@@ -1,0 +1,12 @@
+# Xcode
+build/
+DerivedData/
+.derivedData/
+*.xcuserstate
+xcuserdata/
+*.xcuserdatad/
+*.log
+.DS_Store
+
+# 共有 API キー（お試し用）。実ファイルは Git に含めません。
+osmBus/Secrets.swift
