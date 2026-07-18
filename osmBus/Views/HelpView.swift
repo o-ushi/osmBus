@@ -9,7 +9,7 @@ struct HelpView: View {
     private var appVersion: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
-        return AppLocaleString.formatted("osmBus_バージョン", locale: locale, version, build)
+        return AppLocaleString.formatted("バージョン", locale: locale, version, build)
     }
 
     var body: some View {
@@ -35,7 +35,7 @@ struct HelpView: View {
                 }
 
                 Section {
-                    Text(AppLocaleString.text("osmBus_ヘルプ紹介文", locale: locale))
+                    Text(AppLocaleString.text("ヘルプ紹介文", locale: locale))
                         .font(.body.weight(.medium))
                         .foregroundStyle(.primary)
                         .listRowBackground(Color.clear)
@@ -45,47 +45,53 @@ struct HelpView: View {
                     helpRow(
                         icon: "mappin.and.ellipse",
                         color: .blue,
-                        titleKey: "osmBus_help_場所を登録_title",
-                        bodyKey: "osmBus_help_場所を登録_body"
+                        titleKey: "help_場所を登録_title",
+                        bodyKey: "help_場所を登録_body"
                     )
                     helpRow(
                         icon: "mappin.circle.fill",
                         color: .teal,
-                        titleKey: "osmBus_help_目的地_title",
-                        bodyKey: "osmBus_help_目的地_body"
+                        titleKey: "help_目的地_title",
+                        bodyKey: "help_目的地_body"
                     )
                     helpRow(
                         icon: "location.fill",
                         color: .green,
-                        titleKey: "osmBus_help_現在地_title",
-                        bodyKey: "osmBus_help_現在地_body"
+                        titleKey: "help_現在地_title",
+                        bodyKey: "help_現在地_body"
                     )
                     helpRow(
                         icon: "number",
                         color: .orange,
-                        titleKey: "osmBus_help_バス番号_title",
-                        bodyKey: "osmBus_help_バス番号_body"
+                        titleKey: "help_バス番号_title",
+                        bodyKey: "help_バス番号_body"
                     )
                 }
 
                 Section(AppLocaleString.text("API キー", locale: locale)) {
                     helpRow(
+                        icon: "gift.fill",
+                        color: .green,
+                        titleKey: "help_お試し_title",
+                        bodyKey: "help_お試し_body"
+                    )
+                    helpRow(
                         icon: "key.fill",
                         color: .pink,
-                        titleKey: "osmBus_help_APIキー_とは_title",
-                        bodyKey: "osmBus_help_APIキー_とは_body"
+                        titleKey: "help_APIキー_とは_title",
+                        bodyKey: "help_APIキー_とは_body"
                     )
                     helpRow(
                         icon: "gearshape.fill",
                         color: .blue,
-                        titleKey: "osmBus_help_APIキー_設定_title",
-                        bodyKey: "osmBus_help_APIキー_設定_body"
+                        titleKey: "help_APIキー_設定_title",
+                        bodyKey: "help_APIキー_設定_body"
                     )
                     helpRow(
                         icon: "lock.shield.fill",
                         color: .teal,
-                        titleKey: "osmBus_help_APIキー_安心_title",
-                        bodyKey: "osmBus_help_APIキー_安心_body"
+                        titleKey: "help_APIキー_安心_title",
+                        bodyKey: "help_APIキー_安心_body"
                     )
                 }
 
@@ -93,29 +99,62 @@ struct HelpView: View {
                     helpRow(
                         icon: "checkmark.circle.fill",
                         color: .green,
-                        titleKey: "osmBus_help_乗車_title",
-                        bodyKey: "osmBus_help_乗車_body"
+                        titleKey: "help_乗車_title",
+                        bodyKey: "help_乗車_body"
                     )
                     helpRow(
                         icon: "xmark.circle.fill",
                         color: .red,
-                        titleKey: "osmBus_help_不可_title",
-                        bodyKey: "osmBus_help_不可_body"
+                        titleKey: "help_不可_title",
+                        bodyKey: "help_不可_body"
                     )
+                }
+
+                Section(AppLocaleString.text("経路を見る", locale: locale)) {
+                    helpRow(
+                        icon: "map.fill",
+                        color: .blue,
+                        titleKey: "help_経路_title",
+                        bodyKey: "help_経路_body"
+                    )
+                    helpRow(
+                        icon: "bus.fill",
+                        color: .purple,
+                        titleKey: "help_乗車中_title",
+                        bodyKey: "help_乗車中_body"
+                    )
+                }
+
+                Section(AppLocaleString.text("設定", locale: locale)) {
+                    helpRow(
+                        icon: "gearshape.2.fill",
+                        color: .gray,
+                        titleKey: "help_設定_title",
+                        bodyKey: "help_設定_body"
+                    )
+                    NavigationLink {
+                        PrivacyDataView()
+                            .environment(\.locale, locale)
+                    } label: {
+                        Label(
+                            AppLocaleString.text("プライバシーとデータ", locale: locale),
+                            systemImage: "hand.raised.fill"
+                        )
+                    }
                 }
 
                 Section(AppLocaleString.text("トラブルシュート", locale: locale)) {
                     helpRow(
                         icon: "exclamationmark.triangle.fill",
                         color: .orange,
-                        titleKey: "osmBus_help_ルートなし_title",
-                        bodyKey: "osmBus_help_ルートなし_body"
+                        titleKey: "help_ルートなし_title",
+                        bodyKey: "help_ルートなし_body"
                     )
                     helpRow(
                         icon: "wifi.slash",
                         color: .gray,
-                        titleKey: "osmBus_help_通信_title",
-                        bodyKey: "osmBus_help_通信_body"
+                        titleKey: "help_通信_title",
+                        bodyKey: "help_通信_body"
                     )
                 }
 
@@ -123,24 +162,18 @@ struct HelpView: View {
                     helpRow(
                         icon: "crown.fill",
                         color: .orange,
-                        titleKey: "osmBus_help_プラン_title",
-                        bodyKey: "osmBus_help_プラン_body"
+                        titleKey: "help_プラン_title",
+                        body: AppLocaleString.formatted(
+                            "help_プラン_body",
+                            locale: locale,
+                            PlanStore.freeItemLimit
+                        )
                     )
                 }
             }
             .listStyle(.insetGrouped)
             .navigationTitle(AppLocaleString.text("ヘルプ", locale: locale))
             .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                    }
-                    .accessibilityLabel(AppLocaleString.text("閉じる", locale: locale))
-                }
-            }
         }
         .environment(\.locale, locale)
     }
@@ -161,6 +194,10 @@ struct HelpView: View {
     }
 
     private func helpRow(icon: String, color: Color, titleKey: String, bodyKey: String) -> some View {
+        helpRow(icon: icon, color: color, titleKey: titleKey, body: AppLocaleString.text(bodyKey, locale: locale))
+    }
+
+    private func helpRow(icon: String, color: Color, titleKey: String, body: String) -> some View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: icon)
                 .font(.body.weight(.semibold))
@@ -170,7 +207,7 @@ struct HelpView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(AppLocaleString.text(titleKey, locale: locale))
                     .font(.subheadline.weight(.semibold))
-                Text(AppLocaleString.text(bodyKey, locale: locale))
+                Text(body)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

@@ -1,2 +1,5 @@
 /* Privacy - Location When In Use Usage Description */
-"NSLocationWhenInUseUsageDescription" = "Vi tri cua ban duoc dung khi ung dung mo de kiem tra xe buyt tu tram hien tai co di den diem den hay khong.";
+"NSLocationWhenInUseUsageDescription" = "Vị trí của bạn được dùng khi mở ứng dụng để kiểm tra xe buýt tại trạm hiện tại có đi đến điểm đến hay không.";
+
+/* Privacy - Location Always and When In Use Usage Description */
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Vị trí của bạn được dùng ở chế độ nền để thông báo khi sắp đến trạm xuống xe của bạn.";

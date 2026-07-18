@@ -13,19 +13,27 @@ struct DestinationHistoryEntry: Codable, Identifiable, Equatable, Sendable {
 }
 
 enum DestinationHistoryStore {
-    private static let userDefaultsKey = "destination.history"
+    private static let keychainKey = "destination.history"
+    /// 旧 UserDefaults 実装からの移行用（再インストールで履歴が消えないよう Keychain に移した）。
+    private static let legacyUserDefaultsKey = "destination.history"
 
     static func loadAll() -> [DestinationHistoryEntry] {
-        guard let data = UserDefaults.standard.data(forKey: userDefaultsKey),
-              let entries = try? JSONDecoder().decode([DestinationHistoryEntry].self, from: data) else {
-            return []
+        if let data = KeychainStore.load(key: keychainKey),
+           let entries = try? JSONDecoder().decode([DestinationHistoryEntry].self, from: data) {
+            return entries
         }
-        return entries
+        if let legacyData = UserDefaults.standard.data(forKey: legacyUserDefaultsKey),
+           let entries = try? JSONDecoder().decode([DestinationHistoryEntry].self, from: legacyData) {
+            saveAll(entries)
+            UserDefaults.standard.removeObject(forKey: legacyUserDefaultsKey)
+            return entries
+        }
+        return []
     }
 
     static func saveAll(_ entries: [DestinationHistoryEntry]) {
         guard let data = try? JSONEncoder().encode(entries) else { return }
-        UserDefaults.standard.set(data, forKey: userDefaultsKey)
+        KeychainStore.save(key: keychainKey, data: data)
     }
 
     static func add(_ destination: Destination) {
@@ -47,7 +55,8 @@ enum DestinationHistoryStore {
     }
 
     static func clearAll() {
-        UserDefaults.standard.removeObject(forKey: userDefaultsKey)
+        KeychainStore.delete(key: keychainKey)
+        UserDefaults.standard.removeObject(forKey: legacyUserDefaultsKey)
     }
 
     static func matches(_ lhs: Destination, _ rhs: Destination) -> Bool {

@@ -152,6 +152,7 @@ struct AppearanceSettingsView: View {
         }
         .navigationTitle(AppLocaleString.text("外観", locale: locale))
         .navigationBarTitleDisplayMode(.inline)
+        .hiddenBackButtonWithSwipe()
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
             case .frameEditor:

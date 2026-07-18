@@ -11,9 +11,21 @@ struct SavedPlacesView: View {
     @Environment(\.locale) private var locale
     @Environment(PlanStore.self) private var planStore
     @State private var savedPlaces: [SavedPlace] = []
-    @State private var showingEditor = false
-    @State private var editingPlace: SavedPlace?
+    @State private var editorPresentation: PlaceEditorPresentation?
     @State private var registrationFeedback: RegistrationFeedback?
+
+    private struct PlaceEditorPresentation: Identifiable {
+        let id: UUID
+        let place: SavedPlace?
+
+        static func add() -> PlaceEditorPresentation {
+            PlaceEditorPresentation(id: UUID(), place: nil)
+        }
+
+        static func edit(_ place: SavedPlace) -> PlaceEditorPresentation {
+            PlaceEditorPresentation(id: place.id, place: place)
+        }
+    }
 
     private enum RegistrationFeedback: Equatable {
         case saved(String)
@@ -56,9 +68,9 @@ struct SavedPlacesView: View {
                 if savedPlaces.isEmpty {
                     Section {
                         ContentUnavailableView(
-                            AppLocaleString.text("osmBus_登録済みの場所なし", locale: locale),
+                            AppLocaleString.text("登録済みの場所なし", locale: locale),
                             systemImage: "mappin.and.ellipse",
-                            description: Text(AppLocaleString.text("osmBus_登録済みの場所なし説明", locale: locale))
+                            description: Text(AppLocaleString.text("登録済みの場所なし説明", locale: locale))
                         )
                         .listRowBackground(Color.clear)
                     }
@@ -72,13 +84,18 @@ struct SavedPlacesView: View {
                                     selectDestination(from: place)
                                 }
                             )
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    deletePlace(place)
+                                } label: {
+                                    Label(AppLocaleString.text("削除", locale: locale), systemImage: "trash")
+                                }
+
                                 Button {
                                     beginEditing(place)
                                 } label: {
-                                    Image(systemName: "pencil")
+                                    Label(AppLocaleString.text("編集", locale: locale), systemImage: "pencil")
                                 }
-                                .accessibilityLabel(AppLocaleString.text("編集", locale: locale))
                                 .tint(.blue)
                             }
                         }
@@ -87,10 +104,10 @@ struct SavedPlacesView: View {
                         Text(AppLocaleString.text("登録済みの場所", locale: locale))
                     } footer: {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(AppLocaleString.text("osmBus_登録済みフッター", locale: locale))
+                            Text(AppLocaleString.text("登録済みフッター", locale: locale))
                                 .foregroundStyle(SavedPlaceFormStyle.footerText)
                             if planStore.isFree {
-                                Text(AppLocaleString.text("osmBus_登録地_FREE上限", locale: locale))
+                                Text(AppLocaleString.formatted("登録地_FREE上限", locale: locale, PlanStore.freeItemLimit))
                                     .foregroundStyle(SavedPlaceFormStyle.footerText)
                             }
                         }
@@ -105,7 +122,7 @@ struct SavedPlacesView: View {
                     } header: {
                         Text(AppLocaleString.text("現在の目的地", locale: locale))
                     } footer: {
-                        Text(AppLocaleString.text("osmBus_長押し登録フッター", locale: locale))
+                        Text(AppLocaleString.text("長押し登録フッター", locale: locale))
                             .foregroundStyle(SavedPlaceFormStyle.footerText)
                     }
                 }
@@ -116,16 +133,8 @@ struct SavedPlacesView: View {
                 AppLocaleString.text(isEmbedded ? "登録済みの場所" : "場所を登録", locale: locale)
             )
             .navigationBarTitleDisplayMode(.inline)
+            .hiddenBackButtonWithSwipe()
             .toolbar {
-                if !isEmbedded {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button { dismiss() } label: {
-                            Image(systemName: "xmark")
-                        }
-                        .foregroundStyle(.blue)
-                        .accessibilityLabel(AppLocaleString.text("閉じる", locale: locale))
-                    }
-                }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         beginAddingPlace()
@@ -134,7 +143,7 @@ struct SavedPlacesView: View {
                     }
                     .foregroundStyle(planStore.canAddSavedPlace ? .blue : Color(UIColor.tertiaryLabel))
                     .disabled(!planStore.canAddSavedPlace)
-                    .accessibilityLabel(AppLocaleString.text("osmBus_場所を追加", locale: locale))
+                    .accessibilityLabel(AppLocaleString.text("場所を追加", locale: locale))
                 }
                 if !savedPlaces.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -143,18 +152,18 @@ struct SavedPlacesView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingEditor) {
+            .sheet(item: $editorPresentation) { presentation in
                 SavedPlaceEditorView(
-                    place: editingPlace,
+                    place: presentation.place,
                     prefillDestination: nil
                 ) { saved in
-                    if let editingPlace,
+                    if let editingPlace = presentation.place,
                        savedPlaces.contains(where: { $0.id == editingPlace.id }) {
                         SavedPlaceStore.update(saved)
                     } else if SavedPlaceStore.add(saved) {
-                        showRegistrationFeedback(.saved(AppLocaleString.formatted("osmBus_登録完了_%@", locale: locale, saved.label)))
+                        showRegistrationFeedback(.saved(AppLocaleString.formatted("登録完了_%@", locale: locale, saved.label)))
                     } else {
-                        showRegistrationFeedback(.limitReached(AppLocaleString.text("osmBus_登録件数上限", locale: locale)))
+                        showRegistrationFeedback(.limitReached(AppLocaleString.formatted("登録件数上限", locale: locale, PlanStore.freeItemLimit)))
                     }
                     reloadPlaces()
                 }
@@ -164,9 +173,6 @@ struct SavedPlacesView: View {
             }
             .onAppear {
                 reloadPlaces()
-            }
-            .onDisappear {
-                resetEditorState()
             }
             .overlay(alignment: .bottom) {
                 if let registrationFeedback {
@@ -190,6 +196,11 @@ struct SavedPlacesView: View {
         savedPlaces = SavedPlaceStore.loadAll()
     }
 
+    private func deletePlace(_ place: SavedPlace) {
+        SavedPlaceStore.delete(id: place.id)
+        reloadPlaces()
+    }
+
     private func deletePlaces(at offsets: IndexSet) {
         for index in offsets {
             SavedPlaceStore.delete(id: savedPlaces[index].id)
@@ -206,16 +217,14 @@ struct SavedPlacesView: View {
 
     private func beginAddingPlace() {
         guard planStore.canAddSavedPlace else {
-            showRegistrationFeedback(.limitReached(AppLocaleString.text("osmBus_登録件数上限", locale: locale)))
+            showRegistrationFeedback(.limitReached(AppLocaleString.formatted("登録件数上限", locale: locale, PlanStore.freeItemLimit)))
             return
         }
-        resetEditorState()
-        showingEditor = true
+        editorPresentation = .add()
     }
 
     private func beginEditing(_ place: SavedPlace) {
-        editingPlace = place
-        showingEditor = true
+        editorPresentation = .edit(place)
     }
 
     private func registerCurrentDestinationDirectly(_ destination: Destination) {
@@ -223,19 +232,19 @@ struct SavedPlacesView: View {
 
         if savedPlace(matching: destination) != nil {
             UINotificationFeedbackGenerator().notificationOccurred(.warning)
-            showRegistrationFeedback(.duplicate(AppLocaleString.text("osmBus_重複登録", locale: locale)))
+            showRegistrationFeedback(.duplicate(AppLocaleString.text("重複登録", locale: locale)))
             return
         }
 
         let place = SavedPlace.from(destination: destination, label: destination.name)
         guard SavedPlaceStore.add(place) else {
             UINotificationFeedbackGenerator().notificationOccurred(.warning)
-            showRegistrationFeedback(.limitReached(AppLocaleString.text("osmBus_登録件数上限", locale: locale)))
+            showRegistrationFeedback(.limitReached(AppLocaleString.formatted("登録件数上限", locale: locale, PlanStore.freeItemLimit)))
             return
         }
         reloadPlaces()
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        showRegistrationFeedback(.saved(AppLocaleString.formatted("osmBus_登録完了_%@", locale: locale, destination.name)))
+        showRegistrationFeedback(.saved(AppLocaleString.formatted("登録完了_%@", locale: locale, destination.name)))
     }
 
     private func showRegistrationFeedback(_ feedback: RegistrationFeedback) {
@@ -247,10 +256,6 @@ struct SavedPlacesView: View {
                 registrationFeedback = nil
             }
         }
-    }
-
-    private func resetEditorState() {
-        editingPlace = nil
     }
 
     private func savedPlace(matching destination: Destination) -> SavedPlace? {
@@ -291,7 +296,7 @@ private struct CurrentDestinationRegisterRow: View {
                     .foregroundStyle(Color.secondary)
             }
 
-            Label(AppLocaleString.text("osmBus_長押しで登録", locale: locale), systemImage: "hand.tap.fill")
+            Label(AppLocaleString.text("長押しで登録", locale: locale), systemImage: "hand.tap.fill")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(SavedPlaceFormStyle.hintText)
         }
@@ -310,37 +315,36 @@ private struct SavedPlaceRow: View {
     @Environment(\.locale) private var locale
 
     var body: some View {
-        Button(action: onSelect) {
-            HStack(spacing: 12) {
-                Image(systemName: iconName(for: place.label))
+        HStack(spacing: 12) {
+            Image(systemName: iconName(for: place.label))
+                .font(.body.weight(.semibold))
+                .foregroundStyle(.blue)
+                .frame(width: 28)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(place.label)
                     .font(.body.weight(.semibold))
-                    .foregroundStyle(.blue)
-                    .frame(width: 28)
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(place.label)
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(.primary)
-                    Text(place.detailLine)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                }
-
-                Spacer(minLength: 8)
-
-                if isCurrentDestination {
-                    Text(AppLocaleString.text("設定中", locale: locale))
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.green)
-                }
-
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color(UIColor.tertiaryLabel))
+                    .foregroundStyle(.primary)
+                Text(place.detailLine)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
             }
+
+            Spacer(minLength: 8)
+
+            if isCurrentDestination {
+                Text(AppLocaleString.text("設定中", locale: locale))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.green)
+            }
+
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color(UIColor.tertiaryLabel))
         }
-        .buttonStyle(.plain)
+        .contentShape(Rectangle())
+        .onTapGesture(perform: onSelect)
     }
 
     private func iconName(for label: String) -> String {
@@ -372,7 +376,7 @@ private struct SavedPlaceEditorView: View {
     @State private var selectedCandidate: DestinationSearchService.Candidate?
     @State private var isSearching = false
     @State private var errorMessage: String?
-    @State private var searchTask: Task<Void, Never>?
+    @State private var debouncedSearch = DebouncedPlaceSearch()
 
     private enum FocusField: Hashable {
         case label
@@ -393,7 +397,7 @@ private struct SavedPlaceEditorView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField(AppLocaleString.text("osmBus_表示名プレースホルダー", locale: locale), text: $label)
+                    TextField(AppLocaleString.text("表示名プレースホルダー", locale: locale), text: $label)
                         .focused($focusedField, equals: .label)
                         .foregroundStyle(.primary)
 
@@ -425,7 +429,7 @@ private struct SavedPlaceEditorView: View {
                 } header: {
                     Text(AppLocaleString.text("名前", locale: locale))
                 } footer: {
-                    Text(AppLocaleString.text("osmBus_名前フッター", locale: locale))
+                    Text(AppLocaleString.text("名前フッター", locale: locale))
                         .foregroundStyle(SavedPlaceFormStyle.footerText)
                 }
 
@@ -448,7 +452,7 @@ private struct SavedPlaceEditorView: View {
                             } label: {
                                 Image(systemName: "arrow.triangle.2.circlepath")
                             }
-                            .accessibilityLabel(AppLocaleString.text("osmBus_場所を選び直す", locale: locale))
+                            .accessibilityLabel(AppLocaleString.text("場所を選び直す", locale: locale))
                         }
                     } else {
                         TextField(AppLocaleString.text("駅名・住所・施設名", locale: locale), text: $searchText)
@@ -474,7 +478,7 @@ private struct SavedPlaceEditorView: View {
                         } else if candidates.isEmpty {
                             Text(
                                 searchText.count < 2
-                                    ? AppLocaleString.text("osmBus_検索ヒント", locale: locale)
+                                    ? AppLocaleString.text("検索ヒント", locale: locale)
                                     : AppLocaleString.text("候補がありません", locale: locale)
                             )
                                 .foregroundStyle(.secondary)
@@ -504,7 +508,7 @@ private struct SavedPlaceEditorView: View {
                 } header: {
                     Text(AppLocaleString.text("場所", locale: locale))
                 } footer: {
-                    Text(AppLocaleString.text("osmBus_場所フッター", locale: locale))
+                    Text(AppLocaleString.text("場所フッター", locale: locale))
                         .foregroundStyle(SavedPlaceFormStyle.footerText)
                 }
             }
@@ -512,7 +516,7 @@ private struct SavedPlaceEditorView: View {
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle(
                 AppLocaleString.text(
-                    place == nil ? "osmBus_場所を追加" : "osmBus_場所を編集",
+                    place == nil ? "場所を追加" : "場所を編集",
                     locale: locale
                 )
             )
@@ -602,36 +606,19 @@ private struct SavedPlaceEditorView: View {
     }
 
     private func scheduleSearch(for query: String, immediate: Bool = false) {
-        searchTask?.cancel()
-        searchTask = Task {
-            if !immediate {
-                try? await Task.sleep(nanoseconds: 350_000_000)
-            }
-            guard !Task.isCancelled else { return }
+        debouncedSearch.schedule(query: query, immediate: immediate) { query in
             await performSearch(query: query)
         }
     }
 
     @MainActor
     private func performSearch(query: String) async {
-        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmed.count >= 2 else {
-            candidates = []
-            errorMessage = nil
-            isSearching = false
-            return
-        }
-
-        isSearching = true
+        isSearching = query.trimmingCharacters(in: .whitespacesAndNewlines).count >= 2
         errorMessage = nil
 
-        do {
-            candidates = try await DestinationSearchService.searchPlaces(query: trimmed)
-        } catch {
-            candidates = []
-            errorMessage = error.localizedDescription
-        }
-
+        let outcome = await DestinationSearchService.performPlaceSearch(query: query)
+        candidates = outcome.candidates
+        errorMessage = outcome.errorMessage
         isSearching = false
     }
 }

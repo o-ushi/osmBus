@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A6EDB852FDB6EBB0022DD97 /* GoogleMaps in Frameworks */ = {isa = PBXBuildFile; productRef = 4A6EDB842FDB6EBB0022DD97 /* GoogleMaps */; };
 		B01D001 /* osmBusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D001 /* osmBusApp.swift */; };
 		B01D003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B02D003 /* Assets.xcassets */; };
 		B01D004 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D006 /* AppTheme.swift */; };
@@ -50,11 +51,39 @@
 		B01D042 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D049 /* Secrets.swift */; };
 		B01D043 /* SharedRoutesTrialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D050 /* SharedRoutesTrialStore.swift */; };
 		B01D044 /* RoutesAPIKeyResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D051 /* RoutesAPIKeyResolver.swift */; };
+		B01D045 /* IAPProductIDs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D052 /* IAPProductIDs.swift */; };
+		B01D046 /* StorePurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D054 /* StorePurchaseManager.swift */; };
+		B01D047 /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = B02D055 /* Products.storekit */; };
+		B01D055 /* StopAlertSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D056 /* StopAlertSettings.swift */; };
+		B01D057 /* KeypadFeedbackSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D058 /* KeypadFeedbackSettings.swift */; };
+		B01D059 /* StopAlertPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D059 /* StopAlertPlayer.swift */; };
+		B01D060 /* StopAlertSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D060 /* StopAlertSettingsView.swift */; };
+		B01D061 /* MapLocationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D061 /* MapLocationPickerView.swift */; };
+		B01D062 /* BusRouteMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D062 /* BusRouteMapView.swift */; };
+		B01D063 /* OverpassAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D063 /* OverpassAPIService.swift */; };
+		B01D064 /* GoogleMapsAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D064 /* GoogleMapsAPIService.swift */; };
+		B01D065 /* APINetworkHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D065 /* APINetworkHelpers.swift */; };
+		B01D066 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D066 /* LocationService.swift */; };
+		B01D067 /* TransitRouteModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D067 /* TransitRouteModels.swift */; };
+		B01D068 /* GoogleRoutesAPIService+APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D068 /* GoogleRoutesAPIService+APIClient.swift */; };
+		B01D069 /* GoogleRoutesAPIService+BusMatching.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D069 /* GoogleRoutesAPIService+BusMatching.swift */; };
+		B01D070 /* GoogleRoutesAPIService+PolylineGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D070 /* GoogleRoutesAPIService+PolylineGeometry.swift */; };
+		B01D071 /* GoogleRoutesAPIService+RouteDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D071 /* GoogleRoutesAPIService+RouteDisplay.swift */; };
+		B01D072 /* GoogleAPISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D072 /* GoogleAPISettingsView.swift */; };
+		B01D073 /* RidingTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D073 /* RidingTracker.swift */; };
+		B01D074 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D074 /* KeychainStore.swift */; };
+		B01D075 /* SwipeBackEnabler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D075 /* SwipeBackEnabler.swift */; };
+		B01D076 /* ThirdPartyDataConsent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D076 /* ThirdPartyDataConsent.swift */; };
+		B01D077 /* PrivacyDataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D077 /* PrivacyDataView.swift */; };
+		EA15861A27C6E4A6A312B1F7 /* RidingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98480A3BA1B534FB5BAAB123 /* RidingState.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		98480A3BA1B534FB5BAAB123 /* RidingState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RidingState.swift; sourceTree = "<group>"; };
 		B02D001 /* osmBusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = osmBusApp.swift; sourceTree = "<group>"; };
 		B02D003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B02D004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B02D005 /* osmBus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = osmBus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B02D006 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		B02D007 /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		B02D008 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
@@ -99,8 +128,31 @@
 		B02D049 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 		B02D050 /* SharedRoutesTrialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedRoutesTrialStore.swift; sourceTree = "<group>"; };
 		B02D051 /* RoutesAPIKeyResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutesAPIKeyResolver.swift; sourceTree = "<group>"; };
-		B02D004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B02D005 /* osmBus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = osmBus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B02D052 /* IAPProductIDs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPProductIDs.swift; sourceTree = "<group>"; };
+		B02D053 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = Localization/ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B02D054 /* StorePurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorePurchaseManager.swift; sourceTree = "<group>"; };
+		B02D055 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
+		B02D056 /* StopAlertSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopAlertSettings.swift; sourceTree = "<group>"; };
+		B02D058 /* KeypadFeedbackSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeypadFeedbackSettings.swift; sourceTree = "<group>"; };
+		B02D059 /* StopAlertPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopAlertPlayer.swift; sourceTree = "<group>"; };
+		B02D060 /* StopAlertSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopAlertSettingsView.swift; sourceTree = "<group>"; };
+		B02D061 /* MapLocationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapLocationPickerView.swift; sourceTree = "<group>"; };
+		B02D062 /* BusRouteMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusRouteMapView.swift; sourceTree = "<group>"; };
+		B02D063 /* OverpassAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverpassAPIService.swift; sourceTree = "<group>"; };
+		B02D064 /* GoogleMapsAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleMapsAPIService.swift; sourceTree = "<group>"; };
+		B02D065 /* APINetworkHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APINetworkHelpers.swift; sourceTree = "<group>"; };
+		B02D066 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		B02D067 /* TransitRouteModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitRouteModels.swift; sourceTree = "<group>"; };
+		B02D068 /* GoogleRoutesAPIService+APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GoogleRoutesAPIService+APIClient.swift"; sourceTree = "<group>"; };
+		B02D069 /* GoogleRoutesAPIService+BusMatching.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GoogleRoutesAPIService+BusMatching.swift"; sourceTree = "<group>"; };
+		B02D070 /* GoogleRoutesAPIService+PolylineGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GoogleRoutesAPIService+PolylineGeometry.swift"; sourceTree = "<group>"; };
+		B02D071 /* GoogleRoutesAPIService+RouteDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GoogleRoutesAPIService+RouteDisplay.swift"; sourceTree = "<group>"; };
+		B02D072 /* GoogleAPISettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleAPISettingsView.swift; sourceTree = "<group>"; };
+		B02D073 /* RidingTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RidingTracker.swift; sourceTree = "<group>"; };
+		B02D074 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		B02D075 /* SwipeBackEnabler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeBackEnabler.swift; sourceTree = "<group>"; };
+		B02D076 /* ThirdPartyDataConsent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThirdPartyDataConsent.swift; sourceTree = "<group>"; };
+		B02D077 /* PrivacyDataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyDataView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +160,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A6EDB852FDB6EBB0022DD97 /* GoogleMaps in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -133,6 +186,7 @@
 				B04D009 /* Resources */,
 				B02D003 /* Assets.xcassets */,
 				B02D004 /* Info.plist */,
+				B02D055 /* Products.storekit */,
 				B02D049 /* Secrets.swift */,
 			);
 			path = osmBus;
@@ -163,6 +217,7 @@
 				B02D010 /* ResultBannerView.swift */,
 				B02D011 /* BusKeypadView.swift */,
 				B02D012 /* SettingsView.swift */,
+				B02D072 /* GoogleAPISettingsView.swift */,
 				B02D031 /* AppSettingsView.swift */,
 				B02D032 /* BusCardBackground.swift */,
 				B02D033 /* AppearanceBackgroundLayer.swift */,
@@ -177,6 +232,11 @@
 				B02D026 /* DestinationHistoryView.swift */,
 				B02D046 /* TransitRoutesSheetView.swift */,
 				B02D047 /* TransitRouteMapView.swift */,
+				B02D060 /* StopAlertSettingsView.swift */,
+				B02D061 /* MapLocationPickerView.swift */,
+				B02D062 /* BusRouteMapView.swift */,
+				B02D075 /* SwipeBackEnabler.swift */,
+				B02D077 /* PrivacyDataView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -194,6 +254,7 @@
 			children = (
 				B02D016 /* Destination.swift */,
 				B02D023 /* SavedPlace.swift */,
+				98480A3BA1B534FB5BAAB123 /* RidingState.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -203,17 +264,34 @@
 			children = (
 				B02D013 /* GoogleRoutesAPIKeyStore.swift */,
 				B02D014 /* GoogleRoutesAPIService.swift */,
+				B02D067 /* TransitRouteModels.swift */,
+				B02D068 /* GoogleRoutesAPIService+APIClient.swift */,
+				B02D069 /* GoogleRoutesAPIService+BusMatching.swift */,
+				B02D070 /* GoogleRoutesAPIService+PolylineGeometry.swift */,
+				B02D071 /* GoogleRoutesAPIService+RouteDisplay.swift */,
+				B02D073 /* RidingTracker.swift */,
+				B02D064 /* GoogleMapsAPIService.swift */,
+				B02D065 /* APINetworkHelpers.swift */,
+				B02D066 /* LocationService.swift */,
 				B02D017 /* DestinationStore.swift */,
 				B02D018 /* DestinationSearchService.swift */,
 				B02D025 /* DestinationHistoryStore.swift */,
+				B02D074 /* KeychainStore.swift */,
+				B02D076 /* ThirdPartyDataConsent.swift */,
 				B02D027 /* AppLanguage.swift */,
 				B02D048 /* BusKeypadInputMode.swift */,
 				B02D050 /* SharedRoutesTrialStore.swift */,
+				B02D056 /* StopAlertSettings.swift */,
+				B02D058 /* KeypadFeedbackSettings.swift */,
+				B02D059 /* StopAlertPlayer.swift */,
+				B02D063 /* OverpassAPIService.swift */,
 				B02D051 /* RoutesAPIKeyResolver.swift */,
 				B02D028 /* AppLocaleString.swift */,
 				B02D029 /* AppAppearanceStore.swift */,
 				B02D030 /* ColorThemeManager.swift */,
 				B02D044 /* PlanStore.swift */,
+				B02D052 /* IAPProductIDs.swift */,
+				B02D054 /* StorePurchaseManager.swift */,
 				B02D045 /* OsmBusDeepLink.swift */,
 			);
 			path = Services;
@@ -257,7 +335,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2620;
-				LastUpgradeCheck = 2620;
+				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					B05D001 = {
 						CreatedOnToolsVersion = 26.2;
@@ -277,6 +355,7 @@
 			);
 			mainGroup = B04D001;
 			packageReferences = (
+				4A6EDB832FDB6EBB0022DD97 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */,
 			);
 			productRefGroup = B04D003 /* Products */;
 			projectDirPath = "";
@@ -295,6 +374,7 @@
 				B01D003 /* Assets.xcassets in Resources */,
 				B01D035 /* Localizable.strings in Resources */,
 				B01D036 /* InfoPlist.strings in Resources */,
+				B01D047 /* Products.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,11 +406,32 @@
 				B01D021 /* SavedPlace.swift in Sources */,
 				B01D022 /* SavedPlacesView.swift in Sources */,
 				B01D023 /* DestinationHistoryStore.swift in Sources */,
+				B01D074 /* KeychainStore.swift in Sources */,
+				B01D075 /* SwipeBackEnabler.swift in Sources */,
+				B01D076 /* ThirdPartyDataConsent.swift in Sources */,
+				B01D077 /* PrivacyDataView.swift in Sources */,
 				B01D024 /* DestinationHistoryView.swift in Sources */,
 				B01D025 /* AppLanguage.swift in Sources */,
 				B01D041 /* BusKeypadInputMode.swift in Sources */,
 				B01D042 /* Secrets.swift in Sources */,
 				B01D043 /* SharedRoutesTrialStore.swift in Sources */,
+				B01D055 /* StopAlertSettings.swift in Sources */,
+				B01D057 /* KeypadFeedbackSettings.swift in Sources */,
+				B01D059 /* StopAlertPlayer.swift in Sources */,
+				B01D060 /* StopAlertSettingsView.swift in Sources */,
+				B01D061 /* MapLocationPickerView.swift in Sources */,
+				B01D062 /* BusRouteMapView.swift in Sources */,
+				B01D063 /* OverpassAPIService.swift in Sources */,
+				B01D064 /* GoogleMapsAPIService.swift in Sources */,
+				B01D065 /* APINetworkHelpers.swift in Sources */,
+				B01D066 /* LocationService.swift in Sources */,
+				B01D067 /* TransitRouteModels.swift in Sources */,
+				B01D068 /* GoogleRoutesAPIService+APIClient.swift in Sources */,
+				B01D069 /* GoogleRoutesAPIService+BusMatching.swift in Sources */,
+				B01D070 /* GoogleRoutesAPIService+PolylineGeometry.swift in Sources */,
+				B01D071 /* GoogleRoutesAPIService+RouteDisplay.swift in Sources */,
+				B01D072 /* GoogleAPISettingsView.swift in Sources */,
+				B01D073 /* RidingTracker.swift in Sources */,
 				B01D044 /* RoutesAPIKeyResolver.swift in Sources */,
 				B01D026 /* AppLocaleString.swift in Sources */,
 				B01D027 /* AppAppearanceStore.swift in Sources */,
@@ -345,6 +446,9 @@
 				B01D038 /* OsmBusDeepLink.swift in Sources */,
 				B01D039 /* TransitRoutesSheetView.swift in Sources */,
 				B01D040 /* TransitRouteMapView.swift in Sources */,
+				B01D045 /* IAPProductIDs.swift in Sources */,
+				B01D046 /* StorePurchaseManager.swift in Sources */,
+				EA15861A27C6E4A6A312B1F7 /* RidingState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -364,6 +468,7 @@
 		B02D043 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
+				B02D053 /* ja */,
 				B02D041 /* en */,
 				B02D042 /* vi */,
 			);
@@ -376,7 +481,6 @@
 		B09D001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -408,7 +512,9 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = ELS6C2V4CR;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -428,10 +534,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -440,7 +548,6 @@
 		B09D002 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -472,8 +579,10 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = ELS6C2V4CR;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -487,9 +596,11 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -502,7 +613,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ELS6C2V4CR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = osmBus/Info.plist;
@@ -510,7 +620,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.33;
 				PRODUCT_BUNDLE_IDENTIFIER = com.osamushikubo.osmBus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -528,7 +638,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ELS6C2V4CR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = osmBus/Info.plist;
@@ -536,7 +645,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.33;
 				PRODUCT_BUNDLE_IDENTIFIER = com.osamushikubo.osmBus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -569,6 +678,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4A6EDB832FDB6EBB0022DD97 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googlemaps/ios-maps-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.14.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4A6EDB842FDB6EBB0022DD97 /* GoogleMaps */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4A6EDB832FDB6EBB0022DD97 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */;
+			productName = GoogleMaps;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B08D001 /* Project object */;
 }

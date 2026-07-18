@@ -57,7 +57,7 @@ struct DestinationHistoryView: View {
                         Text(AppLocaleString.text("タップすると、その目的地を設定します。", locale: locale))
                             .foregroundStyle(Color(UIColor.secondaryLabel))
                         if planStore.isFree {
-                            Text(AppLocaleString.text("osmBus_履歴_FREE上限", locale: locale))
+                            Text(AppLocaleString.formatted("履歴_FREE上限", locale: locale, PlanStore.freeItemLimit))
                                 .foregroundStyle(Color(UIColor.secondaryLabel))
                         }
                     }
@@ -67,9 +67,14 @@ struct DestinationHistoryView: View {
                     Button(role: .destructive) {
                         showsClearConfirmation = true
                     } label: {
-                        Image(systemName: "trash")
+                        Label(
+                            AppLocaleString.text("履歴を消去", locale: locale),
+                            systemImage: "trash"
+                        )
                     }
-                    .accessibilityLabel(AppLocaleString.text("履歴を消去", locale: locale))
+                } footer: {
+                    Text(AppLocaleString.text("履歴消去フッター", locale: locale))
+                        .foregroundStyle(Color(UIColor.secondaryLabel))
                 }
             }
         }
@@ -77,17 +82,7 @@ struct DestinationHistoryView: View {
         .scrollContentBackground(.visible)
         .navigationTitle(AppLocaleString.text("履歴", locale: locale))
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            if !isEmbedded {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark")
-                    }
-                    .foregroundStyle(.blue)
-                    .accessibilityLabel(AppLocaleString.text("閉じる", locale: locale))
-                }
-            }
-        }
+        .hiddenBackButtonWithSwipe()
         .confirmationDialog(
             AppLocaleString.text("履歴をすべて消去しますか？", locale: locale),
             isPresented: $showsClearConfirmation,

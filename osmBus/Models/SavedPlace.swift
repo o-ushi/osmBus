@@ -102,4 +102,8 @@ enum SavedPlaceStore {
         places = Array(places.prefix(count))
         saveAll(places)
     }
+
+    static func clearAll() {
+        UserDefaults.standard.removeObject(forKey: userDefaultsKey)
+    }
 }

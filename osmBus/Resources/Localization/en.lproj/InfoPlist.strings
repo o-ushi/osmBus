@@ -1,2 +1,5 @@
 /* Privacy - Location When In Use Usage Description */
 "NSLocationWhenInUseUsageDescription" = "Your location is used while the app is open to check whether buses from your stop go to your destination.";
+
+/* Privacy - Location Always and When In Use Usage Description */
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Your location is used in the background to alert you when your stop is approaching.";

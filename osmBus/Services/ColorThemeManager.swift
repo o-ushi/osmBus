@@ -66,23 +66,22 @@ enum ColorTheme: String, CaseIterable, Identifiable {
         }
     }
 
-    var navigationBarBackground: Color? {
-        self == .standard ? nil : sceneColor
-    }
-
-    var navigationBarScheme: ColorScheme { .light }
 }
 
 extension View {
+    /// ナビゲーションバーの背景を resolvedSceneColor で塗り、
+    /// 輝度から自動算出した ColorScheme を適用する。
+    /// standard テーマは何もしない（システム既定のまま）。
     @ViewBuilder
-    func themedNavigationBar(_ theme: ColorTheme) -> some View {
-        if let bg = theme.navigationBarBackground {
+    func themedNavigationBar(_ theme: ColorTheme, sceneColor: Color) -> some View {
+        if theme == .standard {
             self
-                .toolbarBackground(bg, for: .navigationBar)
-                .toolbarBackground(.visible, for: .navigationBar)
-                .toolbarColorScheme(theme.navigationBarScheme, for: .navigationBar)
         } else {
+            let scheme: ColorScheme = sceneColor.relativeLuminance > 0.18 ? .light : .dark
             self
+                .toolbarBackground(sceneColor, for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
+                .toolbarColorScheme(scheme, for: .navigationBar)
         }
     }
 
@@ -93,7 +92,6 @@ extension View {
         if theme == .standard {
             self
         } else {
-            // 輝度 0.18 を境に明暗を判定（WCAG AA 基準と整合）
             let scheme: ColorScheme = sceneColor.relativeLuminance > 0.18 ? .light : .dark
             self
                 .toolbarBackground(sceneColor, for: .tabBar)

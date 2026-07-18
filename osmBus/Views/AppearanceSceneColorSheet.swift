@@ -16,14 +16,6 @@ struct AppearanceSceneColorSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .onAppear { selection = seedColor }
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                    }
-                    .accessibilityLabel(AppLocaleString.text("キャンセル", locale: locale))
-                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button { onApply(selection); dismiss() } label: {
                         Image(systemName: "checkmark")

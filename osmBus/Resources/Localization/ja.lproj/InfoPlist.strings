@@ -1,0 +1,5 @@
+/* Privacy - Location When In Use Usage Description */
+"NSLocationWhenInUseUsageDescription" = "バス停での現在地から目的地までのルートを判定するために、使用中のみ位置情報を利用します。";
+
+/* Privacy - Location Always and When In Use Usage Description */
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "降車するバス停に近づいたことをお知らせするため、バックグラウンドでも位置情報を利用します。";

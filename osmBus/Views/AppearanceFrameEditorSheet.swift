@@ -15,7 +15,7 @@ struct AppearanceFrameEditorSheet: View {
                         } label: {
                             HStack(spacing: 12) {
                                 swatchRow(preset.builtInStyle().previewSwatches)
-                                Text(preset.displayName)
+                                Text(AppLocaleString.text(preset.displayName, locale: locale))
                                     .foregroundStyle(.primary)
                                 Spacer()
                                 if store.framePreset == preset {

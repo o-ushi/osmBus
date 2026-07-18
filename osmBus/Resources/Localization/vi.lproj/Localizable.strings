@@ -1,958 +1,774 @@
-"フィルター" = "Loc";
-"すべて" = "Tat ca";
-"該当する記録がありません" = "Khong co ban ghi phu hop";
-"別のカテゴリを選ぶか、フィルターを解除してください。" = "Chon danh muc khac hoac bo loc.";
-
-"並び替え" = "Sap xep";
-"昇順" = "Tang dan";
-"降順" = "Giam dan";
-
-"リスト" = "Danh sach";
-"地図" = "Ban do";
-"記録がありません" = "Chua co ban ghi";
-"右上の %@ からスポットを追加してください。" = "Them dia diem tu %@ o goc tren ben phai.";
-"スポットを追加" = "Them Dia Diem";
-"（無題）" = "(Khong tieu de)";
-"おすすめ" = "De xuat";
-"おすすめ %@／5" = "De xuat %@/5";
-"%@ 段階" = "Muc %@";
-
-"店名・場所名" = "Ten Dia Diem";
-"イベント名（任意）" = "Ten Su Kien (Tuy Chon)";
-"カテゴリ" = "Danh Muc";
-"カテゴリ一覧" = "Danh muc";
-"カテゴリ一覧説明" = "Danh sach nay hien trong loc, nhap lieu va bo loc. Xoa khoi danh sach khong doi ten da luu tren dia diem. Khong the xoa muc cuoi cung.";
-"新しいカテゴリ" = "Danh muc moi";
-"追加" = "Them";
-"カテゴリ名を入力してください。" = "Nhap ten danh muc.";
-"同じ名前のカテゴリがあります。" = "Ten danh muc da ton tai.";
-"訪問日時" = "Thoi Gian Ghe Tham";
-"訪問日" = "Ngay ghe tham";
-"登録日" = "Ngày đăng ký";
-"基本情報" = "Thong Tin Co Ban";
 "検索中…" = "Dang tim...";
-"店名・場所で検索して反映（ピン不要）" = "Tim theo ten dia diem va ap dung (khong can ghim)";
-"名前から位置" = "Tim vi tri theo ten";
-"Apple の地図検索で緯度・経度を入れます。Google マップを開いたりピンを選んだりする必要はありません。現在地が分かっていると検索の精度が上がります。" = "Dung tim kiem ban do he thong (MKLocalSearch) de dien vi do va kinh do — khong can mo ung dung Google Maps hay chon ghim. Do chinh xac cao hon neu co vi tri hien tai.";
-"店名・場所で Google マップを開く" = "Mo Google Maps bang ten dia diem";
-"対象の場所を開いたあと「共有」→「リンクをコピー」でコピーし、このアプリに戻ると緯度・経度を取り込みます。" = "Sau khi mo dia diem, chon Chia se -> Sao chep lien ket. Khi quay lai ung dung nay, toa do se duoc nhap tu dong.";
-"Google マップの共有リンクを貼り付け" = "Dan lien ket chia se Google Maps";
-"リンクを反映" = "Ap dung lien ket";
-"クリップボードから" = "Tu bo nho tam";
-"Google マップから取り込み" = "Nhap tu Google Maps";
-"上部のボタンで検索結果を開き、共有リンクで自動取り込みするか、リンクを直接貼り付けても構いません。短縮リンクはネットワークで解決します。" = "Mo ket qua tim kiem bang nut ben tren va nhap tu dong bang lien ket chia se, hoac dan lien ket truc tiep. Lien ket rut gon se duoc giai quyet qua mang.";
-"緯度" = "Vi do";
-"経度" = "Kinh do";
-"現在地を取得" = "Lay vi tri hien tai";
-"位置" = "Vi tri";
-"初回は位置情報の許可ダイアログが表示されます。" = "Lan dau su dung se hien hop thoai xin quyen vi tri.";
-"感想・インプレッション" = "Cam nhan";
-"メモ" = "Ghi chu";
-"閉じる" = "Dong";
+
 "保存" = "Luu";
-"候補を選択" = "Chon ket qua";
+
 "編集" = "Chinh sua";
-"クリップボードにテキストがありません。" = "Khong co van ban trong bo nho tam.";
-"検索語を URL 化できませんでした。" = "Khong the ma hoa tu khoa thanh URL.";
-"Google マップを開けませんでした。" = "Khong the mo Google Maps.";
 
-"詳細" = "Chi tiet";
-"Google Maps で開く" = "Mo Google Maps";
-"Googleで調べる" = "Tim tren Google";
-"Google AIで調べる" = "Tim tren Google AI";
-"保存しているリンク" = "Lien ket da luu";
-"保存済み" = "Da luu";
-"カフェ" = "Quan ca phe";
-"レストラン" = "Nha hang";
-"ランドマーク" = "Dia danh";
-"公園" = "Cong vien";
-"ショップ" = "Cua hang";
-"その他" = "Khac";
-"Google マップの共有リンクが未設定です。「編集」から共有→コピーした文字列を貼ってください。" = "Chua co lien ket chia se Google Maps. O Chinh sua, dung Chia se -> sao chep, roi dan vao day.";
-"店名・場所" = "Dia diem";
-"イベント" = "Su kien";
-"Google Maps で開く（座標）" = "Mo Google Maps (toa do)";
-"Google Maps で開く（店名で検索）" = "Mo Google Maps (tim theo ten)";
-"スポット" = "Dia diem";
-"場所を共有" = "Chia se vi tri";
-"店名も座標もないため地図を開けません。" = "Khong the mo ban do vi khong co ten dia diem va toa do.";
-"メモ" = "Ghi chu";
 "キャンセル" = "Huy";
-"Google の登録写真（取得できる場合・一枚はメタデータ上もっとも大きいサイズ）。キーが無効・該当なしのときは周辺マップを表示します。" = "Hien anh dia diem tu Google neu co (anh lon nhat theo metadata). Neu key khong hop le hoac khong co anh, se hien ban do xung quanh.";
-"Places API キー未設定のため周辺マップを表示しています。店の写真や共有リンクの取り込みには、アプリの「設定」でキーを保存するか Info.plist の GOOGLE_PLACES_API_KEY を設定してください。" = "Chua cau hinh Places API key nen hien ban do gan day. Luu key trong phan Cai dat hoac GOOGLE_PLACES_API_KEY trong Info.plist de tai anh va lien ket chia se.";
-"Places API（Google）" = "Places API (Google)";
-"Places API キー（任意・写真・共有リンク）" = "Khoa Places API (tuy chon — anh va lien ket)";
-"Google Places API キー（任意）" = "Khoa Google Places API (tuy chon)";
-"キーを保存" = "Luu khoa";
-"キーを保存しました。" = "Da luu khoa.";
-"保存したキーを削除" = "Xoa khoa da luu";
-"保存したキーを削除しました。" = "Da xoa khoa da luu.";
-"Google Cloud で発行したキーを入力すると、店の写真取得や共有リンクからの座標取り込みに使われます。ビルドに埋め込んだ Info.plist のキーよりここで保存した値が優先されます。" = "Nhap khoa tu Google Cloud de tai anh dia diem va lay toa do tu lien ket chia se. Khoa luu tai day duoc uu tien hon GOOGLE_PLACES_API_KEY trong Info.plist.";
-"キーを登録すると、スポットの写真を一覧・詳細画面に自動で表示できます。Google アカウントがあれば Google Cloud Console で発行できます（一定量まで無料）。未登録でも地図のスナップショットが表示されます。" = "Dang ky key giup tang ty le tu dong lay vi do/kinh do tu lien ket chia se Google Maps. Lay key tu Google Cloud Console voi han muc mien phi (can tai khoan Google).";
-"%@ の場所" = "Vi tri cua %@";
-"緯度・経度があるときは、施設の写真（取得できる場合）または周辺地図を表示しています。" = "Khi da co vi do va kinh do, hien anh dia diem (neu lay duoc) hoac ban do gan day.";
-
-"ピンがありません" = "Khong co ghim";
-"地図のピンは保存した緯度・経度だけを使います。入力・編集画面で共有リンクから座標を取り込むか、数値を直接入力してください。" = "Ghim ban do chi dung vi do luu. Lay tu lien ket chia se hoac nhap so trong man hinh them/sua.";
-"位置を解決中…" = "Dang xac dinh vi tri…";
-"リンクから緯度・経度を反映" = "Lay vi do tu lien ket";
-"共有リンクの文字列から緯度・経度を解析して埋めます（入力中は少し待つと自動反映されます）。数値は直接編集できます。短いリンクはネットワークと設定の Places API キーが必要な場合があります。" = "Vi do lay tu chuoi lienket (doi sau khi nhap); co the sua bang tay. Lienket ngan can mang va Places API trong Cai dat.";
-"リンクから緯度・経度を取り込みました。" = "Da lay vi do tu lienket.";
-"対象を開いたあと「共有」→「リンクをコピー」でコピーし、このアプリに戻るとリンクが反映され、緯度・経度を取り込みます。" = "Mo dia diem, Share → Copy link; quay lai app de dien lienket va lay vi do.";
-"リストからスポットを追加すると地図に表示されます。" = "Them dia diem tu danh sach thi se hien tren ban do.";
-"すべてのピンに合わせる" = "Can tat ca ghim";
 
 "位置情報の利用が許可されていません。設定から許可してください。" = "Chua duoc cap quyen truy cap vi tri. Hay bat trong Cai dat.";
+
 "位置情報の状態を確認できません。" = "Khong the kiem tra trang thai quyen vi tri.";
-"店名・場所名（またはイベント名）を入力してください。" = "Vui long nhap ten dia diem (hoac ten su kien).";
+
 "見つかりませんでした。別のキーワードで試してください。" = "Khong tim thay. Hay thu tu khoa khac.";
-"リンクの形式が正しくありません。" = "Dinh dang lien ket khong hop le.";
-"Google マップのリンクではありません（maps.google.com / maps.app.goo.gl など）。" = "Day khong phai lien ket Google Maps (maps.google.com / maps.app.goo.gl, v.v.).";
-"座標をリンクから読み取れませんでした。ピンを開いた状態で共有するか、ブラウザで開いた長い URL をコピーしてください。" = "Khong the doc toa do tu lien ket. Hay chia se khi dang mo ghim hoac sao chep URL day du tu trinh duyet.";
-"短縮リンクの解決に失敗しました: %@" = "Khong giai duoc lien ket rut gon: %@";
-"応答がありません" = "Khong co phan hoi";
-"最終 URL を取得できません" = "Khong the lay URL cuoi cung";
+
 "設定" = "Cai dat";
+
 "プラン管理" = "Goi cuoc";
+
 "現在のプラン" = "Goi hien tai";
-"スポット最大登録件数" = "So dia diem toi da";
+
 "無制限" = "Khong gioi han";
-"FREE プランでは最大 %@ 件までスポットを登録できます。PREMIUM プランにアップグレードすると無制限に登録できます。" = "Goi FREE cho phep dang ky toi da %@ dia diem. Nang cap len PREMIUM de dang ky khong gioi han.";
+
 "PREMIUMにアップグレード" = "Nang cap len PREMIUM";
-"処理中…" = "Dang xu ly…";
-"復元中…" = "Dang khoi phuc…";
+
 "購入を復元" = "Khoi phuc mua hang";
+
 "テスト用プラン" = "Goi kiem thu";
+
 "FREE" = "FREE";
+
 "PREMIUM" = "PREMIUM";
-"プランを切り替えると登録件数制限とアイコンが変わります。" = "Khi doi goi, gioi han dang ky va bieu tuong ung dung se thay doi.";
+
 "プレミアムプランへのアップグレードが完了しました！" = "Da nang cap len PREMIUM thanh cong!";
+
 "購入を復元しました。" = "Da khoi phuc mua hang.";
+
 "復元できる購入が見つかりませんでした。" = "Khong tim thay giao dich co the khoi phuc.";
-"購入を復元する_フッター" = "Khôi phục gói PREMIUM đã mua trước đó bằng cùng Apple ID.";
-"開発者確認" = "Xac nhan nha phat trien";
-"開発者確認の説明" = "Nhap mat khau de mo chuyen goi phat trien.";
-"開発者用パスワード" = "Mat khau";
-"パスワードが違います。" = "Mat khau khong dung.";
+
 "開発者メニュー" = "🛠 Developer Menu";
-"プランの切り替え" = "Doi goi";
+
 "言語" = "Ngon ngu";
+
 "アプリの表示言語を変更できます。" = "Ban co the thay doi ngon ngu hien thi cua ung dung.";
-"データ" = "Du lieu";
-"エクスポート" = "Xuat";
-"インポート" = "Nhap";
-"JSON ファイルで登録データを保存・復元できます。" = "Ban co the luu va khoi phuc du lieu bang tep JSON.";
-"お知らせ" = "Thong bao";
+
 "OK" = "OK";
-"%@件をインポートしました。" = "Da nhap %@ ban ghi.";
 
-"タイトル・メモ・カテゴリを検索" = "Tim tieu de, ghi chu hoac danh muc";
-"検索をクリア" = "Xóa ô tìm kiếm";
-"%@件のスポットを削除しますか？" = "Xoa %@ dia diem?";
 "削除" = "Xoa";
-"共有" = "Chia se";
-"全フィルターを解除" = "Xoa tat ca bo loc";
-"全選択" = "Chon tat ca";
-"全解除" = "Bo chon";
-"項目を選択" = "Chon muc";
-"%@件を選択中" = "Da chon %@";
-"新規作成" = "Tao moi";
-"選択" = "Chon";
+
 "ヘルプ" = "Tro giup";
-"近い順" = "Gan nhat truoc";
-"遠い順" = "Xa nhat truoc";
-"現在地からの距離" = "Khoang cach";
-"未定" = "Chua xac dinh";
-"（未選択）" = "(Khong co)";
 
-"位置情報が利用できません" = "Khong the truy cap vi tri";
-"設定を開く" = "Mo Cai dat";
-"設定アプリから位置情報の使用を許可してください。" = "Vui long bat quyen vi tri trong ung dung Cai dat.";
-"現在地に移動" = "Den vi tri hien tai";
-"衛星写真に切り替え" = "Chuyen sang ve tinh";
-"標準地図に切り替え" = "Chuyen sang ban do tieu chuan";
-"アイコン表示に切り替え" = "Chuyen sang bieu tuong";
-"テキスト表示に切り替え" = "Chuyen sang chu";
-"詳細を見る" = "Xem chi tiet";
-
-"出発地" = "Diem xuat phat";
 "現在地" = "Vi tri hien tai";
-"地図から選ぶ" = "Chon tren ban do";
-"時刻指定" = "Thoi gian";
-"検索" = "Tim kiem";
-"徒歩" = "Di bo";
-"分" = "phut";
+
 "バス" = "Xe buyt";
-"%@ までに出発" = "Xuat phat truoc %@";
-"この区間のバス情報はありません" = "Khong co thong tin xe buyt cho tuyen nay";
+
 "取得中…" = "Dang lay…";
-"出発地を取得できていません" = "Khong co diem xuat phat";
-"設定で Google Maps API キーを入力するとバス情報を取得できます" = "Nhap khoa Google Maps API trong Cai dat de lay thong tin xe buyt";
-"出発" = "Xuat phat";
-"到着" = "Den noi";
-"発 %@" = "Khoi hanh %@";
-"着 %@" = "Den %@";
-"APIエラー: %@" = "Loi API: %@";
-"バス情報を取得できませんでした" = "Khong the lay thong tin xe buyt";
-
-"地図をタップして出発地を選択" = "Cham vao ban do de chon diem xuat phat";
-"出発地を選択中…" = "Dang chon diem xuat phat…";
-"出発地を選択" = "Chon Diem Xuat Phat";
-
-"場所を確認する" = "Xem tren ban do";
-"バス経路を確認" = "Kiem tra tuyen xe buyt";
-"保存した共有リンクのページをそのまま表示しています（ブラウザの Google マップに近い画面です）。" = "Dang hien trang lienket da luu (tuong tu Google Maps tren trinh duyet).";
-"リンクが無いため、Places の写真または周辺地図を表示します。" = "Khong co lienket; hien anh Places hoac ban do gan day.";
-"共有リンクが無く、Places API キーも無いときは地図画像のみです。「設定」でキーを保存できます。" = "Khong co lienket va khoa Places API; chi hien anh ban do. Luu khoa trong Cai dat.";
-
-"おすすめ度" = "Xep hang";
-"日程" = "Ngay";
-"月で選ぶ" = "Theo thang";
-"期間で選ぶ" = "Theo khoang";
-"開始" = "Bat dau";
-"終了" = "Ket thuc";
-
-"未来のデフォルト日時をセット" = "Dat thoi gian mac dinh tuong lai";
-"入力を整形" = "Chuan hoa nhap";
-"Google マップの共有リンク" = "Lienket chia se Google Maps";
-"開ける URL 形式として解釈できませんでした。" = "Khong the giai thich la URL hop le.";
-"位置（Google マップ）" = "Vi tri (Google Maps)";
-"写真を削除" = "Xoa anh";
-"写真を追加" = "Them anh";
-"写真を変更" = "Doi anh";
-"写真" = "Anh";
 
 "カラーテーマ" = "Chu de mau";
+
 "見た目" = "Giao dien";
+
 "外観" = "Giao dien";
-"地図プロバイダー" = "Nha cung cap ban do";
 
 "カスタムで編集…" = "Tuy chinh…";
+
 "枠や見出し" = "Kieu the";
-"スポット一覧のカードや枠線のスタイルを変更します。" = "Thay doi kieu the va vien trong danh sach dia diem.";
+
 "テクスチャ" = "Nen";
-"リスト画面の背景に重ねる模様を選びます。" = "Chon hoa van nen cho danh sach.";
+
 "下地・シーン色" = "Mau nen";
+
 "アプリ背景の下地色を変更します。テクスチャと組み合わせて使えます。" = "Doi mau nen ung dung. Co the ket hop voi nen.";
+
 "カスタム…" = "Tuy chinh…";
+
 "プレビュー" = "Xem truoc";
 
 "プリセットから始める" = "Bat dau tu mau co san";
+
 "カラーをカスタム" = "Tuy chinh mau";
+
 "カード背景" = "Nen the";
+
 "枠線" = "Vien";
+
 "アクセント" = "Nhon manh";
+
 "枠線の太さ  %@ pt" = "Do day vien  %@ pt";
+
 "ダークカード（文字色を自動調整）" = "The toi (tu dong dieu chinh mau chu)";
+
 "枠・見出しのカスタム" = "Tuy chinh kieu the";
+
 "完了" = "Xong";
+
 "シーン色" = "Mau canh";
+
 "カスタム下地色" = "Mau nen tuy chinh";
+
 "適用" = "Ap dung";
 
 "パステル" = "Pastel";
+
 "レトロ電卓風" = "May tinh retro";
+
 "ネオン" = "Neon";
+
 "モノトーン" = "Don sac";
+
 "ハノイ・エディション" = "Phien ban Ha Noi";
+
 "カスタム" = "Tuy chinh";
+
 "既定（方眼＋ドット）" = "Mac dinh (luoi + cham)";
+
 "方眼紙" = "Giay ke";
+
 "ドット" = "Cham tron";
+
 "古い地図風" = "Ban do co";
+
 "レンガ" = "Gach";
+
 "斜め格子" = "Luoi cheo";
+
 "波線" = "Song";
+
 "システムに合わせる" = "Theo he thong";
+
 "アイボリー" = "Ngan";
+
 "スカイブルー" = "Xanh troi";
+
 "ミント" = "Bac ha";
+
 "サンド" = "Cat";
+
 "ラベンダー" = "Oai huong";
+
 "テラコッタ" = "Terracotta";
+
 "標準" = "Tieu chuan";
+
 "シック" = "Thanh lich";
+
 "ポップ" = "Pop";
+
 "モノクロ" = "Don sac";
+
 "iOSデフォルトの配色" = "Mau mac dinh iOS";
+
 "落ち着いたアースカラー" = "Mau dat calm";
+
 "明るくビビッドな配色" = "Mau sang vivid";
+
 "モノクローム配色" = "Bo mau don sac";
 
-"地図の設定" = "Cai dat Ban do";
-"Apple マップ" = "Apple Maps";
-"Google マップ" = "Google Maps";
-"Google マップで表示中" = "Dang dung Google Maps";
-"APIキー未設定のため Apple マップで表示されます" = "Chua co khoa API — dung Apple Maps";
-"Google マップはより精度の高い地図データを使用するため、ピンの位置が現地に一致しやすくなります。APIキーが必要です（無料枠あり）。" = "Google Maps dung du lieu chinh xac hon nen ghim phu hop vi tri thuc te hon. Can khoa API (co mien phi).";
-"Google Maps SDK APIキー" = "Khoa API Google Maps SDK";
-"APIキーを保存しました。\n「Google マップ」を選択してアプリを再起動すると Google マップが有効になります。" = "Da luu khoa API.\nChon \"Google Maps\" va khoi dong lai ung dung de bat Google Maps.";
-"APIキーを削除しました。Apple マップに戻ります。" = "Da xoa khoa API. Chuyen ve Apple Maps.";
-"Google Cloud Console でキーを取得" = "Lay khoa tu Google Cloud Console";
-"Google Cloud Console で「Maps SDK for iOS」を有効にし、APIキーを作成して入力してください。Gemini 用キーや Places 用キーとは別のキーです。キーを新たに設定・変更した場合はアプリの再起動が必要です。" = "Bat \"Maps SDK for iOS\" trong Google Cloud Console va tao khoa API. Khoa nay khac voi khoa Places. Can khoi dong lai ung dung sau khi thay doi khoa.";
-"Maps SDK APIキーフッター" = "Lưu khóa Maps SDK for iOS tại đây. Có thể bật API trên cùng dự án Google Cloud. Có thể cần khởi động lại ứng dụng sau khi đổi khóa.";
-"Routes API を Google Cloud で有効化" = "Bật Routes API trong Google Cloud";
-"Go キー表示_地図" = "Đang dùng: khóa đã lưu trong Cài đặt bản đồ";
-"Go キー表示_同梱" = "Đang dùng: khóa bản đồ đi kèm ứng dụng";
-"Go バス失敗_経路なし_短文" = "Không tìm thấy lịch trình xe buýt cho khu vực này.";
-"Go バス失敗_経路なし_タイトル" = "Không có tuyến xe buýt";
-"Go バス失敗_経路なし_詳細" = "Có thể không có dữ liệu hoặc không có chuyến phù hợp. Thử đổi giờ/điểm xuất phát và nhấn Tìm, hoặc mở Google Maps bên dưới.";
-"Go バス失敗_クラウド未設定_短文" = "Dịch vụ tìm xe buýt có thể chưa được bật trên dự án Google của bạn.";
-"Go バス失敗_クラウド未設定_タイトル" = "Kiểm tra cài đặt đám mây";
-"Go バス失敗_クラウド未設定_詳細" = "Trong ứng dụng, mở Cài đặt → Bản đồ, rồi trong cùng dự án Google Cloud với khóa của bạn, bật API tuyến đường/đi lại. Đợi vài phút và nhấn Tìm lại.";
-"Go バス失敗_キー無効_短文" = "Khóa API có thể sai hoặc bị chặn trên thiết bị này.";
-"Go バス失敗_キー無効_タイトル" = "Kiểm tra khóa API";
-"Go バス失敗_キー無効_詳細" = "Mở lại khóa trong Cài đặt bản đồ và kiểm tra không nhầm ký tự. Trên Google Cloud, xác nhận hạn chế ứng dụng iOS và API được phép.";
-"Go バス失敗_キー403_短文" = "Yêu cầu bị từ chối. Có thể cần chỉnh khóa hoặc hạn chế.";
-"Go バス失敗_キー403_タイトル" = "Kiểm tra quyền";
-"Go バス失敗_キー403_詳細" = "Kiểm tra khóa trong Cài đặt và hạn chế API/trên Google Cloud.";
-"Go バス失敗_混雑_短文" = "Hệ thống đang bận. Vui lòng thử lại sau.";
-"Go バス失敗_混雑_タイトル" = "Thử lại sau";
-"Go バス失敗_混雑_詳細" = "Quá nhiều truy cập. Đợi một lát rồi nhấn Tìm lại.";
-"Go バス失敗_サーバー_短文" = "Tạm thời không kết nối được máy chủ.";
-"Go バス失敗_サーバー_タイトル" = "Lỗi kết nối";
-"Go バス失敗_サーバー_詳細" = "Thử nhấn Tìm lại sau. Nếu vẫn lỗi, kiểm tra mạng.";
-"Go バス失敗_HTTP番号_短文" = "Không tải được thông tin xe buýt (%d).";
-"Go バス失敗_HTTP番号_タイトル" = "Đã xảy ra lỗi";
-"Go バス失敗_HTTP番号_詳細" = "Lỗi (%d) khi kết nối. Vui lòng thử lại sau.";
-"Go バス失敗_上限_短文" = "Có thể cần kiểm tra hạn mức hoặc thanh toán trên Google Cloud.";
-"Go バス失敗_上限_タイトル" = "Hạn mức sử dụng";
-"Go バス失敗_上限_詳細" = "Mở dự án Google Cloud và kiểm tra thanh toán và hạn mức API.";
-"Go バス失敗_その他_短文" = "Không tải được thông tin xe buýt.";
-"Go バス失敗_その他_タイトル" = "Không tải được thông tin xe buýt";
-"Go バス失敗_その他_詳細" = "Thử nhấn Tìm lại. Nếu vẫn lỗi, kiểm tra khóa trong Cài đặt và API đã bật trên Google Cloud.";
-"Go バス失敗_一般_短文" = "Không tải được dữ liệu.";
-"Go バス失敗_一般_タイトル" = "Tải thất bại";
-"Go バス失敗_一般_詳細" = "Kiểm tra kết nối và nhấn Tìm lại.";
-"Go バスエラー_詳しく" = "Chi tiết";
-"Go バスエラー_OK" = "OK";
-"Go バスエラー_設定を開く" = "Mở Cài đặt hệ thống";
-"Go バスエラー_既定タイトル" = "Thông tin xe buýt";
-"Go バスAPIキー未設定_本文" = "Để hiển thị xe buýt, hãy lưu khóa Maps/Routes trong Cài đặt bản đồ.";
-"Go バスAPIキー未設定_ヒント" = "Vào Cài đặt → Bản đồ, nhập và lưu khóa Maps/Routes.";
-"Go バスAPI_要マップ専用_本文" = "Tuyến xe và bản đồ Google cần khóa Maps/Routes trong Cài đặt bản đồ.";
-"Go バスAPI_要マップ専用_ヒント" = "Cài đặt → Bản đồ → khóa Maps SDK — dùng khóa đã bật Maps SDK và Routes API trên Google Cloud.";
-"Go バス_プレースホルダー" = "Nhấn Tìm để hiển thị các chuyến xe buýt.";
-"ルート" = "Tuyến đường";
-"Go 出発地説明" = "Dùng vị trí hiện tại cần quyền và GPS. Nếu chưa có, hãy chọn điểm xuất phát bằng \"Chọn trên bản đồ\" hoặc để Google Maps dùng vị trí trên màn hình tuyến đường.";
-"Go GoogleMapsボタン" = "Mở lộ trình trong Google Maps";
-"Go GoogleMaps補足" = "Mở Google Maps với điểm xuất phát và đích. Chọn ô tô, đi bộ, phương tiện công cộng... trong ứng dụng. Nếu chưa cài, trình duyệt sẽ mở chỉ đường.";
-"Go 緯度経度なし" = "Địa điểm này chưa có vĩ độ và kinh độ.";
-"Go 現在地未取得" = "Đang lấy vị trí. Chọn \"Chọn trên bản đồ\" để đặt điểm xuất phát.";
-"Google マップで開く" = "Mở trong Google Maps";
-"詳細_Googleマップ_緯度経度" = "Vĩ độ / Kinh độ";
-"地図の共有リンク" = "Liên kết chia sẻ bản đồ";
-"位置（地図リンク）" = "Vị trí (liên kết bản đồ)";
-"エクスポートTXT説明_GoogleMaps" = "Danh sách liên kết tìm kiếm Google Maps (google.com). Mở từng liên kết khi cần.";
-"地図リスト取り込み_空入力時" = "Dán URL chia sẻ danh sách, văn bản đã sao chép hoặc nội dung Takeout.";
-"地図リスト取り込み_リンクなし" = "Không tìm thấy liên kết bản đồ có thể nhập. Hãy dùng liên kết chia sẻ, văn bản có URL bản đồ hoặc JSON/CSV Takeout.";
-"地図リンクリスト取り込み_ヘッダー" = "Danh sách liên kết bản đồ";
-"地図リンクリスト取り込み_フッター" = "Dán URL chia sẻ từ Google Maps và dịch vụ tương tự, văn bản sao chép từ danh sách hoặc JSON/CSV Saved Places từ Google Takeout. Chỉ nhập được phần có thể truy cập qua chia sẻ hoặc Takeout.";
-"地図リンクリストから取り込む" = "Nhập từ danh sách liên kết bản đồ";
-"地図リンクリストからインポート" = "Đã nhập từ danh sách liên kết bản đồ";
-"地図スポット" = "Địa điểm bản đồ";
-"地図リンクリストを取り込む" = "Nhập danh sách liên kết bản đồ";
-"位置情報を表示できません。編集画面で緯度・経度を入力するか、地図アプリの共有リンクを貼り付けてください。" = "Không thể hiển thị vị trí. Nhập vĩ độ/kinh độ trên màn hình chỉnh sửa hoặc dán liên kết chia sẻ từ ứng dụng bản đồ.";
-"Google マップ用リンク一覧（TXT）" = "Danh sách liên kết Google Maps (TXT)";
-
-"バージョン %@ (%@)" = "Phien ban %@ (%@)";
-"ヘルプ紹介文" = "Lưu giữ mọi địa điểm bạn yêu thích.\nQuán cà phê, nhà hàng, điểm tham quan — ghi lại ngay những nơi muốn quay lại và tìm chúng bất kỳ lúc nào trên bản đồ. Những chuyến đi đã qua và ước mơ chưa đến, tất cả ở một nơi.";
 "基本操作" = "Thao tac co ban";
-"一括操作" = "Thao tac nhieu muc";
-"詳細画面" = "Man hinh chi tiet";
-"フィルターと並び替え" = "Bo loc va Sap xep";
-"Google マップリンク" = "Lienket Google Maps";
-"地図タブ" = "Tab Ban do";
-"「未来」カテゴリ" = "Danh muc Tuong lai";
-"見た目のカスタマイズ" = "Tuy chinh Giao dien";
-"データ管理" = "Quan ly Du lieu";
-"各種設定" = "Cai dat";
+
 "API キー" = "Khoa API";
 
-"%d年" = "%d";
-
-"スポットを編集" = "Chỉnh sửa địa điểm";
-"スポットを削除（1件）" = "Xóa địa điểm";
-"スポットを検索" = "Tìm kiếm địa điểm";
-"複数件を選択して削除" = "Chọn và xóa nhiều mục";
-"複数件を別の端末へ送る" = "Gửi nhiều mục sang thiết bị khác";
-"詳細画面でインライン編集" = "Chỉnh sửa trực tiếp trên màn hình chi tiết";
-"詳細画面から地図タブへジャンプ" = "Chuyển đến tab Bản đồ từ chi tiết";
-"写真を追加・変更する" = "Thêm hoặc thay đổi ảnh";
-"サムネイル・地図の自動表示" = "Tự động hiển thị ảnh thu nhỏ & bản đồ";
-"メモを確認する（一覧から）" = "Xem ghi chú (từ danh sách)";
-"メモを編集する（詳細画面）" = "Chỉnh sửa ghi chú (màn hình chi tiết)";
-"Google マップリンクを取り込む" = "Nhập liên kết Google Maps";
-"地図の共有リンクを取り込む" = "Nhập liên kết chia sẻ bản đồ";
-"アプリ内から Google マップを開く" = "Mở Google Maps từ trong ứng dụng";
-"Go ボタン — Google マップへ" = "Nút Go — Google Maps";
-"地図サービスの保存リストを取り込む" = "Nhập danh sách đã lưu từ dịch vụ bản đồ";
-"Google マップ用リンク一覧を書き出す" = "Xuất danh sách liên kết Google Maps";
-"リンクの取り込みに時間がかかる場合" = "Nếu nhập liên kết mất nhiều thời gian";
-"詳細から地図タブへ切り替える" = "Chuyển sang tab Bản đồ từ chi tiết";
-"外観（枠・テクスチャ・背景色）" = "Giao diện (khung, họa tiết, màu nền)";
-"プランを確認・アップグレードする" = "Xem gói & Nâng cấp";
-"「…」→「プラン管理」でプランの確認とアップグレードができます。FREE プランでは最大 10 件のスポットを登録できます。PREMIUM プランにアップグレードすると無制限になり、アプリアイコンが変わります。" = "Nhấn '…' → 'Gói cước' để xem gói hiện tại hoặc nâng cấp. Gói FREE cho phép tối đa 10 địa điểm. Nâng cấp lên PREMIUM để lưu không giới hạn và đổi biểu tượng ứng dụng.";
-"購入を復元する" = "Khôi phục giao dịch mua";
-"機種変更や再インストール後は「…」→「プラン管理」→「購入を復元」をタップしてください。同じ Apple ID で購入済みの場合、PREMIUM プランが復元されます。" = "Sau khi đổi thiết bị hoặc cài lại ứng dụng, nhấn '…' → 'Gói cước' → 'Khôi phục mua hàng'. Nếu bạn đã mua PREMIUM bằng cùng Apple ID, gói sẽ được khôi phục.";
-"データをバックアップする" = "Sao lưu dữ liệu";
-"データを復元・引き継ぎする" = "Khôi phục hoặc chuyển dữ liệu";
-"言語を変更する" = "Thay đổi ngôn ngữ";
-"カテゴリを管理する" = "Quản lý danh mục";
-"地図プロバイダーを変更する" = "Thay đổi nhà cung cấp bản đồ";
-"Places API キーについて" = "Về khóa Places API";
-"Google Maps API キーについて" = "Về khóa Google Maps API";
-"一覧画面右上の「…」ボタンをタップし、「新規作成」を選びます。店名・場所名、カテゴリ、訪問日時、地図アプリの共有リンクなどを入力して「保存」してください。" = "Nhấn nút '…' ở góc trên bên phải danh sách và chọn 'Tạo mới'. Nhập tên địa điểm, danh mục, ngày ghé thăm, liên kết chia sẻ từ ứng dụng bản đồ... rồi nhấn 'Lưu'.";
-"一覧から行をタップして詳細画面を開き、右上の「編集」ボタンをタップします。" = "Nhấn vào một hàng trong danh sách để mở màn hình chi tiết, rồi nhấn nút 'Sửa' ở góc trên bên phải.";
-"一覧画面で行を左にスワイプすると「削除」ボタンが現れます。" = "Vuốt sang trái trên một hàng trong danh sách để hiện nút 'Xóa'.";
-"一覧画面を下にスワイプすると検索バーが表示されます。タイトル・イベント名・メモ・カテゴリを横断して絞り込みます。" = "Kéo xuống trong màn hình danh sách để hiện thanh tìm kiếm. Tìm kiếm theo tiêu đề, tên sự kiện, ghi chú và danh mục.";
-"「…」→「選択」で選択モードに入り、削除したい行をタップします。「全選択」で全件選択、ゴミ箱ボタンで確認後に一括削除できます。" = "Vào '…' → 'Chọn' để vào chế độ chọn và nhấn các hàng cần xóa. Dùng 'Chọn tất cả' rồi nhấn biểu tượng thùng rác để xóa hàng loạt.";
-"選択モードで送りたい行を選び、ツールバーの共有ボタン（↑マーク）をタップします。AirDrop または各種共有先を選んでください。受け取り側は「…」→「インポート」でデータを取り込めます。" = "Ở chế độ chọn, chọn các hàng và nhấn nút chia sẻ (↑) trên thanh công cụ. Chọn AirDrop hoặc điểm đến khác. Người nhận có thể nhập dữ liệu qua '…' → 'Nhập'.";
-"詳細画面の各項目（店名・イベント・カテゴリ・訪問日時・おすすめ・メモ）を長押しすると、その場で編集できます。「保存」で確定、「キャンセル」で破棄します。" = "Nhấn giữ bất kỳ trường nào (tên, sự kiện, danh mục, ngày, đánh giá, ghi chú) trên màn hình chi tiết để chỉnh sửa trực tiếp. Nhấn 'Lưu' để xác nhận hoặc 'Hủy' để bỏ.";
-"緯度・経度が登録されているスポットでは、詳細画面右上に「Go」ボタンが表示されます。出発地を選び、「Google マップでルートを開く」から Google マップアプリの経路画面を開けます。車・徒歩・公共交通などはマップ側で切り替えられます。アプリが入っていない場合はブラウザの Google マップに切り替わります。詳細・一覧の「Google マップで開く」からも同じ場所を Google マップで確認できます。" = "Với địa điểm có tọa độ, nút Go xuất hiện góc trên bên phải. Chọn điểm xuất phát để mở màn hình chỉ đường trong Google Maps. Chọn ô tô, đi bộ, phương tiện công cộng... trong ứng dụng. Nếu chưa cài ứng dụng, trình duyệt sẽ mở. Bạn cũng có thể mở cùng địa điểm qua 'Mở trong Google Maps' trên chi tiết và danh sách.";
-"詳細画面上部のヒーロー画像は地図スナップショットになっています。「位置」セクションの「場所を確認する」をタップすると、地図タブへ切り替わりそのスポットを中心に表示します。" = "Ảnh hero phía trên màn hình chi tiết là ảnh chụp bản đồ. Nhấn 'Xem vị trí' trong mục Vị trí để chuyển sang tab Bản đồ và lấy địa điểm đó làm trung tâm.";
-"一覧上部のフィルターアイコンをタップすると、カテゴリ・おすすめ度に加え、訪問日または登録日を基準に月（年ごとに折り畳み）や期間で絞り込めます。フィルターが有効なときはアイコンが塗りつぶし表示になります。" = "Nhấn biểu tượng lọc ở đầu danh sách để lọc theo danh mục và đánh giá, và theo tháng (nhóm theo năm) hoặc khoảng ngày dựa trên ngày ghé thăm hoặc ngày đăng ký. Biểu tượng hiển thị đặc khi bộ lọc đang hoạt động.";
-"並び替えアイコンから「店名」「イベント」「訪問日時」「現在地からの距離」で昇順／降順を切り替えられます。距離ソートは位置情報の許可が必要です。" = "Dùng biểu tượng sắp xếp để chuyển tăng/giảm dần theo 'Tên địa điểm', 'Sự kiện', 'Ngày ghé thăm' hoặc 'Khoảng cách'. Sắp xếp theo khoảng cách yêu cầu quyền vị trí.";
-"追加・編集画面の「写真」セクションで「写真を追加」をタップし、カメラロールから選べます。保存時に最大 1200px にリサイズされ、容量を抑えて保存されます。「写真を削除」で削除できます。" = "Trong mục Ảnh của màn hình thêm/sửa, nhấn 'Thêm ảnh' để chọn từ thư viện. Ảnh được nén tối đa 1200px khi lưu. Nhấn 'Xóa ảnh' để xóa.";
-"緯度・経度や地図の共有リンクが登録されていると、施設の写真または周辺地図が自動取得されます。独自写真が登録されている場合はそちらが優先されます。一度読み込んだ画像はキャッシュされます。" = "Nếu có tọa độ hoặc liên kết chia sẻ bản đồ, ảnh địa điểm hoặc bản đồ lân cận sẽ được tải tự động. Ảnh tùy chỉnh được ưu tiên hiển thị. Ảnh đã tải được lưu vào bộ nhớ đệm.";
-"メモが入力済みのスポットには行末に「📝」が表示されます。タップするとポップアップで内容を確認できます。" = "Địa điểm có ghi chú sẽ hiển thị '📝' ở cuối hàng. Nhấn để xem ghi chú trong cửa sổ popup.";
-"詳細画面の「メモ」欄を長押しすると編集モードになります。入力後「保存」をタップしてください。" = "Nhấn giữ ô Ghi chú trên màn hình chi tiết để vào chế độ chỉnh sửa. Nhấn 'Lưu' sau khi nhập xong.";
-"Google マップで場所を開き「共有」→「リンクをコピー」でリンクをコピーします。追加・編集画面の「Google マップの共有リンク」欄に貼り付けると、緯度・経度が自動で反映されます。" = "Mở địa điểm trong Google Maps, rồi Chia sẻ → Sao chép liên kết. Dán vào ô 'Liên kết Google Maps' trong màn hình thêm/sửa để tự động điền tọa độ.";
-"Google マップで場所を開き「共有」→「リンクをコピー」でリンクをコピーします。追加・編集画面の「地図の共有リンク」欄に貼り付けると、緯度・経度が自動で反映されます（maps.app.goo.gl など Google マップのリンクをはじめ、主要な形式に対応）。" = "Mở địa điểm trong Google Maps, rồi Chia sẻ → Sao chép liên kết. Dán vào ô 'Liên kết chia sẻ bản đồ' trong thêm/sửa để tự động điền tọa độ (hỗ trợ liên kết Google Maps như maps.app.goo.gl và các định dạng phổ biến khác).";
-"追加・編集画面で店名を入力後、「店名・場所で Google マップを開く」ボタンをタップします。Google マップで場所を確認し「共有」→「リンクをコピー」でコピーしてアプリに戻ると、リンクが自動で反映されます。" = "Nhập tên địa điểm trong màn hình thêm/sửa, rồi nhấn 'Mở Google Maps theo tên'. Tìm địa điểm, Chia sẻ → Sao chép liên kết, quay lại ứng dụng và liên kết sẽ tự động được áp dụng.";
-"一覧の「…」→「地図リンクリストを取り込む」で、共有 URL、コピーしたリスト本文、または Google Takeout の Saved Places JSON/CSV を貼り付けます（Google マップ由来のデータを含みます）。リスト名を入れると osmStroll のイベント名として保存されます。" = "Trong danh sách: '…' → 'Nhập danh sách liên kết bản đồ', dán URL chia sẻ, văn bản đã sao chép hoặc JSON/CSV Saved Places từ Google Takeout (có thể gồm dữ liệu từ Google Maps). Tên danh sách được lưu làm tên sự kiện trong osmStroll.";
-"「…」→「エクスポート」から「Google マップ用リンク一覧（TXT）」を選ぶと、登録スポットの Google マップ向け検索 URL（google.com の地図）の一覧を書き出せます。別サービスのリストへ反映するときは各アプリの手順に従ってください。" = "Chọn '…' → 'Xuất' → 'Danh sách liên kết Google Maps (TXT)' để xuất URL tìm kiếm google.com/maps cho các địa điểm. Khi chép sang dịch vụ khác, hãy làm theo hướng dẫn của từng ứng dụng.";
-"短縮リンク（maps.app.goo.gl）は通信で展開する必要があります。展開には数秒かかることがあります。Places API キーが設定されていると、より確実に取り込めます。" = "Liên kết rút gọn (maps.app.goo.gl) cần được mở rộng qua mạng, có thể mất vài giây. Có khóa Places API sẽ cải thiện độ tin cậy.";
-"画面下部の「地図」タブでは、登録したスポットをマップ上のピンで一覧できます。ピンをタップすると詳細画面へ移動します。" = "Tab Bản đồ ở phía dưới màn hình hiển thị tất cả địa điểm đã lưu dưới dạng ghim. Nhấn vào ghim để đến màn hình chi tiết.";
-"詳細画面の「位置」セクションで「場所を確認する」をタップすると、地図タブへ自動で切り替わり、そのスポットを地図の中心に表示します。" = "Nhấn 'Xem vị trí' trong mục Vị trí trên màn hình chi tiết để tự động chuyển sang tab Bản đồ và lấy địa điểm đó làm trung tâm.";
-"カテゴリに「未来」を選ぶと、訪問日時が翌日の正午（12:00）に自動でセットされます。まだ訪れていない場所の候補として使えます。「未来」カテゴリは「設定」→「カテゴリ一覧」から追加できます。" = "Chọn danh mục 'Tương lai' sẽ tự động đặt thời gian ghé thăm vào trưa ngày hôm sau (12:00). Dùng để lưu những nơi bạn định đến. Thêm danh mục này qua Cài đặt → Danh mục.";
-"「設定」→「カラーテーマ」で「標準」「シック」「ポップ」「モノクロ」の4種類から配色を選べます。アクセントカラー・星色・地図ピン色がまとめて切り替わります。" = "Vào Cài đặt → Chủ đề màu để chọn trong 4 bảng màu: Chuẩn, Thanh lịch, Tươi sáng và Đơn sắc. Màu nhấn, màu sao và màu ghim bản đồ đều thay đổi cùng nhau.";
-"「設定」→「見た目」→「外観」でスポットカードの枠スタイル（パステル・ネオンなど）、背景のテクスチャ（方眼・ドットなど）、アプリ背景色をカスタマイズできます。カスタムカラーや独自の枠スタイルも設定可能です。" = "Vào Cài đặt → Giao diện để tùy chỉnh kiểu thẻ (Pastel, Neon...), họa tiết nền (Lưới, Chấm...) và màu nền ứng dụng. Cũng có thể tùy chỉnh màu sắc và kiểu khung riêng.";
-"「…」→「エクスポート」で全スポットを JSON ファイルに書き出せます。iCloud Drive や Files アプリに保存しておくと安心です。" = "Vào '…' → 'Xuất' để lưu tất cả địa điểm dưới dạng file JSON. Nên lưu vào iCloud Drive hoặc ứng dụng Files để an toàn.";
-"「…」→「インポート」でエクスポートした JSON/ZIP ファイルを読み込めます。地図の共有 URL を含むテキストや CSV/JSON を選んだ場合は、リンクリストとして取り込みを試します。" = "Vào '…' → 'Nhập' để tải file JSON/ZIP đã xuất. Nếu chọn văn bản hoặc CSV/JSON có URL chia sẻ bản đồ, ứng dụng sẽ thử nhập như danh sách liên kết.";
-"エクスポート形式を選択" = "Chọn định dạng xuất";
-"写真なし JSON（軽量）" = "JSON không có ảnh (nhẹ)";
-"写真付き ZIP" = "ZIP có ảnh";
-"写真付き ZIP は写真を別ファイルとして保存するため、従来の写真入り JSON より小さくなります。" = "ZIP có ảnh lưu ảnh thành file riêng nên nhỏ hơn JSON kiểu cũ có nhúng ảnh.";
-"Google Maps 用リンク一覧（TXT）" = "Danh sách liên kết Google Maps (TXT)";
-"Google Maps は外部アプリから保存済みリストを直接作成できないため、TXT は各リンクを開いて保存するための一覧です。" = "Google Maps không cho ứng dụng bên ngoài tạo trực tiếp danh sách Đã lưu, nên file TXT này là danh sách liên kết để bạn mở và lưu từng mục.";
-"Google Maps リストを取り込む" = "Nhập danh sách Google Maps";
-"Google Maps リストからインポート" = "Đã nhập từ danh sách Google Maps";
-"Google Maps スポット" = "Địa điểm Google Maps";
-"Google Maps のリスト共有 URL、コピーしたテキスト、または Takeout の内容を貼り付けてください。" = "Dán URL chia sẻ danh sách Google Maps, văn bản đã sao chép hoặc nội dung Takeout.";
-"Google Maps の場所リンクを見つけられませんでした。リストの共有リンク、Google Maps URL を含むテキスト、または Google Takeout の JSON/CSV を指定してください。" = "Không tìm thấy liên kết địa điểm Google Maps. Hãy dùng liên kết chia sẻ danh sách, văn bản có URL Google Maps hoặc JSON/CSV từ Google Takeout.";
-"%@件をインポートしました。重複 %@件、失敗 %@件。" = "Đã nhập %@ mục. %@ trùng lặp, %@ thất bại.";
-"osmStroll 側のリスト名（任意）" = "Tên danh sách trong osmStroll (tùy chọn)";
-"Google Maps リスト" = "Danh sách Google Maps";
-"Google Maps の保存済みリスト共有 URL、リストからコピーしたテキスト、または Google Takeout の Saved Places JSON/CSV を貼り付けます。Google 側の非公開リストは、共有リンクまたは Takeout で読み出せる範囲だけ取り込めます。" = "Dán URL chia sẻ danh sách đã lưu của Google Maps, văn bản sao chép từ danh sách hoặc JSON/CSV Saved Places từ Google Takeout. Danh sách riêng tư chỉ nhập được nếu đọc được qua chia sẻ hoặc Takeout.";
-"取り込み中…" = "Đang nhập…";
-"Google Maps から取り込む" = "Nhập từ Google Maps";
-"取り込む" = "Nhập";
-"Google Maps の保存済みリストを取り込む" = "Nhập danh sách đã lưu của Google Maps";
-"一覧の「…」→「Google Maps リストを取り込む」で、Google Maps のリスト共有 URL、コピーしたリスト本文、または Google Takeout の Saved Places JSON/CSV を貼り付けます。リスト名を入れると osmStroll のイベント名として保存されます。" = "Trong màn hình danh sách, dùng '…' → 'Nhập danh sách Google Maps', rồi dán URL chia sẻ danh sách Google Maps, văn bản đã sao chép hoặc JSON/CSV Saved Places từ Google Takeout. Tên danh sách sẽ được lưu làm tên sự kiện trong osmStroll.";
-"Google Maps 用リンク一覧を書き出す" = "Xuất danh sách liên kết Google Maps";
-"「…」→「エクスポート」から「Google Maps 用リンク一覧（TXT）」を選ぶと、登録スポットの Google Maps リンク一覧を書き出せます。Google Maps は外部アプリから保存済みリストを直接作成する API を提供していないため、リンクを開いて保存先リストへ追加してください。" = "Chọn 'Danh sách liên kết Google Maps (TXT)' trong '…' → 'Xuất' để xuất các liên kết Google Maps của địa điểm đã lưu. Google Maps không có API cho ứng dụng bên ngoài tạo trực tiếp danh sách Đã lưu, nên hãy mở từng liên kết và thêm vào danh sách đích.";
-"「…」→「インポート」でエクスポートした JSON/ZIP ファイルを読み込めます。Google Maps URL を含むテキストや CSV/JSON を選んだ場合は、Google Maps リストとして取り込みを試します。" = "Dùng '…' → 'Nhập' để tải file JSON/ZIP đã xuất. Nếu chọn văn bản hoặc CSV/JSON có URL Google Maps, osmStroll sẽ thử nhập như danh sách Google Maps.";
-"「設定」→「言語」で「日本語」「English」「Tiếng Việt」に切り替えられます。" = "Vào Cài đặt → Ngôn ngữ để chuyển giữa Tiếng Nhật, English và Tiếng Việt.";
-"「設定」→「カテゴリ一覧」でカテゴリの追加・削除・並び替え・アイコン変更ができます。並び替えは「編集」ボタンを押してから行をドラッグしてください。" = "Vào Cài đặt → Danh mục để thêm, xóa, sắp xếp lại hoặc đổi biểu tượng. Để sắp xếp, nhấn 'Sửa' rồi kéo các hàng.";
-"「設定」→「地図」で Apple マップと Google マップを切り替えられます。Google マップは「Maps SDK for iOS」の API キーが必要です。" = "Vào Cài đặt → Bản đồ để chuyển giữa Apple Maps và Google Maps. Google Maps yêu cầu khóa API 'Maps SDK for iOS'.";
-"Google Cloud Console で発行した「Places API（新）」のキーを登録すると、写真の取得精度と共有リンクからの座標解析精度が向上します。キーなしでも地図スナップショットは表示されます。" = "Đăng ký khóa 'Places API (mới)' từ Google Cloud Console để cải thiện phân tích tọa độ từ liên kết. Nhiều liên kết hoạt động không cần khóa, nhưng có khóa sẽ ít lỗi hơn.";
-"「設定」→「地図」→「Google Maps SDK APIキー」に「Maps SDK for iOS」のキーを登録すると、Google マップでのピン表示やナビ連携がより正確になります。Google Cloud Console で発行できます（無料枠あり）。" = "Đăng ký khóa 'Maps SDK for iOS' trong Cài đặt → Bản đồ → Khóa API Google Maps SDK để cải thiện độ chính xác của ghim và điều hướng. Lấy khóa từ Google Cloud Console (có gói miễn phí).";
-"ダーツの旅" = "Chuyen di phi tieu";
-"ダーツの旅_起点の選び方" = "Diem xuat phat";
-"ダーツの旅_起点説明フッター" = "Khi dung vi tri hien tai hoac ghim tren ban do, chi cac dia da luu co toa do trong khoang cach duong thang tu diem xuat phat moi duoc de xuat.";
-"ダーツの旅_起点からの距離" = "Khoang cach tu diem xuat phat";
-"ダーツの旅_距離km表示" = "%d km";
-"ダーツの旅_距離フッター" = "Gioi han cac diem de xuat trong khoang cach duong thang nay tu diem xuat phat.";
-"ダーツの旅_現在地から" = "Tu vi tri hien tai";
-"ダーツの旅_起点を地図から指定" = "Chon diem xuat phat tren ban do";
-"ダーツの旅_場所の制限なし" = "Khong gioi han vi tri";
-"ダーツの旅_地図で起点を指定" = "Chon diem xuat phat tren ban do";
-"ダーツの旅_地図起点フッター" = "Cham ban do de chon diem xuat phat, roi cham Chon.";
-"選択範囲には登録地がありません" = "Khong co dia da luu trong vung da chon.";
-"ダーツの旅_現在地を取得できません" = "Khong lay duoc vi tri hien tai. Hay kiem tra quyen vi tri hoac tin hieu, roi thu lai.";
-"ダーツの旅_地図起点を設定してください" = "Khi dung Chon diem xuat phat tren ban do, hay cham muc duoi de chon diem truoc khi nem.";
-"ダーツを投げる" = "Nem phi tieu";
-"ダーツの旅_条件を変更" = "Doi dieu kien";
-"ダーツの旅に含める" = "Đưa vào Chuyến đi phi tiêu";
-"登録済みスポットからランダムに行き先を提案します。気分に合わなければ、もう一度投げてみてください。" = "Goi y ngau nhien diem den tu cac dia diem da luu. Neu chua hop tam trang, hay nem lai.";
-"%@つの行き先候補" = "%@ goi y diem den";
-"登録が%@件のため、表示できる候補だけ出しています。" = "Chi co %@ dia diem da luu, nen chi hien cac goi y do.";
-"もう一度投げる" = "Nem lai";
-"おすすめなし" = "Khong xep hang";
-"すごく良い" = "Rất tốt";
-"良い" = "Tốt";
-"まあまあ" = "Tạm được";
-"ふつう" = "Bình thường";
-"イマイチ" = "Chưa tốt";
-"ダーツの旅でランダム探索" = "Khám phá với Chuyến đi phi tiêu";
-"今日の行き先は、運命に決めてもらおう。登録済みスポットの中からランダムに行き先を提案——「そういえばまだ行ってなかった」という新鮮な発見も、懐かしい再訪も待っているかも。ピンとくるまで何度でも投げ直せます。" = "Hãy để số phận chọn điểm đến tiếp theo cho bạn. Một địa điểm ngẫu nhiên từ danh sách đã lưu — khám phá lại nơi đã quên hay bất ngờ tìm ra điều mới mẻ. Chưa ưng? Cứ thả thêm cho đến khi thấy hứng khởi!";
-
-"darts.title" = "Chuyen di phi tieu";
-"darts.change_options" = "Doi dieu kien";
-"darts.throw_again" = "Nem lai";
-"darts.setup.blurb" = "Goi y ngau nhien diem den tu cac dia diem da luu. Neu chua hop tam trang, hay nem lai.";
-"darts.origin.section_title" = "Diem xuat phat";
-"darts.origin.footer" = "Khi dung vi tri hien tai hoac ghim tren ban do, chi cac dia da luu co toa do trong khoang cach duong thang tu diem xuat phat moi duoc de xuat.";
-"darts.radius.label" = "Khoang cach tu diem xuat phat";
-"darts.radius.km_format" = "%d km";
-"darts.radius.footer" = "Gioi han cac diem de xuat trong khoang cach duong thang nay tu diem xuat phat.";
-"darts.map.pick_button" = "Chon diem xuat phat tren ban do";
-"darts.map.pick_footer" = "Cham ban do de chon diem xuat phat, roi cham Chon.";
-"darts.throw.action" = "Nem phi tieu";
-"darts.results.count_header" = "%@ goi y diem den";
-"darts.results.partial_pool_footer" = "Chi co %@ dia diem da luu, nen chi hien cac goi y do.";
-"darts.empty.location" = "Khong lay duoc vi tri hien tai. Hay kiem tra quyen vi tri hoac tin hieu, roi thu lai.";
-"darts.empty.map_pin" = "Khi dung Chon diem xuat phat tren ban do, hay cham muc duoi de chon diem truoc khi nem.";
-"darts.empty.no_spots" = "Khong co dia da luu trong vung da chon.";
-"darts.origin_mode.current" = "Tu vi tri hien tai";
-"darts.origin_mode.map" = "Chon diem xuat phat tren ban do";
-"darts.origin_mode.anywhere" = "Khong gioi han vi tri";
-"darts.include_in_trip" = "Đưa vào Chuyến đi phi tiêu";
-"darts.help.random_title" = "Khám phá với Chuyến đi phi tiêu";
-"darts.help.random_body" = "Hãy để số phận chọn điểm đến tiếp theo cho bạn. Một địa điểm ngẫu nhiên từ danh sách đã lưu — khám phá lại nơi đã quên hay bất ngờ tìm ra điều mới mẻ. Chưa ưng? Cứ thả thêm cho đến khi thấy hứng khởi!";
-
-"recommend.title" = "Gợi ý cho bạn";
-"recommend.change_options" = "Đổi điều kiện";
-"recommend.reask" = "Chọn lại";
-"recommend.setup.blurb" = "Chọn ngẫu nhiên một địa điểm ⭐️4 trở lên và nhờ Google AI gợi ý các nơi tương tự ở gần đó.";
-"recommend.action" = "Nhờ Google AI gợi ý";
-"recommend.result.selected_label" = "Địa điểm được chọn";
-"recommend.open_google_ai" = "Mở trong Google AI";
-"recommend.result.footer" = "Mở trang tìm kiếm Google AI.";
-"recommend.distance_format" = "~%.1f km từ điểm xuất phát";
-"recommend.empty.no_4star" = "Không có địa điểm nào đạt ⭐️4 trở lên. Hãy đánh giá một số địa điểm từ 4 sao trở lên để dùng tính năng này.";
-"recommend.empty.no_spots_in_range" = "Không tìm thấy địa điểm ⭐️4+ trong khu vực đã chọn.";
-"recommend.query.with_origin" = "Gợi ý các địa điểm tương tự trong vòng {radius}km quanh vị trí {olat}, {olon}";
-"recommend.query.no_origin" = "Gợi ý các địa điểm tương tự";
-"recommend.query.name_label" = "Địa điểm: ";
-"recommend.query.lat_label" = "Vĩ độ: ";
-"recommend.query.lon_label" = "Kinh độ: ";
-"recommend.query.dist_label" = "Khoảng cách từ điểm xuất phát: ~";
-"recommend.query.language_instruction" = "Vui lòng trả lời bằng tiếng Việt.";
-
-"APIキーについて" = "Về khóa API";
-"APIキー案内_キーの取り扱い" = "Khóa chỉ được lưu trên thiết bị này và không tải lên máy chủ của nhà phát triển.";
-"APIキー案内地図_1" = "Hiển thị Google Maps cần khóa API Maps SDK for iOS từ Google Cloud.";
-"APIキー案内地図_2" = "Bật \"Maps SDK for iOS\" trong Google Cloud Console và tạo khóa. Có gói miễn phí.";
 "導通テスト" = "Kiểm tra kết nối";
-"接続成功" = "Kết nối thành công";
-"接続に失敗しました" = "Kết nối thất bại";
-
-"選択地点を地図の中心に表示" = "Đưa điểm đã chọn vào giữa bản đồ";
-"設定_地図中心に表示_フッター" = "Khi quay lại từ chi tiết sau khi mở từ tab bản đồ, bản đồ sẽ căn giữa điểm đó. Nút \"Xem tren ban do\" trong mục Vị trí luôn căn giữa.";
 
 "API 連携" = "Tích hợp API";
-"設定画面_API連携フッター_Places" = "Khóa Google Places API giúp tăng khả năng nhập tọa độ từ liên kết chia sẻ.";
-"Google API 設定" = "Cài đặt Google API";
-"Google Places API キーの役割" = "Khóa này để làm gì?";
-"PlacesAPI説明_リード" = "Khi bạn lưu địa điểm bằng liên kết chia sẻ Google Maps, khóa giúp lấy đúng thông tin vị trí ổn định hơn.";
-"PlacesAPI説明_補足" = "Nhiều liên kết vẫn dùng được không cần khóa. Khóa hữu ích khi liên kết thiếu thông tin. Nếu không lấy được tọa độ, ứng dụng đoán từ tên cửa hàng hoặc địa điểm (kém chính xác hơn, ghim có thể lệch).";
-"一覧_写真枠案内" = "Thêm ảnh\ntại đây";
-"写真あり" = "Có ảnh";
-"詳細ヒーロー説明_緯度経度あり" = "Bản đồ quanh tọa độ đã lưu.";
-"詳細ヒーロー説明_共有リンクあり" = "Hiển thị địa điểm từ liên kết đã lưu (một số liên kết giống Google Maps trên trình duyệt).";
-"詳細ヒーロー説明_位置情報不足" = "Không có tọa độ hoặc liên kết hợp lệ thì có thể không hiện bản đồ. Hãy dán liên kết trong màn chỉnh sửa hoặc thêm khóa API trong Cài đặt.";
-"登録した写真" = "Ảnh của bạn";
-"表示を再読み込み" = "Tải lại hiển thị";
-"画像を再取得" = "Tải lại ảnh";
-"一覧・詳細の写真と地図" = "Ảnh & bản đồ trong danh sách và chi tiết";
-"一覧では自分が登録した写真のみがサムネイルになり、写真がないときは薄い枠が表示されます（右側のテキストの位置は変わりません）。詳細の一番上は地図のみです。写真を登録しているときは、画面下部（「Google AIで調べる」の下）に表示されます。" = "Chỉ ảnh bạn thêm mới làm thumbnail; nếu không có ảnh thì có khung nhạt (chữ bên phải không bị lệch). Đầu màn chi tiết chỉ là bản đồ. Nếu có ảnh, hiển thị ở cuối (dưới “Tìm bằng Google AI”).";
-"Places API リクエストはこの端末から Google のサーバーに直接送信されます。第三者を経由しません。" = "Yêu cầu Places API được gửi thẳng từ thiết bị này đến Google. Không qua bên thứ ba.";
+
 "プライバシーとセキュリティ" = "Bảo mật & Quyền riêng tư";
+
 "端末内のみ保存" = "Chỉ lưu trên thiết bị";
-"APIキーはこの端末の設定にのみ保存されます。開発者のサーバーには一切送信されません。" = "Khóa API chỉ lưu trong cài đặt của thiết bị này. Không bao giờ gửi đến máy chủ nhà phát triển.";
+
 "Google に直接送信" = "Gửi thẳng đến Google";
-"Google Cloud Console で Places API (New) を有効にして発行したキーを入力してください。キーはこの端末にのみ保存されます。" = "Bật Places API (New) trong Google Cloud, tạo khóa và dán vào đây. Chỉ lưu trên thiết bị này.";
-"API キーを取得する（Google Cloud Console）" = "Lấy API key (Google Cloud Console)";
-"Places API (New) の有効化手順" = "Cách bật Places API (New)";
-"入力したキーで Places API に実際にリクエストを送信してテストします。テスト前に保存は不要です。" = "Gửi một yêu cầu thử với khóa vừa nhập. Không cần lưu trước.";
-"接続に成功しました。共有リンクからの緯度経度取り込みなどに利用できます。" = "Kết nối thành công. Có thể dùng khóa khi nhập tọa độ từ liên kết chia sẻ.";
-"保存する" = "Lưu";
-"APIキーを削除する" = "Xóa API key";
-"Places 画像キャッシュをクリア" = "Xóa cache ảnh Places";
-"過去に保存された Places 関連画像のキャッシュを削除します。" = "Xóa ảnh đã cache trước đây qua Places.";
+
 "保存しました" = "Đã lưu";
-"Google Places API キーを保存しました。共有リンク解析などに使用されます。" = "Đã lưu khóa Google Places API. Dùng khi phân tích liên kết chia sẻ và tác vụ tương tự.";
-"キャッシュをクリアしました" = "Đã xóa cache";
-"キャッシュ削除後の案内" = "Đã xóa cache liên quan Places.";
+
 "URLの生成に失敗しました。" = "Không tạo được URL.";
+
 "レスポンスの解析に失敗しました。" = "Không đọc được phản hồi.";
-"リクエストエラー（400）。Places API (New) が Google Cloud で有効になっているか確認してください。" = "Lỗi yêu cầu (400). Kiểm tra xem Places API (New) đã bật trong Google Cloud chưa.";
-"認証エラーフォーマット" = "Lỗi xác thực (%d). Khóa không hợp lệ hoặc thiếu quyền Places API.";
-"HTTPエラーフォーマット" = "Lỗi (%d): %@";
-"通信エラーフォーマット" = "Lỗi mạng: %@";
-"プライバシーポリシー" = "Chính sách bảo mật";
-"利用規約 (EULA)" = "Điều khoản sử dụng (EULA)";
 
-// MARK: - Help rows (symbolic keys)
-"help.basic.add.title" = "Thêm địa điểm";
-"help.basic.add.body" = "Nhấn nút '+' ở góc trên bên phải danh sách để mở màn hình chọn cách thêm. Chọn trong bốn tùy chọn: 'Ghi lại vị trí hiện tại', 'Lưu nơi muốn đến', 'Lưu thành bản nháp' hoặc 'Đăng ký từ ảnh'.";
-"help.basic.record_now.title" = "Ghi lại vị trí hiện tại ngay lập tức";
-"help.basic.record_now.body" = "Nhấn '+' → 'Ghi lại vị trí hiện tại' để mở màn hình thêm với tọa độ GPS hiện tại đã được điền sẵn. Chỉ cần nhập tên và nhấn 'Lưu' để ghi lại nhanh nơi bạn đang đứng.";
-"help.basic.want_to_go_map.title" = "Thêm bằng cách nhấn giữ bản đồ";
-"help.basic.want_to_go_map.body" = "Nhấn '+' → 'Lưu nơi muốn đến' → 'Chọn từ bản đồ' để mở bản đồ. Nhấn giữ vị trí muốn thêm để đặt ghim, rồi nhấn 'Xác nhận vị trí' để mở màn hình thêm với tọa độ đã điền sẵn.";
-"help.basic.edit.title" = "Sửa địa điểm";
-"help.basic.edit.body" = "Nhấn vào một hàng trong danh sách để mở màn hình chi tiết, rồi nhấn nút 'Sửa' ở góc trên bên phải.";
-"help.basic.delete.title" = "Xóa địa điểm";
-"help.basic.delete.body" = "Vuốt sang trái trên một hàng trong danh sách để hiện nút 'Xóa'.";
-"help.basic.search.title" = "Tìm kiếm địa điểm";
-"help.basic.search.body" = "Kéo xuống màn hình danh sách để hiện thanh tìm kiếm. Tìm kiếm theo tiêu đề, tên sự kiện, ghi chú và danh mục.";
-"help.bulk.multiDelete.title" = "Chọn và xóa nhiều mục";
-"help.bulk.multiDelete.body" = "Vào '…' → 'Chọn' để vào chế độ chọn, nhấn vào các hàng cần xóa. Dùng 'Chọn tất cả' rồi nhấn biểu tượng thùng rác để xóa hàng loạt sau khi xác nhận.";
-"help.bulk.share.title" = "Gửi nhiều mục sang thiết bị khác";
-"help.bulk.share.body" = "Ở chế độ chọn, chọn các hàng và nhấn nút chia sẻ (↑) trên thanh công cụ. Chọn AirDrop hoặc điểm đến khác. Người nhận có thể nhập dữ liệu qua '…' → 'Nhập'.";
-"help.detail.inline.title" = "Chỉnh sửa trực tiếp trên màn hình chi tiết";
-"help.detail.inline.body" = "Nhấn giữ bất kỳ trường nào (tên, sự kiện, danh mục, ngày, đánh giá, ghi chú) trên màn hình chi tiết để chỉnh sửa trực tiếp. Nhấn 'Lưu' để xác nhận hoặc 'Hủy' để bỏ.";
-"help.detail.go.title" = "Nút Go — Google Maps";
-"help.detail.go.body" = "Với địa điểm có tọa độ, nút Go xuất hiện góc trên bên phải. Chọn điểm xuất phát để mở màn hình chỉ đường trong Google Maps. Chọn ô tô, đi bộ, phương tiện công cộng... trong ứng dụng. Nếu chưa cài ứng dụng, trình duyệt sẽ mở. Bạn cũng có thể mở cùng địa điểm qua 'Mở trong Google Maps' trên chi tiết và danh sách.";
-"help.detail.mapJump.title" = "Nhảy sang tab Bản đồ từ chi tiết";
-"help.detail.mapJump.body" = "Ảnh nền ở đầu màn hình chi tiết là ảnh chụp bản đồ. Nhấn 'Xem vị trí' trong mục Vị trí để chuyển sang tab Bản đồ và lấy địa điểm đó làm trung tâm.";
-"help.filter.filter.title" = "Lọc";
-"help.filter.filter.body" = "Nhấn biểu tượng lọc ở đầu danh sách để lọc theo danh mục và mức độ yêu thích, theo tháng (gộp theo năm) hoặc theo khoảng thời gian dựa trên ngày thăm hoặc ngày đăng ký. Biểu tượng hiện đặc khi bộ lọc đang hoạt động.";
-"help.filter.sort.title" = "Sắp xếp";
-"help.filter.sort.body" = "Dùng biểu tượng sắp xếp để chuyển tăng/giảm dần theo 'Tên địa điểm', 'Sự kiện', 'Ngày ghé thăm' hoặc 'Khoảng cách'. Sắp xếp theo khoảng cách yêu cầu quyền vị trí.";
-"help.photo.add.title" = "Thêm hoặc đổi ảnh";
-"help.photo.add.body" = "Trong mục Ảnh của màn hình thêm/sửa, nhấn 'Thêm ảnh' để chọn từ thư viện. Ảnh được nén tối đa 1200px khi lưu. Nhấn 'Xóa ảnh' để xóa.";
-"help.photo.display.title" = "Ảnh & bản đồ trong danh sách và chi tiết";
-"help.photo.display.body" = "Chỉ ảnh bạn thêm mới làm thumbnail; nếu không có ảnh thì có khung nhạt (chữ bên phải không bị lệch). Đầu màn chi tiết chỉ là bản đồ. Nếu có ảnh, hiển thị ở cuối (dưới 'Tìm bằng Google AI').";
-"help.photo.exif.title" = "Tự động nhập vị trí & ngày thăm từ ảnh";
-"help.photo.exif.body" = "Khi bạn chọn ảnh từ thư viện trong màn hình thêm/sửa, tọa độ GPS sẽ tự động điền nếu ảnh có dữ liệu vị trí. Ngày giờ chụp cũng được áp dụng vào ngày thăm nếu có. Thông báo sẽ hiện nếu không tìm thấy dữ liệu nào.";
-"help.quickShoot.shoot.title" = "Ghi lại nhanh với Chụp nhanh";
-"help.quickShoot.shoot.body" = "Nhấn nút Chụp ở giữa thanh tab để mở camera. Sau khi chụp, ảnh và vị trí (GPS hoặc vị trí hiện tại) tự động lưu thành bản nháp. Tiện dụng khi muốn ghi lại nhanh trong lúc di chuyển.";
-"help.quickShoot.draft.title" = "Hoàn thiện bản nháp sau";
-"help.quickShoot.draft.body" = "Bản nháp xuất hiện đầu danh sách với nhãn Bản nháp màu cam. Nhấn để mở màn hình sửa, thêm tiêu đề và danh mục, rồi nhấn Lưu chính thức để lưu thành bản ghi đầy đủ. Bạn cũng có thể xóa bản nháp bằng cách vuốt sang trái.";
-"help.memo.view.title" = "Xem ghi chú (từ danh sách)";
-"help.memo.view.body" = "Địa điểm có ghi chú sẽ hiển thị '📝' ở cuối hàng. Nhấn để xem ghi chú trong cửa sổ popup.";
-"help.memo.edit.title" = "Sửa ghi chú (màn hình chi tiết)";
-"help.memo.edit.body" = "Nhấn giữ ô Ghi chú trên màn hình chi tiết để vào chế độ chỉnh sửa. Nhấn 'Lưu' sau khi nhập xong.";
-"help.mapLink.import.title" = "Nhập liên kết chia sẻ bản đồ";
-"help.mapLink.import.body" = "Mở địa điểm trong Google Maps, rồi Chia sẻ → Sao chép liên kết. Dán vào ô 'Liên kết chia sẻ bản đồ' trong thêm/sửa để tự động điền tọa độ (hỗ trợ liên kết Google Maps như maps.app.goo.gl và các định dạng phổ biến khác).";
-"help.mapLink.open.title" = "Mở Google Maps từ trong ứng dụng";
-"help.mapLink.open.body" = "Nhập tên địa điểm trong thêm/sửa, rồi nhấn 'Mở Google Maps theo tên'. Tìm địa điểm, Chia sẻ → Sao chép liên kết, quay lại ứng dụng và liên kết sẽ tự động điền.";
-"help.mapLink.slow.title" = "Nếu nhập liên kết mất nhiều thời gian";
-"help.mapLink.slow.body" = "Liên kết rút gọn (maps.app.goo.gl) cần được mở rộng qua mạng, có thể mất vài giây. Khóa Places API giúp tăng độ tin cậy.";
-"help.mapLink.list.title" = "Nhập danh sách đã lưu từ dịch vụ bản đồ";
-"help.mapLink.list.body" = "Từ danh sách, dùng '…' → 'Nhập danh sách liên kết bản đồ' và dán URL chia sẻ, văn bản đã sao chép hoặc Google Takeout Saved Places JSON/CSV. Tên danh sách được lưu làm tên sự kiện trong osmStroll.";
-"help.mapLink.export.title" = "Xuất danh sách liên kết Google Maps";
-"help.mapLink.export.body" = "Chọn '…' → 'Xuất' → 'Danh sách liên kết Google Maps (TXT)' để xuất URL tìm kiếm google.com/maps cho các địa điểm. Làm theo hướng dẫn của từng ứng dụng khi sao chép sang danh sách khác.";
-"help.mapTab.tab.title" = "Tab Bản đồ";
-"help.mapTab.tab.body" = "Tab Bản đồ ở phía dưới màn hình hiển thị tất cả địa điểm đã lưu dưới dạng ghim. Nhấn vào ghim để đến màn hình chi tiết.";
-"help.mapTab.switch.title" = "Chuyển sang tab Bản đồ từ chi tiết";
-"help.mapTab.switch.body" = "Nhấn 'Xem vị trí' trong mục Vị trí trên màn hình chi tiết để tự động chuyển sang tab Bản đồ và lấy địa điểm đó làm trung tâm.";
-"help.appearance.theme.title" = "Chủ đề màu";
-"help.appearance.theme.body" = "Vào Cài đặt → Chủ đề màu để chọn trong 4 bảng màu: Chuẩn, Thanh lịch, Tươi sáng và Đơn sắc. Màu nhấn, màu sao và màu ghim bản đồ đều thay đổi cùng nhau.";
-"help.appearance.style.title" = "Kiểu, họa tiết & màu nền";
-"help.appearance.style.body" = "Vào Cài đặt → Giao diện để tùy chỉnh kiểu thẻ (Pastel, Neon...), họa tiết nền (Lưới, Chấm...) và màu nền ứng dụng. Cũng có thể tùy chỉnh màu sắc và kiểu khung riêng.";
-"help.data.backup.title" = "Sao lưu dữ liệu";
-"help.data.backup.body" = "Vào '…' → 'Xuất' để lưu tất cả địa điểm dưới dạng file JSON. Nên lưu vào iCloud Drive hoặc ứng dụng Files để an toàn.";
-"help.data.restore.title" = "Khôi phục hoặc chuyển dữ liệu";
-"help.data.restore.body" = "Vào '…' → 'Nhập' để tải file JSON/ZIP đã xuất. Nếu chọn văn bản hoặc CSV/JSON có URL chia sẻ bản đồ, ứng dụng sẽ thử nhập như danh sách liên kết.";
-"help.plan.upgrade.title" = "Xem gói & Nâng cấp";
-"help.plan.upgrade.body" = "Nhấn '…' → 'Gói cước' để xem gói hiện tại hoặc nâng cấp. Gói FREE cho phép tối đa 10 địa điểm. Nâng cấp lên PREMIUM để không giới hạn và thay đổi biểu tượng ứng dụng.";
-"help.plan.restore.title" = "Khôi phục giao dịch mua";
-"help.plan.restore.body" = "Sau khi đổi thiết bị hoặc cài lại ứng dụng, nhấn '…' → 'Gói cước' → 'Khôi phục mua hàng'. Nếu bạn đã mua PREMIUM bằng cùng Apple ID, gói sẽ được khôi phục.";
-"help.settings.language.title" = "Đổi ngôn ngữ";
-"help.settings.language.body" = "Vào Cài đặt → Ngôn ngữ để chuyển giữa Tiếng Nhật, English và Tiếng Việt.";
-"help.settings.categories.title" = "Quản lý danh mục";
-"help.settings.categories.body" = "Vào Cài đặt → Danh mục để thêm, xóa, sắp xếp lại hoặc đổi biểu tượng. Để sắp xếp, nhấn 'Sửa' rồi kéo các hàng.";
-"help.apiKey.places.title" = "Về Places API Key";
-"help.apiKey.places.body" = "Đăng ký khóa 'Places API (New)' từ Google Cloud Console giúp cải thiện độ chính xác khi phân tích tọa độ từ liên kết chia sẻ. Nhiều liên kết vẫn hoạt động không có khóa, nhưng khóa giúp giảm lỗi.";
-
-// MARK: - Quick Shoot & Draft (Help)
-"写真から位置・訪問日を自動取り込み" = "Tự động nhập vị trí & ngày thăm từ ảnh";
-"追加・編集画面でカメラロールから写真を選ぶと、写真に GPS 情報が記録されていれば緯度・経度が自動で入力されます。撮影日時が記録されていれば訪問日時も自動で反映されます。どちらも含まれない場合はメッセージが表示されます。" = "Khi bạn chọn ảnh từ thư viện trong màn hình thêm/sửa, tọa độ GPS sẽ tự động điền nếu ảnh có dữ liệu vị trí. Ngày giờ chụp cũng được áp dụng vào ngày thăm nếu có. Thông báo sẽ hiện nếu không tìm thấy dữ liệu nào.";
-"クイック撮影＆下書き" = "Chụp nhanh & Bản nháp";
-"クイック撮影で素早く記録する" = "Ghi lại nhanh với Chụp nhanh";
-"タブバー中央の「撮影」ボタンをタップするとカメラが起動します。シャッターを切ると、写真と位置情報（GPS または現在地）が自動で下書きとして保存されます。移動中に素早く記録したいときに便利です。" = "Nhấn nút Chụp ở giữa thanh tab để mở camera. Sau khi chụp, ảnh và vị trí (GPS hoặc vị trí hiện tại) tự động lưu thành bản nháp. Tiện dụng khi muốn ghi lại nhanh trong lúc di chuyển.";
-"下書きをあとから仕上げる" = "Hoàn thiện bản nháp sau";
-"下書きは一覧画面の先頭にオレンジの「下書き」バッジ付きで表示されます。タップして編集画面を開き、タイトル・カテゴリなどを追加して「本保存」をタップすると正式な記録になります。下書きのまま左スワイプで削除することもできます。" = "Bản nháp xuất hiện đầu danh sách với nhãn Bản nháp màu cam. Nhấn để mở màn hình sửa, thêm tiêu đề và danh mục, rồi nhấn Lưu chính thức để lưu thành bản ghi đầy đủ. Bạn cũng có thể xóa bản nháp bằng cách vuốt sang trái.";
-
-// MARK: - Quick Shoot & Draft
-"撮影" = "Chụp";
-"クイック撮影" = "Chụp nhanh";
-"このデバイスではカメラを使用できません。" = "Thiết bị này không hỗ trợ camera.";
-"位置情報を取得中…" = "Đang lấy vị trí…";
-"現在地を取得中…" = "Đang lấy vị trí hiện tại…";
-"下書き（%@件）" = "Bản nháp (%@)";
-"（下書き）" = "(Bản nháp)";
-"下書き" = "Bản nháp";
-"本保存" = "Lưu chính thức";
-"この写真には位置情報が含まれていません。" = "Ảnh này không có thông tin vị trí.";
-"写真の位置情報を取り込みました。" = "Đã nhập vị trí từ ảnh.";
-"写真の撮影日時と位置情報を取り込みました。" = "Đã nhập ngày giờ và vị trí từ ảnh.";
-"写真の撮影日時を取り込みました。" = "Đã nhập ngày giờ chụp từ ảnh.";
-
-// MARK: - Add Spot Scene Picker
-"add.scene.picker.title" = "Thêm điểm đến";
-"add.scene.record_now.title" = "Ghi lại vị trí hiện tại";
-"add.scene.record_now.subtitle" = "Đăng ký điểm này ngay tại đây";
-"add.scene.want_to_go.title" = "Lưu nơi muốn đến";
-"add.scene.want_to_go.subtitle" = "Lưu với ngày thăm chưa xác định";
-"add.scene.draft.title" = "Lưu thành bản nháp";
-"add.scene.draft.subtitle" = "Lưu tạm với ít thông tin và chỉnh sửa chi tiết sau";
-"add.scene.from_photo.title" = "Đăng ký từ ảnh";
-"add.scene.from_photo.subtitle" = "Đăng ký vị trí và ngày thăm từ dữ liệu Exif của ảnh";
-"add.scene.from_photo.no_exif.title" = "Không có dữ liệu Exif";
-"add.scene.from_photo.no_exif.message" = "Ảnh này không có thông tin vị trí hoặc ngày chụp. Vui lòng nhập thủ công.";
-
-// MARK: - Want-to-go method picker
-"add.want_to_go.method.title" = "Cách thêm";
-"add.want_to_go.by_name.title" = "Theo tên địa điểm";
-"add.want_to_go.by_name.subtitle" = "Nhập tên hoặc liên kết bản đồ để đăng ký";
-"add.want_to_go.by_map.title" = "Chọn từ bản đồ";
-"add.want_to_go.by_map.subtitle" = "Nhấn giữ bản đồ để đặt ghim vị trí";
-
-// MARK: - Spot Map Picker
-"spot.map.picker.title" = "Chọn địa điểm";
-"spot.map.picker.instruction" = "Nhấn giữ bản đồ để đặt ghim";
-"spot.map.picker.confirm" = "Xác nhận vị trí";
-"spot.map.picker.selecting" = "Đang lấy vị trí…";
-
-// MARK: - Location prefill messages
-"現在地の座標を取り込みました。" = "Đã thêm vị trí hiện tại.";
-"地図で選択した場所を取り込みました。" = "Đã thêm vị trí từ bản đồ.";
-"現在地を取得できませんでした。地図リンクや手動入力で位置を設定してください。" = "Không lấy được vị trí hiện tại. Hãy nhập tọa độ thủ công hoặc dùng liên kết bản đồ.";
-
-// MARK: - Add Spot navigation titles & buttons
-"add.scene.nav.want_to_go" = "Thêm nơi muốn đến";
-"add.scene.nav.draft" = "Tạo bản nháp";
-"add.scene.save.draft" = "Lưu bản nháp";
-"追加" = "Thêm";
-
-// MARK: - Missing keys
-"決定" = "Xác nhận";
-"対応している地図の共有リンクではありません（Google マップの maps.google.com / maps.app.goo.gl を推奨。maps.apple.com にも対応）。" = "Đây không phải liên kết bản đồ được hỗ trợ (khuyến nghị Google Maps maps.google.com / maps.app.goo.gl; cũng hỗ trợ maps.apple.com).";
-"このリンクから緯度・経度を特定できませんでした。別の共有リンクを試すか、Google マップで場所を開いた状態の長い URL をコピーしてください。" = "Không thể xác định tọa độ từ liên kết này. Hãy thử liên kết chia sẻ khác hoặc sao chép URL đầy đủ khi đang mở địa điểm trong Google Maps.";
-"共有リンクに座標が含まれていません。短いリンクを取り込むにはアプリの「設定」で Places API（新）用のキーを保存するか、Info.plist の GOOGLE_PLACES_API_KEY に設定してください。" = "Liên kết chia sẻ không chứa tọa độ. Để nhập liên kết ngắn, hãy lưu khóa Places API (New) trong Cài đặt ứng dụng hoặc đặt GOOGLE_PLACES_API_KEY trong Info.plist.";
 "位置情報を取得できませんでした。" = "Không thể lấy vị trí.";
 
-
-
-"バス番号" = "Số xe buýt";
 "バス番号を入力" = "Nhập số xe buýt";
+
 "履歴がありません" = "Chưa có lịch sử";
+
 "目的地を設定すると、ここに履歴として表示されます。" = "Khi bạn đặt điểm đến, nó sẽ hiển thị ở đây.";
+
 "目的地の履歴" = "Lịch sử điểm đến";
+
 "タップすると、その目的地を設定します。" = "Chạm để đặt điểm đến đó.";
+
 "履歴を消去" = "Xóa lịch sử";
+
 "履歴をすべて消去しますか？" = "Xóa toàn bộ lịch sử?";
+
 "この操作は取り消せません。" = "Thao tác này không thể hoàn tác.";
+
 "設定中" = "Đang dùng";
 
-
-
-/* osmBus complete */
 "目的地を設定" = "Đặt điểm đến";
+
 "現在地" = "Vị trí hiện tại";
+
 "取得済み" = "Đã lấy";
+
 "取得中…" = "Đang lấy…";
+
 "未取得" = "Chưa lấy";
-"位置情報が許可されていません" = "Không được phép truy cập vị trí";
+
 "位置情報の利用が許可されていません。設定から許可してください。" = "Không được phép dùng vị trí. Hãy bật trong Cài đặt.";
+
 "位置情報の状態を確認できません。" = "Không thể xác định trạng thái vị trí.";
+
 "位置情報を取得できませんでした。" = "Không thể lấy vị trí.";
-"その他" = "Khác";
+
 "履歴" = "Lịch sử";
-"場所を登録" = "Địa điểm đã lưu";
+
 "設定" = "Cài đặt";
+
 "ヘルプ" = "Trợ giúp";
+
 "プラン管理" = "Quản lý gói";
+
 "目的地" = "Điểm đến";
-"バス番号" = "Số xe buýt";
+
 "バス番号を入力" = "Nhập số xe buýt";
+
 "バス" = "Xe buýt";
+
 "ルートを確認中…" = "Đang kiểm tra tuyến…";
+
 "ルートを確認しています…" = "Đang kiểm tra tuyến…";
+
 "乗ってください！" = "Lên xe!";
-"このバスは目的地に行きません" = "Xe buýt này không đến điểm đến của bạn";
+
 "もう一度試す" = "Thử lại";
-"osmBus_ルートなし" = "Không tìm thấy tuyến công cộng với điều kiện này. Kiểm tra vị trí, điểm đến và kết nối.";
-"osmBus_バス番号例" = "vd: 35";
-"osmBus_バス番号説明" = "Chỉ nhập số (vd: 35). Hệ thống tự nhận 35A, 35B…";
-"osmBus_見送ってください" = "Bỏ qua xe này!";
-"osmBus_だったら乗ってください_%@" = "Nếu là %@ thì lên xe!";
-"osmBus_だったら乗ってください_複数_%@" = "Nếu là %@ thì lên xe!";
-"osmBus_API連携フッター" = "Kiểm tra xe buýt cần khóa Google Routes API. Mở màn hình Google Routes API để xem hướng dẫn dễ hiểu.";
+
+"ルートなし" = "Không tìm thấy tuyến công cộng với điều kiện này. Kiểm tra vị trí, điểm đến và kết nối.";
+
+"バス番号例" = "vd: 35";
+
+"バス番号説明" = "Chỉ nhập số (vd: 35). Hệ thống tự nhận 35A, 35B…";
+
+"見送ってください" = "Bỏ qua xe này!";
+
+"だったら乗ってください_%@" = "Nếu là %@ thì lên xe!";
+
+"だったら乗ってください_複数_%@" = "Nếu là %@ thì lên xe!";
+
+"API連携フッター" = "Một khóa API Google dùng cho cả kiểm tra xe buýt lẫn hiển thị bản đồ. Mở Google API để xem hướng dẫn thiết lập.";
+
 "メイン画面のカードや枠線のスタイルを変更します。" = "Thay đổi kiểu thẻ và viền trên màn hình chính.";
+
 "メイン画面の背景に重ねる模様を選びます。" = "Chọn họa tiết phủ nền màn hình chính.";
+
 "現在の目的地" = "Điểm đến hiện tại";
+
 "履歴から探す" = "Tìm từ lịch sử";
+
 "登録地から探す" = "Tìm từ địa điểm đã lưu";
+
 "駅名・住所・施設名" = "Ga, địa chỉ hoặc địa điểm";
-"osmBus_検索入力" = "Tìm kiếm";
-"osmBus_検索ヒント" = "Nhập ít nhất 2 ký tự để xem gợi ý.";
+
+"検索入力" = "Tìm kiếm";
+
+"検索ヒント" = "Nhập ít nhất 2 ký tự để xem gợi ý.";
+
 "検索結果" = "Kết quả tìm kiếm";
+
 "目的地をクリア" = "Xóa điểm đến";
+
 "候補がありません" = "Không có kết quả";
+
 "検索中…" = "Đang tìm…";
+
 "登録済みの場所" = "Địa điểm đã lưu";
+"場所を登録" = "Lưu địa điểm";
+
 "履歴がありません" = "Chưa có lịch sử";
+
 "目的地を設定すると、ここに履歴として表示されます。" = "Khi bạn đặt điểm đến, nó sẽ hiển thị ở đây.";
+
 "目的地の履歴" = "Lịch sử điểm đến";
+
 "タップすると、その目的地を設定します。" = "Chạm để đặt điểm đến đó.";
+
 "履歴を消去" = "Xóa lịch sử";
+
 "履歴をすべて消去しますか？" = "Xóa toàn bộ lịch sử?";
+
 "この操作は取り消せません。" = "Thao tác này không thể hoàn tác.";
+
 "設定中" = "Đang dùng";
+
 "Google Routes API" = "Google Routes API";
-"osmBus_APIキー未設定" = "Hãy đặt khóa API trước";
-"osmBus_APIキー未設定_説明" = "Cần khóa Google Routes API để kiểm tra xe buýt. Chạm để mở Cài đặt.";
-"osmBus_設定画面を開くヒント" = "Mở màn hình cài đặt khóa API";
-"osmBus_エラー_APIキー未設定" = "Chưa đặt khóa Google Routes API. Hãy lưu khóa trong Cài đặt.";
-"osmBus_エラー_目的地未設定" = "Hãy đặt điểm đến trước.";
-"osmBus_エラー_現在地未取得" = "Không lấy được vị trí. Hãy cho phép truy cập vị trí.";
-"osmBus_座標表示" = "Vĩ %@ / Kinh %@";
-"osmBus_RoutesAPIキー保存完了" = "Đã lưu khóa Google Routes API. Dùng để kiểm tra tuyến xe buýt.";
-"osmBus_RoutesAPI_バス判定タイトル" = "Kiểm tra tuyến xe buýt";
-"osmBus_RoutesAPI_バス判定説明" = "Hỏi Google về tuyến công cộng từ vị trí hiện tại đến điểm đến, rồi kiểm tra các biến thể khớp số bạn nhập (vd: 35A, 35B) có trên tuyến đó không.";
-"osmBus_RoutesAPI_キーの役割" = "Khóa Google Routes API dùng để làm gì";
-"osmBus_RoutesAPI説明_リード" = "osmBus dùng dịch vụ tìm tuyến của Google (Routes API) để kiểm tra xe buýt trước mặt có đi đến điểm đến không. Vì vậy bạn cần \"khóa API\" — giống như mật khẩu riêng để dùng dịch vụ của Google.";
-"osmBus_RoutesAPI説明_補足" = "Nghe có vẻ khó, nhưng bạn có thể tạo miễn phí bằng tài khoản Google. Dùng cá nhân thường nằm trong hạn mức miễn phí hàng tháng.";
-"osmBus_RoutesAPI_はじめて" = "Lần đầu dùng khóa API?";
-"osmBus_RoutesAPI_初心者_これは何_見出し" = "Khóa API là gì?";
-"osmBus_RoutesAPI_初心者_これは何" = "Giống mật khẩu để ứng dụng hỏi Google về tuyến xe buýt. osmBus chỉ dùng cho việc này, không dùng cho mục đích khác.";
-"osmBus_RoutesAPI_初心者_無料_見出し" = "Có mất phí không?";
-"osmBus_RoutesAPI_初心者_無料" = "Google Cloud có gói miễn phí. Kiểm tra xe buýt cá nhân thường nằm trong hạn mức miễn phí.";
-"osmBus_RoutesAPI_初心者_手順_見出し" = "Các bước cài đặt";
-"osmBus_RoutesAPI_初心者_手順" = "① Bật Routes API trên Google Cloud Console → ② Tạo khóa API → ③ Dán vào ô bên dưới và lưu → ④ Chạy Kiểm tra kết nối";
-"osmBus_RoutesAPI_端末内説明" = "Khóa chỉ được lưu trên iPhone này. Không gửi đến máy chủ của nhà phát triển.";
-"osmBus_RoutesAPI_Google送信説明" = "Yêu cầu tuyến được gửi trực tiếp từ iPhone này đến máy chủ Google. Không qua bên thứ ba.";
-"osmBus_RoutesAPI_キー入力フッター" = "Dán khóa được cấp sau khi bật Routes API trên Google Cloud Console. Khóa bắt đầu bằng AIza và là chuỗi ký tự dài.";
-"osmBus_RoutesAPI_キー取得リンク" = "Lấy khóa API (Google Cloud Console)";
-"osmBus_RoutesAPI_有効化手順" = "Cách bật Routes API";
-"osmBus_RoutesAPI_導通テストフッター" = "Có thể thử trước khi lưu. Kiểm tra kết nối thử tìm tuyến Ga Tokyo → Shibuya để xác nhận khóa hoạt động.";
-"osmBus_RoutesAPI_キー削除" = "Xóa khóa API";
-"osmBus_バージョン" = "Phiên bản %@ (%@)";
-"osmBus_ヘルプ紹介文" = "Khi tìm tuyến trên Google Maps, nhập số xe buýt trước mặt để biết ngay xe có đến điểm đến của bạn không.";
-"osmBus_help_場所を登録_title" = "Địa điểm đã lưu";
-"osmBus_help_場所を登録_body" = "Từ … → Địa điểm đã lưu, đăng ký nhà và nơi thường đến. Chạm để đặt làm điểm đến.";
-"osmBus_help_目的地_title" = "Đặt điểm đến";
-"osmBus_help_目的地_body" = "Chạm thanh điểm đến ở trên để chọn từ địa điểm đã lưu, lịch sử hoặc kết quả tìm kiếm.";
-"osmBus_help_現在地_title" = "Lấy vị trí hiện tại";
-"osmBus_help_現在地_body" = "Ứng dụng xin quyền vị trí khi mở. Ở trạm xe buýt, chạm làm mới (↻) trên thanh vị trí trước khi nhập số xe.";
-"osmBus_help_バス番号_title" = "Nhập số xe buýt";
-"osmBus_help_バス番号_body" = "Chỉ nhập số (vd: 35). Ứng dụng tự tìm 35A, 35B… trong tuyến đến điểm đến và báo có nên lên xe hay không.";
-"osmBus_help_API_title" = "Đặt khóa API";
-"osmBus_help_API_body" = "Vào … → Cài đặt → Google Routes API để nhập và lưu khóa.";
-"osmBus_help_APIキー_とは_title" = "Khóa API là gì?";
-"osmBus_help_APIキー_とは_body" = "Giống mật khẩu để dùng dịch vụ Google. osmBus chỉ dùng khi kiểm tra xe buýt có đi đến điểm đến không.";
-"osmBus_help_APIキー_設定_title" = "Cách cài đặt";
-"osmBus_help_APIキー_設定_body" = "Mở … → Cài đặt → Google Routes API và làm theo hướng dẫn trên màn hình để tạo khóa trên Google Cloud Console, dán và lưu. Có thể chạy Kiểm tra kết nối.";
-"osmBus_help_APIキー_安心_title" = "Khóa có an toàn không?";
-"osmBus_help_APIキー_安心_body" = "Khóa chỉ lưu trên iPhone này, không gửi đến máy chủ nhà phát triển. Chỉ gửi trực tiếp đến Google khi tìm tuyến.";
-"osmBus_help_乗車_title" = "Lên xe!";
-"osmBus_help_乗車_body" = "Tuyến đến điểm đến bao gồm mọi biến thể khớp số bạn nhập (vd: cả 35A và 35B). Kiểm tra giờ đến và điểm xuống trước khi lên xe.";
-"osmBus_help_不可_title" = "Bỏ qua xe này!";
-"osmBus_help_不可_body" = "Không có biến thể phù hợp trên tuyến đến điểm đến. Nếu chỉ một biến thể đi được, sẽ hiện thông báo như \"Nếu là 35A thì lên xe!\"";
-"osmBus_help_ルートなし_title" = "Không tìm thấy tuyến";
-"osmBus_help_ルートなし_body" = "Đảm bảo vị trí và điểm đến cùng khu vực. Ở nước ngoài (vd: Hà Nội), vị trí hiện tại cũng phải ở đó.";
-"osmBus_help_通信_title" = "Lỗi kết nối";
-"osmBus_help_通信_body" = "Kiểm tra Wi‑Fi hoặc dữ liệu di động, rồi chạm Thử lại.";
-"osmBus_help_プラン_title" = "Quản lý gói";
-"osmBus_help_プラン_body" = "Mở … → Quản lý gói để xem gói hiện tại. PREMIUM sẽ có sau.";
+
+"APIキー未設定" = "Hãy đặt khóa API trước";
+
+"APIキー未設定_説明" = "Cần khóa Google Routes API để kiểm tra xe buýt. Chạm để mở Cài đặt.";
+
+"設定画面を開くヒント" = "Mở màn hình cài đặt khóa API";
+
+"エラー_APIキー未設定" = "Chưa đặt khóa Google Routes API. Hãy lưu khóa trong Cài đặt.";
+
+"エラー_目的地未設定" = "Hãy đặt điểm đến trước.";
+
+"エラー_現在地未取得" = "Không lấy được vị trí. Hãy cho phép truy cập vị trí.";
+
+"座標表示" = "Vĩ %@ / Kinh %@";
+
+"RoutesAPIキー保存完了" = "Đã lưu khóa Google Routes API. Dùng để kiểm tra tuyến xe buýt.";
+
+"RoutesAPI_バス判定タイトル" = "Kiểm tra tuyến xe buýt";
+
+"RoutesAPI_バス判定説明" = "Hỏi Google về tuyến công cộng từ vị trí hiện tại đến điểm đến, rồi kiểm tra các biến thể khớp số bạn nhập (vd: 35A, 35B) có trên tuyến đó không.";
+
+"RoutesAPI_キーの役割" = "Khóa Google Routes API dùng để làm gì";
+
+"RoutesAPI説明_リード" = "osmBus dùng một khóa API Google cho cả kiểm tra xe buýt (Routes API) lẫn hiển thị bản đồ (Maps SDK). Bạn cần \"khóa API\" — giống như mật khẩu riêng để dùng dịch vụ của Google.";
+
+"RoutesAPI説明_補足" = "Nghe có vẻ khó, nhưng bạn có thể tạo miễn phí bằng tài khoản Google. Dùng cá nhân thường nằm trong hạn mức miễn phí hàng tháng.";
+
+"RoutesAPI_はじめて" = "Lần đầu dùng khóa API?";
+
+"RoutesAPI_初心者_これは何_見出し" = "Khóa API là gì?";
+
+"RoutesAPI_初心者_これは何" = "Giống mật khẩu để ứng dụng hỏi Google về tuyến xe buýt. osmBus chỉ dùng cho việc này, không dùng cho mục đích khác.";
+
+"RoutesAPI_初心者_無料_見出し" = "Có mất phí không?";
+
+"RoutesAPI_初心者_無料" = "Google Cloud có gói miễn phí. Kiểm tra xe buýt cá nhân thường nằm trong hạn mức miễn phí.";
+
+"RoutesAPI_初心者_手順_見出し" = "Các bước cài đặt";
+
+"RoutesAPI_初心者_手順" = "① Bật Routes API trên Google Cloud Console → ② Tạo khóa API → ③ Dán vào ô bên dưới và lưu → ④ Chạy Kiểm tra kết nối";
+
+"RoutesAPI_端末内説明" = "Khóa được lưu trong Keychain và gửi cho Google khi xác thực yêu cầu API. Khóa không được gửi đến máy chủ riêng của nhà phát triển.";
+
+"RoutesAPI_Google送信説明" = "Tìm tuyến gửi tọa độ điểm đi, điểm đến, tùy chọn tìm kiếm và khóa API cho Google.";
+
+"RoutesAPI_キー入力フッター" = "Dán khóa được cấp sau khi bật Routes API trên Google Cloud Console. Khóa bắt đầu bằng AIza và là chuỗi ký tự dài.";
+
+"RoutesAPI_キー取得リンク" = "Lấy khóa API (Google Cloud Console)";
+
+"RoutesAPI_有効化手順" = "Cách bật Routes API";
+
+"RoutesAPI_導通テストフッター" = "Có thể thử trước khi lưu. Kiểm tra kết nối thử tìm tuyến Ga Tokyo → Shibuya để xác nhận khóa hoạt động.";
+
+"RoutesAPI_キー削除" = "Xóa khóa API";
+
+"バージョン" = "Phiên bản %@ (%@)";
+
+"ヘルプ紹介文" = "Ở trạm xe buýt, nhập số xe trước mặt để biết ngay xe có đến điểm đến của bạn không. Bạn cũng có thể xem tuyến đi và theo dõi khi đang đi.";
+
+"help_場所を登録_title" = "Địa điểm đã lưu";
+
+"help_場所を登録_body" = "Từ … → Địa điểm đã lưu, đăng ký nhà và nơi thường đến. Chạm để đặt làm điểm đến.";
+
+"help_目的地_title" = "Đặt điểm đến";
+
+"help_目的地_body" = "Chạm thanh điểm đến ở trên để chọn từ địa điểm đã lưu, lịch sử hoặc kết quả tìm kiếm.";
+
+"help_現在地_title" = "Lấy vị trí hiện tại";
+
+"help_現在地_body" = "Ứng dụng xin quyền vị trí khi mở. Ở trạm xe buýt, chạm làm mới (↻) trên thanh vị trí trước khi nhập số xe.";
+
+"help_バス番号_title" = "Nhập số xe buýt";
+
+"help_バス番号_body" = "Chỉ nhập số (vd: 35). Ứng dụng tự tìm 35A, 35B… trong tuyến đến điểm đến và báo có nên lên xe hay không.";
+
+"help_APIキー_とは_title" = "Khóa API là gì?";
+
+"help_APIキー_とは_body" = "Giống mật khẩu để ứng dụng hỏi Google về tuyến xe buýt. osmBus chỉ dùng cho việc này. Có thể cài đặt với gói PREMIUM — với khóa riêng, kiểm tra không giới hạn và không tính vào hạn mức miễn phí hàng tháng.";
+
+"help_APIキー_設定_title" = "Cách cài đặt";
+
+"help_APIキー_設定_body" = "Mở … → Cài đặt → Google Routes API và làm theo hướng dẫn trên màn hình để tạo khóa trên Google Cloud Console, dán và lưu. Có thể chạy Kiểm tra kết nối.";
+
+"help_APIキー_安心_title" = "Khóa có an toàn không?";
+
+"help_APIキー_安心_body" = "Khóa được lưu trong Keychain và gửi cho Google để xác thực API. Khóa không được gửi đến máy chủ riêng của nhà phát triển.";
+
+"help_乗車_title" = "Lên xe!";
+
+"help_乗車_body" = "Khi tuyến khớp rõ ràng với điểm đến (vd: cả 35A và 35B, hoặc khớp chính xác), màn hình hiển thị lớn màu xanh \"Lên xe!\". Nếu chỉ một số biến thể đi được, thông báo màu vàng như \"Nếu là 35A thì lên xe!\" sẽ xuất hiện.";
+
+"help_不可_title" = "Bỏ qua xe này!";
+
+"help_不可_body" = "Không có biến thể phù hợp trên tuyến đến điểm đến — màn hình hiển thị đỏ \"Bỏ qua xe này!\".";
+
+"help_ルートなし_title" = "Không tìm thấy tuyến";
+
+"help_ルートなし_body" = "Đảm bảo vị trí và điểm đến cùng khu vực. Ở nước ngoài (vd: Hà Nội), vị trí hiện tại cũng phải ở đó.";
+
+"help_通信_title" = "Lỗi kết nối";
+
+"help_通信_body" = "Kiểm tra Wi‑Fi hoặc dữ liệu di động, rồi chạm Thử lại.";
+
+"help_プラン_title" = "Quản lý gói";
+
+"help_プラン_body" = "Mở … → Quản lý gói để xem gói hiện tại, nâng cấp lên PREMIUM hoặc khôi phục giao dịch. Gói FREE: tối đa %1$d địa điểm đã lưu và %1$d mục lịch sử. PREMIUM: không giới hạn.";
+
 "現在のプラン" = "Gói hiện tại";
+
 "FREE" = "FREE";
-"osmBus_プラン_目的地登録" = "Đăng ký điểm đến";
+
 "無制限" = "Không giới hạn";
-"osmBus_プラン_FREE説明" = "osmBus hiện dùng gói FREE. PREMIUM sẽ có sau.";
+
+"プラン_FREE説明" = "Bạn đang dùng gói FREE. Nâng cấp PREMIUM để lưu địa điểm và lịch sử không giới hạn, cùng 60 lượt kiểm tra xe buýt/tháng (khóa dùng chung).";
+
 "購入を復元" = "Khôi phục mua hàng";
-"osmBus_プラン_復元フッター" = "Nếu đã mua PREMIUM trên App Store, khôi phục tại đây. (Sắp có)";
-"osmBus_登録済みの場所なし" = "Chưa có địa điểm đã lưu";
-"osmBus_登録済みの場所なし説明" = "Đăng ký nhà hoặc nơi thường đến để đặt điểm đến một chạm.";
-"osmBus_登録済みフッター" = "Chạm để đặt làm điểm đến. Vuốt trái để xóa hoặc sửa.";
-"osmBus_長押し登録フッター" = "Nhấn giữ để đăng ký điểm đến hiện tại.";
-"osmBus_場所を追加" = "Thêm địa điểm";
-"osmBus_重複登録" = "Địa điểm này đã được lưu.";
-"osmBus_登録完了_%@" = "Đã lưu \"%@\".";
-"osmBus_長押しで登録" = "Nhấn giữ để lưu";
-"osmBus_表示名プレースホルダー" = "Tên hiển thị (vd: Nhà)";
-"osmBus_名前フッター" = "Tên hiển thị trong danh sách. Dùng tên dễ nhận như Nhà hoặc Công ty.";
-"osmBus_場所を選び直す" = "Chọn địa điểm khác";
-"osmBus_場所フッター" = "Tìm theo ga, địa chỉ hoặc tên địa điểm.";
-"osmBus_場所を編集" = "Sửa địa điểm";
+
+"プラン_復元フッター" = "Nếu đã mua PREMIUM trên App Store, khôi phục tại đây.";
+
+"登録済みの場所なし" = "Chưa có địa điểm đã lưu";
+
+"登録済みの場所なし説明" = "Đăng ký nhà hoặc nơi thường đến để đặt điểm đến một chạm.";
+
+"登録済みフッター" = "Chạm để đặt làm điểm đến. Vuốt trái để xóa hoặc sửa.";
+
+"長押し登録フッター" = "Nhấn giữ để đăng ký điểm đến hiện tại.";
+
+"場所を追加" = "Thêm địa điểm";
+
+"重複登録" = "Địa điểm này đã được lưu.";
+
+"登録完了_%@" = "Đã lưu \"%@\".";
+
+"長押しで登録" = "Nhấn giữ để lưu";
+
+"表示名プレースホルダー" = "Tên hiển thị (vd: Nhà)";
+
+"名前フッター" = "Tên hiển thị trong danh sách. Dùng tên dễ nhận như Nhà hoặc Công ty.";
+
+"場所を選び直す" = "Chọn địa điểm khác";
+
+"場所フッター" = "Tìm theo ga, địa chỉ hoặc tên địa điểm.";
+
+"場所を編集" = "Sửa địa điểm";
+
 "自宅" = "Nhà";
+
 "会社" = "Công ty";
+
 "学校" = "Trường";
-"osmBus_エラー_バス番号未入力" = "Nhập số xe buýt.";
-"osmBus_エラー_距離超過_%d" = "Vị trí và điểm đến quá xa (khoảng %d km). Kiểm tra vị trí hiện tại.";
-"osmBus_到着予定_%@" = "Dự kiến đến %@";
-"osmBus_降車バス停不明" = "Không xác định được điểm xuống";
-"osmBus_降車_%@_%d停" = "Xuống tại %@ (%d trạm)";
-"osmBus_降車_%@" = "Xuống tại %@";
-"osmBus_停分乗車_%d" = "Đi %d trạm";
-"osmBus_降車_目的地方面" = "Xuống tại trạm về phía điểm đến";
-"osmBus_RoutesAPI_接続成功_公共交通" = "Kết nối thành công. Đã lấy tuyến công cộng.";
-"osmBus_RoutesAPI_接続成功_キー有効" = "Kết nối thành công. Khóa API hợp lệ. Chưa có tuyến transit lúc này nhưng tìm tuyến vẫn hoạt động.";
+
+"エラー_バス番号未入力" = "Nhập số xe buýt.";
+
+"エラー_距離超過_%d" = "Vị trí và điểm đến quá xa (khoảng %d km). Kiểm tra vị trí hiện tại.";
+
+"到着予定_%@" = "Dự kiến đến %@";
+
+"降車バス停不明" = "Không xác định được điểm xuống";
+
+"降車_%@" = "Xuống tại %@";
+
+"降車_目的地方面" = "Xuống tại trạm về phía điểm đến";
+
+"RoutesAPI_接続成功_公共交通" = "Kết nối thành công. Đã lấy tuyến công cộng.";
+
+"RoutesAPI_接続成功_キー有効" = "Kết nối thành công. Khóa API hợp lệ. Chưa có tuyến transit lúc này nhưng tìm tuyến vẫn hoạt động.";
+
 "URLの生成に失敗しました。" = "Không tạo được URL.";
+
 "レスポンスの解析に失敗しました。" = "Không phân tích được phản hồi.";
-"osmBus_RoutesAPI_HTTP_%d_%@" = "HTTP %d: %@";
+
+"RoutesAPI_HTTP_%d_%@" = "HTTP %d: %@";
+
 "この条件では公共交通ルートが見つかりませんでした。" = "Không tìm thấy tuyến công cộng với điều kiện này.";
-"osmBus_RoutesAPI_エラー_400" = "Yêu cầu lỗi. Hãy bật Routes API trên Google Cloud.";
-"osmBus_RoutesAPI_エラー_401" = "Lỗi xác thực. Kiểm tra khóa API và trạng thái Routes API.";
-"osmBus_RoutesAPI_エラー_429" = "Quá nhiều yêu cầu. Hãy đợi và thử lại.";
-"osmBus_RoutesAPI_エラー_500" = "Máy chủ Google tạm thời không khả dụng. Hãy thử lại sau.";
-"osmBus_RoutesAPI_ネットワーク_オフライン" = "Không có internet. Kiểm tra Wi‑Fi hoặc dữ liệu di động.";
-"osmBus_RoutesAPI_ネットワーク_タイムアウト" = "Hết thời gian chờ. Kiểm tra sóng và thử lại.";
-"osmBus_RoutesAPI_ネットワーク_接続不可" = "Không kết nối được máy chủ. Kiểm tra mạng.";
-"osmBus_検索_空入力" = "Nhập điểm đến.";
-"osmBus_検索_2文字以上" = "Nhập ít nhất 2 ký tự.";
+
+"RoutesAPI_エラー_400" = "Yêu cầu lỗi. Hãy bật Routes API trên Google Cloud.";
+
+"RoutesAPI_エラー_401" = "Lỗi xác thực. Kiểm tra khóa API và trạng thái Routes API.";
+
+"RoutesAPI_エラー_429" = "Quá nhiều yêu cầu. Hãy đợi và thử lại.";
+
+"RoutesAPI_エラー_500" = "Máy chủ Google tạm thời không khả dụng. Hãy thử lại sau.";
+
+"RoutesAPI_ネットワーク_オフライン" = "Không có internet. Kiểm tra Wi‑Fi hoặc dữ liệu di động.";
+
+"RoutesAPI_ネットワーク_タイムアウト" = "Hết thời gian chờ. Kiểm tra sóng và thử lại.";
+
+"RoutesAPI_ネットワーク_接続不可" = "Không kết nối được máy chủ. Kiểm tra mạng.";
+
+"検索_空入力" = "Nhập điểm đến.";
+
+"検索_2文字以上" = "Nhập ít nhất 2 ký tự.";
+
 "見つかりませんでした。別のキーワードで試してください。" = "Không tìm thấy. Thử từ khóa khác.";
+
 "基本操作" = "Thao tác cơ bản";
+
 "結果の見方" = "Cách đọc kết quả";
+
 "トラブルシュート" = "Khắc phục sự cố";
+
 "プラン" = "Gói";
+
 "端末内のみ保存" = "Chỉ lưu trên thiết bị";
+
 "Google に直接送信" = "Gửi trực tiếp đến Google";
+
 "プライバシーとセキュリティ" = "Quyền riêng tư & bảo mật";
+
 "API キー" = "Khóa API";
+
 "導通テスト" = "Kiểm tra kết nối";
+
 "保存" = "Lưu";
+
 "保存しました" = "Đã lưu";
+
 "OK" = "OK";
-"閉じる" = "Đóng";
+
 "完了" = "Xong";
+
 "キャンセル" = "Hủy";
+
 "編集" = "Sửa";
+
 "名前" = "Tên";
+
 "場所" = "Địa điểm";
 
-/* osmBus extra */
-"職場" = "Nơi làm việc";
+"プラン切り替え説明" = "Khi đổi gói, phần hiển thị trên màn hình này sẽ thay đổi.";
 
-"osmBus_プラン切り替え説明" = "Khi đổi gói, phần hiển thị trên màn hình này sẽ thay đổi.";
-"osmBus_件数_%d" = "%d mục";
-"osmBus_プラン_FREE制限フッター" = "Gói FREE chỉ lưu tối đa 1 mục trong lịch sử và 1 địa điểm đã đăng ký. Nâng cấp PREMIUM để lưu không giới hạn.";
-"osmBus_プラン_PREMIUM制限フッター" = "Gói PREMIUM cho phép lưu lịch sử và địa điểm đã đăng ký không giới hạn.";
-"osmBus_登録件数上限" = "Gói FREE chỉ cho phép đăng ký 1 địa điểm.";
-"osmBus_登録地_FREE上限" = "Gói FREE chỉ cho phép đăng ký 1 địa điểm.";
-"osmBus_履歴_FREE上限" = "Gói FREE chỉ giữ 1 điểm đến mới nhất trong lịch sử.";
-"osmBus_経路一覧" = "Tuyến đường";
-"osmBus_経路読込中" = "Đang tải tuyến…";
-"osmBus_経路候補" = "Tuyến gợi ý";
-"osmBus_経路番号_%d" = "Tuyến %d";
-"osmBus_運賃不明" = "Không có thông tin cước";
-"osmBus_経路を見る" = "Xem tuyến gợi ý";
-"osmBus_経路件数_%d" = "%d tuyến";
-"osmBus_経路取得失敗" = "Không tải được tuyến";
-"osmBus_経路一覧フッター" = "Tuyến công cộng từ Google Routes API. Cước phí có thể không hiển thị tùy khu vực hoặc tuyến.";
-"osmBus_経路一覧フッター_地図" = "Nhấn giữ một tuyến để xem trên bản đồ cùng các điểm chuyển tuyến.";
-"osmBus_長押しで地図" = "Nhấn giữ để xem trên bản đồ";
-"osmBus_現在地" = "Vị trí hiện tại";
-"osmBus_バス停" = "Trạm xe buýt";
-"osmBus_あとN停_%d" = "Thêm %d trạm";
-"osmBus_バス停合計_%d" = "%d trạm xe buýt";
-"osmBus_経由停_%d" = "Qua %d";
-"osmBus_所要時間_%d分" = "Khoảng %d phút";
-"osmBus_公共交通ステップなし" = "Không có đoạn công cộng";
-"osmBus_テンキー入力" = "Nhập trên bàn phím số";
-"osmBus_テンキー_クリアして新規" = "Xóa và nhập mới sau khi có kết quả";
-"osmBus_テンキー_継ぎ足し" = "Nối thêm số sau khi có kết quả";
-"osmBus_テンキー入力_フッター" = "Chọn cách nhập số sau khi đã hiển thị kết quả kiểm tra xe buýt.";
-"osmBus_お試し残り_%d" = "Dùng thử còn lại: %d lần";
-"osmBus_お試し枠_使い切り" = "Bạn đã dùng hết 10 lượt dùng thử. Hãy nhập khóa Google Routes API trong Cài đặt để tiếp tục.";
-"osmBus_お試し枠_使い切り_タイトル" = "Đã hết lượt dùng thử";
-"osmBus_お試し枠_使い切り_説明" = "Bạn đã dùng hết 10 lượt dùng thử miễn phí. Mở Cài đặt → Google Routes API để lấy và lưu khóa API của bạn, rồi tiếp tục kiểm tra xe buýt.";
-"osmBus_お試し枠_設定を開く" = "Mở Cài đặt";
-"osmBus_お試し終了_タイトル" = "Đã hết lượt dùng thử";
-"osmBus_お試し終了_説明" = "Lưu khóa Google Routes API trong Cài đặt để tiếp tục dùng kiểm tra xe buýt.";
+"件数_%d" = "%d mục";
+
+"プラン_FREE制限フッター" = "Gói FREE chỉ lưu tối đa %1$d mục trong lịch sử và %1$d địa điểm đã đăng ký. Nâng cấp PREMIUM để lưu không giới hạn.";
+
+"プラン_PREMIUM制限フッター" = "Gói PREMIUM cho phép lưu lịch sử và địa điểm đã đăng ký không giới hạn.";
+
+"登録件数上限" = "Gói FREE chỉ cho phép đăng ký tối đa %1$d địa điểm.";
+
+"登録地_FREE上限" = "Gói FREE chỉ cho phép đăng ký tối đa %1$d địa điểm.";
+
+"履歴_FREE上限" = "Gói FREE chỉ giữ tối đa %1$d điểm đến gần nhất trong lịch sử.";
+
+"経路一覧" = "Tuyến đường";
+
+"経路読込中" = "Đang tải tuyến…";
+
+"経路候補" = "Tuyến gợi ý";
+
+"経路番号_%d" = "Tuyến %d";
+
+"運賃不明" = "Không có thông tin cước";
+
+"経路を見る" = "Xem tuyến gợi ý";
+
+"経路件数_%d" = "%d tuyến";
+
+"経路取得失敗" = "Không tải được tuyến";
+
+"経路一覧フッター" = "Tuyến công cộng từ Google Routes API. Cước phí có thể không hiển thị tùy khu vực hoặc tuyến.";
+
+"経路一覧フッター_地図" = "Chạm một tuyến để xem trên bản đồ cùng các điểm chuyển tuyến.";
+
+"バス停" = "Trạm xe buýt";
+
+"バス停合計_%d" = "%d trạm xe buýt";
+
+"所要時間_%d分" = "Khoảng %d phút";
+
+"公共交通ステップなし" = "Không có đoạn công cộng";
+
+"テンキー入力" = "Nhập trên bàn phím số";
+
+"テンキー_クリアして新規" = "Xóa và nhập mới sau khi có kết quả";
+
+"テンキー_継ぎ足し" = "Nối thêm số sau khi có kết quả";
+
+"テンキー入力_フッター" = "Chọn cách nhập số sau khi đã hiển thị kết quả kiểm tra xe buýt.";
+
+"お試し残り_%d" = "Lượt còn lại tháng này: %d";
+
+"お試し枠_使い切り" = "Bạn đã dùng hết 30 lượt kiểm tra miễn phí tháng này. Nâng cấp PREMIUM hoặc đợi đến ngày 1 tháng sau.";
+
+"お試し枠_使い切り_タイトル" = "Đã hết hạn mức tháng này";
+
+"お試し枠_使い切り_説明" = "Bạn đã dùng hết 30 lượt kiểm tra miễn phí tháng này (khóa dùng chung). Nâng cấp PREMIUM để được 60 lượt/tháng, hoặc cài khóa API riêng trong Cài đặt → Google Routes API.";
+
+"お試し枠_設定を開く" = "Mở Cài đặt";
+
+"お試し終了_タイトル" = "Đã hết hạn mức tháng này";
+
+"お試し終了_説明" = "Nâng cấp PREMIUM để được 60 lượt/tháng (khóa dùng chung), hoặc cài khóa Google Routes API riêng trong Cài đặt để dùng không giới hạn.";
+
+"方向_N" = "B";
+"方向_NE" = "ĐB";
+"方向_E" = "Đ";
+"方向_SE" = "ĐN";
+"方向_S" = "N";
+"方向_SW" = "TN";
+"方向_W" = "T";
+"方向_NW" = "TB";
+"help_お試し_title" = "Lượt dùng miễn phí hàng tháng";
+"help_お試し_body" = "Không cần khóa riêng: gói FREE được 30 lần kiểm tra/tháng (khóa dùng chung). Gói PREMIUM được 60 lần/tháng. Đặt lại ngày 1 hàng tháng. Số lần còn lại hiển thị ở giữa thanh công cụ trên. Cài khóa riêng (PREMIUM) để dùng không giới hạn.";
+"help_経路_title" = "Tuyến đi";
+"help_経路_body" = "Chạm nút tuyến trên màn hình chính (hoặc lắc thiết bị) để xem các phương án đi công cộng đến điểm đến. Chạm một tuyến để xem trên bản đồ, hoặc chạm giữ vào số xe buýt để bắt đầu chế độ đang đi ngay.";
+"help_乗車中_title" = "Chế độ đang đi";
+"help_乗車中_body" = "Sau kết quả xanh hoặc vàng \"Lên xe!\", chạm Bắt đầu đi (hoặc chạm giữ số xe buýt trong danh sách tuyến) để vào chế độ đang đi. Ứng dụng sẽ theo dõi khoảng cách thẳng đến trạm xuống xe hiện tại và báo bằng cảnh báo bạn đã cài đặt. Khi chuyển tuyến, khoảng cách tự chuyển sang trạm xuống xe tiếp theo. Chạm biểu tượng \"Đang đi\" ở góc trên bên trái để mở bản đồ tuyến. Dùng nút Xuống xe trên thẻ để kết thúc.";
+"help_設定_title" = "Cài đặt & cảnh báo";
+"help_設定_body" = "Từ … → Cài đặt bạn có thể đổi ngôn ngữ, chủ đề màu, giao diện (khung thẻ & hoạ tiết), âm thanh bàn phím và cảnh báo đến nơi. Cảnh báo đến nơi dựa trên khoảng cách đến trạm xuống xe, hỗ trợ tối đa 3 mức — chuông reo 1–3 lần từ xa đến gần. Chuông và cảnh báo hoạt động ngay cả khi ứng dụng ở nền hoặc màn hình tắt. Khóa Maps API và Routes API cũng cài ở đây (PREMIUM).";
+
+"方向ヒント_%@" = "Hướng %@";
+"方向バッジ_%@" = "%@";
+
+"APIキー_Premium限定_タイトル" = "Tinh nang PREMIUM";
+"APIキー_Premium限定_説明" = "Cai khóa Google API riêng có trong gói PREMIUM.";
+"Google Maps API" = "Google Maps API";
+"IAP_再読み込み" = "Tai lai san pham";
+"IAP_商品が見つかりません" = "Khong tim thay san pham";
+"IAP_商品読み込み中" = "Dang tai san pham…";
+"IAP_商品読み込み失敗" = "Khong tai duoc san pham";
+"IAP_復元失敗" = "Khoi phuc that bai";
+"IAP_購入保留" = "Giao dich dang cho duyet";
+"IAP_購入失敗" = "Mua hang that bai";
+"MapsAPI_Google送信説明" = "Yeu cau ban do gui truc tiep tu iPhone den may chu Google.";
+"MapsAPI_はじめて" = "Lan dau dung khóa API?";
+"MapsAPI_エラー_400" = "Yeu cau loi. Hay bat Maps API tren Google Cloud.";
+"MapsAPI_エラー_401" = "Loi xac thuc. Kiem tra khóa API va Maps API.";
+"MapsAPI_エラー_429" = "Qua nhieu yeu cau. Vui long doi va thu lai.";
+"MapsAPI_エラー_500" = "May chu Google tam thoi khong kha dung.";
+"MapsAPI_エラー_不明_%@" = "Loi Maps API: %@";
+"MapsAPI_エラー_拒否_%@" = "Yeu cau bi tu choi: %@";
+"MapsAPI_キーの役割" = "Khóa Google Maps API dung de lam gi";
+"MapsAPI_キー入力フッター" = "Dan khóa da bat Maps API tren Google Cloud Console.";
+"MapsAPI_キー削除" = "Xóa khóa API";
+"MapsAPI_キー取得リンク" = "Lay khóa API (Google Cloud Console)";
+"MapsAPI_初心者_これは何" = "Giong mat khau de ung dung hien thi Google Maps.";
+"MapsAPI_初心者_これは何_見出し" = "Khóa API la gi?";
+"MapsAPI_初心者_手順" = "① Bat Maps API → ② Tao khóa API → ③ Dan va luu → ④ Chay kiem tra ket noi";
+"MapsAPI_初心者_手順_見出し" = "Cac buoc cai dat";
+"MapsAPI_初心者_無料" = "Google Cloud co goi mien phi. Dung ca nhan thuong nam trong han muc mien phi.";
+"MapsAPI_初心者_無料_見出し" = "Co mat phi khong?";
+"MapsAPI_導通テストフッター" = "Kiem tra ket noi xac minh khóa bang yeu cau geocode don gian.";
+"MapsAPI_接続成功" = "Ket noi thanh cong. Khóa Maps API hop le.";
+"MapsAPI_有効化手順" = "Cach bat Maps API";
+"MapsAPI_端末内説明" = "Khóa được lưu trong Keychain và gửi khi xác thực yêu cầu Google Maps.";
+
+"プライバシーとデータ" = "Quyền riêng tư";
+"プライバシー_設定フッター" = "Xem cách dữ liệu được gửi, lưu và xóa.";
+"第三者送信_同意が必要" = "Cần đồng ý trong Quyền riêng tư & dữ liệu trước khi gửi dữ liệu đến dịch vụ bên ngoài.";
+"プライバシー_初回説明" = "Hãy xem bên nhận, dữ liệu và mục đích bên dưới trước lần gửi đầu tiên. Nếu từ chối, các chức năng tìm kiếm, bản đồ và tuyến cần truyền dữ liệu ra ngoài sẽ không hoạt động.";
+"プライバシー_外部送信" = "Bên nhận, dữ liệu và mục đích";
+"プライバシー_Google詳細" = "Google LLC (Routes API, Maps SDK và Geocoding) nhận vị trí hiện tại hoặc điểm đi đã chọn, điểm đến, vùng bản đồ và khóa API để tính tuyến, hiển thị bản đồ và xác định địa chỉ. Số xe buýt được đối chiếu với kết quả Google Routes trên thiết bị và không được thêm vào nội dung yêu cầu tuyến gửi Google. Áp dụng điều khoản và chính sách quyền riêng tư của Google.";
+"プライバシー_Apple詳細" = "Apple Inc. (tìm kiếm MapKit và mã hóa địa lý) nhận từ khóa tìm kiếm, tọa độ đã chọn và thông tin khu vực cần thiết để tìm địa điểm và hiển thị địa chỉ. Áp dụng điều khoản và chính sách quyền riêng tư của Apple.";
+"プライバシー_Overpass詳細" = "Các nhà vận hành OpenStreetMap Overpass API (overpass-api.de, Kumi Systems và điểm cuối Mail.ru) nhận số xe buýt, tọa độ hiện tại hoặc điểm đi, bán kính tìm kiếm và ID tuyến đã chọn để lấy tuyến, hình dạng và điểm dừng. Ứng dụng có thể thử lần lượt nhiều nhà vận hành. Áp dụng chính sách nhật ký và lưu giữ của từng nhà vận hành.";
+"プライバシー_端末保存" = "Lưu trữ trên thiết bị";
+"プライバシー_保存詳細" = "Điểm đến, địa điểm đã lưu, cài đặt hiển thị và sự đồng ý được lưu trong UserDefaults. Lịch sử điểm đến và khóa Google API của bạn được lưu trong Keychain. Kết quả tuyến chỉ nằm trong bộ nhớ khi sử dụng và không được giữ thành lịch sử lâu dài sau khi thoát ứng dụng.";
+"プライバシー_保持削除詳細" = "Dữ liệu được giữ đến khi bạn xóa hoặc xóa vùng lưu trữ ứng dụng. Dữ liệu Keychain có thể còn sau khi gỡ ứng dụng, vì vậy hãy dùng Xóa tất cả dữ liệu tại đây. Việc lưu giữ/xóa tại nhà cung cấp tuân theo chính sách của họ và ứng dụng không thể xóa dữ liệu phía nhà cung cấp.";
+"プライバシー_StoreKit詳細" = "Apple StoreKit được dùng để tải thông tin sản phẩm, mua hoặc khôi phục gói và xác minh quyền lợi. Apple xử lý giao dịch; ứng dụng không nhận hay lưu thông tin thẻ thanh toán. Trạng thái gói hiện tại được lưu trên thiết bị. Không thể xóa lịch sử mua hàng Apple tại đây.";
+"プライバシー_同意管理" = "Quản lý đồng ý";
+"プライバシー_同意中" = "Đã cho phép gửi ra ngoài (phiên bản 1)";
+"プライバシー_拒否中" = "Đã từ chối gửi ra ngoài";
+"プライバシー_同意撤回" = "Rút lại đồng ý";
+"プライバシー_同意する" = "Cho phép gửi ra ngoài";
+"プライバシー_拒否時説明" = "Sau khi từ chối hoặc rút lại, ứng dụng dừng các lần gửi thuộc phạm vi này đến Google, tìm kiếm/mã hóa địa lý Apple MapKit và Overpass. Vẫn có thể lấy vị trí trên thiết bị và xem dữ liệu đã lưu.";
+"プライバシー_全データ削除" = "Xóa tất cả dữ liệu";
+"プライバシー_全データ削除確認" = "Xóa dữ liệu đã lưu?";
+"プライバシー_全データ削除詳細" = "Xóa điểm đến, lịch sử điểm đến, địa điểm đã lưu, khóa Google API và sự đồng ý gửi ra ngoài. Lịch sử mua hàng và tùy chọn chung không bị xóa.";
+"プライバシー_同意して続ける" = "Đồng ý và tiếp tục";
+"プライバシー_同意しない" = "Không đồng ý";
+"プライバシー_ポリシー本文" = "Chính sách quyền riêng tư osmBus";
+"プライバシー_ポリシー本文_詳細" = "Chi tiết về gửi dữ liệu ra ngoài, thời gian lưu giữ và cách xóa.";
+"プライバシー_関連ポリシー" = "Chính sách liên quan";
+"プライバシー_Appleポリシー" = "Chính sách quyền riêng tư Apple";
+"プライバシー_Appleメディア規約" = "Điều khoản Dịch vụ Media của Apple";
+"プライバシー_Googleポリシー" = "Chính sách quyền riêng tư Google";
+"プライバシー_関連ポリシー_詳細" = "Điều khoản của Apple áp dụng cho tìm kiếm/mã hóa địa lý MapKit và mua hàng StoreKit; chính sách của Google áp dụng cho Routes API, Maps SDK và Geocoding.";
+"MapsAPIキー_Premium限定_説明" = "Cai khóa Google Maps API co trong goi PREMIUM.";
+"MapsAPIキー保存完了" = "Da luu khóa Google Maps API.";
+"MapsAPI説明_リード" = "osmBus dung Google Maps de hien thi tuyen va ban do tuyen xe. Can khóa Maps API cho tinh nang ban do.";
+"MapsAPI説明_補足" = "Co the tao mien phi voi tai khoan Google.";
+"Maps_お試し残り_%d" = "Luot ban do con lai thang nay: %d";
+"Maps_お試し終了_タイトル" = "Da het han muc ban do thang nay";
+"Maps_お試し終了_本文" = "Nang cap PREMIUM hoac cai khóa Maps API trong Cai dat.";
+"Maps_お試し説明" = "Khong co khóa rieng, goi FREE dung khóa chung voi gioi han hang thang.";
+"Maps_キー設定済み" = "Da cai khóa Maps API";
+"Maps_キー設定済み_説明" = "Dùng khóa riêng để hiển thị bản đồ. Sử dụng khóa riêng giúp xem bản đồ không giới hạn.";
+"Maps_現在の状態" = "Trang thai Maps";
+"Maps_設定に進む" = "Mo Cai dat";
+"Overpass_サーバー_%@" = "May chu Overpass: %@";
+"Overpass_サーバー処理" = "May chu Overpass dang xu ly. Thu lai.";
+"Overpass_タイムアウト" = "Yeu cau Overpass het thoi gian.";
+"Overpass_現在地なし" = "Can vi tri hien tai de tra cuu tuyen.";
+"Overpass_解析失敗" = "Khong phan tich duoc du lieu tuyen.";
+"Overpass_路線なし" = "Khong tim thay tuyen xe phu hop.";
+"Overpass_通信エラー" = "Khong ket noi duoc may chu Overpass.";
+"PREMIUM_MapsAPI_説明" = "PREMIUM: 60 lần xem bản đồ/tháng với khóa dùng chung. Hoặc cài khóa Maps API riêng để dùng không giới hạn.";
+"PREMIUM_RoutesAPI_説明" = "PREMIUM: 60 lượt kiểm tra xe/tháng với khóa dùng chung. Hoặc cài khóa Routes API riêng để dùng không giới hạn.";
+"PREMIUM_API統合_説明" = "Kiểm tra xe buýt: 60 lượt/tháng với khóa dùng chung. Hiển thị bản đồ: 60 lượt/tháng (đếm riêng). Cài khóa API riêng để dùng không giới hạn cả hai.";
+"PREMIUM_利用中" = "Dang dung PREMIUM";
+"RoutesAPI_お試し状況_補足" = "Đặt lại ngày 1 hàng tháng. Gói PREMIUM được 60 lượt/tháng.";
+"exclamationmark.triangle.fill" = "exclamationmark.triangle.fill";
+"flag.checkered" = "flag.checkered";
+"key.fill" = "key.fill";
+"location.fill" = "location.fill";
+"その他" = "Khac";
+"エラー_不明" = "Loi khong xac dinh";
+"キーフィードバック" = "Phan hoi ban phim";
+"キーフィードバック_クリック" = "Am click";
+"キーフィードバック_バイブ" = "Rung";
+"キーフィードバック_バイブ強さ" = "Cuong do rung";
+"キーフィードバック_フッター" = "Dieu chinh am thanh va rung khi bam ban phim.";
+"キーフィードバック_弱め" = "Nhe";
+"キーフィードバック_強め" = "Manh";
+"キーフィードバック_普通" = "Vua";
+"キーフィードバック_音量" = "Am luong";
+"サウンド_三連音" = "Ba am";
+"サウンド_タック" = "Tach";
+"サウンド_チャイム" = "Chuong";
+"サウンド_ディン" = "Ding";
+"サウンド_プレビュー" = "Nghe thu";
+"サウンド_メッセージ" = "Tin nhan";
+"サウンド_確認音" = "Am xac nhan";
+"サウンド_つま先" = "Tiptoes";
+"サウンド_ベル" = "Chuong";
+"サウンド選択_タイトル" = "Chon am thanh";
+"タップで地図" = "Cham de xem tren ban do";
+"テンキー_判定" = "Ban phim so xe buyt";
+"テンキー_表示" = "Hiện bàn phím số";
+"テンキー_非表示" = "Ẩn bàn phím số";
+"乗車中" = "Dang di";
+"降車_確認" = "Xuống xe?";
+"路線候補_初期化確認" = "Làm mới danh sách tuyến?";
+"はい" = "Có";
+"いいえ" = "Không";
+"乗車開始" = "Bat dau di";
+"他の系統も乗れるかも" = "Bien the khac cung co the di duoc";
+"到着アラート_%d" = "Canh bao con %d tram";
+"到着アラート_タイトル" = "Canh bao so tram con lai";
+"地図_タップヒント" = "Cham ban do de chon dia diem";
+"地図_住所取得中" = "Dang lay dia chi…";
+"地図_出発地" = "Diem di";
+"地図_出発地に設定" = "地図_出発地に設定";
+"地図_手動出発地クリア" = "Xoa diem di thu cong";
+"地図_目的地" = "Diem den";
+"地図_目的地に設定" = "地図_目的地に設定";
+"地図から選択" = "Chon tren ban do";
+"履歴消去フッター" = "Xoa toan bo lich su dia diem.";
+"検索_失敗" = "Tim kiem that bai";
+"現在地に移動" = "Ve vi tri hien tai";
+"系統選択_タイトル" = "Chon bien the tuyen";
+"設定_アラート_アラーム" = "Canh bao chuong";
+"設定_アラート_サウンド" = "Am thanh";
+"設定_アラート_バイブ" = "Rung";
+"設定_アラート_バイブ強さ" = "Cuong do rung";
+"設定_アラート_通知" = "Thong bao";
+"設定_アラート_通知フッター" = "Cau hinh canh bao khi gan tram xuong.";
+"設定_アラート_音量" = "Am luong";
+"設定_アラート_音量_システム" = "Theo am luong he thong";
+"設定_到着アラート" = "Canh bao den noi";
+"設定_距離アラート" = "Canh bao khoang cach";
+"設定_距離アラート_%d" = "Canh bao khoang cach %d";
+"設定_距離アラート_フッター" = "Canh bao khi trong pham vi khoang cach da dat.";
+"設定_距離アラート_距離" = "Khoang cach (m)";
+"距離アラート_%d" = "Canh bao o %d m";
+"距離アラート_タイトル" = "Canh bao khoang cach";
+"路線図" = "Ban do tuyen";
+"路線図_OSM出典" = "Du lieu tuyen © OpenStreetMap contributors";
+"路線図_エラー_タイトル" = "Loi ban do tuyen";
+"路線図_クリア" = "Xoa";
+"路線図_候補" = "Tuyen ung vien";
+"路線図_候補_ヒント" = "Chon tuyen khop voi so xe buyt.";
+"路線図_現在地なし警告" = "Can vi tri hien tai de hien thi ban do tuyen.";
+"路線図_空状態" = "Nhập số xe buýt để tìm tuyến";
+"路線図_空状態_コンテキスト" = "Nhập số xe buýt để tìm tuyến gần đây";
+"路線図_読込中_%@" = "Dang tai %@…";
+"逆方向_タイトル" = "Huong nguoc lai?";
+"逆方向_本文" = "Xe buyt co the di nguoc huong. Kiem tra tuyen truoc khi len xe.";
+"逆方向_本文_次で降車" = "Xe nay co the khong di ve huong diem den. Hay xuong o tram ke tiep.";
+"降車" = "Xuong xe";
+"直線距離" = "Khoảng cách";
+"乗車中バス_設定タイトル" = "Chon xe buyt dang di";
+"乗車中バス_確認_%@" = "Ban dang di xe buyt %@ khong?";

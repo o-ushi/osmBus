@@ -17,7 +17,7 @@ struct APIKeySetupBanner: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(
                         AppLocaleString.text(
-                            isTrialExhausted ? "osmBus_お試し終了_タイトル" : "osmBus_APIキー未設定",
+                            isTrialExhausted ? "お試し終了_タイトル" : "APIキー未設定",
                             locale: locale
                         )
                     )
@@ -27,7 +27,7 @@ struct APIKeySetupBanner: View {
 
                     Text(
                         AppLocaleString.text(
-                            isTrialExhausted ? "osmBus_お試し終了_説明" : "osmBus_APIキー未設定_説明",
+                            isTrialExhausted ? "お試し終了_説明" : "APIキー未設定_説明",
                             locale: locale
                         )
                     )
@@ -48,7 +48,7 @@ struct APIKeySetupBanner: View {
             .background(Color.orange.opacity(0.22), in: RoundedRectangle(cornerRadius: AppTheme.cornerRadius))
         }
         .buttonStyle(.plain)
-        .accessibilityHint(AppLocaleString.text("osmBus_設定画面を開くヒント", locale: locale))
+        .accessibilityHint(AppLocaleString.text("設定画面を開くヒント", locale: locale))
     }
 }
 

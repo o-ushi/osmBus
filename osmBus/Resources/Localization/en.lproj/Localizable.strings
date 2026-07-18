@@ -1,962 +1,774 @@
-"フィルター" = "Filter";
-"すべて" = "All";
-"該当する記録がありません" = "No matching records";
-"別のカテゴリを選ぶか、フィルターを解除してください。" = "Choose another category or clear the filter.";
-
-"並び替え" = "Sort";
-"昇順" = "Ascending";
-"降順" = "Descending";
-
-"リスト" = "List";
-"地図" = "Map";
-"記録がありません" = "No records yet";
-"右上の %@ からスポットを追加してください。" = "Add a spot from %@ in the top-right.";
-"スポットを追加" = "Add Spot";
-"（無題）" = "(Untitled)";
-"おすすめ" = "Recommended";
-"おすすめ %@／5" = "Recommended %@/5";
-"%@ 段階" = "%@ level";
-
-"店名・場所名" = "Place Name";
-"イベント名（任意）" = "Event Name (Optional)";
-"カテゴリ" = "Category";
-"カテゴリ一覧" = "Categories";
-"カテゴリ一覧説明" = "These choices appear in the list, forms, and filters. Removing one here does not change categories already saved on spots. You cannot delete the last remaining category.";
-"新しいカテゴリ" = "New category";
-"追加" = "Add";
-"カテゴリ名を入力してください。" = "Enter a category name.";
-"同じ名前のカテゴリがあります。" = "That category name already exists.";
-"訪問日時" = "Visited At";
-"訪問日" = "Visit date";
-"登録日" = "Date registered";
-"基本情報" = "Basic Info";
 "検索中…" = "Searching...";
-"店名・場所で検索して反映（ピン不要）" = "Search by place name and apply (no pin needed)";
-"名前から位置" = "Find Location by Name";
-"Apple の地図検索で緯度・経度を入れます。Google マップを開いたりピンを選んだりする必要はありません。現在地が分かっていると検索の精度が上がります。" = "Uses the system map search (MKLocalSearch) to fill latitude and longitude—no need to open the Google Maps app or pick a pin. Accuracy improves if current location is available.";
-"店名・場所で Google マップを開く" = "Open Google Maps by Place Name";
-"対象の場所を開いたあと「共有」→「リンクをコピー」でコピーし、このアプリに戻ると緯度・経度を取り込みます。" = "After opening the place, tap Share -> Copy link. When you return to this app, coordinates are imported automatically.";
-"Google マップの共有リンクを貼り付け" = "Paste Google Maps share link";
-"リンクを反映" = "Apply Link";
-"クリップボードから" = "From Clipboard";
-"Google マップから取り込み" = "Import from Google Maps";
-"上部のボタンで検索結果を開き、共有リンクで自動取り込みするか、リンクを直接貼り付けても構いません。短縮リンクはネットワークで解決します。" = "Use the button above to open search results and import via shared link, or paste a link directly. Short links are resolved over network.";
-"緯度" = "Latitude";
-"経度" = "Longitude";
-"現在地を取得" = "Use Current Location";
-"位置" = "Location";
-"初回は位置情報の許可ダイアログが表示されます。" = "A location permission dialog appears on first use.";
-"感想・インプレッション" = "Notes / Impression";
-"メモ" = "Memo";
-"閉じる" = "Close";
+
 "保存" = "Save";
-"候補を選択" = "Select a Candidate";
+
 "編集" = "Edit";
-"クリップボードにテキストがありません。" = "No text found in clipboard.";
-"検索語を URL 化できませんでした。" = "Could not encode the search text as URL.";
-"Google マップを開けませんでした。" = "Could not open Google Maps.";
 
-"詳細" = "Details";
-"Google Maps で開く" = "Open in Google Maps";
-"Googleで調べる" = "Search on Google";
-"Google AIで調べる" = "Search on Google AI";
-"保存しているリンク" = "Saved link";
-"保存済み" = "Saved";
-"カフェ" = "Cafe";
-"レストラン" = "Restaurant";
-"ランドマーク" = "Landmark";
-"公園" = "Park";
-"ショップ" = "Shop";
-"その他" = "Other";
-"Google マップの共有リンクが未設定です。「編集」から共有→コピーした文字列を貼ってください。" = "No Google Maps share link is set. In “Edit,” use Share → copy, then paste the text here.";
-"店名・場所" = "Place";
-"イベント" = "Event";
-"Google Maps で開く（座標）" = "Open in Google Maps (coordinates)";
-"Google Maps で開く（店名で検索）" = "Open in Google Maps (search by name)";
-"スポット" = "Spot";
-"場所を共有" = "Share Location";
-"店名も座標もないため地図を開けません。" = "Cannot open map because neither place name nor coordinates are set.";
-"メモ" = "Notes";
 "キャンセル" = "Cancel";
-"Google の登録写真（取得できる場合・一枚はメタデータ上もっとも大きいサイズ）。キーが無効・該当なしのときは周辺マップを表示します。" = "Shows a Google place photo when available (largest by metadata). Falls back to nearby map if key is invalid or no photo is found.";
-"Places API キー未設定のため周辺マップを表示しています。店の写真や共有リンクの取り込みには、アプリの「設定」でキーを保存するか Info.plist の GOOGLE_PLACES_API_KEY を設定してください。" = "Places API key is not configured, so a nearby map is shown. Save a key in app Settings or set GOOGLE_PLACES_API_KEY in Info.plist for place photos and shared-link import.";
-"Places API（Google）" = "Places API (Google)";
-"Places API キー（任意・写真・共有リンク）" = "Places API key (optional — photos & links)";
-"Google Places API キー（任意）" = "Google Places API key (optional)";
-"キーを保存" = "Save key";
-"キーを保存しました。" = "Key saved.";
-"保存したキーを削除" = "Remove saved key";
-"保存したキーを削除しました。" = "Saved key removed.";
-"Google Cloud で発行したキーを入力すると、店の写真取得や共有リンクからの座標取り込みに使われます。ビルドに埋め込んだ Info.plist のキーよりここで保存した値が優先されます。" = "Enter a key from Google Cloud to fetch place photos and resolve coordinates from shared links. A key saved here overrides GOOGLE_PLACES_API_KEY from Info.plist.";
-"キーを登録すると、スポットの写真を一覧・詳細画面に自動で表示できます。Google アカウントがあれば Google Cloud Console で発行できます（一定量まで無料）。未登録でも地図のスナップショットが表示されます。" = "Registering a key improves how often latitude and longitude can be resolved automatically from Google Maps share links. You can get one from Google Cloud Console with a free tier (Google account required).";
-"%@ の場所" = "Location of %@";
-"緯度・経度があるときは、施設の写真（取得できる場合）または周辺地図を表示しています。" = "When latitude and longitude are set, a place photo (when available) or a nearby map is shown.";
-
-"ピンがありません" = "No pins";
-"地図のピンは保存した緯度・経度だけを使います。入力・編集画面で共有リンクから座標を取り込むか、数値を直接入力してください。" = "Map pins use only saved latitude and longitude. Import coordinates from a shared link or enter numbers on the add/edit screen.";
-"位置を解決中…" = "Resolving location…";
-"リンクから緯度・経度を反映" = "Apply lat/lng from link";
-"共有リンクの文字列から緯度・経度を解析して埋めます（入力中は少し待つと自動反映されます）。数値は直接編集できます。短いリンクはネットワークと設定の Places API キーが必要な場合があります。" = "Latitude and longitude are parsed from the shared link (after typing, wait briefly for auto-fill). You can edit numbers directly. Short links may require network access and a Places API key in Settings.";
-"リンクから緯度・経度を取り込みました。" = "Imported latitude and longitude from the link.";
-"対象を開いたあと「共有」→「リンクをコピー」でコピーし、このアプリに戻るとリンクが反映され、緯度・経度を取り込みます。" = "After opening the place, tap Share → Copy link. When you return to this app, the link is filled in and latitude/longitude are imported.";
-"リストからスポットを追加すると地図に表示されます。" = "Added spots from the list will appear on the map.";
-"すべてのピンに合わせる" = "Fit all pins";
 
 "位置情報の利用が許可されていません。設定から許可してください。" = "Location access is not allowed. Please enable it in Settings.";
+
 "位置情報の状態を確認できません。" = "Could not determine location authorization status.";
-"店名・場所名（またはイベント名）を入力してください。" = "Please enter a place name (or event name).";
+
 "見つかりませんでした。別のキーワードで試してください。" = "No results found. Try another keyword.";
-"リンクの形式が正しくありません。" = "The link format is invalid.";
-"Google マップのリンクではありません（maps.google.com / maps.app.goo.gl など）。" = "This is not a Google Maps link (maps.google.com / maps.app.goo.gl, etc.).";
-"座標をリンクから読み取れませんでした。ピンを開いた状態で共有するか、ブラウザで開いた長い URL をコピーしてください。" = "Could not read coordinates from the link. Share while a pin is open, or copy a full URL from browser.";
-"短縮リンクの解決に失敗しました: %@" = "Failed to resolve short link: %@";
-"応答がありません" = "No response";
-"最終 URL を取得できません" = "Could not retrieve final URL";
+
 "設定" = "Settings";
+
 "プラン管理" = "Plan";
+
 "現在のプラン" = "Current Plan";
-"スポット最大登録件数" = "Spot Limit";
+
 "無制限" = "Unlimited";
-"FREE プランでは最大 %@ 件までスポットを登録できます。PREMIUM プランにアップグレードすると無制限に登録できます。" = "On the FREE plan, you can register up to %@ spots. Upgrade to PREMIUM for unlimited spots.";
+
 "PREMIUMにアップグレード" = "Upgrade to PREMIUM";
-"処理中…" = "Processing…";
-"復元中…" = "Restoring…";
+
 "購入を復元" = "Restore Purchases";
+
 "テスト用プラン" = "Test Plan";
+
 "FREE" = "FREE";
+
 "PREMIUM" = "PREMIUM";
-"プランを切り替えると登録件数制限とアイコンが変わります。" = "Switching plans changes the registration limit and app icon.";
+
 "プレミアムプランへのアップグレードが完了しました！" = "Upgrade to PREMIUM completed!";
+
 "購入を復元しました。" = "Purchases restored.";
+
 "復元できる購入が見つかりませんでした。" = "No restorable purchases were found.";
-"購入を復元する_フッター" = "Restore your previously purchased PREMIUM plan using the same Apple ID.";
-"開発者確認" = "Developer";
-"開発者確認の説明" = "Enter the password to open developer plan controls.";
-"開発者用パスワード" = "Password";
-"パスワードが違います。" = "Incorrect password.";
+
 "開発者メニュー" = "🛠 Developer Menu";
-"プランの切り替え" = "Switch Plan";
+
 "言語" = "Language";
+
 "アプリの表示言語を変更できます。" = "You can change the app display language.";
-"データ" = "Data";
-"エクスポート" = "Export";
-"インポート" = "Import";
-"JSON ファイルで登録データを保存・復元できます。" = "You can save and restore your records with a JSON file.";
-"お知らせ" = "Notice";
+
 "OK" = "OK";
-"%@件をインポートしました。" = "Imported %@ records.";
 
-"タイトル・メモ・カテゴリを検索" = "Search title, notes, or category";
-"検索をクリア" = "Clear search";
-"%@件のスポットを削除しますか？" = "Delete %@ spot(s)?";
 "削除" = "Delete";
-"共有" = "Share";
-"全フィルターを解除" = "Clear All Filters";
-"全選択" = "Select All";
-"全解除" = "Deselect All";
-"項目を選択" = "Select Items";
-"%@件を選択中" = "%@ Selected";
-"新規作成" = "Create New";
-"選択" = "Select";
+
 "ヘルプ" = "Help";
-"近い順" = "Nearest First";
-"遠い順" = "Farthest First";
-"現在地からの距離" = "Distance";
-"未定" = "Undecided";
-"（未選択）" = "(None)";
 
-"位置情報が利用できません" = "Location Unavailable";
-"設定を開く" = "Open Settings";
-"設定アプリから位置情報の使用を許可してください。" = "Please allow location access in the Settings app.";
-"現在地に移動" = "Go to Current Location";
-"衛星写真に切り替え" = "Switch to Satellite View";
-"標準地図に切り替え" = "Switch to Standard Map";
-"アイコン表示に切り替え" = "Switch to Icon View";
-"テキスト表示に切り替え" = "Switch to Text View";
-"詳細を見る" = "View Details";
-
-"出発地" = "Origin";
 "現在地" = "Current Location";
-"地図から選ぶ" = "Choose from Map";
-"時刻指定" = "Time";
-"検索" = "Search";
-"徒歩" = "Walking";
-"分" = "min";
+
 "バス" = "Bus";
-"%@ までに出発" = "Depart by %@";
-"この区間のバス情報はありません" = "No bus routes for this trip";
+
 "取得中…" = "Fetching…";
-"出発地を取得できていません" = "Origin unavailable";
-"設定で Google Maps API キーを入力するとバス情報を取得できます" = "Enter a Google Maps API key in Settings to get bus info";
-"出発" = "Departure";
-"到着" = "Arrival";
-"発 %@" = "Dep %@";
-"着 %@" = "Arr %@";
-"APIエラー: %@" = "API error: %@";
-"バス情報を取得できませんでした" = "Could not fetch bus information";
-
-"地図をタップして出発地を選択" = "Tap the map to set origin";
-"出発地を選択中…" = "Selecting origin…";
-"出発地を選択" = "Select Origin";
-
-"場所を確認する" = "View on Map";
-"バス経路を確認" = "Check Bus Route";
-"保存した共有リンクのページをそのまま表示しています（ブラウザの Google マップに近い画面です）。" = "Showing the saved share-link page as-is (similar to Google Maps in a browser).";
-"リンクが無いため、Places の写真または周辺地図を表示します。" = "No link saved; showing a Places photo or nearby map.";
-"共有リンクが無く、Places API キーも無いときは地図画像のみです。「設定」でキーを保存できます。" = "No share link and no Places API key; showing map image only. Save a key in Settings.";
-
-"おすすめ度" = "Rating";
-"日程" = "Date";
-"月で選ぶ" = "By Month";
-"期間で選ぶ" = "By Range";
-"開始" = "Start";
-"終了" = "End";
-
-"未来のデフォルト日時をセット" = "Set future default date and time";
-"入力を整形" = "Trim Input";
-"Google マップの共有リンク" = "Google Maps share link";
-"開ける URL 形式として解釈できませんでした。" = "Could not interpret as a valid URL.";
-"位置（Google マップ）" = "Location (Google Maps)";
-"写真を削除" = "Delete Photo";
-"写真を追加" = "Add Photo";
-"写真を変更" = "Change Photo";
-"写真" = "Photo";
 
 "カラーテーマ" = "Color Theme";
+
 "見た目" = "Appearance";
+
 "外観" = "Appearance";
-"地図プロバイダー" = "Map Provider";
 
 "カスタムで編集…" = "Customize…";
+
 "枠や見出し" = "Card Style";
-"スポット一覧のカードや枠線のスタイルを変更します。" = "Change the card and border style for the spot list.";
+
 "テクスチャ" = "Texture";
-"リスト画面の背景に重ねる模様を選びます。" = "Choose a pattern to overlay on the list background.";
+
 "下地・シーン色" = "Background Color";
+
 "アプリ背景の下地色を変更します。テクスチャと組み合わせて使えます。" = "Change the app's background color. Can be combined with textures.";
+
 "カスタム…" = "Custom…";
+
 "プレビュー" = "Preview";
 
 "プリセットから始める" = "Start from Preset";
+
 "カラーをカスタム" = "Custom Colors";
+
 "カード背景" = "Card Background";
+
 "枠線" = "Border";
+
 "アクセント" = "Accent";
+
 "枠線の太さ  %@ pt" = "Border width  %@ pt";
+
 "ダークカード（文字色を自動調整）" = "Dark Card (auto-adjust text color)";
+
 "枠・見出しのカスタム" = "Customize Card Style";
+
 "完了" = "Done";
+
 "シーン色" = "Scene Color";
+
 "カスタム下地色" = "Custom Background Color";
+
 "適用" = "Apply";
 
 "パステル" = "Pastel";
+
 "レトロ電卓風" = "Retro Calculator";
+
 "ネオン" = "Neon";
+
 "モノトーン" = "Monotone";
+
 "ハノイ・エディション" = "Hanoi Edition";
+
 "カスタム" = "Custom";
+
 "既定（方眼＋ドット）" = "Default (Grid + Dot)";
+
 "方眼紙" = "Grid Paper";
+
 "ドット" = "Dots";
+
 "古い地図風" = "Old Map";
+
 "レンガ" = "Brick";
+
 "斜め格子" = "Diagonal Weave";
+
 "波線" = "Waves";
+
 "システムに合わせる" = "Follow System";
+
 "アイボリー" = "Ivory";
+
 "スカイブルー" = "Sky Blue";
+
 "ミント" = "Mint";
+
 "サンド" = "Sand";
+
 "ラベンダー" = "Lavender";
+
 "テラコッタ" = "Terracotta";
+
 "標準" = "Standard";
+
 "シック" = "Chic";
+
 "ポップ" = "Pop";
+
 "モノクロ" = "Monochrome";
+
 "iOSデフォルトの配色" = "Default iOS colors";
+
 "落ち着いたアースカラー" = "Calm earth tones";
+
 "明るくビビッドな配色" = "Bright vivid colors";
+
 "モノクローム配色" = "Monochrome palette";
 
-"地図の設定" = "Map Settings";
-"Apple マップ" = "Apple Maps";
-"Google マップ" = "Google Maps";
-"Google マップで表示中" = "Using Google Maps";
-"APIキー未設定のため Apple マップで表示されます" = "No API key — showing Apple Maps";
-"Google マップはより精度の高い地図データを使用するため、ピンの位置が現地に一致しやすくなります。APIキーが必要です（無料枠あり）。" = "Google Maps uses higher-accuracy map data so pins better match the actual location. An API key is required (free tier available).";
-"Google Maps SDK APIキー" = "Google Maps SDK API Key";
-"APIキーを保存しました。\n「Google マップ」を選択してアプリを再起動すると Google マップが有効になります。" = "API key saved.\nSelect \"Google Maps\" and restart the app to enable Google Maps.";
-"APIキーを削除しました。Apple マップに戻ります。" = "API key removed. Switching back to Apple Maps.";
-"Google Cloud Console でキーを取得" = "Get a key from Google Cloud Console";
-"Google Cloud Console で「Maps SDK for iOS」を有効にし、APIキーを作成して入力してください。Gemini 用キーや Places 用キーとは別のキーです。キーを新たに設定・変更した場合はアプリの再起動が必要です。" = "Enable \"Maps SDK for iOS\" in Google Cloud Console and create an API key. This is separate from Places keys. An app restart is required after changing the key.";
-"Maps SDK APIキーフッター" = "Save your Maps SDK for iOS key here. You can enable APIs on the same Google Cloud project. An app restart may be needed after changing the key.";
-"Routes API を Google Cloud で有効化" = "Enable Routes API in Google Cloud";
-"Go キー表示_地図" = "Using: key saved in Map settings";
-"Go キー表示_同梱" = "Using: map key bundled with the app";
-"Go バス失敗_経路なし_短文" = "We could not find bus options for this area.";
-"Go バス失敗_経路なし_タイトル" = "No bus route found";
-"Go バス失敗_経路なし_詳細" = "There may be no transit data for this corridor, or no suitable trips at this time. Try another time or origin, or open “Google Maps” below to check routes.";
-"Go バス失敗_クラウド未設定_短文" = "Bus search may not be turned on yet for your Google project.";
-"Go バス失敗_クラウド未設定_タイトル" = "Check your cloud settings";
-"Go バス失敗_クラウド未設定_詳細" = "In the app, open Settings → Map settings, then in the same Google Cloud project as your key, enable route/transit-related APIs. Wait a few minutes and tap Search again.";
-"Go バス失敗_キー無効_短文" = "The API key may be wrong or blocked for this device.";
-"Go バス失敗_キー無効_タイトル" = "Check your API key";
-"Go バス失敗_キー無効_詳細" = "Re-open the map API key in Settings and verify there are no typos. In Google Cloud, confirm iOS app restrictions and that required APIs are allowed for this key.";
-"Go バス失敗_キー403_短文" = "The request was denied. Your key or restrictions may need an update.";
-"Go バス失敗_キー403_タイトル" = "Permission issue";
-"Go バス失敗_キー403_詳細" = "Check the map API key in Settings and your key restrictions (APIs and app binding) in Google Cloud.";
-"Go バス失敗_混雑_短文" = "Service is busy. Please try again shortly.";
-"Go バス失敗_混雑_タイトル" = "Try again in a moment";
-"Go バス失敗_混雑_詳細" = "Too many requests right now. Wait a bit and tap Search again.";
-"Go バス失敗_サーバー_短文" = "We could not reach the server temporarily.";
-"Go バス失敗_サーバー_タイトル" = "Connection problem";
-"Go バス失敗_サーバー_詳細" = "Try Search again in a moment. If it continues, check your network.";
-"Go バス失敗_HTTP番号_短文" = "Could not load bus information (%d).";
-"Go バス失敗_HTTP番号_タイトル" = "Something went wrong";
-"Go バス失敗_HTTP番号_詳細" = "An error (%d) occurred while contacting the service. Please try again later.";
-"Go バス失敗_上限_短文" = "You may need to check quota or billing in Google Cloud.";
-"Go バス失敗_上限_タイトル" = "Usage limit";
-"Go バス失敗_上限_詳細" = "Open your Google Cloud project and review billing and quota for the APIs you use.";
-"Go バス失敗_その他_短文" = "Could not load bus information.";
-"Go バス失敗_その他_タイトル" = "Could not load bus information";
-"Go バス失敗_その他_詳細" = "Try Search again. If it keeps happening, confirm your API key in Settings and that the right APIs are enabled in Google Cloud.";
-"Go バス失敗_一般_短文" = "Could not load data.";
-"Go バス失敗_一般_タイトル" = "Load failed";
-"Go バス失敗_一般_詳細" = "Check your connection and try Search again.";
-"Go バスエラー_詳しく" = "Learn more";
-"Go バスエラー_OK" = "OK";
-"Go バスエラー_設定を開く" = "Open Settings";
-"Go バスエラー_既定タイトル" = "Bus information";
-"Go バスAPIキー未設定_本文" = "To show bus options, save your Maps/Routes API key under Map settings.";
-"Go バスAPIキー未設定_ヒント" = "Go to Settings → Map settings, enter your Maps/Routes key, and save.";
-"Go バスAPI_要マップ専用_本文" = "Bus routes and the in-app Google map need the Maps/Routes key from Map settings.";
-"Go バスAPI_要マップ専用_ヒント" = "Settings → Map settings → Google Maps SDK API key — use a key with Maps SDK and Routes API enabled in Google Cloud.";
-"Go バス_プレースホルダー" = "Tap Search to load bus options.";
-"ルート" = "Route";
-"Go 出発地説明" = "Current location needs permission and a GPS fix. If it's missing, set a start point with \"Choose on map,\" or let Google Maps use your location on the route screen.";
-"Go GoogleMapsボタン" = "Open route in Google Maps";
-"Go GoogleMaps補足" = "Opens Google Maps with start and destination. Switch driving, walking, transit, or other modes in the app. If the app isn’t installed, your browser opens directions.";
-"Go 緯度経度なし" = "This spot has no latitude/longitude.";
-"Go 現在地未取得" = "Waiting for current location. Tap \"Choose on map\" to set a starting point.";
-"Google マップで開く" = "Open in Google Maps";
-"詳細_Googleマップ_緯度経度" = "Lat / long";
-"地図の共有リンク" = "Map share link";
-"位置（地図リンク）" = "Location (map link)";
-"エクスポートTXT説明_GoogleMaps" = "A text list of Google Maps (google.com) search links. Open each link as needed.";
-"地図リスト取り込み_空入力時" = "Paste a list share URL, copied text, or Takeout content.";
-"地図リスト取り込み_リンクなし" = "No importable map links were found. Use a share link, text with map URLs, or Google Takeout JSON/CSV.";
-"地図リンクリスト取り込み_ヘッダー" = "Map link list";
-"地図リンクリスト取り込み_フッター" = "Paste a share URL from Google Maps and similar services, copied list text, or Google Takeout Saved Places JSON/CSV. Only data accessible via sharing or Takeout can be imported.";
-"地図リンクリストから取り込む" = "Import from map link list";
-"地図リンクリストからインポート" = "Imported from map link list";
-"地図スポット" = "Map spot";
-"地図リンクリストを取り込む" = "Import map link list";
-"位置情報を表示できません。編集画面で緯度・経度を入力するか、地図アプリの共有リンクを貼り付けてください。" = "Location can’t be shown. Enter coordinates on the edit screen, or paste a map app share link.";
-"Google マップ用リンク一覧（TXT）" = "Google Maps link list (TXT)";
-
-"バージョン %@ (%@)" = "Version %@ (%@)";
-"ヘルプ紹介文" = "Every place you love, mapped and ready.\nSave cafés, restaurants, and hidden gems in seconds — find them anytime on the map. Your visited spots and future wish list, all in one beautifully organised place.";
 "基本操作" = "Basic Operations";
-"一括操作" = "Bulk Actions";
-"詳細画面" = "Detail Screen";
-"フィルターと並び替え" = "Filters & Sort";
-"Google マップリンク" = "Google Maps Link";
-"地図タブ" = "Map Tab";
-"「未来」カテゴリ" = "\"Future\" Category";
-"見た目のカスタマイズ" = "Appearance Customization";
-"データ管理" = "Data Management";
-"各種設定" = "Settings";
+
 "API キー" = "API Keys";
 
-// Year / month format
-"%d年" = "%d";
-
-// Help — row titles
-"スポットを編集" = "Edit a Spot";
-"スポットを削除（1件）" = "Delete a Spot";
-"スポットを検索" = "Search Spots";
-"複数件を選択して削除" = "Select and Delete Multiple";
-"複数件を別の端末へ送る" = "Send Multiple to Another Device";
-"詳細画面でインライン編集" = "Inline Editing on Detail Screen";
-"詳細画面から地図タブへジャンプ" = "Jump to Map from Detail";
-"写真を追加・変更する" = "Add or Change a Photo";
-"サムネイル・地図の自動表示" = "Auto Thumbnail & Map";
-"メモを確認する（一覧から）" = "View Memo (from List)";
-"メモを編集する（詳細画面）" = "Edit Memo (Detail Screen)";
-"Google マップリンクを取り込む" = "Import a Google Maps Link";
-"地図の共有リンクを取り込む" = "Import a map share link";
-"アプリ内から Google マップを開く" = "Open Google Maps from the app";
-"Go ボタン — Google マップへ" = "Go — Google Maps";
-"地図サービスの保存リストを取り込む" = "Import a saved list from a map service";
-"Google マップ用リンク一覧を書き出す" = "Export a Google Maps link list";
-"リンクの取り込みに時間がかかる場合" = "If Link Import Takes Too Long";
-"詳細から地図タブへ切り替える" = "Switch to Map Tab from Detail";
-"外観（枠・テクスチャ・背景色）" = "Style, Texture & Background";
-"プランを確認・アップグレードする" = "View Plan & Upgrade";
-"「…」→「プラン管理」でプランの確認とアップグレードができます。FREE プランでは最大 10 件のスポットを登録できます。PREMIUM プランにアップグレードすると無制限になり、アプリアイコンが変わります。" = "Tap '…' → 'Plan' to view your current plan or upgrade. The FREE plan allows up to 10 spots. Upgrade to PREMIUM for unlimited spots and a different app icon.";
-"購入を復元する" = "Restore a Purchase";
-"機種変更や再インストール後は「…」→「プラン管理」→「購入を復元」をタップしてください。同じ Apple ID で購入済みの場合、PREMIUM プランが復元されます。" = "After switching devices or reinstalling, tap '…' → 'Plan' → 'Restore Purchases'. If you previously bought PREMIUM with the same Apple ID, it will be restored.";
-"データをバックアップする" = "Back Up Your Data";
-"データを復元・引き継ぎする" = "Restore or Transfer Data";
-"言語を変更する" = "Change Language";
-"カテゴリを管理する" = "Manage Categories";
-"地図プロバイダーを変更する" = "Change Map Provider";
-"Places API キーについて" = "About the Places API Key";
-"Google Maps API キーについて" = "About the Google Maps API Key";
-
-// Help — row bodies
-"一覧画面右上の「…」ボタンをタップし、「新規作成」を選びます。店名・場所名、カテゴリ、訪問日時、地図アプリの共有リンクなどを入力して「保存」してください。" = "Tap the '…' button at the top-right of the list and select 'Create New'. Enter the place name, category, visit date, map app share link, etc., then tap 'Save'.";
-"一覧から行をタップして詳細画面を開き、右上の「編集」ボタンをタップします。" = "Tap a row in the list to open the detail screen, then tap the 'Edit' button in the top-right.";
-"一覧画面で行を左にスワイプすると「削除」ボタンが現れます。" = "Swipe left on a row in the list to reveal the 'Delete' button.";
-"一覧画面を下にスワイプすると検索バーが表示されます。タイトル・イベント名・メモ・カテゴリを横断して絞り込みます。" = "Pull down on the list screen to reveal the search bar. It searches across title, event name, memo, and category.";
-"「…」→「選択」で選択モードに入り、削除したい行をタップします。「全選択」で全件選択、ゴミ箱ボタンで確認後に一括削除できます。" = "Go to '…' → 'Select' to enter selection mode and tap rows to delete. Use 'Select All' then the trash icon to bulk-delete after confirmation.";
-"選択モードで送りたい行を選び、ツールバーの共有ボタン（↑マーク）をタップします。AirDrop または各種共有先を選んでください。受け取り側は「…」→「インポート」でデータを取り込めます。" = "In selection mode, select rows and tap the share button (↑) in the toolbar. Choose AirDrop or another destination. The recipient can import data via '…' → 'Import'.";
-"詳細画面の各項目（店名・イベント・カテゴリ・訪問日時・おすすめ・メモ）を長押しすると、その場で編集できます。「保存」で確定、「キャンセル」で破棄します。" = "Long-press any field (name, event, category, date, rating, memo) on the detail screen to edit it in place. Tap 'Save' to confirm or 'Cancel' to discard.";
-"緯度・経度が登録されているスポットでは、詳細画面右上に「Go」ボタンが表示されます。出発地を選び、「Google マップでルートを開く」から Google マップアプリの経路画面を開けます。車・徒歩・公共交通などはマップ側で切り替えられます。アプリが入っていない場合はブラウザの Google マップに切り替わります。詳細・一覧の「Google マップで開く」からも同じ場所を Google マップで確認できます。" = "For spots with coordinates, a 'Go' button appears at the top-right of the detail screen. Choose a starting point to open directions in the Google Maps app. Switch driving, walking, transit, and more in Maps. If the app isn’t installed, the browser opens instead. You can also open the same place via 'Open in Google Maps' on the detail and list screens.";
-"詳細画面上部のヒーロー画像は地図スナップショットになっています。「位置」セクションの「場所を確認する」をタップすると、地図タブへ切り替わりそのスポットを中心に表示します。" = "The hero image at the top of the detail screen is a map snapshot. Tap 'View Location' in the Position section to switch to the map tab and center on that spot.";
-"一覧上部のフィルターアイコンをタップすると、カテゴリ・おすすめ度に加え、訪問日または登録日を基準に月（年ごとに折り畳み）や期間で絞り込めます。フィルターが有効なときはアイコンが塗りつぶし表示になります。" = "Tap the filter icon at the top of the list to filter by category and rating, and by month (grouped by year) or date range using either the visit date or the registration date. The icon appears filled when a filter is active.";
-"並び替えアイコンから「店名」「イベント」「訪問日時」「現在地からの距離」で昇順／降順を切り替えられます。距離ソートは位置情報の許可が必要です。" = "Use the sort icon to switch ascending/descending order for 'Place Name', 'Event', 'Visit Date', or 'Distance'. Distance sort requires location permission.";
-"追加・編集画面の「写真」セクションで「写真を追加」をタップし、カメラロールから選べます。保存時に最大 1200px にリサイズされ、容量を抑えて保存されます。「写真を削除」で削除できます。" = "In the add/edit screen's Photo section, tap 'Add Photo' to choose from your camera roll. Photos are resized to 1200px max on save. Tap 'Delete Photo' to remove.";
-"緯度・経度や地図の共有リンクが登録されていると、施設の写真または周辺地図が自動取得されます。独自写真が登録されている場合はそちらが優先されます。一度読み込んだ画像はキャッシュされます。" = "If coordinates or a map share link are saved, the place photo or nearby map is fetched automatically. A custom photo takes priority. Loaded images are cached.";
-"メモが入力済みのスポットには行末に「📝」が表示されます。タップするとポップアップで内容を確認できます。" = "Spots with a memo show '📝' at the end of the row. Tap it to view the memo in a popup.";
-"詳細画面の「メモ」欄を長押しすると編集モードになります。入力後「保存」をタップしてください。" = "Long-press the Memo field on the detail screen to enter edit mode. Tap 'Save' after typing.";
-"Google マップで場所を開き「共有」→「リンクをコピー」でリンクをコピーします。追加・編集画面の「Google マップの共有リンク」欄に貼り付けると、緯度・経度が自動で反映されます。" = "Open a place in Google Maps, then Share → Copy Link. Paste it into the 'Google Maps Share Link' field in add/edit to auto-fill coordinates.";
-"Google マップで場所を開き「共有」→「リンクをコピー」でリンクをコピーします。追加・編集画面の「地図の共有リンク」欄に貼り付けると、緯度・経度が自動で反映されます（maps.app.goo.gl など Google マップのリンクをはじめ、主要な形式に対応）。" = "Open a place in Google Maps, then Share → Copy Link. Paste it into the 'Map share link' field in add/edit to auto-fill coordinates (supports Google Maps links such as maps.app.goo.gl and other common formats).";
-"追加・編集画面で店名を入力後、「店名・場所で Google マップを開く」ボタンをタップします。Google マップで場所を確認し「共有」→「リンクをコピー」でコピーしてアプリに戻ると、リンクが自動で反映されます。" = "Enter the place name in add/edit, then tap 'Open in Google Maps by Name'. Find the place, Share → Copy Link, return to the app, and the link is applied automatically.";
-"一覧の「…」→「地図リンクリストを取り込む」で、共有 URL、コピーしたリスト本文、または Google Takeout の Saved Places JSON/CSV を貼り付けます（Google マップ由来のデータを含みます）。リスト名を入れると osmStroll のイベント名として保存されます。" = "From the list, use '…' → 'Import map link list' and paste a share URL, copied list text, or Google Takeout Saved Places JSON/CSV (may include data from Google Maps). The list name is saved as the event name in osmStroll.";
-"「…」→「エクスポート」から「Google マップ用リンク一覧（TXT）」を選ぶと、登録スポットの Google マップ向け検索 URL（google.com の地図）の一覧を書き出せます。別サービスのリストへ反映するときは各アプリの手順に従ってください。" = "Choose '…' → 'Export' → 'Google Maps link list (TXT)' to export google.com/maps search URLs for your spots. Follow each service’s steps when copying into another app’s list.";
-"短縮リンク（maps.app.goo.gl）は通信で展開する必要があります。展開には数秒かかることがあります。Places API キーが設定されていると、より確実に取り込めます。" = "Short links (maps.app.goo.gl) need to be expanded over the network, which may take a few seconds. A Places API key improves reliability.";
-"画面下部の「地図」タブでは、登録したスポットをマップ上のピンで一覧できます。ピンをタップすると詳細画面へ移動します。" = "The Map tab at the bottom shows all registered spots as pins. Tap a pin to go to the detail screen.";
-"詳細画面の「位置」セクションで「場所を確認する」をタップすると、地図タブへ自動で切り替わり、そのスポットを地図の中心に表示します。" = "Tap 'View Location' in the Position section of the detail screen to switch to the map tab and center on that spot.";
-"カテゴリに「未来」を選ぶと、訪問日時が翌日の正午（12:00）に自動でセットされます。まだ訪れていない場所の候補として使えます。「未来」カテゴリは「設定」→「カテゴリ一覧」から追加できます。" = "Selecting the 'Future' category sets the visit time to noon the next day (12:00) automatically. Use it to save places you plan to visit. Add this category via Settings → Categories.";
-"「設定」→「カラーテーマ」で「標準」「シック」「ポップ」「モノクロ」の4種類から配色を選べます。アクセントカラー・星色・地図ピン色がまとめて切り替わります。" = "Go to Settings → Color Theme to choose from 4 color schemes: Standard, Chic, Pop, and Monochrome. The accent, star, and map pin colors all change together.";
-"「設定」→「見た目」→「外観」でスポットカードの枠スタイル（パステル・ネオンなど）、背景のテクスチャ（方眼・ドットなど）、アプリ背景色をカスタマイズできます。カスタムカラーや独自の枠スタイルも設定可能です。" = "Go to Settings → Appearance to customize card style (Pastel, Neon, etc.), background texture (Grid, Dot, etc.), and app background color. Custom colors and styles are also available.";
-"「…」→「エクスポート」で全スポットを JSON ファイルに書き出せます。iCloud Drive や Files アプリに保存しておくと安心です。" = "Go to '…' → 'Export' to save all spots as a JSON file. Storing it in iCloud Drive or Files is recommended.";
-"「…」→「インポート」でエクスポートした JSON/ZIP ファイルを読み込めます。地図の共有 URL を含むテキストや CSV/JSON を選んだ場合は、リンクリストとして取り込みを試します。" = "Go to '…' → 'Import' to load an exported JSON/ZIP file. If you choose text or CSV/JSON containing map share URLs, osmStroll tries to import it as a link list.";
-"エクスポート形式を選択" = "Choose Export Format";
-"写真なし JSON（軽量）" = "JSON without Photos (Small)";
-"写真付き ZIP" = "ZIP with Photos";
-"写真付き ZIP は写真を別ファイルとして保存するため、従来の写真入り JSON より小さくなります。" = "ZIP with Photos stores photos as separate files, making it smaller than the old photo-embedded JSON.";
-"Google Maps 用リンク一覧（TXT）" = "Google Maps Link List (TXT)";
-"Google Maps は外部アプリから保存済みリストを直接作成できないため、TXT は各リンクを開いて保存するための一覧です。" = "Google Maps does not allow external apps to create Saved lists directly, so this TXT is a list of links you can open and save.";
-"Google Maps リストを取り込む" = "Import Google Maps List";
-"Google Maps リストからインポート" = "Imported from a Google Maps list";
-"Google Maps スポット" = "Google Maps Spot";
-"Google Maps のリスト共有 URL、コピーしたテキスト、または Takeout の内容を貼り付けてください。" = "Paste a Google Maps list share URL, copied text, or Takeout content.";
-"Google Maps の場所リンクを見つけられませんでした。リストの共有リンク、Google Maps URL を含むテキスト、または Google Takeout の JSON/CSV を指定してください。" = "No Google Maps place links were found. Use a list share link, text containing Google Maps URLs, or Google Takeout JSON/CSV.";
-"%@件をインポートしました。重複 %@件、失敗 %@件。" = "Imported %@ records. %@ duplicates, %@ failed.";
-"osmStroll 側のリスト名（任意）" = "osmStroll list name (optional)";
-"Google Maps リスト" = "Google Maps List";
-"Google Maps の保存済みリスト共有 URL、リストからコピーしたテキスト、または Google Takeout の Saved Places JSON/CSV を貼り付けます。Google 側の非公開リストは、共有リンクまたは Takeout で読み出せる範囲だけ取り込めます。" = "Paste a Google Maps saved-list share URL, text copied from a list, or Google Takeout Saved Places JSON/CSV. Private Google lists can only be imported when they are readable through sharing or Takeout.";
-"取り込み中…" = "Importing…";
-"Google Maps から取り込む" = "Import from Google Maps";
-"取り込む" = "Import";
-"Google Maps の保存済みリストを取り込む" = "Import a Google Maps Saved List";
-"一覧の「…」→「Google Maps リストを取り込む」で、Google Maps のリスト共有 URL、コピーしたリスト本文、または Google Takeout の Saved Places JSON/CSV を貼り付けます。リスト名を入れると osmStroll のイベント名として保存されます。" = "Use '…' → 'Import Google Maps List' on the list screen, then paste a Google Maps list share URL, copied list text, or Google Takeout Saved Places JSON/CSV. The list name is saved as the osmStroll event name.";
-"Google Maps 用リンク一覧を書き出す" = "Export a Google Maps Link List";
-"「…」→「エクスポート」から「Google Maps 用リンク一覧（TXT）」を選ぶと、登録スポットの Google Maps リンク一覧を書き出せます。Google Maps は外部アプリから保存済みリストを直接作成する API を提供していないため、リンクを開いて保存先リストへ追加してください。" = "Choose 'Google Maps Link List (TXT)' from '…' → 'Export' to export Google Maps links for registered spots. Google Maps does not provide an API for external apps to create Saved lists directly, so open each link and add it to the target list.";
-"「…」→「インポート」でエクスポートした JSON/ZIP ファイルを読み込めます。Google Maps URL を含むテキストや CSV/JSON を選んだ場合は、Google Maps リストとして取り込みを試します。" = "Use '…' → 'Import' to load exported JSON/ZIP files. If you select text or CSV/JSON containing Google Maps URLs, osmStroll will try to import it as a Google Maps list.";
-"「設定」→「言語」で「日本語」「English」「Tiếng Việt」に切り替えられます。" = "Go to Settings → Language to switch between Japanese, English, and Vietnamese.";
-"「設定」→「カテゴリ一覧」でカテゴリの追加・削除・並び替え・アイコン変更ができます。並び替えは「編集」ボタンを押してから行をドラッグしてください。" = "Go to Settings → Categories to add, delete, reorder, or change icons. To reorder, tap 'Edit' and drag the rows.";
-"「設定」→「地図」で Apple マップと Google マップを切り替えられます。Google マップは「Maps SDK for iOS」の API キーが必要です。" = "Go to Settings → Map to switch between Apple Maps and Google Maps. Google Maps requires a 'Maps SDK for iOS' API key.";
-"Google Cloud Console で発行した「Places API（新）」のキーを登録すると、写真の取得精度と共有リンクからの座標解析精度が向上します。キーなしでも地図スナップショットは表示されます。" = "Registering a 'Places API (New)' key from Google Cloud Console improves coordinate parsing from shared links. Many links work without a key, but a key reduces failures.";
-"「設定」→「地図」→「Google Maps SDK APIキー」に「Maps SDK for iOS」のキーを登録すると、Google マップでのピン表示やナビ連携がより正確になります。Google Cloud Console で発行できます（無料枠あり）。" = "Registering a 'Maps SDK for iOS' key in Settings → Map → Google Maps SDK API Key improves pin accuracy and navigation. Get one from Google Cloud Console (free tier available).";
-"ダーツの旅" = "Darts Trip";
-"ダーツの旅_起点の選び方" = "Starting point";
-"ダーツの旅_起点説明フッター" = "When you use current location or a map pin, only saved spots with coordinates within the straight-line distance from that starting point are suggested.";
-"ダーツの旅_起点からの距離" = "Distance from start";
-"ダーツの旅_距離km表示" = "%d km";
-"ダーツの旅_距離フッター" = "Limits suggested spots to within this straight-line distance from the starting point.";
-"ダーツの旅_現在地から" = "From current location";
-"ダーツの旅_起点を地図から指定" = "Pick start on map";
-"ダーツの旅_場所の制限なし" = "No location limit";
-"ダーツの旅_地図で起点を指定" = "Choose start on map";
-"ダーツの旅_地図起点フッター" = "Tap the map to choose a starting point, then tap Choose.";
-"選択範囲には登録地がありません" = "No saved spots in the selected area.";
-"ダーツの旅_現在地を取得できません" = "Could not get your location. Check Location permission or signal, then try again.";
-"ダーツの旅_地図起点を設定してください" = "When using Pick start on map, tap Choose start on map below and pick a point before throwing.";
-"ダーツを投げる" = "Throw darts";
-"ダーツの旅_条件を変更" = "Edit options";
-"ダーツの旅に含める" = "Include in Darts Trip";
-"登録済みスポットからランダムに行き先を提案します。気分に合わなければ、もう一度投げてみてください。" = "Randomly suggests destinations from your saved spots. If none fit your mood, throw again.";
-"%@つの行き先候補" = "%@ destination ideas";
-"登録が%@件のため、表示できる候補だけ出しています。" = "Only %@ saved spot(s) are available, so only those candidates are shown.";
-"もう一度投げる" = "Throw Again";
-"おすすめなし" = "No rating";
-"すごく良い" = "Excellent";
-"良い" = "Good";
-"まあまあ" = "Okay";
-"ふつう" = "Average";
-"イマイチ" = "Not Great";
-"ダーツの旅でランダム探索" = "Explore with Darts Trip";
-"今日の行き先は、運命に決めてもらおう。登録済みスポットの中からランダムに行き先を提案——「そういえばまだ行ってなかった」という新鮮な発見も、懐かしい再訪も待っているかも。ピンとくるまで何度でも投げ直せます。" = "Let fate pick your next destination. A random spot from your saved list is served up — rediscover a forgotten favourite or stumble onto somewhere brand new. Not feeling it? Throw again until adventure calls.";
-
-"darts.title" = "Darts Trip";
-"darts.change_options" = "Edit options";
-"darts.throw_again" = "Throw Again";
-"darts.setup.blurb" = "Randomly suggests destinations from your saved spots. If none fit your mood, throw again.";
-"darts.origin.section_title" = "Starting point";
-"darts.origin.footer" = "When you use current location or a map pin, only saved spots with coordinates within the straight-line distance from that starting point are suggested.";
-"darts.radius.label" = "Distance from start";
-"darts.radius.km_format" = "%d km";
-"darts.radius.footer" = "Limits suggested spots to within this straight-line distance from the starting point.";
-"darts.map.pick_button" = "Choose start on map";
-"darts.map.pick_footer" = "Tap the map to choose a starting point, then tap Choose.";
-"darts.throw.action" = "Throw darts";
-"darts.results.count_header" = "%@ destination ideas";
-"darts.results.partial_pool_footer" = "Only %@ saved spot(s) are available, so only those candidates are shown.";
-"darts.empty.location" = "Could not get your location. Check Location permission or signal, then try again.";
-"darts.empty.map_pin" = "When using Pick start on map, tap Choose start on map below and pick a point before throwing.";
-"darts.empty.no_spots" = "No saved spots in the selected area.";
-"darts.origin_mode.current" = "From current location";
-"darts.origin_mode.map" = "Pick start on map";
-"darts.origin_mode.anywhere" = "No location limit";
-"darts.include_in_trip" = "Include in Darts Trip";
-"darts.help.random_title" = "Explore with Darts Trip";
-"darts.help.random_body" = "Let fate pick your next destination. A random spot from your saved list is served up — rediscover a forgotten favourite or stumble onto somewhere brand new. Not feeling it? Throw again until adventure calls.";
-
-"recommend.title" = "Recommended for You";
-"recommend.change_options" = "Edit options";
-"recommend.reask" = "Pick again";
-"recommend.setup.blurb" = "Randomly picks one of your ⭐️4+ spots and asks Google AI to suggest similar places nearby.";
-"recommend.action" = "Ask Google AI";
-"recommend.result.selected_label" = "Selected spot";
-"recommend.open_google_ai" = "Open in Google AI";
-"recommend.result.footer" = "Opens Google AI search.";
-"recommend.distance_format" = "~%.1f km from start";
-"recommend.empty.no_4star" = "No spots with ⭐️4 or higher. Rate some spots 4 or above to use this feature.";
-"recommend.empty.no_spots_in_range" = "No ⭐️4+ spots found in the selected area.";
-"recommend.query.with_origin" = "Suggest places similar to this one within {radius}km of {olat}, {olon}";
-"recommend.query.no_origin" = "Suggest similar places";
-"recommend.query.name_label" = "Place: ";
-"recommend.query.lat_label" = "Lat: ";
-"recommend.query.lon_label" = "Lon: ";
-"recommend.query.dist_label" = "Distance from start: ~";
-"recommend.query.language_instruction" = "Please respond in English.";
-
-"APIキーについて" = "About API Keys";
-"APIキー案内_キーの取り扱い" = "Your key is stored only on this device and is not uploaded to the developer's servers.";
-"APIキー案内地図_1" = "Displaying Google Maps requires an API key for Maps SDK for iOS from Google Cloud.";
-"APIキー案内地図_2" = "Enable \"Maps SDK for iOS\" in Google Cloud Console and create a key. A free tier is available.";
 "導通テスト" = "Test Connection";
-"接続成功" = "Connection OK";
-"接続に失敗しました" = "Connection failed";
-
-"選択地点を地図の中心に表示" = "Center the selected spot on the map";
-"設定_地図中心に表示_フッター" = "When you return from detail after opening it from the map tab, the map centers on that spot. “View on Map” in the Position section always centers on the spot.";
 
 "API 連携" = "API Integration";
-"設定画面_API連携フッター_Places" = "A Google Places API key improves how often coordinates can be imported from share links.";
-"Google API 設定" = "Google API Settings";
-"Google Places API キーの役割" = "What this key is for";
-"PlacesAPI説明_リード" = "When you save a place using a Google Maps share link, this key helps fetch the right location information more reliably.";
-"PlacesAPI説明_補足" = "Many links still work without a key. Use a key when the link doesn’t include enough detail on its own. If nothing works, the app guesses from the shop or place name—less accurate, and the pin may be off.";
-"一覧_写真枠案内" = "Add your\nphoto here";
-"写真あり" = "Has photo";
-"詳細ヒーロー説明_緯度経度あり" = "Map centered on the saved coordinates.";
-"詳細ヒーロー説明_共有リンクあり" = "Showing the place from your saved share link (similar to Google Maps in a browser for some links).";
-"詳細ヒーロー説明_位置情報不足" = "Without latitude/longitude or a usable share link, a map may not appear. Paste a link on the edit screen, or add an API key in Settings to improve resolving tricky links.";
-"登録した写真" = "Your photo";
-"表示を再読み込み" = "Reload display";
-"画像を再取得" = "Reload image";
-"一覧・詳細の写真と地図" = "Photos & maps in list & detail";
-"一覧では自分が登録した写真のみがサムネイルになり、写真がないときは薄い枠が表示されます（右側のテキストの位置は変わりません）。詳細の一番上は地図のみです。写真を登録しているときは、画面下部（「Google AIで調べる」の下）に表示されます。" = "Only photos you add appear as thumbnails; otherwise a light frame is shown (text on the right stays aligned). The top of detail is map-only. If you added a photo, it appears at the bottom (below “Search with Google AI”).";
-"Places API リクエストはこの端末から Google のサーバーに直接送信されます。第三者を経由しません。" = "Places API requests go straight from this device to Google. No third parties are involved.";
+
 "プライバシーとセキュリティ" = "Privacy & Security";
+
 "端末内のみ保存" = "Stored on Device Only";
-"APIキーはこの端末の設定にのみ保存されます。開発者のサーバーには一切送信されません。" = "Your API key is stored only in this device's settings. It is never sent to the developer's servers.";
+
 "Google に直接送信" = "Sent Directly to Google";
-"Google Cloud Console で Places API (New) を有効にして発行したキーを入力してください。キーはこの端末にのみ保存されます。" = "Turn on Places API (New) in Google Cloud, create a key, and paste it here. Saved only on this device.";
-"API キーを取得する（Google Cloud Console）" = "Get an API key (Google Cloud Console)";
-"Places API (New) の有効化手順" = "How to enable Places API (New)";
-"入力したキーで Places API に実際にリクエストを送信してテストします。テスト前に保存は不要です。" = "Sends a quick test using the key you typed. You don’t need to save first.";
-"接続に成功しました。共有リンクからの緯度経度取り込みなどに利用できます。" = "Connection succeeded. You can use this key when importing coordinates from share links.";
-"保存する" = "Save";
-"APIキーを削除する" = "Remove API Key";
-"Places 画像キャッシュをクリア" = "Clear Places image cache";
-"過去に保存された Places 関連画像のキャッシュを削除します。" = "Removes cached images previously fetched via Places.";
+
 "保存しました" = "Saved";
-"Google Places API キーを保存しました。共有リンク解析などに使用されます。" = "Google Places API key saved. It will be used when resolving share links and similar tasks.";
-"キャッシュをクリアしました" = "Cache Cleared";
-"キャッシュ削除後の案内" = "Places-related cache has been cleared.";
+
 "URLの生成に失敗しました。" = "Failed to generate URL.";
+
 "レスポンスの解析に失敗しました。" = "Failed to parse response.";
-"リクエストエラー（400）。Places API (New) が Google Cloud で有効になっているか確認してください。" = "Request error (400). Check that Places API (New) is enabled in Google Cloud.";
-"認証エラーフォーマット" = "Authentication error (%d). The API key is invalid or lacks Places API permission.";
-"HTTPエラーフォーマット" = "Error (%d): %@";
-"通信エラーフォーマット" = "Network error: %@";
-"プライバシーポリシー" = "Privacy Policy";
-"利用規約 (EULA)" = "Terms of Use (EULA)";
 
-// MARK: - Help rows (symbolic keys)
-"help.basic.add.title" = "Add a Spot";
-"help.basic.add.body" = "Tap the '+' button at the top-right of the list to open the scene picker. Choose from four options: 'Record Current Location', 'Save a Place to Visit', 'Save as Draft', or 'Register from Photo'.";
-"help.basic.record_now.title" = "Record Current Location Instantly";
-"help.basic.record_now.body" = "Tap '+' → 'Record Current Location' to open the add screen with your current GPS coordinates pre-filled. Just enter a name and tap 'Save' to quickly capture where you are.";
-"help.basic.want_to_go_map.title" = "Add by Long-Pressing the Map";
-"help.basic.want_to_go_map.body" = "Tap '+' → 'Save a Place to Visit' → 'Pick from Map' to open a map. Long-press your target location to drop a pin, then tap 'Confirm Location' to open the add screen with coordinates pre-filled.";
-"help.basic.edit.title" = "Edit a Spot";
-"help.basic.edit.body" = "Tap a row in the list to open the detail screen, then tap the 'Edit' button in the top-right.";
-"help.basic.delete.title" = "Delete a Spot";
-"help.basic.delete.body" = "Swipe left on a row in the list to reveal the 'Delete' button.";
-"help.basic.search.title" = "Search Spots";
-"help.basic.search.body" = "Pull down on the list screen to reveal the search bar. It searches across title, event name, memo, and category.";
-"help.bulk.multiDelete.title" = "Select and Delete Multiple";
-"help.bulk.multiDelete.body" = "Go to '…' → 'Select' to enter selection mode and tap rows to delete. Use 'Select All' then the trash icon to bulk-delete after confirmation.";
-"help.bulk.share.title" = "Send Multiple to Another Device";
-"help.bulk.share.body" = "In selection mode, select rows and tap the share button (↑) in the toolbar. Choose AirDrop or another destination. The recipient can import data via '…' → 'Import'.";
-"help.detail.inline.title" = "Inline Editing on Detail Screen";
-"help.detail.inline.body" = "Long-press any field (name, event, category, date, rating, memo) on the detail screen to edit it in place. Tap 'Save' to confirm or 'Cancel' to discard.";
-"help.detail.go.title" = "Go — Google Maps";
-"help.detail.go.body" = "For spots with coordinates, a 'Go' button appears at the top-right of the detail screen. Choose a starting point to open directions in the Google Maps app. Switch driving, walking, transit, and more in Maps. If the app isn't installed, the browser opens instead. You can also open the same place via 'Open in Google Maps' on the detail and list screens.";
-"help.detail.mapJump.title" = "Jump to Map from Detail";
-"help.detail.mapJump.body" = "The hero image at the top of the detail screen is a map snapshot. Tap 'View Location' in the Position section to switch to the map tab and center on that spot.";
-"help.filter.filter.title" = "Filter";
-"help.filter.filter.body" = "Tap the filter icon at the top of the list to filter by category and rating, and by month (grouped by year) or date range using either the visit date or the registration date. The icon appears filled when a filter is active.";
-"help.filter.sort.title" = "Sort";
-"help.filter.sort.body" = "Use the sort icon to switch ascending/descending order for 'Place Name', 'Event', 'Visit Date', or 'Distance'. Distance sort requires location permission.";
-"help.photo.add.title" = "Add or Change a Photo";
-"help.photo.add.body" = "In the add/edit screen's Photo section, tap 'Add Photo' to choose from your camera roll. Photos are resized to 1200px max on save. Tap 'Delete Photo' to remove.";
-"help.photo.display.title" = "Photos & Maps in List & Detail";
-"help.photo.display.body" = "Only photos you add appear as thumbnails; otherwise a light frame is shown (text on the right stays aligned). The top of detail is map-only. If you added a photo, it appears at the bottom (below \"Search with Google AI\").";
-"help.photo.exif.title" = "Auto-import location & visit date from photo";
-"help.photo.exif.body" = "When you pick a photo from your camera roll in the add/edit screen, GPS coordinates are auto-filled if the photo contains location data. The shooting date/time is also applied to the visit date if available. A message is shown if neither is found.";
-"help.quickShoot.shoot.title" = "Record instantly with Quick Shoot";
-"help.quickShoot.shoot.body" = "Tap the Shoot button in the center of the tab bar to launch the camera. After taking a shot, the photo and location (GPS or current position) are automatically saved as a draft. Perfect for quick captures on the go.";
-"help.quickShoot.draft.title" = "Finish drafts later";
-"help.quickShoot.draft.body" = "Drafts appear at the top of the list with an orange Draft badge. Tap one to open the edit screen, add a title and category, then tap Publish to save it as a full record. You can also delete a draft by swiping left.";
-"help.memo.view.title" = "View Memo (from List)";
-"help.memo.view.body" = "Spots with a memo show '📝' at the end of the row. Tap it to view the memo in a popup.";
-"help.memo.edit.title" = "Edit Memo (Detail Screen)";
-"help.memo.edit.body" = "Long-press the Memo field on the detail screen to enter edit mode. Tap 'Save' after typing.";
-"help.mapLink.import.title" = "Import a Map Share Link";
-"help.mapLink.import.body" = "Open a place in Google Maps, then Share → Copy Link. Paste it into the 'Map share link' field in add/edit to auto-fill coordinates (supports Google Maps links such as maps.app.goo.gl and other common formats).";
-"help.mapLink.open.title" = "Open Google Maps from the App";
-"help.mapLink.open.body" = "Enter the place name in add/edit, then tap 'Open in Google Maps by Name'. Find the place, Share → Copy Link, return to the app, and the link is applied automatically.";
-"help.mapLink.slow.title" = "If Link Import Takes Too Long";
-"help.mapLink.slow.body" = "Short links (maps.app.goo.gl) need to be expanded over the network, which may take a few seconds. A Places API key improves reliability.";
-"help.mapLink.list.title" = "Import a Saved List from a Map Service";
-"help.mapLink.list.body" = "From the list, use '…' → 'Import map link list' and paste a share URL, copied list text, or Google Takeout Saved Places JSON/CSV (may include data from Google Maps). The list name is saved as the event name in osmStroll.";
-"help.mapLink.export.title" = "Export a Google Maps Link List";
-"help.mapLink.export.body" = "Choose '…' → 'Export' → 'Google Maps link list (TXT)' to export google.com/maps search URLs for your spots. Follow each service's steps when copying into another app's list.";
-"help.mapTab.tab.title" = "Map Tab";
-"help.mapTab.tab.body" = "The Map tab at the bottom shows all registered spots as pins. Tap a pin to go to the detail screen.";
-"help.mapTab.switch.title" = "Switch to Map Tab from Detail";
-"help.mapTab.switch.body" = "Tap 'View Location' in the Position section of the detail screen to switch to the map tab and center on that spot.";
-"help.appearance.theme.title" = "Color Theme";
-"help.appearance.theme.body" = "Go to Settings → Color Theme to choose from 4 color schemes: Standard, Chic, Pop, and Monochrome. The accent, star, and map pin colors all change together.";
-"help.appearance.style.title" = "Style, Texture & Background";
-"help.appearance.style.body" = "Go to Settings → Appearance to customize card style (Pastel, Neon, etc.), background texture (Grid, Dot, etc.), and app background color. Custom colors and styles are also available.";
-"help.data.backup.title" = "Back Up Your Data";
-"help.data.backup.body" = "Go to '…' → 'Export' to save all spots as a JSON file. Storing it in iCloud Drive or Files is recommended.";
-"help.data.restore.title" = "Restore or Transfer Data";
-"help.data.restore.body" = "Go to '…' → 'Import' to load an exported JSON/ZIP file. If you choose text or CSV/JSON containing map share URLs, osmStroll tries to import it as a link list.";
-"help.plan.upgrade.title" = "View Plan & Upgrade";
-"help.plan.upgrade.body" = "Tap '…' → 'Plan' to view your current plan or upgrade. The FREE plan allows up to 10 spots. Upgrade to PREMIUM for unlimited spots and a different app icon.";
-"help.plan.restore.title" = "Restore a Purchase";
-"help.plan.restore.body" = "After switching devices or reinstalling, tap '…' → 'Plan' → 'Restore Purchases'. If you previously bought PREMIUM with the same Apple ID, it will be restored.";
-"help.settings.language.title" = "Change Language";
-"help.settings.language.body" = "Go to Settings → Language to switch between Japanese, English, and Vietnamese.";
-"help.settings.categories.title" = "Manage Categories";
-"help.settings.categories.body" = "Go to Settings → Categories to add, delete, reorder, or change icons. To reorder, tap 'Edit' and drag the rows.";
-"help.apiKey.places.title" = "About the Places API Key";
-"help.apiKey.places.body" = "Registering a 'Places API (New)' key from Google Cloud Console improves coordinate parsing from shared links. Many links work without a key, but a key reduces failures.";
-
-// MARK: - Quick Shoot & Draft (Help)
-"写真から位置・訪問日を自動取り込み" = "Auto-import location & visit date from photo";
-"追加・編集画面でカメラロールから写真を選ぶと、写真に GPS 情報が記録されていれば緯度・経度が自動で入力されます。撮影日時が記録されていれば訪問日時も自動で反映されます。どちらも含まれない場合はメッセージが表示されます。" = "When you pick a photo from your camera roll in the add/edit screen, GPS coordinates are auto-filled if the photo contains location data. The shooting date/time is also applied to the visit date if available. A message is shown if neither is found.";
-"クイック撮影＆下書き" = "Quick Shoot & Draft";
-"クイック撮影で素早く記録する" = "Record instantly with Quick Shoot";
-"タブバー中央の「撮影」ボタンをタップするとカメラが起動します。シャッターを切ると、写真と位置情報（GPS または現在地）が自動で下書きとして保存されます。移動中に素早く記録したいときに便利です。" = "Tap the Shoot button in the center of the tab bar to launch the camera. After taking a shot, the photo and location (GPS or current position) are automatically saved as a draft. Perfect for quick captures on the go.";
-"下書きをあとから仕上げる" = "Finish drafts later";
-"下書きは一覧画面の先頭にオレンジの「下書き」バッジ付きで表示されます。タップして編集画面を開き、タイトル・カテゴリなどを追加して「本保存」をタップすると正式な記録になります。下書きのまま左スワイプで削除することもできます。" = "Drafts appear at the top of the list with an orange Draft badge. Tap one to open the edit screen, add a title and category, then tap Publish to save it as a full record. You can also delete a draft by swiping left.";
-
-// MARK: - Quick Shoot & Draft
-"撮影" = "Shoot";
-"クイック撮影" = "Quick Shoot";
-"このデバイスではカメラを使用できません。" = "Camera is not available on this device.";
-"位置情報を取得中…" = "Getting location…";
-"現在地を取得中…" = "Getting current location…";
-"下書き（%@件）" = "Drafts (%@)";
-"（下書き）" = "(Draft)";
-"下書き" = "Draft";
-"本保存" = "Publish";
-"この写真には位置情報が含まれていません。" = "This photo does not include location data.";
-"写真の位置情報を取り込みました。" = "Imported location from the photo.";
-"写真の撮影日時と位置情報を取り込みました。" = "Imported date/time and location from the photo.";
-"写真の撮影日時を取り込みました。" = "Imported shooting date/time from the photo.";
-
-// MARK: - Add Spot Scene Picker
-"add.scene.picker.title" = "Add a Spot";
-"add.scene.record_now.title" = "Record Current Location";
-"add.scene.record_now.subtitle" = "Register this spot right where you are";
-"add.scene.want_to_go.title" = "Save a Place to Visit";
-"add.scene.want_to_go.subtitle" = "Saved with an undecided visit date";
-"add.scene.draft.title" = "Save as Draft";
-"add.scene.draft.subtitle" = "Save now with minimal info and edit the details later";
-"add.scene.from_photo.title" = "Register from Photo";
-"add.scene.from_photo.subtitle" = "Registers location and date from the photo's Exif data";
-"add.scene.from_photo.no_exif.title" = "No Exif Data";
-"add.scene.from_photo.no_exif.message" = "This photo has no location or date information. Please enter them manually.";
-
-// MARK: - Want-to-go method picker
-"add.want_to_go.method.title" = "How to Add";
-"add.want_to_go.by_name.title" = "By Place Name";
-"add.want_to_go.by_name.subtitle" = "Enter a name or map link to register";
-"add.want_to_go.by_map.title" = "Pick from Map";
-"add.want_to_go.by_map.subtitle" = "Long press on the map to drop a pin";
-
-// MARK: - Spot Map Picker
-"spot.map.picker.title" = "Select Location";
-"spot.map.picker.instruction" = "Long press on the map to drop a pin";
-"spot.map.picker.confirm" = "Confirm Location";
-"spot.map.picker.selecting" = "Getting location…";
-
-// MARK: - Location prefill messages
-"現在地の座標を取り込みました。" = "Current location added.";
-"地図で選択した場所を取り込みました。" = "Location from map added.";
-"現在地を取得できませんでした。地図リンクや手動入力で位置を設定してください。" = "Could not get current location. Enter coordinates manually or use a map link.";
-
-// MARK: - Add Spot navigation titles & buttons
-"add.scene.nav.want_to_go" = "Add Want-to-Go Place";
-"add.scene.nav.draft" = "Create Draft";
-"add.scene.save.draft" = "Save Draft";
-"追加" = "Add";
-
-// MARK: - Missing keys
-"決定" = "Confirm";
-"対応している地図の共有リンクではありません（Google マップの maps.google.com / maps.app.goo.gl を推奨。maps.apple.com にも対応）。" = "This is not a supported map share link (Google Maps maps.google.com / maps.app.goo.gl recommended; maps.apple.com also supported).";
-"このリンクから緯度・経度を特定できませんでした。別の共有リンクを試すか、Google マップで場所を開いた状態の長い URL をコピーしてください。" = "Could not determine coordinates from this link. Try a different share link, or copy the full URL while the place is open in Google Maps.";
-"共有リンクに座標が含まれていません。短いリンクを取り込むにはアプリの「設定」で Places API（新）用のキーを保存するか、Info.plist の GOOGLE_PLACES_API_KEY に設定してください。" = "The share link does not include coordinates. To import short links, save a Places API (New) key in app Settings or set GOOGLE_PLACES_API_KEY in Info.plist.";
 "位置情報を取得できませんでした。" = "Could not obtain location.";
 
-
-
-"バス番号" = "Bus number";
 "バス番号を入力" = "Enter bus number";
+
 "履歴がありません" = "No history yet";
+
 "目的地を設定すると、ここに履歴として表示されます。" = "When you set a destination, it will appear here as history.";
+
 "目的地の履歴" = "Destination history";
+
 "タップすると、その目的地を設定します。" = "Tap to set that destination.";
+
 "履歴を消去" = "Clear history";
+
 "履歴をすべて消去しますか？" = "Clear all history?";
+
 "この操作は取り消せません。" = "This action cannot be undone.";
+
 "設定中" = "Active";
 
-
-
-/* osmBus complete */
 "目的地を設定" = "Set destination";
+
 "現在地" = "Current location";
+
 "取得済み" = "Acquired";
+
 "取得中…" = "Locating…";
+
 "未取得" = "Not acquired";
-"位置情報が許可されていません" = "Location access is not allowed";
+
 "位置情報の利用が許可されていません。設定から許可してください。" = "Location access is not allowed. Please enable it in Settings.";
+
 "位置情報の状態を確認できません。" = "Unable to determine location status.";
+
 "位置情報を取得できませんでした。" = "Could not get your location.";
-"その他" = "More";
+
 "履歴" = "History";
-"場所を登録" = "Saved places";
+
 "設定" = "Settings";
+
 "ヘルプ" = "Help";
+
 "プラン管理" = "Plan management";
+
 "目的地" = "Destination";
-"バス番号" = "Bus number";
+
 "バス番号を入力" = "Enter bus number";
+
 "バス" = "Bus";
+
 "ルートを確認中…" = "Checking route…";
+
 "ルートを確認しています…" = "Checking the route…";
+
 "乗ってください！" = "Get on!";
-"このバスは目的地に行きません" = "This bus does not go to your destination";
+
 "もう一度試す" = "Try again";
-"osmBus_ルートなし" = "No transit routes found for these conditions. Check your location, destination, and connection.";
-"osmBus_バス番号例" = "e.g. 35";
-"osmBus_バス番号説明" = "Enter digits only (e.g. 35). Variants like 35A are detected automatically.";
-"osmBus_見送ってください" = "Skip this bus!";
-"osmBus_だったら乗ってください_%@" = "Get on if it's %@!";
-"osmBus_だったら乗ってください_複数_%@" = "Get on if it's %@!";
-"osmBus_API連携フッター" = "Bus checks use Google Routes API. Open Google Routes API for a beginner-friendly guide to setting up your key.";
+
+"ルートなし" = "No transit routes found for these conditions. Check your location, destination, and connection.";
+
+"バス番号例" = "e.g. 35";
+
+"バス番号説明" = "Enter digits only (e.g. 35). Variants like 35A are detected automatically.";
+
+"見送ってください" = "Skip this bus!";
+
+"だったら乗ってください_%@" = "Get on if it's %@!";
+
+"だったら乗ってください_複数_%@" = "Get on if it's %@!";
+
+"API連携フッター" = "One Google API key is used for both bus checks and map display. Open Google API for a beginner-friendly setup guide.";
+
 "メイン画面のカードや枠線のスタイルを変更します。" = "Change card and border styles on the main screen.";
+
 "メイン画面の背景に重ねる模様を選びます。" = "Choose a pattern overlay for the main screen background.";
+
 "現在の目的地" = "Current destination";
+
 "履歴から探す" = "Search from history";
+
 "登録地から探す" = "Search from saved places";
+
 "駅名・住所・施設名" = "Station, address, or place";
-"osmBus_検索入力" = "Search";
-"osmBus_検索ヒント" = "Enter at least 2 characters to see suggestions.";
+
+"検索入力" = "Search";
+
+"検索ヒント" = "Enter at least 2 characters to see suggestions.";
+
 "検索結果" = "Search results";
+
 "目的地をクリア" = "Clear destination";
+
 "候補がありません" = "No results found";
+
 "検索中…" = "Searching…";
+
 "登録済みの場所" = "Saved places";
+"場所を登録" = "Save place";
+
 "履歴がありません" = "No history yet";
+
 "目的地を設定すると、ここに履歴として表示されます。" = "When you set a destination, it will appear here as history.";
+
 "目的地の履歴" = "Destination history";
+
 "タップすると、その目的地を設定します。" = "Tap to set that destination.";
+
 "履歴を消去" = "Clear history";
+
 "履歴をすべて消去しますか？" = "Clear all history?";
+
 "この操作は取り消せません。" = "This action cannot be undone.";
+
 "設定中" = "Active";
+
 "Google Routes API" = "Google Routes API";
-"osmBus_APIキー未設定" = "Set up your API key first";
-"osmBus_APIキー未設定_説明" = "A Google Routes API key is required for bus checks. Tap to open Settings.";
-"osmBus_設定画面を開くヒント" = "Opens the API key settings screen";
-"osmBus_エラー_APIキー未設定" = "Google Routes API key is not set. Save your key in Settings.";
-"osmBus_エラー_目的地未設定" = "Please set a destination first.";
-"osmBus_エラー_現在地未取得" = "Could not get your location. Please allow location access.";
-"osmBus_座標表示" = "Lat %@ / Lon %@";
-"osmBus_RoutesAPIキー保存完了" = "Your Google Routes API key has been saved. It will be used for bus route checks.";
-"osmBus_RoutesAPI_バス判定タイトル" = "Check bus routes";
-"osmBus_RoutesAPI_バス判定説明" = "Asks Google for public transit routes from your location to the destination, then checks whether variants matching the digits you entered (e.g. 35A, 35B) are on that route.";
-"osmBus_RoutesAPI_キーの役割" = "What the Google Routes API key does";
-"osmBus_RoutesAPI説明_リード" = "osmBus uses Google's route search (Routes API) to check whether the bus in front of you goes to your destination. For that, you need an API key — like a personal passcode for using Google's service.";
-"osmBus_RoutesAPI説明_補足" = "It sounds technical, but you can create one for free with a Google account. For personal use, Google's free monthly allowance is usually enough.";
-"osmBus_RoutesAPI_はじめて" = "New to API keys?";
-"osmBus_RoutesAPI_初心者_これは何_見出し" = "What is an API key?";
-"osmBus_RoutesAPI_初心者_これは何" = "Think of it as a passcode that lets this app ask Google for bus route information. osmBus uses it only for route checks — nothing else.";
-"osmBus_RoutesAPI_初心者_無料_見出し" = "Does it cost money?";
-"osmBus_RoutesAPI_初心者_無料" = "Google Cloud offers a free tier. For everyday personal bus checks, you typically stay within the free allowance.";
-"osmBus_RoutesAPI_初心者_手順_見出し" = "Setup steps";
-"osmBus_RoutesAPI_初心者_手順" = "① Enable Routes API in Google Cloud Console → ② Create an API key → ③ Paste it below and save → ④ Run Connection test to verify";
-"osmBus_RoutesAPI_端末内説明" = "Your key is saved only on this iPhone. It is not sent to the developer's server.";
-"osmBus_RoutesAPI_Google送信説明" = "Route requests go directly from this iPhone to Google's servers. No third party is involved.";
-"osmBus_RoutesAPI_キー入力フッター" = "Paste a key issued after enabling Routes API in Google Cloud Console. Keys start with AIza and are a long string of letters and numbers.";
-"osmBus_RoutesAPI_キー取得リンク" = "Get an API key (Google Cloud Console)";
-"osmBus_RoutesAPI_有効化手順" = "How to enable Routes API";
-"osmBus_RoutesAPI_導通テストフッター" = "You can test before saving. Connection test tries a Tokyo Station → Shibuya route search to confirm your key works.";
-"osmBus_RoutesAPI_キー削除" = "Remove API key";
-"osmBus_バージョン" = "Version %@ (%@)";
-"osmBus_ヘルプ紹介文" = "While searching routes in Google Maps, enter the bus number in front of you to instantly see if it goes to your destination.";
-"osmBus_help_場所を登録_title" = "Saved places";
-"osmBus_help_場所を登録_body" = "From … → Saved places, register home and frequent places. Tap one to set it as your destination.";
-"osmBus_help_目的地_title" = "Set destination";
-"osmBus_help_目的地_body" = "Tap the destination bar at the top to pick from saved places, history, or search results.";
-"osmBus_help_現在地_title" = "Get current location";
-"osmBus_help_現在地_body" = "Location permission is requested at launch. At a bus stop, tap refresh (↻) on the location bar before entering the bus number.";
-"osmBus_help_バス番号_title" = "Enter bus number";
-"osmBus_help_バス番号_body" = "Enter digits only (e.g. 35). The app finds matching variants like 35A or 35B from route data and tells you whether to board.";
-"osmBus_help_API_title" = "Set API key";
-"osmBus_help_API_body" = "Go to … → Settings → Google Routes API to enter and save your key.";
-"osmBus_help_APIキー_とは_title" = "What is an API key?";
-"osmBus_help_APIキー_とは_body" = "Think of it as a passcode for using Google's services. osmBus uses it only when checking whether a bus goes to your destination.";
-"osmBus_help_APIキー_設定_title" = "How to set it up";
-"osmBus_help_APIキー_設定_body" = "Open … → Settings → Google Routes API and follow the on-screen guide to create a key in Google Cloud Console, paste it, and save. You can also run Connection test.";
-"osmBus_help_APIキー_安心_title" = "Is my key safe?";
-"osmBus_help_APIキー_安心_body" = "Your key stays on this iPhone only and is never sent to the developer's server. It is sent directly to Google only when searching routes.";
-"osmBus_help_乗車_title" = "Get on!";
-"osmBus_help_乗車_body" = "Routes to your destination include all variants matching your digits (e.g. both 35A and 35B). Check arrival time and alighting stop before boarding.";
-"osmBus_help_不可_title" = "Skip this bus!";
-"osmBus_help_不可_body" = "No matching variants appear on routes to your destination. If only one variant works, you'll see a message like \"Get on if it's 35A!\"";
-"osmBus_help_ルートなし_title" = "No route found";
-"osmBus_help_ルートなし_body" = "Make sure your location and destination are in the same region. Abroad (e.g. Hanoi), your current location must also be there.";
-"osmBus_help_通信_title" = "Connection error";
-"osmBus_help_通信_body" = "Check Wi‑Fi or mobile data, then tap Try again.";
-"osmBus_help_プラン_title" = "Plan management";
-"osmBus_help_プラン_body" = "Open … → Plan management to see your current plan. PREMIUM is coming soon.";
+
+"APIキー未設定" = "Set up your API key first";
+
+"APIキー未設定_説明" = "A Google Routes API key is required for bus checks. Tap to open Settings.";
+
+"設定画面を開くヒント" = "Opens the API key settings screen";
+
+"エラー_APIキー未設定" = "Google Routes API key is not set. Save your key in Settings.";
+
+"エラー_目的地未設定" = "Please set a destination first.";
+
+"エラー_現在地未取得" = "Could not get your location. Please allow location access.";
+
+"座標表示" = "Lat %@ / Lon %@";
+
+"RoutesAPIキー保存完了" = "Your Google Routes API key has been saved. It will be used for bus route checks.";
+
+"RoutesAPI_バス判定タイトル" = "Check bus routes";
+
+"RoutesAPI_バス判定説明" = "Asks Google for public transit routes from your location to the destination, then checks whether variants matching the digits you entered (e.g. 35A, 35B) are on that route.";
+
+"RoutesAPI_キーの役割" = "What the Google Routes API key does";
+
+"RoutesAPI説明_リード" = "osmBus uses one Google API key for both bus checks (Routes API) and map display (Maps SDK). You need an API key — like a personal passcode for using Google's services.";
+
+"RoutesAPI説明_補足" = "It sounds technical, but you can create one for free with a Google account. For personal use, Google's free monthly allowance is usually enough.";
+
+"RoutesAPI_はじめて" = "New to API keys?";
+
+"RoutesAPI_初心者_これは何_見出し" = "What is an API key?";
+
+"RoutesAPI_初心者_これは何" = "Think of it as a passcode that lets this app ask Google for bus route information. osmBus uses it only for route checks — nothing else.";
+
+"RoutesAPI_初心者_無料_見出し" = "Does it cost money?";
+
+"RoutesAPI_初心者_無料" = "Google Cloud offers a free tier. For everyday personal bus checks, you typically stay within the free allowance.";
+
+"RoutesAPI_初心者_手順_見出し" = "Setup steps";
+
+"RoutesAPI_初心者_手順" = "① Enable Routes API in Google Cloud Console → ② Create an API key → ③ Paste it below and save → ④ Run Connection test to verify";
+
+"RoutesAPI_端末内説明" = "Your key is stored in Keychain and sent to Google when authenticating API requests. It is not sent to the developer's own server.";
+
+"RoutesAPI_Google送信説明" = "Route searches send origin and destination coordinates, search options, and the API key to Google.";
+
+"RoutesAPI_キー入力フッター" = "Paste a key issued after enabling Routes API in Google Cloud Console. Keys start with AIza and are a long string of letters and numbers.";
+
+"RoutesAPI_キー取得リンク" = "Get an API key (Google Cloud Console)";
+
+"RoutesAPI_有効化手順" = "How to enable Routes API";
+
+"RoutesAPI_導通テストフッター" = "You can test before saving. Connection test tries a Tokyo Station → Shibuya route search to confirm your key works.";
+
+"RoutesAPI_キー削除" = "Remove API key";
+
+"バージョン" = "Version %@ (%@)";
+
+"ヘルプ紹介文" = "At a bus stop, enter the bus number to instantly see if it goes to your destination. You can also browse transit routes and track your ride.";
+
+"help_場所を登録_title" = "Saved places";
+
+"help_場所を登録_body" = "From … → Saved places, register home and frequent places. Tap one to set it as your destination.";
+
+"help_目的地_title" = "Set destination";
+
+"help_目的地_body" = "Tap the destination bar at the top to pick from saved places, history, or search results.";
+
+"help_現在地_title" = "Get current location";
+
+"help_現在地_body" = "Location permission is requested at launch. At a bus stop, tap refresh (↻) on the location bar before entering the bus number.";
+
+"help_バス番号_title" = "Enter bus number";
+
+"help_バス番号_body" = "Enter digits only (e.g. 35). The app finds matching variants like 35A or 35B from route data and tells you whether to board.";
+
+"help_APIキー_とは_title" = "What is an API key?";
+
+"help_APIキー_とは_body" = "A passcode that lets this app ask Google for bus route information. osmBus uses it only for route checks. Available on the PREMIUM plan — with your own key, checks are unlimited and not counted against the monthly free quota.";
+
+"help_APIキー_設定_title" = "How to set it up";
+
+"help_APIキー_設定_body" = "Open … → Settings → Google Routes API and follow the on-screen guide to create a key in Google Cloud Console, paste it, and save. You can also run Connection test.";
+
+"help_APIキー_安心_title" = "Is my key safe?";
+
+"help_APIキー_安心_body" = "Your key is stored in Keychain and sent to Google for API authentication. It is not sent to the developer's own server.";
+
+"help_乗車_title" = "Get on!";
+
+"help_乗車_body" = "When the bus clearly matches your destination (exact route or all variants like both 35A and 35B), you'll see a large green \"Get on!\" message. If only some variants work, yellow messages like \"Get on if it's 35A!\" appear.";
+
+"help_不可_title" = "Skip this bus!";
+
+"help_不可_body" = "No matching variants appear on routes to your destination — you'll see red \"Skip this bus!\"";
+
+"help_ルートなし_title" = "No route found";
+
+"help_ルートなし_body" = "Make sure your location and destination are in the same region. Abroad (e.g. Hanoi), your current location must also be there.";
+
+"help_通信_title" = "Connection error";
+
+"help_通信_body" = "Check Wi‑Fi or mobile data, then tap Try again.";
+
+"help_プラン_title" = "Plan management";
+
+"help_プラン_body" = "Open … → Plan management to view your plan, upgrade to PREMIUM, or restore a previous purchase. FREE plan: up to %1$d saved places and %1$d history entries. PREMIUM: unlimited.";
+
 "現在のプラン" = "Current plan";
+
 "FREE" = "FREE";
-"osmBus_プラン_目的地登録" = "Saved destinations";
+
 "無制限" = "Unlimited";
-"osmBus_プラン_FREE説明" = "osmBus is currently available on the FREE plan. PREMIUM is coming soon.";
+
+"プラン_FREE説明" = "You are on the FREE plan. Upgrade to PREMIUM for unlimited saved places and history, plus 60 bus checks/month (shared key).";
+
 "購入を復元" = "Restore purchases";
-"osmBus_プラン_復元フッター" = "If you purchased PREMIUM on the App Store, restore it here. (Coming soon)";
-"osmBus_登録済みの場所なし" = "No saved places yet";
-"osmBus_登録済みの場所なし説明" = "Register home or frequent places for one-tap destination setup.";
-"osmBus_登録済みフッター" = "Tap to set as destination. Swipe left to delete or edit.";
-"osmBus_長押し登録フッター" = "Long-press to register the current destination as-is.";
-"osmBus_場所を追加" = "Add place";
-"osmBus_重複登録" = "This place is already saved.";
-"osmBus_登録完了_%@" = "Saved \"%@\".";
-"osmBus_長押しで登録" = "Long-press to save";
-"osmBus_表示名プレースホルダー" = "Display name (e.g. Home)";
-"osmBus_名前フッター" = "Name shown in the list. Use something easy to recognize, like Home or Work.";
-"osmBus_場所を選び直す" = "Choose a different place";
-"osmBus_場所フッター" = "Search by station, address, or place name.";
-"osmBus_場所を編集" = "Edit place";
+
+"プラン_復元フッター" = "If you purchased PREMIUM on the App Store, restore it here.";
+
+"登録済みの場所なし" = "No saved places yet";
+
+"登録済みの場所なし説明" = "Register home or frequent places for one-tap destination setup.";
+
+"登録済みフッター" = "Tap to set as destination. Swipe left to delete or edit.";
+
+"長押し登録フッター" = "Long-press to register the current destination as-is.";
+
+"場所を追加" = "Add place";
+
+"重複登録" = "This place is already saved.";
+
+"登録完了_%@" = "Saved \"%@\".";
+
+"長押しで登録" = "Long-press to save";
+
+"表示名プレースホルダー" = "Display name (e.g. Home)";
+
+"名前フッター" = "Name shown in the list. Use something easy to recognize, like Home or Work.";
+
+"場所を選び直す" = "Choose a different place";
+
+"場所フッター" = "Search by station, address, or place name.";
+
+"場所を編集" = "Edit place";
+
 "自宅" = "Home";
+
 "会社" = "Work";
+
 "学校" = "School";
-"osmBus_エラー_バス番号未入力" = "Enter a bus number.";
-"osmBus_エラー_距離超過_%d" = "Your location and destination are too far apart (about %d km). Check your current location.";
-"osmBus_到着予定_%@" = "ETA %@";
-"osmBus_降車バス停不明" = "Could not identify alighting stop";
-"osmBus_降車_%@_%d停" = "Alight at %@ (%d stops)";
-"osmBus_降車_%@" = "Alight at %@";
-"osmBus_停分乗車_%d" = "Ride %d stops";
-"osmBus_降車_目的地方面" = "Alight at a stop toward your destination";
-"osmBus_RoutesAPI_接続成功_公共交通" = "Connected. Public transit route retrieved.";
-"osmBus_RoutesAPI_接続成功_キー有効" = "Connected. API key is valid. No transit route at this time, but route search works.";
+
+"エラー_バス番号未入力" = "Enter a bus number.";
+
+"エラー_距離超過_%d" = "Your location and destination are too far apart (about %d km). Check your current location.";
+
+"到着予定_%@" = "ETA %@";
+
+"降車バス停不明" = "Could not identify alighting stop";
+
+"降車_%@" = "Alight at %@";
+
+"降車_目的地方面" = "Alight at a stop toward your destination";
+
+"RoutesAPI_接続成功_公共交通" = "Connected. Public transit route retrieved.";
+
+"RoutesAPI_接続成功_キー有効" = "Connected. API key is valid. No transit route at this time, but route search works.";
+
 "URLの生成に失敗しました。" = "Failed to build URL.";
+
 "レスポンスの解析に失敗しました。" = "Failed to parse response.";
-"osmBus_RoutesAPI_HTTP_%d_%@" = "HTTP %d: %@";
+
+"RoutesAPI_HTTP_%d_%@" = "HTTP %d: %@";
+
 "この条件では公共交通ルートが見つかりませんでした。" = "No public transit route found for these conditions.";
-"osmBus_RoutesAPI_エラー_400" = "Bad request. Make sure Routes API is enabled in Google Cloud.";
-"osmBus_RoutesAPI_エラー_401" = "Authentication error. Check your API key and Routes API status.";
-"osmBus_RoutesAPI_エラー_429" = "Too many requests. Please wait and try again.";
-"osmBus_RoutesAPI_エラー_500" = "Google servers are temporarily unavailable. Please try again later.";
-"osmBus_RoutesAPI_ネットワーク_オフライン" = "No internet connection. Check Wi‑Fi or mobile data.";
-"osmBus_RoutesAPI_ネットワーク_タイムアウト" = "Request timed out. Check your signal and try again.";
-"osmBus_RoutesAPI_ネットワーク_接続不可" = "Cannot reach server. Check your network.";
-"osmBus_検索_空入力" = "Enter a destination.";
-"osmBus_検索_2文字以上" = "Enter at least 2 characters.";
+
+"RoutesAPI_エラー_400" = "Bad request. Make sure Routes API is enabled in Google Cloud.";
+
+"RoutesAPI_エラー_401" = "Authentication error. Check your API key and Routes API status.";
+
+"RoutesAPI_エラー_429" = "Too many requests. Please wait and try again.";
+
+"RoutesAPI_エラー_500" = "Google servers are temporarily unavailable. Please try again later.";
+
+"RoutesAPI_ネットワーク_オフライン" = "No internet connection. Check Wi‑Fi or mobile data.";
+
+"RoutesAPI_ネットワーク_タイムアウト" = "Request timed out. Check your signal and try again.";
+
+"RoutesAPI_ネットワーク_接続不可" = "Cannot reach server. Check your network.";
+
+"検索_空入力" = "Enter a destination.";
+
+"検索_2文字以上" = "Enter at least 2 characters.";
+
 "見つかりませんでした。別のキーワードで試してください。" = "Not found. Try another keyword.";
+
 "基本操作" = "Basics";
+
 "結果の見方" = "Reading results";
+
 "トラブルシュート" = "Troubleshooting";
+
 "プラン" = "Plan";
+
 "端末内のみ保存" = "Stored on device only";
+
 "Google に直接送信" = "Sent directly to Google";
+
 "プライバシーとセキュリティ" = "Privacy & security";
+
 "API キー" = "API key";
+
 "導通テスト" = "Connection test";
+
 "保存" = "Save";
+
 "保存しました" = "Saved";
+
 "OK" = "OK";
-"閉じる" = "Close";
+
 "完了" = "Done";
+
 "キャンセル" = "Cancel";
+
 "編集" = "Edit";
+
 "名前" = "Name";
+
 "場所" = "Place";
 
-/* osmBus extra */
-"職場" = "Workplace";
+"プラン切り替え説明" = "Switching plans updates the display on this screen.";
 
-"osmBus_プラン切り替え説明" = "Switching plans updates the display on this screen.";
-"osmBus_件数_%d" = "%d items";
-"osmBus_プラン_FREE制限フッター" = "On the FREE plan, you can save up to 1 destination in history and 1 saved place. Upgrade to PREMIUM for unlimited storage.";
-"osmBus_プラン_PREMIUM制限フッター" = "On the PREMIUM plan, history and saved places are unlimited.";
-"osmBus_登録件数上限" = "The FREE plan allows only 1 saved place.";
-"osmBus_登録地_FREE上限" = "The FREE plan allows only 1 saved place.";
-"osmBus_履歴_FREE上限" = "On the FREE plan, only the latest destination is kept in history.";
-"osmBus_経路一覧" = "Route options";
-"osmBus_経路読込中" = "Loading routes…";
-"osmBus_経路候補" = "Options";
-"osmBus_経路番号_%d" = "Route %d";
-"osmBus_運賃不明" = "Fare unavailable";
-"osmBus_経路を見る" = "View route options";
-"osmBus_経路件数_%d" = "%d options";
-"osmBus_経路取得失敗" = "Could not load routes";
-"osmBus_経路一覧フッター" = "Public transit routes from Google Routes API. Fares may be unavailable depending on region or line.";
-"osmBus_経路一覧フッター_地図" = "Long-press a route to preview it on the map with transfer stops.";
-"osmBus_長押しで地図" = "Long-press to show on map";
-"osmBus_現在地" = "Current location";
-"osmBus_バス停" = "Bus stop";
-"osmBus_あとN停_%d" = "%d more stops";
-"osmBus_バス停合計_%d" = "%d bus stops";
-"osmBus_経由停_%d" = "Via %d";
-"osmBus_所要時間_%d分" = "About %d min";
-"osmBus_公共交通ステップなし" = "No transit segments";
-"osmBus_テンキー入力" = "Keypad input";
-"osmBus_テンキー_クリアして新規" = "Clear and start fresh after a result";
-"osmBus_テンキー_継ぎ足し" = "Append digits after a result";
-"osmBus_テンキー入力_フッター" = "Choose what happens when you tap a digit on the keypad after a bus check result is shown.";
-"osmBus_お試し残り_%d" = "Free trial remaining: %d";
-"osmBus_お試し枠_使い切り" = "You have used all 10 free trials. Enter your Google Routes API key in Settings to continue.";
-"osmBus_お試し枠_使い切り_タイトル" = "Free trial used up";
-"osmBus_お試し枠_使い切り_説明" = "You have used all 10 free trials. Open Settings → Google Routes API to get and save your own API key and keep using bus checks.";
-"osmBus_お試し枠_設定を開く" = "Open Settings";
-"osmBus_お試し終了_タイトル" = "Free trial used up";
-"osmBus_お試し終了_説明" = "Save a Google Routes API key in Settings to continue using bus checks.";
+"件数_%d" = "%d items";
+
+"プラン_FREE制限フッター" = "On the FREE plan, you can save up to %1$d destinations in history and %1$d saved places. Upgrade to PREMIUM for unlimited storage.";
+
+"プラン_PREMIUM制限フッター" = "On the PREMIUM plan, history and saved places are unlimited.";
+
+"登録件数上限" = "The FREE plan allows only %1$d saved places.";
+
+"登録地_FREE上限" = "The FREE plan allows only %1$d saved places.";
+
+"履歴_FREE上限" = "On the FREE plan, only the latest %1$d destinations are kept in history.";
+
+"経路一覧" = "Route options";
+
+"経路読込中" = "Loading routes…";
+
+"経路候補" = "Options";
+
+"経路番号_%d" = "Route %d";
+
+"運賃不明" = "Fare unavailable";
+
+"経路を見る" = "View route options";
+
+"経路件数_%d" = "%d options";
+
+"経路取得失敗" = "Could not load routes";
+
+"経路一覧フッター" = "Public transit routes from Google Routes API. Fares may be unavailable depending on region or line.";
+
+"経路一覧フッター_地図" = "Tap a route to preview it on the map with transfer stops.";
+
+"バス停" = "Bus stop";
+
+"バス停合計_%d" = "%d bus stops";
+
+"所要時間_%d分" = "About %d min";
+
+"公共交通ステップなし" = "No transit segments";
+
+"テンキー入力" = "Keypad input";
+
+"テンキー_クリアして新規" = "Clear and start fresh after a result";
+
+"テンキー_継ぎ足し" = "Append digits after a result";
+
+"テンキー入力_フッター" = "Choose what happens when you tap a digit on the keypad after a bus check result is shown.";
+
+"お試し残り_%d" = "Monthly uses remaining: %d";
+
+"お試し枠_使い切り" = "You have used all 30 free bus checks this month. Upgrade to PREMIUM or wait until the 1st for more.";
+
+"お試し枠_使い切り_タイトル" = "Monthly limit reached";
+
+"お試し枠_使い切り_説明" = "You have used all 30 free bus checks this month (shared key). Upgrade to PREMIUM for 60 checks/month, or set your own API key in Settings → Google Routes API.";
+
+"お試し枠_設定を開く" = "Open Settings";
+
+"お試し終了_タイトル" = "Monthly limit reached";
+
+"お試し終了_説明" = "Upgrade to PREMIUM for 60 checks/month (shared key), or set your own Google Routes API key in Settings for unlimited checks.";
+
+"方向_N" = "N";
+"方向_NE" = "NE";
+"方向_E" = "E";
+"方向_SE" = "SE";
+"方向_S" = "S";
+"方向_SW" = "SW";
+"方向_W" = "W";
+"方向_NW" = "NW";
+"help_お試し_title" = "Monthly free uses";
+"help_お試し_body" = "Without your own API key, the FREE plan gets 30 bus checks per month using the shared key. PREMIUM plan gets 60 per month. Resets on the 1st. Remaining uses appear in the toolbar center. Setting your own API key (PREMIUM) gives unlimited checks.";
+"help_経路_title" = "Transit routes";
+"help_経路_body" = "Tap the routes button on the main screen (or shake the device) to browse transit options to your destination. Tap a route to view it on the map, or long-press a bus number badge to start riding mode right away.";
+"help_乗車中_title" = "Riding mode";
+"help_乗車中_body" = "After a green or yellow \"Get on!\" result, tap Start riding (or long-press a bus number in the route list) to enter riding mode. It tracks the straight-line distance to your current bus's alighting stop and notifies you with your configured alerts. When transferring, the distance switches to the next alighting stop. Tap the \"Riding\" indicator at the top-left to open the route map. Use the Get off button on the card to end riding.";
+"help_設定_title" = "Settings & alerts";
+"help_設定_body" = "From … → Settings you can change language, color theme, appearance (card frame & texture), keypad sound, and arrival alerts. Arrival alerts are distance-based to the alighting stop, with up to 3 thresholds — alarms play 1–3 times from furthest to closest. Alarms and alerts work even when the app is in the background or the screen is off. Maps and Routes API keys are also configured here (PREMIUM).";
+
+"方向ヒント_%@" = "Heading %@";
+"方向バッジ_%@" = "%@";
+
+"APIキー_Premium限定_タイトル" = "PREMIUM feature";
+"APIキー_Premium限定_説明" = "Setting your own Google API key is available on the PREMIUM plan.";
+"Google Maps API" = "Google Maps API";
+"IAP_再読み込み" = "Reload products";
+"IAP_商品が見つかりません" = "Product not found";
+"IAP_商品読み込み中" = "Loading products…";
+"IAP_商品読み込み失敗" = "Could not load products";
+"IAP_復元失敗" = "Restore failed";
+"IAP_購入保留" = "Purchase pending approval";
+"IAP_購入失敗" = "Purchase failed";
+"MapsAPI_Google送信説明" = "Map requests go directly from this iPhone to Google's servers.";
+"MapsAPI_はじめて" = "New to API keys?";
+"MapsAPI_エラー_400" = "Bad request. Make sure Maps API is enabled in Google Cloud.";
+"MapsAPI_エラー_401" = "Authentication error. Check your API key and Maps API status.";
+"MapsAPI_エラー_429" = "Too many requests. Please wait and try again.";
+"MapsAPI_エラー_500" = "Google servers are temporarily unavailable.";
+"MapsAPI_エラー_不明_%@" = "Maps API error: %@";
+"MapsAPI_エラー_拒否_%@" = "Request denied: %@";
+"MapsAPI_キーの役割" = "What the Google Maps API key does";
+"MapsAPI_キー入力フッター" = "Paste a key issued after enabling Maps API in Google Cloud Console.";
+"MapsAPI_キー削除" = "Remove API key";
+"MapsAPI_キー取得リンク" = "Get an API key (Google Cloud Console)";
+"MapsAPI_初心者_これは何" = "Think of it as a passcode that lets this app show Google Maps.";
+"MapsAPI_初心者_これは何_見出し" = "What is an API key?";
+"MapsAPI_初心者_手順" = "① Enable Maps API → ② Create an API key → ③ Paste below and save → ④ Run Connection test";
+"MapsAPI_初心者_手順_見出し" = "Setup steps";
+"MapsAPI_初心者_無料" = "Google Cloud offers a free tier. Personal map use usually stays within the free allowance.";
+"MapsAPI_初心者_無料_見出し" = "Does it cost money?";
+"MapsAPI_導通テストフッター" = "Connection test verifies your key with a simple geocode request.";
+"MapsAPI_接続成功" = "Connected. Maps API key is valid.";
+"MapsAPI_有効化手順" = "How to enable Maps API";
+"MapsAPI_端末内説明" = "Your key is stored in Keychain and sent when authenticating Google Maps requests.";
+
+"プライバシーとデータ" = "Privacy";
+"プライバシー_設定フッター" = "Review how data is sent, stored, and deleted.";
+"第三者送信_同意が必要" = "Consent in Privacy & Data is required before sending data to external services.";
+"プライバシー_初回説明" = "Review the recipients, data, and purposes below before the first external transmission. If you decline, search, maps, and routing features that require external transmission will not work.";
+"プライバシー_外部送信" = "Recipients, data, and purposes";
+"プライバシー_Google詳細" = "Google LLC (Routes API, Maps SDK, and Geocoding) receives your current or selected origin, destination, map viewport, and API key to calculate routes, display maps, and identify addresses. Bus numbers are matched against Google Routes results on-device and are not added to Google's route request body. Google's terms and privacy policy apply.";
+"プライバシー_Apple詳細" = "Apple Inc. (MapKit search and geocoding) receives search terms, selected coordinates, and nearby context needed for the request to find places and display addresses. Apple's terms and privacy policy apply.";
+"プライバシー_Overpass詳細" = "OpenStreetMap Overpass API operators (overpass-api.de, Kumi Systems, and Mail.ru endpoints) receive the bus number, current or origin coordinates, search radius, and selected route ID to retrieve route candidates, geometry, and stops. The app may retry operators in sequence. Each operator's logging and retention policy applies.";
+"プライバシー_端末保存" = "Storage on your device";
+"プライバシー_保存詳細" = "Destination, saved places, display settings, and consent are stored in UserDefaults. Destination history and your Google API key are stored in Keychain. Route results remain in memory during use and are not kept as a persistent route history after the app exits.";
+"プライバシー_保持削除詳細" = "Stored data is retained until you delete it or clear the app's storage. Keychain items may remain after app deletion, so use Delete All Data here. External providers retain and delete data under their own policies; this app cannot delete provider-side records.";
+"プライバシー_StoreKit詳細" = "Apple StoreKit is used to load product information, purchase or restore the plan, and verify entitlements. Apple processes transactions; the app does not receive or store payment-card details. The current plan state is stored on-device. Apple purchase history cannot be deleted here.";
+"プライバシー_同意管理" = "Consent";
+"プライバシー_同意中" = "External transmission allowed (version 1)";
+"プライバシー_拒否中" = "External transmission declined";
+"プライバシー_同意撤回" = "Withdraw consent";
+"プライバシー_同意する" = "Allow external transmission";
+"プライバシー_拒否時説明" = "After declining or withdrawing, the app stops the covered transmissions to Google, Apple MapKit search/geocoding, and Overpass. On-device location access and viewing saved data remain available.";
+"プライバシー_全データ削除" = "Delete All Data";
+"プライバシー_全データ削除確認" = "Delete saved data?";
+"プライバシー_全データ削除詳細" = "Deletes the destination, destination history, saved places, Google API key, and external-transmission consent. Purchase history and general preferences are not deleted.";
+"プライバシー_同意して続ける" = "Agree and Continue";
+"プライバシー_同意しない" = "Do Not Agree";
+"プライバシー_ポリシー本文" = "osmBus Privacy Policy";
+"プライバシー_ポリシー本文_詳細" = "Full details on external transmissions, retention, and deletion.";
+"プライバシー_関連ポリシー" = "Related Policies";
+"プライバシー_Appleポリシー" = "Apple Privacy Policy";
+"プライバシー_Appleメディア規約" = "Apple Media Services Terms";
+"プライバシー_Googleポリシー" = "Google Privacy Policy";
+"プライバシー_関連ポリシー_詳細" = "Apple's terms apply to MapKit search/geocoding and StoreKit purchases; Google's policy applies to the Routes API, Maps SDK, and Geocoding.";
+"MapsAPIキー_Premium限定_説明" = "Google Maps API key setup is available on the PREMIUM plan.";
+"MapsAPIキー保存完了" = "Your Google Maps API key has been saved.";
+"MapsAPI説明_リード" = "osmBus uses Google Maps to display routes and bus line maps. You need a Maps API key for map features.";
+"MapsAPI説明_補足" = "You can create one for free with a Google account.";
+"Maps_お試し残り_%d" = "Map uses remaining this month: %d";
+"Maps_お試し終了_タイトル" = "Monthly map limit reached";
+"Maps_お試し終了_本文" = "Upgrade to PREMIUM or set your own Maps API key in Settings.";
+"Maps_お試し説明" = "Without your own key, FREE plan gets limited monthly map uses via the shared key.";
+"Maps_キー設定済み" = "Maps API key configured";
+"Maps_キー設定済み_説明" = "Your own key is used for map display. Using your own key gives unlimited map access.";
+"Maps_現在の状態" = "Maps status";
+"Maps_設定に進む" = "Open Settings";
+"Overpass_サーバー_%@" = "Overpass server: %@";
+"Overpass_サーバー処理" = "Overpass server is processing. Try again.";
+"Overpass_タイムアウト" = "Overpass request timed out.";
+"Overpass_現在地なし" = "Current location unavailable for route lookup.";
+"Overpass_解析失敗" = "Could not parse route data.";
+"Overpass_路線なし" = "No matching bus route found.";
+"Overpass_通信エラー" = "Could not reach Overpass server.";
+"PREMIUM_MapsAPI_説明" = "PREMIUM: 60 map uses/month with the shared key. Or use your own Maps API key for unlimited access.";
+"PREMIUM_RoutesAPI_説明" = "PREMIUM: 60 bus checks/month with the shared key. Or use your own Routes API key for unlimited access.";
+"PREMIUM_API統合_説明" = "Bus checks: 60/month with the shared key. Map display: 60/month (separate counter). Set your own API key for unlimited access to both.";
+"PREMIUM_利用中" = "PREMIUM active";
+"RoutesAPI_お試し状況_補足" = "Resets on the 1st of each month. PREMIUM plan gets 60 checks/month.";
+"exclamationmark.triangle.fill" = "exclamationmark.triangle.fill";
+"flag.checkered" = "flag.checkered";
+"key.fill" = "key.fill";
+"location.fill" = "location.fill";
+"その他" = "More";
+"エラー_不明" = "Unknown error";
+"キーフィードバック" = "Keypad feedback";
+"キーフィードバック_クリック" = "Click sound";
+"キーフィードバック_バイブ" = "Haptic feedback";
+"キーフィードバック_バイブ強さ" = "Haptic intensity";
+"キーフィードバック_フッター" = "Adjust sound and vibration when tapping the keypad.";
+"キーフィードバック_弱め" = "Light";
+"キーフィードバック_強め" = "Heavy";
+"キーフィードバック_普通" = "Medium";
+"キーフィードバック_音量" = "Volume";
+"サウンド_三連音" = "Tri-tone";
+"サウンド_タック" = "Tick";
+"サウンド_チャイム" = "Chime";
+"サウンド_ディン" = "Ding";
+"サウンド_プレビュー" = "Preview";
+"サウンド_メッセージ" = "Message";
+"サウンド_確認音" = "Confirm";
+"サウンド_つま先" = "Tiptoes";
+"サウンド_ベル" = "Bell";
+"サウンド選択_タイトル" = "Choose sound";
+"タップで地図" = "Tap to view on map";
+"テンキー_判定" = "Bus number keypad";
+"テンキー_表示" = "Show keypad";
+"テンキー_非表示" = "Hide keypad";
+"乗車中" = "Riding";
+"降車_確認" = "Get off?";
+"路線候補_初期化確認" = "Clear route candidates?";
+"はい" = "Yes";
+"いいえ" = "No";
+"乗車開始" = "Start riding";
+"他の系統も乗れるかも" = "Other variants might work too";
+"到着アラート_%d" = "Alert at %d stops remaining";
+"到着アラート_タイトル" = "Stops remaining alert";
+"地図_タップヒント" = "Tap the map to pick a location";
+"地図_住所取得中" = "Looking up address…";
+"地図_出発地" = "Origin";
+"地図_出発地に設定" = "地図 出発地に設定";
+"地図_手動出発地クリア" = "Clear manual origin";
+"地図_目的地" = "Destination";
+"地図_目的地に設定" = "地図 目的地に設定";
+"地図から選択" = "Pick on map";
+"履歴消去フッター" = "Clear all destination history.";
+"検索_失敗" = "Search failed";
+"現在地に移動" = "Go to current location";
+"系統選択_タイトル" = "Choose route variant";
+"設定_アラート_アラーム" = "Alarm alerts";
+"設定_アラート_サウンド" = "Sound";
+"設定_アラート_バイブ" = "Vibration";
+"設定_アラート_バイブ強さ" = "Vibration strength";
+"設定_アラート_通知" = "Notifications";
+"設定_アラート_通知フッター" = "Configure alerts when approaching your stop.";
+"設定_アラート_音量" = "Volume";
+"設定_アラート_音量_システム" = "Follow system volume";
+"設定_到着アラート" = "Arrival alerts";
+"設定_距離アラート" = "Distance alerts";
+"設定_距離アラート_%d" = "Distance alert %d";
+"設定_距離アラート_フッター" = "Alert when within the set distance of your stop.";
+"設定_距離アラート_距離" = "Distance (m)";
+"距離アラート_%d" = "Alert at %d m";
+"距離アラート_タイトル" = "Distance alert";
+"路線図" = "Route map";
+"路線図_OSM出典" = "Route data © OpenStreetMap contributors";
+"路線図_エラー_タイトル" = "Route map error";
+"路線図_クリア" = "Clear";
+"路線図_候補" = "Route candidates";
+"路線図_候補_ヒント" = "Select a route matching your bus number.";
+"路線図_現在地なし警告" = "Current location needed to show the route map.";
+"路線図_空状態" = "Enter a bus number to search for routes";
+"路線図_空状態_コンテキスト" = "Enter a bus number to find nearby routes";
+"路線図_読込中_%@" = "Loading %@…";
+"逆方向_タイトル" = "Reverse direction?";
+"逆方向_本文" = "This bus may be going the opposite direction. Check the route before boarding.";
+"逆方向_本文_次で降車" = "This bus may not be heading toward your destination. Get off at the next stop.";
+"降車" = "Get off";
+"直線距離" = "Distance";
+"乗車中バス_設定タイトル" = "Set riding bus";
+"乗車中バス_確認_%@" = "Are you riding bus %@?";

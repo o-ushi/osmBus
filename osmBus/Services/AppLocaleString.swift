@@ -1,3 +1,4 @@
+import CoreLocation
 import Foundation
 
 /// アプリの表示言語に対応した文字列解決。
@@ -21,6 +22,31 @@ enum AppLocaleString {
     static func currentText(_ key: String) -> String {
         let code = UserDefaults.standard.string(forKey: AppLanguage.storageKey) ?? AppLanguage.english.rawValue
         return text(key, locale: Locale(identifier: code))
+    }
+
+    /// `LocalizedError` または汎用 API エラーを、アプリ設定言語の文言に変換する。
+    static func userFacingError(_ error: Error, fallbackKey: String = "エラー_一般") -> String {
+        if let localized = error as? LocalizedError,
+           let description = localized.errorDescription,
+           !description.isEmpty {
+            return description
+        }
+        return currentText(fallbackKey)
+    }
+
+    /// Core Location など位置情報エラーをアプリ設定言語の文言に変換する。
+    static func userFacingLocationError(_ error: Error) -> String {
+        if let clError = error as? CLError {
+            switch clError.code {
+            case .denied:
+                return currentText("位置情報の利用が許可されていません。設定から許可してください。")
+            case .locationUnknown:
+                return currentText("位置情報を取得できませんでした。")
+            default:
+                break
+            }
+        }
+        return currentText("位置情報を取得できませんでした。")
     }
 
     static func formatted(_ key: String, locale: Locale, _ arguments: CVarArg...) -> String {
@@ -49,8 +75,14 @@ enum AppLocaleString {
     }
 
     /// `AppLanguage` の rawValue（en / ja / vi）と `.lproj` を 1:1 で対応させ、欠落キーは他言語へフォールバックする。
+    /// Bundle オブジェクト生成はファイル I/O を伴うため、言語コードをキーにしてキャッシュし、再生成を避ける。
+    private static var bundleCache: [String: [Bundle]] = [:]
+
     private static func bundles(preferredEnvironmentLocale: Locale) -> [Bundle] {
         let primary = preferredAppLanguage(environmentLocale: preferredEnvironmentLocale)
+        let cacheKey = primary.rawValue
+        if let cached = bundleCache[cacheKey] { return cached }
+
         let order: [AppLanguage] = {
             switch primary {
             case .english:
@@ -70,6 +102,7 @@ enum AppLocaleString {
                 result.append(bundle)
             }
         }
+        bundleCache[cacheKey] = result
         return result
     }
 }

@@ -13,9 +13,9 @@ enum BusKeypadInputMode: String, CaseIterable, Identifiable {
     var settingsTitleKey: String {
         switch self {
         case .clearBeforeNewInput:
-            return "osmBus_テンキー_クリアして新規"
+            return "テンキー_クリアして新規"
         case .appendToExisting:
-            return "osmBus_テンキー_継ぎ足し"
+            return "テンキー_継ぎ足し"
         }
     }
 

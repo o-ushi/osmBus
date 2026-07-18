@@ -17,7 +17,7 @@ enum AppPlan: String, CaseIterable {
 final class PlanStore {
     static let shared = PlanStore()
 
-    static let freeItemLimit = 1
+    static let freeItemLimit = 3
     private static let storageKey = "osmBus.plan"
 
     private(set) var currentPlan: AppPlan {
@@ -55,6 +55,11 @@ final class PlanStore {
 
     func setPlan(_ plan: AppPlan) {
         currentPlan = plan
+    }
+
+    /// StoreKit のエンタイトルメントに基づいてプランを更新する。
+    func applyPremiumEntitlement(_ hasPremium: Bool) {
+        setPlan(hasPremium ? .paid : .free)
     }
 
     func enforceLimitsForCurrentPlan() {

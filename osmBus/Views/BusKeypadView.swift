@@ -1,13 +1,17 @@
 import SwiftUI
+import UIKit
 
 struct BusKeypadView: View {
     let busNumber: String
+    let canSubmit: Bool
+    var isDisabled: Bool = false
     let onCharacter: (String) -> Void
-    let onDelete: () -> Void
+    let onSubmit: () -> Void
     let onClear: () -> Void
 
     @Environment(\.busFrameStyle) private var frameStyle
     @Environment(\.mainScreenCompactLayout) private var compactLayout
+    @Environment(\.locale) private var locale
 
     var body: some View {
         GeometryReader { geometry in
@@ -30,8 +34,9 @@ struct BusKeypadView: View {
                     keypadRow(["1", "2", "3"])
                     keypadRow(["4", "5", "6"])
                     keypadRow(["7", "8", "9"])
-                    keypadRow(["CLR", "0", ""], includesDelete: true)
+                    keypadRow(["CLR", "0", ""], includesEnter: true)
                 }
+                .disabled(isDisabled)
             }
             .padding(.horizontal, KeypadMetrics.edgePaddingHorizontal)
             .padding(.top, metrics.edgePaddingTop)
@@ -56,7 +61,7 @@ struct BusKeypadView: View {
             .font(.system(size: metrics.busNumberFontSize, weight: .bold, design: .rounded))
             .lineLimit(1)
             .minimumScaleFactor(0.55)
-            .foregroundStyle(.primary)
+            .foregroundStyle(isDisabled ? Color.secondary : Color.primary)
             .frame(maxWidth: .infinity)
             .frame(height: metrics.displayHeight, alignment: .center)
             .multilineTextAlignment(.center)
@@ -73,39 +78,50 @@ struct BusKeypadView: View {
     private func keypadRow(
         _ titles: [String],
         style: KeyStyle = .primary,
-        includesDelete: Bool = false,
+        includesEnter: Bool = false,
         rowHeight: CGFloat = KeypadMetrics.keyHeight
     ) -> some View {
-        HStack(spacing: KeypadMetrics.gridSpacing) {
-            ForEach(Array(titles.enumerated()), id: \.offset) { index, title in
-                if includesDelete && index == titles.count - 1 {
-                    keypadDeleteButton {
-                        onDelete()
-                    }
-                } else {
-                    let keyStyle: KeyStyle = title == "CLR" ? .clear : style
-                    keypadButton(title, style: keyStyle, rowHeight: rowHeight) {
-                        if title == "CLR" {
-                            onClear()
-                        } else {
-                            onCharacter(title)
-                        }
-                    }
+        let regularTitles = includesEnter ? Array(titles.dropLast()) : titles
+        return HStack(spacing: KeypadMetrics.gridSpacing) {
+            ForEach(Array(regularTitles.enumerated()), id: \.offset) { _, title in
+                let keyStyle: KeyStyle = title == "CLR" ? .clear : style
+                keypadButton(title, style: keyStyle, rowHeight: rowHeight) {
+                    if title == "CLR" { onClear() } else { onCharacter(title) }
                 }
+            }
+            if includesEnter {
+                keypadEnterButton { onSubmit() }
             }
         }
         .frame(height: rowHeight)
     }
 
-    private func keypadDeleteButton(action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: "delete.backward")
-                .font(.system(size: KeypadMetrics.deleteIconSize, weight: .semibold))
+    private static let enterSymbolName: String =
+        ["return", "arrow.turn.down.left"].first { UIImage(systemName: $0) != nil } ?? "return"
+
+    private var isLightCard: Bool {
+        frameStyle.cardFill.relativeLuminance > 0.18
+    }
+
+    private func keypadEnterButton(action: @escaping () -> Void) -> some View {
+        let active = canSubmit && !isDisabled
+        return Button {
+            guard canSubmit else { return }
+            KeypadFeedbackSettings.triggerEnterKey()
+            action()
+        } label: {
+            Image(systemName: Self.enterSymbolName)
+                .font(.system(size: KeypadMetrics.deleteIconSize + 2, weight: .bold))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .foregroundStyle(.primary)
-                .background(AppTheme.surface, in: RoundedRectangle(cornerRadius: AppTheme.keypadCornerRadius))
+                .foregroundStyle(active ? .white : Color.secondary)
+                .background(
+                    active ? Color.green : backgroundColor(for: .clear),
+                    in: RoundedRectangle(cornerRadius: AppTheme.keypadCornerRadius)
+                )
+                .animation(.easeInOut(duration: 0.18), value: active)
         }
         .buttonStyle(KeypadButtonStyle())
+        .accessibilityLabel(AppLocaleString.text("テンキー_判定", locale: locale))
     }
 
     private func keypadButton(
@@ -114,25 +130,30 @@ struct BusKeypadView: View {
         rowHeight: CGFloat,
         action: @escaping () -> Void
     ) -> some View {
-        Button(action: action) {
+        Button {
+            KeypadFeedbackSettings.triggerKeyTap()
+            action()
+        } label: {
             Text(title)
                 .font(.system(size: KeypadMetrics.keyFontSize, weight: style == .primary ? .semibold : .bold))
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .foregroundStyle(.primary)
+                .foregroundStyle(isDisabled ? Color.secondary : Color.primary)
                 .background(backgroundColor(for: style), in: RoundedRectangle(cornerRadius: AppTheme.keypadCornerRadius))
         }
         .buttonStyle(KeypadButtonStyle())
     }
 
+    // カード背景の明暗に応じてボタン面の色を選ぶ。
+    // 明るいカード: 黒い薄膜でキーの輪郭を出す。暗いカード: 白い薄膜。
     private func backgroundColor(for style: KeyStyle) -> Color {
         switch style {
         case .primary:
-            return AppTheme.surfacePressed
+            return isLightCard ? Color.black.opacity(0.08) : Color.white.opacity(0.22)
         case .clear:
-            return AppTheme.surface
+            return isLightCard ? Color.black.opacity(0.05) : Color.white.opacity(0.14)
         case .letter:
-            return Color.white.opacity(0.2)
+            return isLightCard ? Color.black.opacity(0.06) : Color.white.opacity(0.20)
         }
     }
 }
@@ -149,7 +170,13 @@ private struct KeypadButtonStyle: ButtonStyle {
 #Preview {
     ZStack {
         AppTheme.brandBlue.ignoresSafeArea()
-        BusKeypadView(busNumber: "35A", onCharacter: { _ in }, onDelete: {}, onClear: {})
+        BusKeypadView(
+            busNumber: "35",
+            canSubmit: true,
+            onCharacter: { _ in },
+            onSubmit: {},
+            onClear: {}
+        )
             .padding()
             .frame(height: 360)
     }

@@ -18,7 +18,7 @@ struct DestinationInputView: View {
     @State private var candidates: [DestinationSearchService.Candidate] = []
     @State private var isSearching = false
     @State private var errorMessage: String?
-    @State private var searchTask: Task<Void, Never>?
+    @State private var debouncedSearch = DebouncedPlaceSearch()
 
     var body: some View {
         NavigationStack {
@@ -34,13 +34,6 @@ struct DestinationInputView: View {
             .navigationTitle(AppLocaleString.text("目的地", locale: locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark")
-                    }
-                    .foregroundStyle(.blue)
-                    .accessibilityLabel(AppLocaleString.text("閉じる", locale: locale))
-                }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
                     Button {
@@ -142,7 +135,7 @@ struct DestinationInputView: View {
                 scheduleSearch(for: searchText, immediate: true)
             }
         } header: {
-            Text(AppLocaleString.text("osmBus_検索入力", locale: locale))
+            Text(AppLocaleString.text("検索入力", locale: locale))
         }
     }
 
@@ -162,7 +155,7 @@ struct DestinationInputView: View {
             } else if candidates.isEmpty {
                 Text(
                     searchText.count < 2
-                        ? AppLocaleString.text("osmBus_検索ヒント", locale: locale)
+                        ? AppLocaleString.text("検索ヒント", locale: locale)
                         : AppLocaleString.text("候補がありません", locale: locale)
                 )
                 .foregroundStyle(.secondary)
@@ -207,36 +200,19 @@ struct DestinationInputView: View {
     }
 
     private func scheduleSearch(for query: String, immediate: Bool = false) {
-        searchTask?.cancel()
-        searchTask = Task {
-            if !immediate {
-                try? await Task.sleep(nanoseconds: 350_000_000)
-            }
-            guard !Task.isCancelled else { return }
+        debouncedSearch.schedule(query: query, immediate: immediate) { query in
             await performSearch(query: query)
         }
     }
 
     @MainActor
     private func performSearch(query: String) async {
-        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmed.count >= 2 else {
-            candidates = []
-            errorMessage = nil
-            isSearching = false
-            return
-        }
-
-        isSearching = true
+        isSearching = query.trimmingCharacters(in: .whitespacesAndNewlines).count >= 2
         errorMessage = nil
 
-        do {
-            candidates = try await DestinationSearchService.searchPlaces(query: trimmed)
-        } catch {
-            candidates = []
-            errorMessage = error.localizedDescription
-        }
-
+        let outcome = await DestinationSearchService.performPlaceSearch(query: query)
+        candidates = outcome.candidates
+        errorMessage = outcome.errorMessage
         isSearching = false
     }
 }

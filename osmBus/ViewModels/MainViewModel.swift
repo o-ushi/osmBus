@@ -25,8 +25,22 @@ final class MainViewModel {
     private(set) var destination: Destination?
     private(set) var currentLatitude: Double?
     private(set) var currentLongitude: Double?
+    private(set) var manualOriginLatitude: Double?
+    private(set) var manualOriginLongitude: Double?
+    private(set) var manualOriginName: String?
     var enteredBusNumber = ""
     var resultState: ResultDisplayState = .idle
+    private(set) var otherBoardableVariants: [String] = []
+    private let ridingTracker = RidingTracker()
+
+    var ridingState: RidingState? { ridingTracker.ridingState }
+    var shouldTrackRiding: Bool { ridingTracker.shouldTrackRiding }
+    var isOSMMapRiding: Bool { ridingTracker.isOSMMapRiding }
+    var osmRidingRouteCandidate: BusRouteCandidate? { ridingTracker.osmRidingRouteCandidate }
+    var osmRidingRouteDetail: BusRouteDetail? { ridingTracker.osmRidingRouteDetail }
+    var wrongDirectionDetected: Bool { ridingTracker.wrongDirectionDetected }
+    var activeRidingAlert: ActiveRidingAlert? { ridingTracker.activeAlert }
+    var ridingAlightCoordinate: CLLocationCoordinate2D? { ridingTracker.alightCoordinate }
 
     var destinationLabel: String {
         destination?.name ?? AppLocaleString.currentText("目的地を設定")
@@ -36,24 +50,29 @@ final class MainViewModel {
         destination != nil
     }
 
+    var hasManualOrigin: Bool { manualOriginLatitude != nil }
+
+    var effectiveOriginLatitude: Double? { manualOriginLatitude ?? currentLatitude }
+    var effectiveOriginLongitude: Double? { manualOriginLongitude ?? currentLongitude }
+
     var hasCurrentLocation: Bool {
-        currentLatitude != nil && currentLongitude != nil
+        effectiveOriginLatitude != nil && effectiveOriginLongitude != nil
     }
 
     var currentLocationCoordinateText: String? {
-        guard let currentLatitude, let currentLongitude else { return nil }
+        guard let lat = effectiveOriginLatitude, let lon = effectiveOriginLongitude else { return nil }
         return AppLocaleString.currentFormatted(
-            "osmBus_座標表示",
-            String(format: "%.5f", currentLatitude),
-            String(format: "%.5f", currentLongitude)
+            "座標表示",
+            String(format: "%.5f", lat),
+            String(format: "%.5f", lon)
         )
     }
 
     enum ResultDisplayState: Equatable {
         case idle
         case checking
-        case canBoard(arrivalText: String, alightStopText: String)
-        case canBoardIfVariant(variantNames: [String], arrivalText: String, alightStopText: String)
+        case canBoard(arrivalText: String, alightStopText: String, directionHint: String?)
+        case canBoardIfVariant(variantNames: [String], arrivalText: String, alightStopText: String, directionHint: String?)
         case cannotBoard
         case noTransitRoutes
         case trialExhausted
@@ -67,13 +86,39 @@ final class MainViewModel {
         case failed(String)
     }
 
-    private(set) var transitRoutes: [ParsedTransitRoute] = []
     private(set) var transitRoutesLoadState: TransitRoutesLoadState = .idle
+    /// 目的地を設定してから見つかった経路の蓄積データベース。GoogleのAPIは呼ぶたびに
+    /// 微妙に結果が変わることがあり、直前の1回だけを見ているとさっきまであった候補が
+    /// 消えて見えることがある。一度見つかった経路は上書き更新しつつ保持し続ける。
+    private(set) var accumulatedTransitRoutes: [ParsedTransitRoute] = []
+    private(set) var boardingRouteIndex: Int?
+    private(set) var boardingRoute: ParsedTransitRoute?
+
+    private(set) var isBoardingRouteCheapest: Bool = true
+
+    var canShowBoardingRouteMap: Bool {
+        guard hasCurrentLocation, destination != nil,
+              let boardingRoute,
+              GoogleRoutesAPIService.routeHasMapGeometry(boardingRoute) else {
+            return false
+        }
+        switch resultState {
+        case .canBoard, .canBoardIfVariant:
+            return true
+        default:
+            return false
+        }
+    }
 
     private var busCheckTask: Task<Void, Never>?
     private var transitRoutesTask: Task<Void, Never>?
-    private static let busCheckDebounceNanoseconds: UInt64 = 400_000_000
+    private var lastAutoTransitRoutesRefreshTime: Date?
+    private var lastAutoBusCheckRefreshTime: Date?
+    /// 結果表示後クリアモードで、新しい番号を入力し始めたあとの1回の入力セッション。
+    private var isComposingNewBusNumber = false
     private let resultHaptic = UINotificationFeedbackGenerator()
+    /// ハプティクの重複判定用。resultState は判定中に .checking を挟むため、これとは別に最後に確定した結果を追跡する。
+    private var lastSettledResultState: ResultDisplayState?
 
     init() {
         destination = DestinationStore.load()
@@ -99,12 +144,39 @@ final class MainViewModel {
         resetTransitRoutes()
     }
 
+    func setManualOrigin(latitude: Double, longitude: Double, name: String) {
+        manualOriginLatitude = latitude
+        manualOriginLongitude = longitude
+        manualOriginName = name
+        resetTransitRoutes()
+        refreshTransitRoutes()
+        if !enteredBusNumber.isEmpty { refreshBusCheck() }
+    }
+
+    func clearManualOrigin() {
+        manualOriginLatitude = nil
+        manualOriginLongitude = nil
+        manualOriginName = nil
+        resetTransitRoutes()
+        refreshTransitRoutes()
+        if !enteredBusNumber.isEmpty { refreshBusCheck() }
+    }
+
     func refreshTransitRoutes(userInitiated: Bool = false) {
+        if !userInitiated {
+            let now = Date()
+            if let last = lastAutoTransitRoutesRefreshTime, now.timeIntervalSince(last) < 60 {
+                return
+            }
+            lastAutoTransitRoutesRefreshTime = now
+        }
+
         transitRoutesTask?.cancel()
 
         guard let destination, hasCurrentLocation,
-              let currentLatitude, let currentLongitude else {
-            resetTransitRoutes()
+              let originLatitude = effectiveOriginLatitude,
+              let originLongitude = effectiveOriginLongitude else {
+            clearTransitRoutesDisplay()
             return
         }
 
@@ -115,12 +187,14 @@ final class MainViewModel {
         guard let apiKey = resolution.apiKey else {
             switch resolution.unavailableReason {
             case .trialExhausted:
-                transitRoutes = []
                 transitRoutesLoadState = .failed(
-                    AppLocaleString.currentText("osmBus_お試し枠_使い切り")
+                    AppLocaleString.currentText("お試し枠_使い切り")
                 )
             default:
-                resetTransitRoutes()
+                // 自動更新はトライアルを消費しない設計のため、まだ一度も手動で
+                // 経路一覧を開いていないとここに来ることがある。よくある一時的な
+                // 状態なので、表示だけ空にして蓄積データベースは保持する。
+                clearTransitRoutesDisplay()
             }
             return
         }
@@ -129,8 +203,8 @@ final class MainViewModel {
 
         transitRoutesTask = Task {
             let result = await GoogleRoutesAPIService.fetchTransitRoutes(
-                originLatitude: currentLatitude,
-                originLongitude: currentLongitude,
+                originLatitude: originLatitude,
+                originLongitude: originLongitude,
                 destinationLatitude: destination.latitude,
                 destinationLongitude: destination.longitude,
                 apiKey: apiKey
@@ -141,35 +215,73 @@ final class MainViewModel {
             await MainActor.run {
                 switch result {
                 case .success(let routes):
-                    transitRoutes = routes
-                    if routes.isEmpty {
-                        transitRoutesLoadState = .failed(
-                            AppLocaleString.currentText("osmBus_ルートなし")
-                        )
-                    } else {
-                        transitRoutesLoadState = .loaded
-                    }
+                    mergeIntoAccumulatedRoutes(routes)
+                    // 今回の取得が空でも、蓄積データベースに何かあればそれを表示できる状態とみなす。
+                    transitRoutesLoadState = accumulatedTransitRoutes.isEmpty
+                        ? .failed(AppLocaleString.currentText("ルートなし"))
+                        : .loaded
                 case .failure(let error):
-                    transitRoutes = []
-                    transitRoutesLoadState = .failed(error.localizedDescription)
+                    transitRoutesLoadState = accumulatedTransitRoutes.isEmpty
+                        ? .failed(AppLocaleString.userFacingError(error))
+                        : .loaded
                 }
             }
         }
     }
 
+    /// 新しい旅の開始(目的地・出発地の変更)以外では呼ばないこと。
+    /// 経路データベース(蓄積分)ごと消去する。
     private func resetTransitRoutes() {
+        accumulatedTransitRoutes = []
+        clearTransitRoutesDisplay()
+    }
+
+    var hasAccumulatedTransitRoutes: Bool {
+        !accumulatedTransitRoutes.isEmpty
+    }
+
+    /// 現在地更新時にユーザーが明示的に選んだ場合に呼ぶ。経路データベースを消去する。
+    func resetAccumulatedTransitRoutes() {
+        resetTransitRoutes()
+    }
+
+    /// 経路一覧の表示状態だけを消去する。蓄積データベースには触れない。
+    /// APIキー未解決など「今回だけ更新できなかった」場合に使う—ここで蓄積分まで
+    /// 消してしまうと、位置情報の自動更新のたびにせっかくのデータベースが
+    /// クリアされてしまう。
+    private func clearTransitRoutesDisplay() {
         transitRoutesTask?.cancel()
-        transitRoutes = []
-        transitRoutesLoadState = .idle
+        transitRoutesLoadState = accumulatedTransitRoutes.isEmpty ? .idle : .loaded
+        lastAutoTransitRoutesRefreshTime = nil
+    }
+
+    /// 新しく見つかった経路をデータベースに蓄積する。バスの並び(系統の組み合わせ)が
+    /// 同じ経路は同一route とみなし、新しい方(所要時間・運賃が最新)で上書きする。
+    private func mergeIntoAccumulatedRoutes(_ newRoutes: [ParsedTransitRoute]) {
+        for route in newRoutes {
+            let key = GoogleRoutesAPIService.transitBusLineBadgeLabels(for: route).joined(separator: "→")
+            if !key.isEmpty {
+                accumulatedTransitRoutes.removeAll {
+                    GoogleRoutesAPIService.transitBusLineBadgeLabels(for: $0).joined(separator: "→") == key
+                }
+            }
+            accumulatedTransitRoutes.append(route)
+        }
     }
 
     func appendBusCharacter(_ raw: String) {
         guard let character = BusNumberInput.normalizedCharacter(raw) else { return }
 
         if BusKeypadInputMode.current == .clearBeforeNewInput, hasSettledBusCheckResult {
-            busCheckTask?.cancel()
-            enteredBusNumber = ""
-            resultState = .idle
+            if !isComposingNewBusNumber {
+                busCheckTask?.cancel()
+                enteredBusNumber = ""
+                resultState = .idle
+                isComposingNewBusNumber = true
+            } else {
+                busCheckTask?.cancel()
+                resultState = .idle
+            }
         }
 
         guard BusNumberInput.canAppend(character, to: enteredBusNumber) else { return }
@@ -196,11 +308,26 @@ final class MainViewModel {
         busCheckTask?.cancel()
         enteredBusNumber = ""
         resultState = .idle
+        isComposingNewBusNumber = false
+        boardingRouteIndex = nil
+        boardingRoute = nil
+        clearRidingState()
     }
 
-    func refreshBusCheck() {
+    func submitBusCheck() {
         guard !enteredBusNumber.isEmpty else { return }
         scheduleBusCheck(immediate: true)
+    }
+
+    func refreshBusCheck(userInitiated: Bool = true) {
+        if !userInitiated {
+            let now = Date()
+            if let last = lastAutoBusCheckRefreshTime, now.timeIntervalSince(last) < 20 {
+                return
+            }
+            lastAutoBusCheckRefreshTime = now
+        }
+        submitBusCheck()
     }
 
     private func scheduleBusCheck(immediate: Bool = false) {
@@ -213,10 +340,22 @@ final class MainViewModel {
 
         busCheckTask = Task {
             if !immediate {
-                try? await Task.sleep(nanoseconds: Self.busCheckDebounceNanoseconds)
+                try? await Task.sleep(nanoseconds: busCheckDebounceNanoseconds(for: enteredBusNumber.count))
             }
             guard !Task.isCancelled else { return }
             await performBusCheck()
+        }
+    }
+
+    /// 入力途中の部分判定を減らすため、桁数が少ないほど待ち時間を長くする。
+    private func busCheckDebounceNanoseconds(for length: Int) -> UInt64 {
+        switch length {
+        case 1:
+            return 2_500_000_000
+        case 2:
+            return 1_500_000_000
+        default:
+            return 900_000_000
         }
     }
 
@@ -225,12 +364,13 @@ final class MainViewModel {
         resultState = .checking
 
         guard let destination else {
-            applyResultState(.error(AppLocaleString.currentText("osmBus_エラー_目的地未設定")))
+            applyResultState(.error(AppLocaleString.currentText("エラー_目的地未設定")))
             return
         }
 
-        guard let currentLatitude, let currentLongitude else {
-            applyResultState(.error(AppLocaleString.currentText("osmBus_エラー_現在地未取得")))
+        guard let originLatitude = effectiveOriginLatitude,
+              let originLongitude = effectiveOriginLongitude else {
+            applyResultState(.error(AppLocaleString.currentText("エラー_現在地未取得")))
             return
         }
 
@@ -243,29 +383,73 @@ final class MainViewModel {
             case .trialExhausted:
                 applyResultState(.trialExhausted)
             default:
-                applyResultState(.error(AppLocaleString.currentText("osmBus_エラー_APIキー未設定")))
+                applyResultState(.error(AppLocaleString.currentText("エラー_APIキー未設定")))
             }
             return
         }
-        let outcome = await GoogleRoutesAPIService.checkBus(
-            busNumber: busNumber,
-            originLatitude: currentLatitude,
-            originLongitude: currentLongitude,
-            destination: destination,
+
+        let distanceMeters = GoogleRoutesAPIService.distanceMeters(
+            fromLatitude: originLatitude,
+            fromLongitude: originLongitude,
+            toLatitude: destination.latitude,
+            toLongitude: destination.longitude
+        )
+        if distanceMeters > 80_000 {
+            applyResultState(.error(
+                AppLocaleString.currentFormatted("エラー_距離超過_%d", Int(distanceMeters / 1000))
+            ))
+            return
+        }
+
+        // 経路データベースを最新化してから、蓄積された経路全体に対して番号を判定する。
+        // 直近1回のAPI応答だけを見ないことで、少し前まであった候補が今回だけたまたま
+        // 返ってこなかったせいで誤って「見送ってください」と判定するのを防ぐ。
+        let result = await GoogleRoutesAPIService.fetchTransitRoutes(
+            originLatitude: originLatitude,
+            originLongitude: originLongitude,
+            destinationLatitude: destination.latitude,
+            destinationLongitude: destination.longitude,
             apiKey: apiKey
         )
 
         guard !Task.isCancelled, enteredBusNumber == busNumber else { return }
 
-        switch outcome {
+        switch result {
+        case .failure(let error):
+            applyResultState(.error(AppLocaleString.userFacingError(error)))
+            return
+        case .success(let routes):
+            mergeIntoAccumulatedRoutes(routes)
+        }
+
+        guard !accumulatedTransitRoutes.isEmpty else {
+            applyResultState(.noTransitRoutes)
+            return
+        }
+
+        let response = GoogleRoutesAPIService.evaluateBusQuery(busNumber, routes: accumulatedTransitRoutes)
+
+        switch response.outcome {
         case .boardAll(let arrivalText, let alightStopText):
-            applyResultState(.canBoard(arrivalText: arrivalText, alightStopText: alightStopText))
+            applyResultState(
+                .canBoard(arrivalText: arrivalText, alightStopText: alightStopText, directionHint: response.boardingDirectionHint),
+                boardingRouteIndex: response.matchingRouteIndex,
+                boardingRoute: response.matchingRoute,
+                isBoardingRouteCheapest: response.isBoardingRouteCheapest
+            )
         case .boardIfVariant(let names, let arrivalText, let alightStopText):
-            applyResultState(.canBoardIfVariant(
-                variantNames: names,
-                arrivalText: arrivalText,
-                alightStopText: alightStopText
-            ))
+            applyResultState(
+                .canBoardIfVariant(
+                    variantNames: names,
+                    arrivalText: arrivalText,
+                    alightStopText: alightStopText,
+                    directionHint: response.boardingDirectionHint
+                ),
+                boardingRouteIndex: response.matchingRouteIndex,
+                boardingRoute: response.matchingRoute,
+                isBoardingRouteCheapest: response.isBoardingRouteCheapest
+            )
+            checkOtherVariantsInOSM(busNumber: busNumber, knownVariants: names)
         case .doNotBoard:
             applyResultState(.cannotBoard)
         case .noTransitRoutes:
@@ -275,9 +459,200 @@ final class MainViewModel {
         }
     }
 
-    private func applyResultState(_ state: ResultDisplayState) {
+    private func applyResultState(
+        _ state: ResultDisplayState,
+        boardingRouteIndex: Int? = nil,
+        boardingRoute: ParsedTransitRoute? = nil,
+        isBoardingRouteCheapest: Bool = true
+    ) {
+        let previous = lastSettledResultState
         resultState = state
-        playResultHaptic(for: state)
+        if case .canBoardIfVariant = state {} else {
+            otherBoardableVariants = []
+        }
+        switch state {
+        case .canBoard, .canBoardIfVariant:
+            self.boardingRouteIndex = boardingRouteIndex
+            self.boardingRoute = boardingRoute
+            self.isBoardingRouteCheapest = isBoardingRouteCheapest
+        default:
+            // 乗車中は boardingRoute と ridingState を保持する
+            if ridingTracker.ridingState == nil {
+                self.boardingRouteIndex = nil
+                self.boardingRoute = nil
+                self.isBoardingRouteCheapest = true
+                clearRidingState()
+            }
+        }
+        // 同じ結果の繰り返し更新ではハプティクを鳴らさない
+        if state != previous {
+            playResultHaptic(for: state)
+        }
+        lastSettledResultState = state
+        registerCompletedBusCheck()
+    }
+
+    private func checkOtherVariantsInOSM(busNumber: String, knownVariants: [String]) {
+        otherBoardableVariants = []
+        guard let lat = effectiveOriginLatitude,
+              let lon = effectiveOriginLongitude else { return }
+        let coord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+        let knownSet = Set(knownVariants)
+        Task { @MainActor in
+            guard let candidates = try? await OverpassAPIService.searchCandidates(
+                ref: busNumber, near: coord, radiusMeters: 30_000
+            ) else { return }
+            let others = candidates.map { $0.ref }.filter { !knownSet.contains($0) }
+            guard !others.isEmpty else { return }
+            guard case .canBoardIfVariant = resultState, enteredBusNumber == busNumber else { return }
+            otherBoardableVariants = others
+        }
+    }
+
+    func prepareBoardingRouteForVariant(_ variantName: String) {
+        if let match = GoogleRoutesAPIService.findMatchingRouteWithIndex(routes: accumulatedTransitRoutes, busNumber: variantName) {
+            boardingRouteIndex = match.index
+            boardingRoute = match.route
+        }
+    }
+
+    func resolvedBoardingBusRef(overrideVariant: String? = nil) -> String {
+        if let overrideVariant, !overrideVariant.isEmpty {
+            return overrideVariant
+        }
+        if case .canBoardIfVariant(let names, _, _, _) = resultState,
+           names.count == 1,
+           let only = names.first {
+            return only
+        }
+        if let route = boardingRoute,
+           let ref = GoogleRoutesAPIService.primaryBusLineRef(route: route, busNumber: enteredBusNumber),
+           !ref.isEmpty {
+            return ref
+        }
+        return enteredBusNumber
+    }
+
+    func boardingRouteMatchHint(overrideVariant: String? = nil) -> BoardingRouteMatchHint? {
+        guard let route = boardingRoute else { return nil }
+        let ref = resolvedBoardingBusRef(overrideVariant: overrideVariant)
+        let step = GoogleRoutesAPIService.boardingBusStep(route: route, busNumber: ref)
+        return BoardingRouteMatchHint(
+            preferredRef: ref,
+            headsign: step?.headsign,
+            departureStopName: step?.departureStopName,
+            arrivalStopName: step?.arrivalStopName
+        )
+    }
+
+    func startRiding() {
+        ridingTracker.startRiding(
+            route: boardingRoute,
+            busNumber: enteredBusNumber,
+            destination: destination
+        )
+    }
+
+    func enableRidingLocationTrackingIfNeeded() {
+        ridingTracker.enableLocationTrackingIfNeeded()
+    }
+
+    func startRidingFromOSMMap(routeRef: String, candidate: BusRouteCandidate, routeDetail: BusRouteDetail? = nil) {
+        enteredBusNumber = routeRef
+        ridingTracker.startFromOSMMap(
+            routeRef: routeRef,
+            candidate: candidate,
+            routeDetail: routeDetail,
+            destination: destination
+        )
+        ridingTracker.enableLocationTrackingIfNeeded()
+    }
+
+    func switchBoardingRoute(to index: Int) {
+        guard index >= 0, index < accumulatedTransitRoutes.count else { return }
+        boardingRouteIndex = index
+        boardingRoute = accumulatedTransitRoutes[index]
+        guard ridingTracker.isActive else { return }
+        ridingTracker.updateRouteWhileRiding(
+            route: boardingRoute,
+            busNumber: enteredBusNumber,
+            destination: destination
+        )
+    }
+
+    func startRidingWithVariant(_ variantName: String) {
+        prepareBoardingRouteForVariant(variantName)
+        ridingTracker.buildRidingState(
+            route: boardingRoute,
+            busNumber: variantName,
+            destination: destination,
+            startTracking: false
+        )
+    }
+
+    func startRidingOnboarding(busNumber: String) {
+        prepareBoardingRouteForVariant(busNumber)
+        enteredBusNumber = busNumber
+        ridingTracker.buildRidingState(
+            route: boardingRoute,
+            busNumber: busNumber,
+            destination: destination,
+            startTracking: false
+        )
+        ridingTracker.enableLocationTrackingIfNeeded()
+    }
+
+    /// 経路候補・候補ルート画面でバス番号を長押しした際、現在の乗車状態を解除してそのバスに切り替える。
+    func startRidingForBusSelection(routeIndex: Int, busNumber: String) {
+        guard routeIndex >= 0, routeIndex < accumulatedTransitRoutes.count else { return }
+        let route = accumulatedTransitRoutes[routeIndex]
+        boardingRouteIndex = routeIndex
+        boardingRoute = route
+        enteredBusNumber = busNumber
+        // 乗車中の切り替えは、その路線の本来の乗車停留所ではなく現在地を乗車地点として使う。
+        // 手前の停留所で既に乗り換え済みのケースで、逆方向誤検知や誤った距離アラームを防ぐため。
+        let boardingLocationOverride: RouteCoordinate? = {
+            guard let lat = currentLatitude, let lon = currentLongitude else { return nil }
+            return RouteCoordinate(latitude: lat, longitude: lon)
+        }()
+        ridingTracker.buildRidingState(
+            route: route,
+            busNumber: busNumber,
+            destination: destination,
+            startTracking: false,
+            boardingLocationOverride: boardingLocationOverride
+        )
+        ridingTracker.enableLocationTrackingIfNeeded()
+    }
+
+    func ridingBusCandidates(for input: String) -> [String] {
+        GoogleRoutesAPIService.busLineCandidates(for: input, in: accumulatedTransitRoutes)
+    }
+
+    func overrideRidingBusNumber(_ busNumber: String) {
+        ridingTracker.overrideBusNumber(busNumber)
+        enteredBusNumber = busNumber
+    }
+
+    func dismissWrongDirection() {
+        ridingTracker.dismissWrongDirection()
+    }
+
+    func dismissActiveRidingAlert() {
+        ridingTracker.dismissActiveAlert()
+    }
+
+    func checkRidingProgress(at coordinate: CLLocationCoordinate2D) {
+        ridingTracker.checkProgress(at: coordinate, destination: destination)
+    }
+
+    private func clearRidingState() {
+        ridingTracker.clear()
+    }
+
+    private func registerCompletedBusCheck() {
+        guard hasSettledBusCheckResult else { return }
+        isComposingNewBusNumber = false
     }
 
     private func playResultHaptic(for state: ResultDisplayState) {
@@ -292,121 +667,6 @@ final class MainViewModel {
             resultHaptic.notificationOccurred(.warning)
         case .idle, .checking, .noTransitRoutes:
             break
-        }
-    }
-}
-
-// MARK: - Location
-
-/// 現在地取得と権限状態の管理。
-@MainActor
-final class LocationService: NSObject, ObservableObject {
-    @Published private(set) var authorizationStatus: CLAuthorizationStatus
-    @Published private(set) var currentLocation: CLLocationCoordinate2D?
-    @Published private(set) var isUpdating = false
-    @Published private(set) var lastError: String?
-
-    private let manager = CLLocationManager()
-    private var isOneShotActive = false
-    private var locationTimeoutTask: Task<Void, Never>?
-
-    private static let fetchTimeoutSeconds: UInt64 = 10
-
-    override init() {
-        authorizationStatus = CLLocationManager().authorizationStatus
-        super.init()
-        manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-        authorizationStatus = manager.authorizationStatus
-    }
-
-    var isDenied: Bool {
-        authorizationStatus == .denied || authorizationStatus == .restricted
-    }
-
-    func refreshCurrentFromCache() {
-        if let cached = manager.location {
-            currentLocation = cached.coordinate
-        }
-    }
-
-    func fetchCurrentLocation() {
-        lastError = nil
-        authorizationStatus = manager.authorizationStatus
-
-        switch manager.authorizationStatus {
-        case .notDetermined:
-            manager.requestWhenInUseAuthorization()
-        case .restricted, .denied:
-            isUpdating = false
-            lastError = AppLocaleString.currentText("位置情報の利用が許可されていません。設定から許可してください。")
-        case .authorizedAlways, .authorizedWhenInUse:
-            if let cached = manager.location {
-                currentLocation = cached.coordinate
-            }
-            guard !isOneShotActive else { return }
-            isUpdating = true
-            isOneShotActive = true
-            manager.startUpdatingLocation()
-            startFetchTimeout()
-        @unknown default:
-            isUpdating = false
-            lastError = AppLocaleString.currentText("位置情報の状態を確認できません。")
-        }
-    }
-
-    private func startFetchTimeout() {
-        locationTimeoutTask?.cancel()
-        locationTimeoutTask = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: LocationService.fetchTimeoutSeconds * 1_000_000_000)
-            guard let self, !Task.isCancelled, self.isOneShotActive else { return }
-            self.finishUpdating(withError: AppLocaleString.currentText("位置情報を取得できませんでした。"))
-        }
-    }
-
-    private func cancelFetchTimeout() {
-        locationTimeoutTask?.cancel()
-        locationTimeoutTask = nil
-    }
-
-    private func finishUpdating(withError error: String? = nil) {
-        cancelFetchTimeout()
-        isOneShotActive = false
-        isUpdating = false
-        manager.stopUpdatingLocation()
-        if let error {
-            lastError = error
-        }
-    }
-}
-
-extension LocationService: CLLocationManagerDelegate {
-    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        Task { @MainActor in
-            authorizationStatus = manager.authorizationStatus
-            if authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways {
-                fetchCurrentLocation()
-            }
-        }
-    }
-
-    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let coordinate = locations.last?.coordinate else { return }
-        Task { @MainActor in
-            cancelFetchTimeout()
-            currentLocation = coordinate
-            lastError = nil
-            if isOneShotActive {
-                isOneShotActive = false
-                isUpdating = false
-                manager.stopUpdatingLocation()
-            }
-        }
-    }
-
-    nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        Task { @MainActor in
-            finishUpdating(withError: error.localizedDescription)
         }
     }
 }

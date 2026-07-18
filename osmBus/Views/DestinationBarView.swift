@@ -3,7 +3,9 @@ import SwiftUI
 struct DestinationBarView: View {
     let label: String
     let hasDestination: Bool
+    var isDisabled: Bool = false
     let onTap: () -> Void
+    var onMapPick: (() -> Void)? = nil
 
     @Environment(\.mainScreenCompactLayout) private var compactLayout
     @Environment(\.busFrameStyle) private var frameStyle
@@ -13,33 +15,57 @@ struct DestinationBarView: View {
     private var iconFont: Font { compactLayout ? .body : .title3 }
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 12) {
-                Image(systemName: hasDestination ? "mappin.circle.fill" : "mappin.and.ellipse")
-                    .font(iconFont)
-                    .foregroundStyle(hasDestination ? Color.accentColor : Color.secondary)
+        HStack(spacing: 0) {
+            Button(action: onTap) {
+                HStack(spacing: 12) {
+                    Image(systemName: hasDestination ? "mappin.circle.fill" : "mappin.and.ellipse")
+                        .font(iconFont)
+                        .foregroundStyle(isDisabled ? Color.secondary : (hasDestination ? Color.accentColor : Color.secondary))
 
-                Text(label)
-                    .font(.system(size: titleSize, weight: .semibold))
-                    .foregroundStyle(hasDestination ? Color.primary : Color.secondary)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.85)
-                    .multilineTextAlignment(.leading)
+                    Text(label)
+                        .font(.system(size: titleSize, weight: isDisabled ? .medium : .semibold))
+                        .foregroundStyle(isDisabled ? Color.secondary : (hasDestination ? Color.primary : Color.secondary))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
+                        .multilineTextAlignment(.leading)
 
-                Spacer(minLength: 0)
+                    Spacer(minLength: 0)
 
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    if onMapPick == nil {
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.horizontal, AppTheme.cardPaddingH)
+                .padding(.vertical, compactLayout ? 10 : 14)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             }
-            .padding(.horizontal, AppTheme.cardPaddingH)
-            .padding(.vertical, compactLayout ? 10 : 14)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .background(BusCardBackground(style: frameStyle))
+            .buttonStyle(.plain)
+            .allowsHitTesting(!isDisabled)
+            .accessibilityLabel(AppLocaleString.text("目的地", locale: locale))
+            .accessibilityValue(label)
+
+            if let onMapPick {
+                Rectangle()
+                    .fill(Color.secondary.opacity(0.25))
+                    .frame(width: 1)
+                    .padding(.vertical, 10)
+
+                Button(action: onMapPick) {
+                    Image(systemName: "map")
+                        .font(iconFont)
+                        .foregroundStyle(isDisabled ? Color.secondary : .blue)
+                        .padding(.horizontal, AppTheme.cardPaddingH)
+                        .padding(.vertical, compactLayout ? 10 : 14)
+                        .frame(maxHeight: .infinity)
+                }
+                .buttonStyle(.plain)
+                .allowsHitTesting(!isDisabled)
+                .accessibilityLabel(AppLocaleString.text("地図から選択", locale: locale))
+            }
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(AppLocaleString.text("目的地", locale: locale))
-        .accessibilityValue(label)
+        .background(BusCardBackground(style: frameStyle))
     }
 }
 
@@ -47,8 +73,12 @@ struct CurrentLocationBarView: View {
     let statusText: String
     let isUpdating: Bool
     let showsSettingsAction: Bool
+    var hasManualOrigin: Bool = false
+    var isDisabled: Bool = false
     let onRefresh: () -> Void
     let onOpenSettings: () -> Void
+    var onClearManualOrigin: (() -> Void)? = nil
+    var onMapPick: (() -> Void)? = nil
 
     @Environment(\.mainScreenCompactLayout) private var compactLayout
     @Environment(\.busFrameStyle) private var frameStyle
@@ -57,40 +87,68 @@ struct CurrentLocationBarView: View {
     private var titleSize: CGFloat { compactLayout ? 15 : 18 }
     private var iconFont: Font { compactLayout ? .body : .title3 }
 
+    private var barLabel: String {
+        let prefix = hasManualOrigin
+            ? AppLocaleString.text("地図_出発地", locale: locale)
+            : AppLocaleString.text("現在地", locale: locale)
+        return "\(prefix): \(statusText)"
+    }
+
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: iconName)
                 .font(iconFont)
-                .foregroundStyle(iconColor)
+                .foregroundStyle(isDisabled ? Color.secondary : iconColor)
 
-            Text("\(AppLocaleString.text("現在地", locale: locale)): \(statusText)")
+            Text(barLabel)
                 .font(.system(size: titleSize, weight: .medium))
-                .foregroundStyle(.primary)
+                .foregroundStyle(isDisabled ? Color.secondary : Color.primary)
                 .lineLimit(2)
                 .minimumScaleFactor(0.85)
 
             Spacer(minLength: 0)
 
-            if showsSettingsAction {
-                Button(action: onOpenSettings) {
-                    Image(systemName: "gearshape")
-                        .font(iconFont)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(AppLocaleString.text("設定", locale: locale))
-            } else {
-                Button(action: onRefresh) {
-                    if isUpdating {
-                        ProgressView()
-                            .controlSize(.small)
-                    } else {
-                        Image(systemName: "arrow.clockwise")
+            HStack(spacing: 12) {
+                if hasManualOrigin, let onClearManualOrigin {
+                    Button(action: onClearManualOrigin) {
+                        Image(systemName: "xmark.circle")
                             .font(iconFont)
                     }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(isDisabled ? Color.secondary : .orange)
+                    .accessibilityLabel(AppLocaleString.text("地図_手動出発地クリア", locale: locale))
+                } else if showsSettingsAction {
+                    Button(action: onOpenSettings) {
+                        Image(systemName: "gearshape")
+                            .font(iconFont)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(AppLocaleString.text("設定", locale: locale))
+                } else {
+                    Button(action: onRefresh) {
+                        if isUpdating {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Image(systemName: "arrow.clockwise")
+                                .font(iconFont)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isUpdating)
                 }
-                .buttonStyle(.plain)
-                .disabled(isUpdating)
+
+                if let onMapPick {
+                    Button(action: onMapPick) {
+                        Image(systemName: "map")
+                            .font(iconFont)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(isDisabled ? Color.secondary : .blue)
+                    .accessibilityLabel(AppLocaleString.text("地図から選択", locale: locale))
+                }
             }
+            .allowsHitTesting(!isDisabled)
         }
         .padding(.horizontal, AppTheme.cardPaddingH)
         .padding(.vertical, compactLayout ? 10 : 14)
@@ -99,11 +157,13 @@ struct CurrentLocationBarView: View {
     }
 
     private var iconName: String {
-        showsSettingsAction ? "location.slash" : "location.fill"
+        if hasManualOrigin { return "mappin.circle.fill" }
+        return showsSettingsAction ? "location.slash" : "location.fill"
     }
 
     private var iconColor: Color {
-        showsSettingsAction ? Color.orange : Color.accentColor
+        if hasManualOrigin { return .green }
+        return showsSettingsAction ? Color.orange : Color.accentColor
     }
 }
 
