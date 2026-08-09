@@ -10,6 +10,7 @@ struct TransitRoutesSheetView: View {
     let routes: [ParsedTransitRoute]
     var ridingBusNumber: String? = nil
     let onReload: () -> Void
+    var onSwitchRoute: ((Int) -> Void)? = nil
     var onSelectRidingBus: ((Int, String) -> Void)? = nil
 
     @Environment(\.locale) private var locale
@@ -56,6 +57,7 @@ struct TransitRoutesSheetView: View {
                     ridingBusNumber: ridingBusNumber,
                     allRoutes: routes,
                     routeOptionCount: routes.count,
+                    onSwitchRoute: onSwitchRoute,
                     onSelectRidingBus: { routeIndex, busNumber in
                         onSelectRidingBus?(routeIndex, busNumber)
                     }
@@ -219,7 +221,14 @@ private struct RouteCandidateRow: View {
                             .foregroundStyle(.tertiary)
                     }
 
-                    busLineBadge(text: line, fontSize: fontSize)
+                    TransitBusLineBadgeLabel(
+                        text: line,
+                        isRidingBus: ridingBusNumber.map { line.uppercased() == $0.uppercased() } ?? false,
+                        font: .system(size: fontSize, weight: .bold, design: .rounded),
+                        horizontalPadding: 14,
+                        verticalPadding: 8,
+                        cornerRadius: 10
+                    )
                         .accessibilityLabel(fullBusLineAccessibilityLabel(at: badgeIndex, compact: line))
                         .onLongPressGesture {
                             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -228,21 +237,6 @@ private struct RouteCandidateRow: View {
                 }
             }
         }
-    }
-
-    private func busLineBadge(text: String, fontSize: CGFloat) -> some View {
-        let isRiding = ridingBusNumber.map { text.uppercased() == $0.uppercased() } ?? false
-        return Text(text)
-            .font(.system(size: fontSize, weight: .bold, design: .rounded))
-            .foregroundStyle(.white)
-            .lineLimit(1)
-            .fixedSize(horizontal: true, vertical: false)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .background(
-                isRiding ? Color.orange : AppTheme.brandBlue,
-                in: RoundedRectangle(cornerRadius: 10, style: .continuous)
-            )
     }
 
     private func fullBusLineAccessibilityLabel(at index: Int, compact: String) -> String {

@@ -12,14 +12,13 @@ struct ResultBannerView: View {
     var otherBoardableVariants: [String] = []
 
     @Environment(\.mainScreenCompactLayout) private var compactLayout
-    @Environment(\.busFrameStyle) private var frameStyle
-    @Environment(\.cardFillColor) private var cardFillColor
+    @Environment(\.busCardStyle) private var cardStyle
     @Environment(\.locale) private var locale
 
     @State private var showsVariantPicker = false
     @State private var pendingVariantNames: [String] = []
 
-    private var cardBg: Color { cardFillColor ?? frameStyle.cardFill }
+    private var cardBg: Color { cardStyle.cardFill }
 
     private var verdictFontSize: CGFloat {
         compactLayout ? 24 : 30
@@ -71,7 +70,7 @@ struct ResultBannerView: View {
         .padding(.horizontal, compactLayout ? 12 : 16)
         .padding(.vertical, compactLayout ? 10 : 14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: contentAlignment)
-        .background(BusCardBackground(style: frameStyle))
+        .background(BusCardBackground(style: cardStyle))
         .animation(.easeInOut(duration: 0.2), value: state)
         .confirmationDialog(
             AppLocaleString.text("系統選択_タイトル", locale: locale),

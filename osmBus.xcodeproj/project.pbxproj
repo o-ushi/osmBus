@@ -16,7 +16,7 @@
 		B01D007 /* DestinationBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D009 /* DestinationBarView.swift */; };
 		B01D008 /* ResultBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D010 /* ResultBannerView.swift */; };
 		B01D009 /* BusKeypadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D011 /* BusKeypadView.swift */; };
-		B01D010 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D012 /* SettingsView.swift */; };
+		B01D010 /* GoogleRoutesAPISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D012 /* GoogleRoutesAPISettingsView.swift */; };
 		B01D011 /* GoogleRoutesAPIKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D013 /* GoogleRoutesAPIKeyStore.swift */; };
 		B01D012 /* GoogleRoutesAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D014 /* GoogleRoutesAPIService.swift */; };
 		B01D013 /* APIKeySetupBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D015 /* APIKeySetupBanner.swift */; };
@@ -33,14 +33,10 @@
 		B01D024 /* DestinationHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D026 /* DestinationHistoryView.swift */; };
 		B01D025 /* AppLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D027 /* AppLanguage.swift */; };
 		B01D026 /* AppLocaleString.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D028 /* AppLocaleString.swift */; };
-		B01D027 /* AppAppearanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D029 /* AppAppearanceStore.swift */; };
-		B01D028 /* ColorThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D030 /* ColorThemeManager.swift */; };
+		B01D027 /* Color+Contrast.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D029 /* Color+Contrast.swift */; };
 		B01D029 /* AppSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D031 /* AppSettingsView.swift */; };
 		B01D030 /* BusCardBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D032 /* BusCardBackground.swift */; };
-		B01D031 /* AppearanceBackgroundLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D033 /* AppearanceBackgroundLayer.swift */; };
-		B01D032 /* AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D034 /* AppearanceSettingsView.swift */; };
-		B01D033 /* AppearanceFrameEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D035 /* AppearanceFrameEditorSheet.swift */; };
-		B01D034 /* AppearanceSceneColorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D036 /* AppearanceSceneColorSheet.swift */; };
+		B01D031 /* SceneBackgroundLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D033 /* SceneBackgroundLayer.swift */; };
 		B01D035 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B02D040 /* Localizable.strings */; };
 		B01D036 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B02D043 /* InfoPlist.strings */; };
 		B01D037 /* PlanStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D044 /* PlanStore.swift */; };
@@ -90,7 +86,7 @@
 		B02D009 /* DestinationBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationBarView.swift; sourceTree = "<group>"; };
 		B02D010 /* ResultBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultBannerView.swift; sourceTree = "<group>"; };
 		B02D011 /* BusKeypadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusKeypadView.swift; sourceTree = "<group>"; };
-		B02D012 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		B02D012 /* GoogleRoutesAPISettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleRoutesAPISettingsView.swift; sourceTree = "<group>"; };
 		B02D013 /* GoogleRoutesAPIKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleRoutesAPIKeyStore.swift; sourceTree = "<group>"; };
 		B02D014 /* GoogleRoutesAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleRoutesAPIService.swift; sourceTree = "<group>"; };
 		B02D015 /* APIKeySetupBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeySetupBanner.swift; sourceTree = "<group>"; };
@@ -107,14 +103,10 @@
 		B02D026 /* DestinationHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationHistoryView.swift; sourceTree = "<group>"; };
 		B02D027 /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguage.swift; sourceTree = "<group>"; };
 		B02D028 /* AppLocaleString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLocaleString.swift; sourceTree = "<group>"; };
-		B02D029 /* AppAppearanceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAppearanceStore.swift; sourceTree = "<group>"; };
-		B02D030 /* ColorThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorThemeManager.swift; sourceTree = "<group>"; };
+		B02D029 /* Color+Contrast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Contrast.swift"; sourceTree = "<group>"; };
 		B02D031 /* AppSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsView.swift; sourceTree = "<group>"; };
 		B02D032 /* BusCardBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusCardBackground.swift; sourceTree = "<group>"; };
-		B02D033 /* AppearanceBackgroundLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceBackgroundLayer.swift; sourceTree = "<group>"; };
-		B02D034 /* AppearanceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingsView.swift; sourceTree = "<group>"; };
-		B02D035 /* AppearanceFrameEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceFrameEditorSheet.swift; sourceTree = "<group>"; };
-		B02D036 /* AppearanceSceneColorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSceneColorSheet.swift; sourceTree = "<group>"; };
+		B02D033 /* SceneBackgroundLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneBackgroundLayer.swift; sourceTree = "<group>"; };
 		B02D037 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Localization/en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		B02D038 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = Localization/ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		B02D039 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = Localization/vi.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -216,14 +208,11 @@
 				B02D019 /* DestinationInputView.swift */,
 				B02D010 /* ResultBannerView.swift */,
 				B02D011 /* BusKeypadView.swift */,
-				B02D012 /* SettingsView.swift */,
+				B02D012 /* GoogleRoutesAPISettingsView.swift */,
 				B02D072 /* GoogleAPISettingsView.swift */,
 				B02D031 /* AppSettingsView.swift */,
 				B02D032 /* BusCardBackground.swift */,
-				B02D033 /* AppearanceBackgroundLayer.swift */,
-				B02D034 /* AppearanceSettingsView.swift */,
-				B02D035 /* AppearanceFrameEditorSheet.swift */,
-				B02D036 /* AppearanceSceneColorSheet.swift */,
+				B02D033 /* SceneBackgroundLayer.swift */,
 				B02D015 /* APIKeySetupBanner.swift */,
 				B02D020 /* MoreActionsMenuView.swift */,
 				B02D021 /* PlanManagementView.swift */,
@@ -287,8 +276,6 @@
 				B02D063 /* OverpassAPIService.swift */,
 				B02D051 /* RoutesAPIKeyResolver.swift */,
 				B02D028 /* AppLocaleString.swift */,
-				B02D029 /* AppAppearanceStore.swift */,
-				B02D030 /* ColorThemeManager.swift */,
 				B02D044 /* PlanStore.swift */,
 				B02D052 /* IAPProductIDs.swift */,
 				B02D054 /* StorePurchaseManager.swift */,
@@ -301,6 +288,7 @@
 			isa = PBXGroup;
 			children = (
 				B02D006 /* AppTheme.swift */,
+				B02D029 /* Color+Contrast.swift */,
 				B02D040 /* Localizable.strings */,
 				B02D043 /* InfoPlist.strings */,
 			);
@@ -392,7 +380,7 @@
 				B01D007 /* DestinationBarView.swift in Sources */,
 				B01D008 /* ResultBannerView.swift in Sources */,
 				B01D009 /* BusKeypadView.swift in Sources */,
-				B01D010 /* SettingsView.swift in Sources */,
+				B01D010 /* GoogleRoutesAPISettingsView.swift in Sources */,
 				B01D011 /* GoogleRoutesAPIKeyStore.swift in Sources */,
 				B01D012 /* GoogleRoutesAPIService.swift in Sources */,
 				B01D013 /* APIKeySetupBanner.swift in Sources */,
@@ -434,14 +422,10 @@
 				B01D073 /* RidingTracker.swift in Sources */,
 				B01D044 /* RoutesAPIKeyResolver.swift in Sources */,
 				B01D026 /* AppLocaleString.swift in Sources */,
-				B01D027 /* AppAppearanceStore.swift in Sources */,
-				B01D028 /* ColorThemeManager.swift in Sources */,
+				B01D027 /* Color+Contrast.swift in Sources */,
 				B01D029 /* AppSettingsView.swift in Sources */,
 				B01D030 /* BusCardBackground.swift in Sources */,
-				B01D031 /* AppearanceBackgroundLayer.swift in Sources */,
-				B01D032 /* AppearanceSettingsView.swift in Sources */,
-				B01D033 /* AppearanceFrameEditorSheet.swift in Sources */,
-				B01D034 /* AppearanceSceneColorSheet.swift in Sources */,
+				B01D031 /* SceneBackgroundLayer.swift in Sources */,
 				B01D037 /* PlanStore.swift in Sources */,
 				B01D038 /* OsmBusDeepLink.swift in Sources */,
 				B01D039 /* TransitRoutesSheetView.swift in Sources */,
@@ -620,7 +604,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.33;
+				MARKETING_VERSION = 1.36;
 				PRODUCT_BUNDLE_IDENTIFIER = com.osamushikubo.osmBus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -645,7 +629,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.33;
+				MARKETING_VERSION = 1.36;
 				PRODUCT_BUNDLE_IDENTIFIER = com.osamushikubo.osmBus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

@@ -39,6 +39,7 @@ final class MainViewModel {
     var osmRidingRouteCandidate: BusRouteCandidate? { ridingTracker.osmRidingRouteCandidate }
     var osmRidingRouteDetail: BusRouteDetail? { ridingTracker.osmRidingRouteDetail }
     var wrongDirectionDetected: Bool { ridingTracker.wrongDirectionDetected }
+    var ridingNearestAlertReached: Bool { ridingTracker.nearestDistanceAlertReached }
     var activeRidingAlert: ActiveRidingAlert? { ridingTracker.activeAlert }
     var ridingAlightCoordinate: CLLocationCoordinate2D? { ridingTracker.alightCoordinate }
 
@@ -95,20 +96,6 @@ final class MainViewModel {
     private(set) var boardingRoute: ParsedTransitRoute?
 
     private(set) var isBoardingRouteCheapest: Bool = true
-
-    var canShowBoardingRouteMap: Bool {
-        guard hasCurrentLocation, destination != nil,
-              let boardingRoute,
-              GoogleRoutesAPIService.routeHasMapGeometry(boardingRoute) else {
-            return false
-        }
-        switch resultState {
-        case .canBoard, .canBoardIfVariant:
-            return true
-        default:
-            return false
-        }
-    }
 
     private var busCheckTask: Task<Void, Never>?
     private var transitRoutesTask: Task<Void, Never>?
@@ -533,32 +520,7 @@ final class MainViewModel {
         return enteredBusNumber
     }
 
-    func boardingRouteMatchHint(overrideVariant: String? = nil) -> BoardingRouteMatchHint? {
-        guard let route = boardingRoute else { return nil }
-        let ref = resolvedBoardingBusRef(overrideVariant: overrideVariant)
-        let step = GoogleRoutesAPIService.boardingBusStep(route: route, busNumber: ref)
-        return BoardingRouteMatchHint(
-            preferredRef: ref,
-            headsign: step?.headsign,
-            departureStopName: step?.departureStopName,
-            arrivalStopName: step?.arrivalStopName
-        )
-    }
-
-    func startRiding() {
-        ridingTracker.startRiding(
-            route: boardingRoute,
-            busNumber: enteredBusNumber,
-            destination: destination
-        )
-    }
-
-    func enableRidingLocationTrackingIfNeeded() {
-        ridingTracker.enableLocationTrackingIfNeeded()
-    }
-
     func startRidingFromOSMMap(routeRef: String, candidate: BusRouteCandidate, routeDetail: BusRouteDetail? = nil) {
-        enteredBusNumber = routeRef
         ridingTracker.startFromOSMMap(
             routeRef: routeRef,
             candidate: candidate,
@@ -566,6 +528,7 @@ final class MainViewModel {
             destination: destination
         )
         ridingTracker.enableLocationTrackingIfNeeded()
+        syncEnteredBusNumber()
     }
 
     func switchBoardingRoute(to index: Int) {
@@ -580,19 +543,8 @@ final class MainViewModel {
         )
     }
 
-    func startRidingWithVariant(_ variantName: String) {
-        prepareBoardingRouteForVariant(variantName)
-        ridingTracker.buildRidingState(
-            route: boardingRoute,
-            busNumber: variantName,
-            destination: destination,
-            startTracking: false
-        )
-    }
-
     func startRidingOnboarding(busNumber: String) {
         prepareBoardingRouteForVariant(busNumber)
-        enteredBusNumber = busNumber
         ridingTracker.buildRidingState(
             route: boardingRoute,
             busNumber: busNumber,
@@ -600,6 +552,7 @@ final class MainViewModel {
             startTracking: false
         )
         ridingTracker.enableLocationTrackingIfNeeded()
+        syncEnteredBusNumber()
     }
 
     /// 経路候補・候補ルート画面でバス番号を長押しした際、現在の乗車状態を解除してそのバスに切り替える。
@@ -608,7 +561,6 @@ final class MainViewModel {
         let route = accumulatedTransitRoutes[routeIndex]
         boardingRouteIndex = routeIndex
         boardingRoute = route
-        enteredBusNumber = busNumber
         // 乗車中の切り替えは、その路線の本来の乗車停留所ではなく現在地を乗車地点として使う。
         // 手前の停留所で既に乗り換え済みのケースで、逆方向誤検知や誤った距離アラームを防ぐため。
         let boardingLocationOverride: RouteCoordinate? = {
@@ -623,15 +575,51 @@ final class MainViewModel {
             boardingLocationOverride: boardingLocationOverride
         )
         ridingTracker.enableLocationTrackingIfNeeded()
+        syncEnteredBusNumber()
     }
 
     func ridingBusCandidates(for input: String) -> [String] {
         GoogleRoutesAPIService.busLineCandidates(for: input, in: accumulatedTransitRoutes)
     }
 
+    /// 乗車中にキーパッドへ別のバス番号を入力して乗り換えを選択した場合の処理。
+    /// 単なる表示ラベルの変更ではなく、乗り換え先バスの区間として降車地点・ポリライン・
+    /// 距離アラート状態を再構築する(そうしないと降車済みの停留所を基準に距離が
+    /// 計算され続け、乗り換え後に距離がどんどん広がって見える不具合になる)。
     func overrideRidingBusNumber(_ busNumber: String) {
-        ridingTracker.overrideBusNumber(busNumber)
-        enteredBusNumber = busNumber
+        guard let match = GoogleRoutesAPIService.findMatchingRouteWithIndex(
+            routes: accumulatedTransitRoutes,
+            busNumber: busNumber
+        ) else {
+            ridingTracker.overrideBusNumber(busNumber)
+            syncEnteredBusNumber()
+            return
+        }
+        boardingRouteIndex = match.index
+        boardingRoute = match.route
+        // 乗り換え時点の乗車停留所は、その区間の本来の乗車停留所ではなく現在地を使う
+        // (手前の停留所で既に乗り換え済みのケースがあるため)。startRidingForBusSelection と同様。
+        let boardingLocationOverride: RouteCoordinate? = {
+            guard let lat = currentLatitude, let lon = currentLongitude else { return nil }
+            return RouteCoordinate(latitude: lat, longitude: lon)
+        }()
+        ridingTracker.buildRidingState(
+            route: match.route,
+            busNumber: busNumber,
+            destination: destination,
+            startTracking: ridingTracker.shouldTrackRiding,
+            boardingLocationOverride: boardingLocationOverride
+        )
+        ridingTracker.enableLocationTrackingIfNeeded()
+        syncEnteredBusNumber()
+    }
+
+    /// enteredBusNumber は「乗車中バス」の表示にも使われるため、RidingTracker に実際に
+    /// 反映された値で必ず上書きする(呼び出し元が渡した値をそのまま信用すると、
+    /// buildRidingState 内のガード節で乗車開始に失敗した場合に表示だけがズレる)。
+    private func syncEnteredBusNumber() {
+        guard let actual = ridingTracker.ridingState?.busNumber else { return }
+        enteredBusNumber = actual
     }
 
     func dismissWrongDirection() {

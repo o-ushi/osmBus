@@ -9,7 +9,7 @@ struct BusKeypadView: View {
     let onSubmit: () -> Void
     let onClear: () -> Void
 
-    @Environment(\.busFrameStyle) private var frameStyle
+    @Environment(\.busCardStyle) private var cardStyle
     @Environment(\.mainScreenCompactLayout) private var compactLayout
     @Environment(\.locale) private var locale
 
@@ -43,7 +43,7 @@ struct BusKeypadView: View {
             .padding(.bottom, metrics.edgePaddingBottom + KeypadMetrics.cardBottomInset)
             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
         }
-        .background(BusCardBackground(style: frameStyle))
+        .background(BusCardBackground(style: cardStyle))
         .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius))
     }
 
@@ -99,15 +99,11 @@ struct BusKeypadView: View {
     private static let enterSymbolName: String =
         ["return", "arrow.turn.down.left"].first { UIImage(systemName: $0) != nil } ?? "return"
 
-    private var isLightCard: Bool {
-        frameStyle.cardFill.relativeLuminance > 0.18
-    }
-
     private func keypadEnterButton(action: @escaping () -> Void) -> some View {
         let active = canSubmit && !isDisabled
         return Button {
             guard canSubmit else { return }
-            KeypadFeedbackSettings.triggerEnterKey()
+            KeypadHapticManager.shared.triggerEnterKey()
             action()
         } label: {
             Image(systemName: Self.enterSymbolName)
@@ -115,7 +111,7 @@ struct BusKeypadView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .foregroundStyle(active ? .white : Color.secondary)
                 .background(
-                    active ? Color.green : backgroundColor(for: .clear),
+                    active ? Color.green : Color.black.opacity(0.05),
                     in: RoundedRectangle(cornerRadius: AppTheme.keypadCornerRadius)
                 )
                 .animation(.easeInOut(duration: 0.18), value: active)
@@ -131,7 +127,7 @@ struct BusKeypadView: View {
         action: @escaping () -> Void
     ) -> some View {
         Button {
-            KeypadFeedbackSettings.triggerKeyTap()
+            KeypadHapticManager.shared.triggerKeyTap()
             action()
         } label: {
             Text(title)
@@ -144,16 +140,14 @@ struct BusKeypadView: View {
         .buttonStyle(KeypadButtonStyle())
     }
 
-    // カード背景の明暗に応じてボタン面の色を選ぶ。
-    // 明るいカード: 黒い薄膜でキーの輪郭を出す。暗いカード: 白い薄膜。
     private func backgroundColor(for style: KeyStyle) -> Color {
         switch style {
         case .primary:
-            return isLightCard ? Color.black.opacity(0.08) : Color.white.opacity(0.22)
+            return Color.black.opacity(0.08)
         case .clear:
-            return isLightCard ? Color.black.opacity(0.05) : Color.white.opacity(0.14)
+            return Color.black.opacity(0.05)
         case .letter:
-            return isLightCard ? Color.black.opacity(0.06) : Color.white.opacity(0.20)
+            return Color.black.opacity(0.06)
         }
     }
 }

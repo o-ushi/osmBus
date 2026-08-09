@@ -16,8 +16,27 @@ struct OsmBusApp: App {
             BusKeypadInputMode.storageKey: BusKeypadInputMode.appendToExisting.rawValue,
         ])
         StopAlertSettings.registerDefaults()
-        KeypadFeedbackSettings.registerDefaults()
+        KeypadHapticManager.registerDefaults()
+        Self.purgeLegacyAppearanceDefaults()
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
+    }
+
+    /// 削除済みのカラーテーマ／外観設定が端末に残した UserDefaults を一掃する。
+    private static func purgeLegacyAppearanceDefaults() {
+        let defaults = UserDefaults.standard
+        let keys = [
+            "osmBus.colorTheme",
+            "osmBus.framePreset",
+            "osmBus.appTexture",
+            "osmBus.customFrame",
+            "osmBus.sceneCustom",
+            "osmBus.sceneR",
+            "osmBus.sceneG",
+            "osmBus.sceneB",
+        ]
+        for key in keys {
+            defaults.removeObject(forKey: key)
+        }
     }
 
     @AppStorage(AppLanguage.storageKey) private var appLanguageCode = AppLanguage.english.rawValue
@@ -26,8 +45,6 @@ struct OsmBusApp: App {
         WindowGroup {
             MainView(pendingDeepLinkDestination: $pendingDeepLinkDestination)
                 .environment(\.locale, Locale(identifier: appLanguageCode))
-                .environment(ColorThemeManager.shared)
-                .environment(AppAppearanceStore.shared)
                 .environment(PlanStore.shared)
                 .environment(StorePurchaseManager.shared)
                 .environment(SharedRoutesTrialStore.shared)

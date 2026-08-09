@@ -30,6 +30,10 @@ final class RidingTracker {
     private(set) var osmRidingRouteCandidate: BusRouteCandidate?
     private(set) var osmRidingRouteDetail: BusRouteDetail?
     private(set) var wrongDirectionDetected = false
+    /// 有効な距離アラートのうち最も近いリング(ゴール直前)まで到達したか。
+    /// 降車ボタンの押し忘れでバックグラウンド測位が延々と続き、端末が発熱するのを
+    /// 防ぐため、ここが true になったら呼び出し側でバックグラウンド追跡を止める。
+    private(set) var nearestDistanceAlertReached = false
     private(set) var activeAlert: ActiveRidingAlert?
     /// activeAlert 表示中に発火した分。前のアラートが閉じられ次第、順番に表示する。
     private var pendingRidingAlerts: [ActiveRidingAlert] = []
@@ -59,6 +63,7 @@ final class RidingTracker {
         ridingStartTime = nil
         boardingStopDistanceToDestination = 0
         wrongDirectionDetected = false
+        nearestDistanceAlertReached = false
         activeAlert = nil
         pendingRidingAlerts = []
         alightCoordinate = nil
@@ -104,9 +109,10 @@ final class RidingTracker {
         // 限らない(手前の停留所で既に乗り換え済みのことがある)。その場合は現在地を基準にする。
         let boardingPoint = boardingLocationOverride ?? busStep.departureStopLocation ?? busStep.polylineCoordinates.first
         if let boarding = boardingPoint, let dest = destination {
-            let from = CLLocation(latitude: boarding.latitude, longitude: boarding.longitude)
-            let to = CLLocation(latitude: dest.latitude, longitude: dest.longitude)
-            boardingStopDistanceToDestination = from.distance(from: to)
+            boardingStopDistanceToDestination = Self.coordinateDistance(
+                from: CLLocationCoordinate2D(latitude: boarding.latitude, longitude: boarding.longitude),
+                to: CLLocationCoordinate2D(latitude: dest.latitude, longitude: dest.longitude)
+            )
         }
         ridingStartTime = Date()
         wrongDirectionDetected = false
@@ -114,15 +120,6 @@ final class RidingTracker {
         ridingState = RidingState(
             busNumber: busNumber,
             alightStopName: alightStop
-        )
-    }
-
-    func startRiding(route: ParsedTransitRoute?, busNumber: String, destination: Destination?) {
-        buildRidingState(
-            route: route,
-            busNumber: busNumber,
-            destination: destination,
-            startTracking: false
         )
     }
 
@@ -145,9 +142,10 @@ final class RidingTracker {
         ridingStartTime = Date()
         wrongDirectionDetected = false
         if let boardingPoint = ridingRoutePolyline.first, let dest = destination {
-            let from = CLLocation(latitude: boardingPoint.latitude, longitude: boardingPoint.longitude)
-            let to = CLLocation(latitude: dest.latitude, longitude: dest.longitude)
-            boardingStopDistanceToDestination = from.distance(from: to)
+            boardingStopDistanceToDestination = Self.coordinateDistance(
+                from: CLLocationCoordinate2D(latitude: boardingPoint.latitude, longitude: boardingPoint.longitude),
+                to: CLLocationCoordinate2D(latitude: dest.latitude, longitude: dest.longitude)
+            )
         } else {
             boardingStopDistanceToDestination = 0
         }
@@ -217,9 +215,11 @@ final class RidingTracker {
             )
             // ルートの15%以上進んでいる場合は正しい方向と判断して検知しない
             if routeProgress < 0.15 {
-                let current = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-                let destLoc = CLLocation(latitude: dest.latitude, longitude: dest.longitude)
-                if current.distance(from: destLoc) > boardingStopDistanceToDestination * 1.5 {
+                let distanceToDestination = Self.coordinateDistance(
+                    from: coordinate,
+                    to: CLLocationCoordinate2D(latitude: dest.latitude, longitude: dest.longitude)
+                )
+                if distanceToDestination > boardingStopDistanceToDestination * 1.5 {
                     wrongDirectionDetected = true
                 }
             }
@@ -233,6 +233,7 @@ final class RidingTracker {
             alightCoordinate = nil
             triggeredDistanceThresholds = []
             lastDistanceToAlight = nil
+            nearestDistanceAlertReached = false
             return
         }
         if let current = alightCoordinate,
@@ -243,6 +244,7 @@ final class RidingTracker {
         alightCoordinate = coordinate
         triggeredDistanceThresholds = []
         lastDistanceToAlight = nil
+        nearestDistanceAlertReached = false
     }
 
     private static func resolveAlightCoordinate(
@@ -274,24 +276,24 @@ final class RidingTracker {
         return nil
     }
 
+    /// 乗車機能内の距離計算はすべてこのヘルパー経由にし、CLLocation の生成箇所を1箇所に絞る。
     private static func coordinateDistance(
         from: CLLocationCoordinate2D,
         to: CLLocationCoordinate2D
     ) -> Double {
-        CLLocation(latitude: from.latitude, longitude: from.longitude)
-            .distance(from: CLLocation(latitude: to.latitude, longitude: to.longitude))
+        GoogleRoutesAPIService.distanceMeters(
+            fromLatitude: from.latitude,
+            fromLongitude: from.longitude,
+            toLatitude: to.latitude,
+            toLongitude: to.longitude
+        )
     }
 
     private func checkDistanceAlerts(at coordinate: CLLocationCoordinate2D) {
         guard ridingState != nil else { return }
         guard let alightCoordinate else { return }
 
-        let current = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-        let alightLoc = CLLocation(
-            latitude: alightCoordinate.latitude,
-            longitude: alightCoordinate.longitude
-        )
-        let distance = current.distance(from: alightLoc)
+        let distance = Self.coordinateDistance(from: coordinate, to: alightCoordinate)
         let previousDistance = lastDistanceToAlight
         lastDistanceToAlight = distance
 
@@ -330,6 +332,11 @@ final class RidingTracker {
         if let nearest = crossedThresholds.min() {
             Self.logger.notice("checkDistanceAlerts crossed multiple thresholds at once: \(crossedThresholds), firing nearest=\(nearest)")
             triggerDistanceAlert(meters: nearest)
+            // 有効な距離アラートのうち一番近いリング(ゴール直前)に到達したら、以後の
+            // バックグラウンド測位継続の要否は呼び出し側(降車ボタンの押し忘れ対策)に委ねる。
+            if nearest == thresholds.min() {
+                nearestDistanceAlertReached = true
+            }
         }
     }
 

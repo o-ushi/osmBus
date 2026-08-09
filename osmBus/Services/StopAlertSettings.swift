@@ -83,10 +83,10 @@ enum StopAlertMode: String, CaseIterable, Identifiable {
 // MARK: - Settings
 
 enum StopAlertSettings {
-    private static let soundIDKey            = "osmBus_alert_soundID"
-    private static let followsSystemKey      = "osmBus_alert_followsSystem"
-    private static let volumeKey             = "osmBus_alert_soundVolume"
-    private static let vibStyleKey           = "osmBus_alert_vibStyle"
+    static let soundIDKey            = "osmBus_alert_soundID"
+    static let followsSystemKey      = "osmBus_alert_followsSystem"
+    static let volumeKey             = "osmBus_alert_soundVolume"
+    static let vibStyleKey           = "osmBus_alert_vibStyle"
 
     static let defaultVolume: Double   = 0.8
 

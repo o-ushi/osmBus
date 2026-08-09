@@ -35,8 +35,6 @@ struct BusRouteMapView: View {
     var isRidingMode: Bool = false
     var initialRouteDetail: BusRouteDetail? = nil
     var initialRouteCandidate: BusRouteCandidate? = nil
-    var autoStartRidingBusNumber: String? = nil
-    var boardingRouteHint: BoardingRouteMatchHint? = nil
     var ridingDurationText: String? = nil
     var ridingFareText: String? = nil
     var onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Void)? = nil
@@ -56,7 +54,6 @@ struct BusRouteMapView: View {
     @State private var ridingActive: Bool
     @State private var cachedPolylines: [GMapPolylineData] = []
     @State private var cachedMarkers: [GMapMarkerData] = []
-    @State private var autoStartRidingAfterLoad: Bool
     @State private var lastKnownUserCoordinate: CLLocationCoordinate2D? = nil
 
     @EnvironmentObject private var locationService: LocationService
@@ -68,8 +65,6 @@ struct BusRouteMapView: View {
         isRidingMode: Bool = false,
         initialRouteDetail: BusRouteDetail? = nil,
         initialRouteCandidate: BusRouteCandidate? = nil,
-        autoStartRidingBusNumber: String? = nil,
-        boardingRouteHint: BoardingRouteMatchHint? = nil,
         ridingDurationText: String? = nil,
         ridingFareText: String? = nil,
         onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Void)? = nil
@@ -80,14 +75,11 @@ struct BusRouteMapView: View {
         self.isRidingMode = isRidingMode
         self.initialRouteDetail = initialRouteDetail
         self.initialRouteCandidate = initialRouteCandidate
-        self.autoStartRidingBusNumber = autoStartRidingBusNumber
-        self.boardingRouteHint = boardingRouteHint
         self.ridingDurationText = ridingDurationText
         self.ridingFareText = ridingFareText
         self.onStartRiding = onStartRiding
         _ridingActive = State(initialValue: isRidingMode)
-        _isKeypadVisible = State(initialValue: !isRidingMode && autoStartRidingBusNumber == nil)
-        _autoStartRidingAfterLoad = State(initialValue: autoStartRidingBusNumber != nil)
+        _isKeypadVisible = State(initialValue: !isRidingMode)
         if isRidingMode, let detail = initialRouteDetail {
             _searchState = State(initialValue: .loaded(detail))
         } else {
@@ -171,7 +163,7 @@ struct BusRouteMapView: View {
                                 }
                             }
                         )
-                        .busMainScreenThemed()
+                        .busMainScreenStyled()
                         .padding(.horizontal, AppTheme.screenPadding)
                         .padding(.bottom, 8)
                         .frame(height: geo.size.height * 0.45)
@@ -185,7 +177,6 @@ struct BusRouteMapView: View {
                     rebuildMapLayers(from: detail)
                 }
                 loadInitialRidingRouteIfNeeded()
-                loadAutoRidingRouteIfNeeded()
             }
             .syncMapLiveLocation(lastKnown: $lastKnownUserCoordinate)
             .onDisappear(perform: releaseMapResources)
@@ -283,14 +274,21 @@ struct BusRouteMapView: View {
 
     private func distanceToAlightingStop(detail: BusRouteDetail) -> Double? {
         guard let coord = effectiveUserCoordinate else { return nil }
-        let userLoc = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
         // OSM ルートの最終停留所（降車位置）への直線距離
+        let alightCoordinate: CLLocationCoordinate2D
         if let lastStop = detail.stops.last {
-            return userLoc.distance(from: CLLocation(latitude: lastStop.coordinate.latitude,
-                                                     longitude: lastStop.coordinate.longitude))
+            alightCoordinate = lastStop.coordinate
+        } else if let dest = destination {
+            alightCoordinate = CLLocationCoordinate2D(latitude: dest.latitude, longitude: dest.longitude)
+        } else {
+            return nil
         }
-        guard let dest = destination else { return nil }
-        return userLoc.distance(from: CLLocation(latitude: dest.latitude, longitude: dest.longitude))
+        return GoogleRoutesAPIService.distanceMeters(
+            fromLatitude: coord.latitude,
+            fromLongitude: coord.longitude,
+            toLatitude: alightCoordinate.latitude,
+            toLongitude: alightCoordinate.longitude
+        )
     }
 
     // MARK: - Route info bar
@@ -481,41 +479,6 @@ struct BusRouteMapView: View {
         loadRoute(candidate)
     }
 
-    private func loadAutoRidingRouteIfNeeded() {
-        guard let busNumber = autoStartRidingBusNumber,
-              case .idle = searchState,
-              let coord = contextCoordinate else { return }
-        let searchRef = boardingRouteHint?.preferredRef ?? busNumber
-        routeNumberInput = searchRef
-        searchState = .searching
-        searchTask?.cancel()
-        searchTask = Task { @MainActor in
-            do {
-                let candidates = try await OverpassAPIService.searchCandidates(ref: searchRef, near: coord)
-                guard !Task.isCancelled else { return }
-                if let resolved = OverpassAPIService.pickResolvedCandidate(
-                    from: candidates,
-                    hint: boardingRouteHint
-                ) {
-                    loadRoute(resolved, collapseKeypad: true)
-                    return
-                }
-                switch candidates.count {
-                case 0:
-                    showError(OverpassError.noResults.errorDescription ?? "")
-                case 1:
-                    loadRoute(candidates[0], collapseKeypad: true)
-                default:
-                    searchState = .multipleCandidates(candidates)
-                    showsCandidateSheet = true
-                }
-            } catch {
-                guard !Task.isCancelled else { return }
-                showError(AppLocaleString.userFacingError(error))
-            }
-        }
-    }
-
     private func startSearch() {
         let ref = routeNumberInput.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !ref.isEmpty else { return }
@@ -563,10 +526,6 @@ struct BusRouteMapView: View {
                 if collapseKeypad {
                     isKeypadVisible = false
                 }
-                if autoStartRidingAfterLoad {
-                    autoStartRidingAfterLoad = false
-                    beginRidingTransition(ref: detail.candidate.ref, candidate: detail.candidate)
-                }
             } catch {
                 guard !Task.isCancelled else { return }
                 showError(AppLocaleString.userFacingError(error))
@@ -576,6 +535,7 @@ struct BusRouteMapView: View {
 
     private func clearRoute() {
         searchTask?.cancel()
+        searchTask = nil
         searchState = .idle
         cachedPolylines = []
         cachedMarkers = []

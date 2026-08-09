@@ -23,17 +23,13 @@ struct MainView: View {
     @State private var pendingOSMRidingStart: (routeRef: String, candidate: BusRouteCandidate, detail: BusRouteDetail)?
     @State private var showsWrongDirectionAlert = false
     @State private var presentedRidingAlert: ActiveRidingAlert?
-    @State private var showsExitRidingConfirmAlert = false
     @State private var showsRouteDatabaseResetConfirm = false
     @State private var showsRidingBusCandidateSheet = false
     @State private var ridingBusCandidates: [String] = []
-    @State private var ridingBusCandidateToConfirm: String? = nil
     @State private var isOnboardingRideSelection = false
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.locale) private var locale
     @Environment(\.colorScheme) private var colorScheme
-    @Environment(AppAppearanceStore.self) private var appearance
-    @Environment(ColorThemeManager.self) private var themeManager
     @Environment(SharedRoutesTrialStore.self) private var trialStore
     @State private var showsTrialExhaustedAlert = false
 
@@ -55,11 +51,11 @@ struct MainView: View {
     }
 
     private var sceneColor: Color {
-        appearance.resolvedSceneColor(colorScheme: colorScheme)
+        AppTheme.sceneColor(for: colorScheme)
     }
 
-    private var effectiveColorScheme: ColorScheme {
-        appearance.sceneColorScheme(for: colorScheme)
+    private var sceneTint: Color {
+        AppTheme.accent
     }
 
     private var destinationLabel: String {
@@ -86,9 +82,8 @@ struct MainView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppearanceBackgroundLayer(
-                    texture: appearance.texture,
-                    colorScheme: effectiveColorScheme,
+                SceneBackgroundLayer(
+                    colorScheme: colorScheme,
                     sceneColor: sceneColor
                 )
                 .ignoresSafeArea()
@@ -119,11 +114,7 @@ struct MainView: View {
                                 }
                             },
                             onClear: {
-                                if viewModel.ridingState != nil {
-                                    showsExitRidingConfirmAlert = true
-                                } else {
-                                    viewModel.clearBusNumber()
-                                }
+                                viewModel.clearBusNumber()
                             }
                         )
                         .environment(\.mainScreenCompactLayout, isZoomedCompact)
@@ -132,11 +123,10 @@ struct MainView: View {
                         .frame(height: halfHeight)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                    .busMainScreenThemed()
+                    .busMainScreenStyled()
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            .themedNavigationBar(themeManager.currentTheme, sceneColor: sceneColor)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     if viewModel.ridingState != nil {
@@ -166,9 +156,7 @@ struct MainView: View {
                             )
                         )
                         .font(.caption2.weight(.medium))
-                        .foregroundStyle(
-                            themeManager.currentTheme.accentColor.readable(against: sceneColor).opacity(0.88)
-                        )
+                        .foregroundStyle(sceneTint.opacity(0.88))
                     }
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
@@ -180,9 +168,7 @@ struct MainView: View {
                         }
                     } label: {
                         Image(systemName: "map")
-                            .foregroundStyle(
-                                themeManager.currentTheme.accentColor.readable(against: sceneColor)
-                            )
+                            .foregroundStyle(sceneTint)
                     }
                     .accessibilityLabel(AppLocaleString.text("路線図", locale: locale))
 
@@ -192,8 +178,6 @@ struct MainView: View {
             .sheet(isPresented: $showsSettings) {
                 AppSettingsView(opensAPISettingsOnAppear: opensAPISettingsOnLaunch)
                     .environment(\.locale, locale)
-                    .environment(ColorThemeManager.shared)
-                    .environment(AppAppearanceStore.shared)
                     .presentationDragIndicator(.visible)
                     .onDisappear {
                         opensAPISettingsOnLaunch = false
@@ -249,6 +233,9 @@ struct MainView: View {
                     routes: viewModel.accumulatedTransitRoutes,
                     ridingBusNumber: viewModel.ridingState?.busNumber,
                     onReload: { viewModel.refreshTransitRoutes(userInitiated: true) },
+                    onSwitchRoute: { newIndex in
+                        viewModel.switchBoardingRoute(to: newIndex)
+                    },
                     onSelectRidingBus: { routeIndex, busNumber in
                         handleRidingBusLongPress(busNumber: busNumber) {
                             viewModel.startRidingForBusSelection(routeIndex: routeIndex, busNumber: busNumber)
@@ -380,15 +367,6 @@ struct MainView: View {
                 ))
             }
             .alert(
-                AppLocaleString.text("降車_確認", locale: locale),
-                isPresented: $showsExitRidingConfirmAlert
-            ) {
-                Button(AppLocaleString.text("はい", locale: locale)) {
-                    viewModel.clearBusNumber()
-                }
-                Button(AppLocaleString.text("いいえ", locale: locale), role: .cancel) {}
-            }
-            .alert(
                 AppLocaleString.text("路線候補_初期化確認", locale: locale),
                 isPresented: $showsRouteDatabaseResetConfirm
             ) {
@@ -423,7 +401,7 @@ struct MainView: View {
                             viewModel.startRidingOnboarding(busNumber: candidate)
                             isOnboardingRideSelection = false
                         } else {
-                            ridingBusCandidateToConfirm = candidate
+                            viewModel.overrideRidingBusNumber(candidate)
                         }
                     }
                 }
@@ -431,26 +409,9 @@ struct MainView: View {
                     isOnboardingRideSelection = false
                 }
             }
-            .alert(
-                AppLocaleString.formatted("乗車中バス_確認_%@", locale: locale, ridingBusCandidateToConfirm ?? ""),
-                isPresented: Binding(
-                    get: { ridingBusCandidateToConfirm != nil },
-                    set: { if !$0 { ridingBusCandidateToConfirm = nil } }
-                )
-            ) {
-                Button(AppLocaleString.text("はい", locale: locale)) {
-                    if let candidate = ridingBusCandidateToConfirm {
-                        viewModel.overrideRidingBusNumber(candidate)
-                    }
-                    ridingBusCandidateToConfirm = nil
-                }
-                Button(AppLocaleString.text("いいえ", locale: locale), role: .cancel) {
-                    ridingBusCandidateToConfirm = nil
-                }
-            }
         }
         .environmentObject(locationService)
-        .tint(themeManager.currentTheme.accentColor.readable(against: sceneColor))
+        .tint(sceneTint)
     }
 
     private func syncContinuousLocationTracking() {
@@ -460,7 +421,11 @@ struct MainView: View {
         if needsTracking {
             // 乗車中は画面を見ていなくても距離アラートを続ける必要があるためバックグラウンド追跡を許可する。
             // 地図を眺めているだけの間は前面のみで十分なので iOS の自動休止に任せる。
-            locationService.startContinuousTracking(allowsBackground: viewModel.shouldTrackRiding)
+            // ただし一番近い到着アラートが鳴った後は、降車ボタンの押し忘れで
+            // バックグラウンド測位が延々と続き端末が発熱するのを避けるため、
+            // 常時ONを自動的に解除する(乗車状態自体は降車ボタンを押すまで継続)。
+            let allowsBackground = viewModel.shouldTrackRiding && !viewModel.ridingNearestAlertReached
+            locationService.startContinuousTracking(allowsBackground: allowsBackground)
         } else if viewModel.ridingState == nil {
             locationService.stopContinuousTrackingAndDisableBackground()
         }
@@ -489,6 +454,7 @@ struct MainView: View {
     private var continuousLocationTrackingKey: String {
         [
             viewModel.shouldTrackRiding ? "1" : "0",
+            viewModel.ridingNearestAlertReached ? "1" : "0",
             boardingRouteMapSheet.map { String($0.id) } ?? "",
             busRouteMapPresentation?.id.uuidString ?? ""
         ].joined(separator: "|")
@@ -566,7 +532,7 @@ struct MainView: View {
                 isBoardingRouteCheapest: viewModel.isBoardingRouteCheapest,
                 isRiding: viewModel.ridingState != nil,
                 onStopRiding: viewModel.ridingState != nil ? {
-                    showsExitRidingConfirmAlert = true
+                    viewModel.clearBusNumber()
                 } : nil,
                 otherBoardableVariants: viewModel.otherBoardableVariants
             )
@@ -609,7 +575,7 @@ struct MainView: View {
             .padding(.horizontal, AppTheme.cardPaddingH)
             .padding(.vertical, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .background(BusCardBackground(style: appearance.resolvedFrameStyle()))
+            .background(BusCardBackground())
         }
         .buttonStyle(.plain)
     }
@@ -642,9 +608,7 @@ struct MainView: View {
             showsMoreActions = true
         } label: {
             Image(systemName: "ellipsis.circle")
-                .foregroundStyle(
-                    themeManager.currentTheme.accentColor.readable(against: sceneColor)
-                )
+                .foregroundStyle(sceneTint)
         }
         .popover(isPresented: $showsMoreActions, arrowEdge: .top) {
             MoreActionsMenuView(
@@ -705,7 +669,7 @@ struct MainView: View {
     private func handleRidingBusLongPress(busNumber: String, otherwise selectRidingBus: () -> Void) {
         if let currentBusNumber = viewModel.ridingState?.busNumber,
            currentBusNumber.uppercased() == busNumber.uppercased() {
-            showsExitRidingConfirmAlert = true
+            viewModel.clearBusNumber()
         } else {
             selectRidingBus()
         }
@@ -825,17 +789,6 @@ private struct BusRouteMapSheet: View {
                 destination: presentation.destination,
                 onStartRiding: onStartRiding
             )
-        case .startRiding(let busNumber, let boardingHint):
-            BusRouteMapView(
-                currentLatitude: presentation.latitude,
-                currentLongitude: presentation.longitude,
-                destination: presentation.destination,
-                autoStartRidingBusNumber: busNumber,
-                boardingRouteHint: boardingHint,
-                ridingDurationText: presentation.ridingDurationText,
-                ridingFareText: presentation.ridingFareText,
-                onStartRiding: onStartRiding
-            )
         case .riding(let candidate, let cachedDetail):
             BusRouteMapView(
                 currentLatitude: presentation.latitude,
@@ -854,7 +807,6 @@ private struct BusRouteMapSheet: View {
 private struct BusRouteMapPresentation: Identifiable {
     enum Mode {
         case browse
-        case startRiding(busNumber: String, boardingHint: BoardingRouteMatchHint?)
         case riding(BusRouteCandidate, cachedDetail: BusRouteDetail?)
     }
 
@@ -914,7 +866,5 @@ private extension View {
 #Preview {
     MainView(pendingDeepLinkDestination: .constant(nil))
         .environment(\.locale, Locale(identifier: "ja"))
-        .environment(ColorThemeManager.shared)
-        .environment(AppAppearanceStore.shared)
         .environment(SharedRoutesTrialStore.shared)
 }

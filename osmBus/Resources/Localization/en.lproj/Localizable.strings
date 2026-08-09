@@ -54,105 +54,7 @@
 
 "取得中…" = "Fetching…";
 
-"カラーテーマ" = "Color Theme";
-
-"見た目" = "Appearance";
-
-"外観" = "Appearance";
-
-"カスタムで編集…" = "Customize…";
-
-"枠や見出し" = "Card Style";
-
-"テクスチャ" = "Texture";
-
-"下地・シーン色" = "Background Color";
-
-"アプリ背景の下地色を変更します。テクスチャと組み合わせて使えます。" = "Change the app's background color. Can be combined with textures.";
-
-"カスタム…" = "Custom…";
-
-"プレビュー" = "Preview";
-
-"プリセットから始める" = "Start from Preset";
-
-"カラーをカスタム" = "Custom Colors";
-
-"カード背景" = "Card Background";
-
-"枠線" = "Border";
-
-"アクセント" = "Accent";
-
-"枠線の太さ  %@ pt" = "Border width  %@ pt";
-
-"ダークカード（文字色を自動調整）" = "Dark Card (auto-adjust text color)";
-
-"枠・見出しのカスタム" = "Customize Card Style";
-
 "完了" = "Done";
-
-"シーン色" = "Scene Color";
-
-"カスタム下地色" = "Custom Background Color";
-
-"適用" = "Apply";
-
-"パステル" = "Pastel";
-
-"レトロ電卓風" = "Retro Calculator";
-
-"ネオン" = "Neon";
-
-"モノトーン" = "Monotone";
-
-"ハノイ・エディション" = "Hanoi Edition";
-
-"カスタム" = "Custom";
-
-"既定（方眼＋ドット）" = "Default (Grid + Dot)";
-
-"方眼紙" = "Grid Paper";
-
-"ドット" = "Dots";
-
-"古い地図風" = "Old Map";
-
-"レンガ" = "Brick";
-
-"斜め格子" = "Diagonal Weave";
-
-"波線" = "Waves";
-
-"システムに合わせる" = "Follow System";
-
-"アイボリー" = "Ivory";
-
-"スカイブルー" = "Sky Blue";
-
-"ミント" = "Mint";
-
-"サンド" = "Sand";
-
-"ラベンダー" = "Lavender";
-
-"テラコッタ" = "Terracotta";
-
-"標準" = "Standard";
-
-"シック" = "Chic";
-
-"ポップ" = "Pop";
-
-"モノクロ" = "Monochrome";
-
-"iOSデフォルトの配色" = "Default iOS colors";
-
-"落ち着いたアースカラー" = "Calm earth tones";
-
-"明るくビビッドな配色" = "Bright vivid colors";
-
-"モノクローム配色" = "Monochrome palette";
 
 "基本操作" = "Basic Operations";
 
@@ -196,33 +98,23 @@
 
 "目的地を設定" = "Set destination";
 
-"現在地" = "Current location";
 
 "取得済み" = "Acquired";
 
-"取得中…" = "Locating…";
 
 "未取得" = "Not acquired";
 
-"位置情報の利用が許可されていません。設定から許可してください。" = "Location access is not allowed. Please enable it in Settings.";
 
-"位置情報の状態を確認できません。" = "Unable to determine location status.";
 
-"位置情報を取得できませんでした。" = "Could not get your location.";
 
 "履歴" = "History";
 
-"設定" = "Settings";
 
-"ヘルプ" = "Help";
 
-"プラン管理" = "Plan management";
 
 "目的地" = "Destination";
 
-"バス番号を入力" = "Enter bus number";
 
-"バス" = "Bus";
 
 "ルートを確認中…" = "Checking route…";
 
@@ -246,9 +138,7 @@
 
 "API連携フッター" = "One Google API key is used for both bus checks and map display. Open Google API for a beginner-friendly setup guide.";
 
-"メイン画面のカードや枠線のスタイルを変更します。" = "Change card and border styles on the main screen.";
 
-"メイン画面の背景に重ねる模様を選びます。" = "Choose a pattern overlay for the main screen background.";
 
 "現在の目的地" = "Current destination";
 
@@ -268,26 +158,17 @@
 
 "候補がありません" = "No results found";
 
-"検索中…" = "Searching…";
 
 "登録済みの場所" = "Saved places";
 "場所を登録" = "Save place";
 
-"履歴がありません" = "No history yet";
 
-"目的地を設定すると、ここに履歴として表示されます。" = "When you set a destination, it will appear here as history.";
 
-"目的地の履歴" = "Destination history";
 
-"タップすると、その目的地を設定します。" = "Tap to set that destination.";
 
-"履歴を消去" = "Clear history";
 
-"履歴をすべて消去しますか？" = "Clear all history?";
 
-"この操作は取り消せません。" = "This action cannot be undone.";
 
-"設定中" = "Active";
 
 "Google Routes API" = "Google Routes API";
 
@@ -397,15 +278,11 @@
 
 "help_プラン_body" = "Open … → Plan management to view your plan, upgrade to PREMIUM, or restore a previous purchase. FREE plan: up to %1$d saved places and %1$d history entries. PREMIUM: unlimited.";
 
-"現在のプラン" = "Current plan";
 
-"FREE" = "FREE";
 
-"無制限" = "Unlimited";
 
 "プラン_FREE説明" = "You are on the FREE plan. Upgrade to PREMIUM for unlimited saved places and history, plus 60 bus checks/month (shared key).";
 
-"購入を復元" = "Restore purchases";
 
 "プラン_復元フッター" = "If you purchased PREMIUM on the App Store, restore it here.";
 
@@ -441,7 +318,6 @@
 
 "学校" = "School";
 
-"エラー_バス番号未入力" = "Enter a bus number.";
 
 "エラー_距離超過_%d" = "Your location and destination are too far apart (about %d km). Check your current location.";
 
@@ -457,9 +333,7 @@
 
 "RoutesAPI_接続成功_キー有効" = "Connected. API key is valid. No transit route at this time, but route search works.";
 
-"URLの生成に失敗しました。" = "Failed to build URL.";
 
-"レスポンスの解析に失敗しました。" = "Failed to parse response.";
 
 "RoutesAPI_HTTP_%d_%@" = "HTTP %d: %@";
 
@@ -483,9 +357,7 @@
 
 "検索_2文字以上" = "Enter at least 2 characters.";
 
-"見つかりませんでした。別のキーワードで試してください。" = "Not found. Try another keyword.";
 
-"基本操作" = "Basics";
 
 "結果の見方" = "Reading results";
 
@@ -493,27 +365,16 @@
 
 "プラン" = "Plan";
 
-"端末内のみ保存" = "Stored on device only";
 
-"Google に直接送信" = "Sent directly to Google";
 
-"プライバシーとセキュリティ" = "Privacy & security";
 
-"API キー" = "API key";
 
-"導通テスト" = "Connection test";
 
-"保存" = "Save";
 
-"保存しました" = "Saved";
 
-"OK" = "OK";
 
-"完了" = "Done";
 
-"キャンセル" = "Cancel";
 
-"編集" = "Edit";
 
 "名前" = "Name";
 
@@ -555,7 +416,6 @@
 
 "バス停" = "Bus stop";
 
-"バス停合計_%d" = "%d bus stops";
 
 "所要時間_%d分" = "About %d min";
 
@@ -598,7 +458,7 @@
 "help_乗車中_title" = "Riding mode";
 "help_乗車中_body" = "After a green or yellow \"Get on!\" result, tap Start riding (or long-press a bus number in the route list) to enter riding mode. It tracks the straight-line distance to your current bus's alighting stop and notifies you with your configured alerts. When transferring, the distance switches to the next alighting stop. Tap the \"Riding\" indicator at the top-left to open the route map. Use the Get off button on the card to end riding.";
 "help_設定_title" = "Settings & alerts";
-"help_設定_body" = "From … → Settings you can change language, color theme, appearance (card frame & texture), keypad sound, and arrival alerts. Arrival alerts are distance-based to the alighting stop, with up to 3 thresholds — alarms play 1–3 times from furthest to closest. Alarms and alerts work even when the app is in the background or the screen is off. Maps and Routes API keys are also configured here (PREMIUM).";
+"help_設定_body" = "From … → Settings you can change language, keypad sound, and arrival alerts. Arrival alerts are distance-based to the alighting stop, with up to 3 thresholds — alarms play 1–3 times from furthest to closest. Alarms and alerts work even when the app is in the background or the screen is off. Maps and Routes API keys are also configured here (PREMIUM).";
 
 "方向ヒント_%@" = "Heading %@";
 "方向バッジ_%@" = "%@";
@@ -613,28 +473,13 @@
 "IAP_復元失敗" = "Restore failed";
 "IAP_購入保留" = "Purchase pending approval";
 "IAP_購入失敗" = "Purchase failed";
-"MapsAPI_Google送信説明" = "Map requests go directly from this iPhone to Google's servers.";
-"MapsAPI_はじめて" = "New to API keys?";
 "MapsAPI_エラー_400" = "Bad request. Make sure Maps API is enabled in Google Cloud.";
 "MapsAPI_エラー_401" = "Authentication error. Check your API key and Maps API status.";
 "MapsAPI_エラー_429" = "Too many requests. Please wait and try again.";
 "MapsAPI_エラー_500" = "Google servers are temporarily unavailable.";
 "MapsAPI_エラー_不明_%@" = "Maps API error: %@";
 "MapsAPI_エラー_拒否_%@" = "Request denied: %@";
-"MapsAPI_キーの役割" = "What the Google Maps API key does";
-"MapsAPI_キー入力フッター" = "Paste a key issued after enabling Maps API in Google Cloud Console.";
-"MapsAPI_キー削除" = "Remove API key";
-"MapsAPI_キー取得リンク" = "Get an API key (Google Cloud Console)";
-"MapsAPI_初心者_これは何" = "Think of it as a passcode that lets this app show Google Maps.";
-"MapsAPI_初心者_これは何_見出し" = "What is an API key?";
-"MapsAPI_初心者_手順" = "① Enable Maps API → ② Create an API key → ③ Paste below and save → ④ Run Connection test";
-"MapsAPI_初心者_手順_見出し" = "Setup steps";
-"MapsAPI_初心者_無料" = "Google Cloud offers a free tier. Personal map use usually stays within the free allowance.";
-"MapsAPI_初心者_無料_見出し" = "Does it cost money?";
-"MapsAPI_導通テストフッター" = "Connection test verifies your key with a simple geocode request.";
 "MapsAPI_接続成功" = "Connected. Maps API key is valid.";
-"MapsAPI_有効化手順" = "How to enable Maps API";
-"MapsAPI_端末内説明" = "Your key is stored in Keychain and sent when authenticating Google Maps requests.";
 
 "プライバシーとデータ" = "Privacy";
 "プライバシー_設定フッター" = "Review how data is sent, stored, and deleted.";
@@ -666,16 +511,10 @@
 "プライバシー_Appleメディア規約" = "Apple Media Services Terms";
 "プライバシー_Googleポリシー" = "Google Privacy Policy";
 "プライバシー_関連ポリシー_詳細" = "Apple's terms apply to MapKit search/geocoding and StoreKit purchases; Google's policy applies to the Routes API, Maps SDK, and Geocoding.";
-"MapsAPIキー_Premium限定_説明" = "Google Maps API key setup is available on the PREMIUM plan.";
-"MapsAPIキー保存完了" = "Your Google Maps API key has been saved.";
-"MapsAPI説明_リード" = "osmBus uses Google Maps to display routes and bus line maps. You need a Maps API key for map features.";
-"MapsAPI説明_補足" = "You can create one for free with a Google account.";
 "Maps_お試し残り_%d" = "Map uses remaining this month: %d";
 "Maps_お試し終了_タイトル" = "Monthly map limit reached";
 "Maps_お試し終了_本文" = "Upgrade to PREMIUM or set your own Maps API key in Settings.";
 "Maps_お試し説明" = "Without your own key, FREE plan gets limited monthly map uses via the shared key.";
-"Maps_キー設定済み" = "Maps API key configured";
-"Maps_キー設定済み_説明" = "Your own key is used for map display. Using your own key gives unlimited map access.";
 "Maps_現在の状態" = "Maps status";
 "Maps_設定に進む" = "Open Settings";
 "Overpass_サーバー_%@" = "Overpass server: %@";
@@ -685,7 +524,6 @@
 "Overpass_解析失敗" = "Could not parse route data.";
 "Overpass_路線なし" = "No matching bus route found.";
 "Overpass_通信エラー" = "Could not reach Overpass server.";
-"PREMIUM_MapsAPI_説明" = "PREMIUM: 60 map uses/month with the shared key. Or use your own Maps API key for unlimited access.";
 "PREMIUM_RoutesAPI_説明" = "PREMIUM: 60 bus checks/month with the shared key. Or use your own Routes API key for unlimited access.";
 "PREMIUM_API統合_説明" = "Bus checks: 60/month with the shared key. Map display: 60/month (separate counter). Set your own API key for unlimited access to both.";
 "PREMIUM_利用中" = "PREMIUM active";
@@ -720,14 +558,11 @@
 "テンキー_表示" = "Show keypad";
 "テンキー_非表示" = "Hide keypad";
 "乗車中" = "Riding";
-"降車_確認" = "Get off?";
 "路線候補_初期化確認" = "Clear route candidates?";
 "はい" = "Yes";
 "いいえ" = "No";
 "乗車開始" = "Start riding";
 "他の系統も乗れるかも" = "Other variants might work too";
-"到着アラート_%d" = "Alert at %d stops remaining";
-"到着アラート_タイトル" = "Stops remaining alert";
 "地図_タップヒント" = "Tap the map to pick a location";
 "地図_住所取得中" = "Looking up address…";
 "地図_出発地" = "Origin";
@@ -771,4 +606,3 @@
 "降車" = "Get off";
 "直線距離" = "Distance";
 "乗車中バス_設定タイトル" = "Set riding bus";
-"乗車中バス_確認_%@" = "Are you riding bus %@?";

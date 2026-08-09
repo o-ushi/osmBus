@@ -4,25 +4,32 @@ enum AppTheme {
     /// メイン背景色 RGB(61, 89, 147)
     static let brandBlue = Color(red: 61 / 255, green: 89 / 255, blue: 147 / 255)
 
-    /// カード・ボタン面
-    static let surface = Color.white.opacity(0.14)
-    static let surfacePressed = Color.white.opacity(0.22)
+    /// アプリ画面の下地色（ライト / ダーク）
+    static let sceneColorLight = Color(red: 253 / 255, green: 252 / 255, blue: 240 / 255)
+    static let sceneColorDark = Color(red: 0.10, green: 0.10, blue: 0.12)
 
-    /// テキスト
+    /// アクセント（ツールバー・tint）
+    static let accent = Color.blue
+
+    /// メインカード枠（パステル固定）
+    static let cardFill = Color(red: 1.00, green: 0.98, blue: 0.95)
+    static let cardBorder = Color(red: 0.96, green: 0.78, blue: 0.60)
+    static let cardBorderWidth: CGFloat = 1.0
+    static let cardAccentStrip = Color(red: 1.00, green: 0.60, blue: 0.20)
+
+    /// テキスト（ブランド青背景上）
     static let primaryText = Color.white
     static let secondaryText = Color.white.opacity(0.72)
-    static let placeholderText = Color.white.opacity(0.45)
 
     static let cornerRadius: CGFloat = 14
     static let keypadCornerRadius: CGFloat = 12
 
     static let screenPadding: CGFloat = 14
-    static let sectionSpacing: CGFloat = 10
     static let cardPaddingH: CGFloat = 12
-    static let cardPaddingV: CGFloat = 10
-    static let keypadKeyHeight: CGFloat = 44
-    static let keypadLetterHeight: CGFloat = 40
-    static let keypadGridSpacing: CGFloat = 6
+
+    static func sceneColor(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark ? sceneColorDark : sceneColorLight
+    }
 }
 
 enum KeypadMetrics {

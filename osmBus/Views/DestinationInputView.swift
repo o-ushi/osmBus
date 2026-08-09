@@ -68,8 +68,7 @@ struct DestinationInputView: View {
             }
         }
         .environment(\.locale, locale)
-        .preferredColorScheme(.light)
-        .tint(.blue)
+        .lightSheetChrome()
     }
 
     @ViewBuilder

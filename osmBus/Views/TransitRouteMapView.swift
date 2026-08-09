@@ -215,7 +215,8 @@ struct GoogleMapView: View {
 
     @Environment(SharedMapsTrialStore.self) private var mapsTrialStore
     @Environment(\.locale) private var locale
-    @State private var showsMapsAPISettings = false
+    @State private var showsPrivacySheet = false
+    @State private var showsAPISettings = false
     @State private var mapBox = GMSMapViewBox()
 
     var body: some View {
@@ -260,14 +261,14 @@ struct GoogleMapView: View {
             Text(AppLocaleString.text("第三者送信_同意が必要", locale: locale))
                 .multilineTextAlignment(.center)
             Button(AppLocaleString.text("プライバシーとデータ", locale: locale)) {
-                showsMapsAPISettings = true
+                showsPrivacySheet = true
             }
             .buttonStyle(.borderedProminent)
         }
         .padding(32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(uiColor: .systemGroupedBackground))
-        .sheet(isPresented: $showsMapsAPISettings) {
+        .sheet(isPresented: $showsPrivacySheet) {
             NavigationStack {
                 PrivacyDataView()
             }
@@ -288,20 +289,16 @@ struct GoogleMapView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Button(AppLocaleString.text("Maps_設定に進む", locale: locale)) {
-                showsMapsAPISettings = true
+                showsAPISettings = true
             }
             .buttonStyle(.borderedProminent)
         }
         .padding(32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(uiColor: .systemGroupedBackground))
-        .sheet(isPresented: $showsMapsAPISettings) {
-            NavigationStack {
-                GoogleRoutesAPISettingsView()
-                    .environment(SharedRoutesTrialStore.shared)
-                    .environment(SharedMapsTrialStore.shared)
-                    .environment(\.locale, locale)
-            }
+        .sheet(isPresented: $showsAPISettings) {
+            AppSettingsView(opensAPISettingsOnAppear: true)
+                .environment(\.locale, locale)
         }
     }
 }
@@ -370,7 +367,6 @@ struct TransitRouteMapView: View {
     let destination: Destination
     var ridingBusNumber: String? = nil
     var ridingAlightCoordinate: RouteCoordinate? = nil
-    var onClose: (() -> Void)? = nil
     var allRoutes: [ParsedTransitRoute] = []
     var routeOptionCount: Int = 1
     var onLoadRouteOptions: (() -> [ParsedTransitRoute])? = nil
@@ -386,7 +382,6 @@ struct TransitRouteMapView: View {
     @State private var mapBox = GMSMapViewBox()
     @State private var cachedPolylines: [GMapPolylineData] = []
     @State private var cachedMarkers: [GMapMarkerData] = []
-    @State private var followUser = false
     @State private var isMapEngineReady = false
     @State private var lastKnownUserCoordinate: CLLocationCoordinate2D? = nil
 
@@ -416,17 +411,17 @@ struct TransitRouteMapView: View {
         return lines.contains { $0.uppercased() == ridingBusNumber.uppercased() }
     }
 
-    private var currentLegAlightingLocation: CLLocation {
+    private var currentLegAlightingCoordinate: CLLocationCoordinate2D {
         if let coord = ridingAlightCoordinate {
-            return CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+            return CLLocationCoordinate2D(latitude: coord.latitude, longitude: coord.longitude)
         }
         let busStep = displayedRoute.steps.first(where: {
             $0.travelMode == "TRANSIT" && $0.vehicleType == "BUS"
         })
         if let loc = busStep?.arrivalStopLocation {
-            return CLLocation(latitude: loc.latitude, longitude: loc.longitude)
+            return CLLocationCoordinate2D(latitude: loc.latitude, longitude: loc.longitude)
         }
-        return CLLocation(latitude: destination.latitude, longitude: destination.longitude)
+        return CLLocationCoordinate2D(latitude: destination.latitude, longitude: destination.longitude)
     }
 
     private var effectiveUserCoordinate: CLLocationCoordinate2D? {
@@ -435,8 +430,13 @@ struct TransitRouteMapView: View {
 
     private var distanceToDestination: Double? {
         guard let coord = effectiveUserCoordinate else { return nil }
-        return CLLocation(latitude: coord.latitude, longitude: coord.longitude)
-            .distance(from: currentLegAlightingLocation)
+        let alight = currentLegAlightingCoordinate
+        return GoogleRoutesAPIService.distanceMeters(
+            fromLatitude: coord.latitude,
+            fromLongitude: coord.longitude,
+            toLatitude: alight.latitude,
+            toLongitude: alight.longitude
+        )
     }
 
     var body: some View {
@@ -491,7 +491,7 @@ struct TransitRouteMapView: View {
         GoogleMapView(
             polylines: cachedPolylines,
             markers: cachedMarkers,
-            shouldFollowUser: followUser,
+            shouldFollowUser: false,
             fitBoundsOnAppear: nil,
             onSetup: { mapView in
                 mapBox.view = mapView
@@ -629,20 +629,6 @@ struct TransitRouteMapView: View {
         .accessibilityAddTraits(.isStaticText)
     }
 
-    @ViewBuilder
-    private var routeSummaryBusLines: some View {
-        let busLines = GoogleRoutesAPIService.transitBusLineBadgeLabels(for: displayedRoute)
-        if busLines.isEmpty {
-            Text(GoogleRoutesAPIService.transitLineSummary(for: displayedRoute))
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.primary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.85)
-        } else {
-            TransitBusLineBadgesRow(lines: busLines)
-        }
-    }
-
     private func buildPolylines() -> [GMapPolylineData] {
         segments.map { seg in
             GMapPolylineData(
@@ -718,7 +704,7 @@ struct TransitRouteMapView: View {
         }
     }
 
-    // MARK: - Data computation (unchanged from MapKit version)
+    // MARK: - Data computation
 
     private var segments: [RouteMapSegment] {
         displayedRoute.steps.enumerated().compactMap { index, step in

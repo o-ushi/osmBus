@@ -22,8 +22,7 @@ struct DestinationHistoryView: View {
             }
         }
         .environment(\.locale, locale)
-        .preferredColorScheme(.light)
-        .tint(.blue)
+        .lightSheetChrome()
     }
 
     private var historyList: some View {

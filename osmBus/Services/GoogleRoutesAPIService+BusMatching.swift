@@ -114,7 +114,9 @@ extension GoogleRoutesAPIService {
             .uppercased()
         guard !normalized.isEmpty else { return [] }
 
-        guard let regex = try? NSRegularExpression(pattern: #"([A-Z]{0,2}\d{1,4}[A-Z]{0,2})"#) else {
+        // プレフィックスは "BRT" のような3文字の系統もあるため {0,3} まで許容する
+        // (以前は {0,2} だったため "BRT01" が "RT01" に誤抽出されていた)。
+        guard let regex = try? NSRegularExpression(pattern: #"([A-Z]{0,3}\d{1,4}[A-Z]{0,3})"#) else {
             return []
         }
 
@@ -141,7 +143,7 @@ extension GoogleRoutesAPIService {
 
     static func parseBusIdentifierParts(_ raw: String) -> BusIdentifierParts? {
         let normalized = raw.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        guard let regex = try? NSRegularExpression(pattern: #"^([A-Z]{0,2})(\d{1,4})([A-Z]{0,2})$"#),
+        guard let regex = try? NSRegularExpression(pattern: #"^([A-Z]{0,3})(\d{1,4})([A-Z]{0,3})$"#),
               let match = regex.firstMatch(
                   in: normalized,
                   range: NSRange(normalized.startIndex..<normalized.endIndex, in: normalized)
@@ -183,16 +185,34 @@ extension GoogleRoutesAPIService {
         findMatchingRouteWithIndex(routes: routes, busNumber: busNumber)?.route
     }
 
+    /// 同じバス番号が複数の経路案(itinerary)にヒットすることがある(例: 直行案と、
+    /// 途中で同じ番号のバスに乗ってから別路線に乗り換える案が両方 Google から返る)。
+    /// 単純に配列の先頭一致を採用すると、乗り換え不要のはずのバスなのに乗り換え案の
+    /// 「乗り換え停留所」が降車地点として設定され、見当違いの場所で到着アラートが
+    /// 鳴る不具合が起きる。ヒットしたバス区間の後にさらに TRANSIT 区間が続かない
+    /// (＝乗り換え不要で目的地に着く)経路を優先する。
     static func findMatchingRouteWithIndex(
         routes: [ParsedTransitRoute],
         busNumber: String
     ) -> (index: Int, route: ParsedTransitRoute)? {
-        guard let index = routes.firstIndex(where: { route in
-            route.steps.contains { step in
+        var fallback: (index: Int, route: ParsedTransitRoute)?
+
+        for (index, route) in routes.enumerated() {
+            guard let stepIdx = route.steps.firstIndex(where: { step in
                 isBusStep(step) && stepMatchesBusNumber(step, busNumber: busNumber)
+            }) else { continue }
+
+            if fallback == nil {
+                fallback = (index, route)
             }
-        }) else { return nil }
-        return (index, routes[index])
+
+            let requiresTransferAfter = route.steps[(stepIdx + 1)...].contains { $0.travelMode == "TRANSIT" }
+            if !requiresTransferAfter {
+                return (index, route)
+            }
+        }
+
+        return fallback
     }
 
     static func boardingBusStep(route: ParsedTransitRoute, busNumber: String) -> ParsedTransitStep? {

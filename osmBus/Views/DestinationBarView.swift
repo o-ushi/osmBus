@@ -8,7 +8,7 @@ struct DestinationBarView: View {
     var onMapPick: (() -> Void)? = nil
 
     @Environment(\.mainScreenCompactLayout) private var compactLayout
-    @Environment(\.busFrameStyle) private var frameStyle
+    @Environment(\.busCardStyle) private var cardStyle
     @Environment(\.locale) private var locale
 
     private var titleSize: CGFloat { compactLayout ? 15 : 18 }
@@ -65,7 +65,7 @@ struct DestinationBarView: View {
                 .accessibilityLabel(AppLocaleString.text("地図から選択", locale: locale))
             }
         }
-        .background(BusCardBackground(style: frameStyle))
+        .background(BusCardBackground(style: cardStyle))
     }
 }
 
@@ -81,7 +81,7 @@ struct CurrentLocationBarView: View {
     var onMapPick: (() -> Void)? = nil
 
     @Environment(\.mainScreenCompactLayout) private var compactLayout
-    @Environment(\.busFrameStyle) private var frameStyle
+    @Environment(\.busCardStyle) private var cardStyle
     @Environment(\.locale) private var locale
 
     private var titleSize: CGFloat { compactLayout ? 15 : 18 }
@@ -153,7 +153,7 @@ struct CurrentLocationBarView: View {
         .padding(.horizontal, AppTheme.cardPaddingH)
         .padding(.vertical, compactLayout ? 10 : 14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background(BusCardBackground(style: frameStyle))
+        .background(BusCardBackground(style: cardStyle))
     }
 
     private var iconName: String {
@@ -183,8 +183,6 @@ struct CurrentLocationBarView: View {
             .frame(height: 80)
         }
         .padding()
-        .busMainScreenThemed()
+        .busMainScreenStyled()
     }
-    .environment(AppAppearanceStore.shared)
-    .environment(ColorThemeManager.shared)
 }

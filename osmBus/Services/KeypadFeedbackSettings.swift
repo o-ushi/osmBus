@@ -155,11 +155,3 @@ final class KeypadHapticManager {
         } catch { return false }
     }
 }
-
-// MARK: - Thin wrapper (BusKeypadView から呼ぶ)
-
-enum KeypadFeedbackSettings {
-    static func triggerKeyTap()  { KeypadHapticManager.shared.triggerKeyTap() }
-    static func triggerEnterKey() { KeypadHapticManager.shared.triggerEnterKey() }
-    static func registerDefaults() { KeypadHapticManager.registerDefaults() }
-}

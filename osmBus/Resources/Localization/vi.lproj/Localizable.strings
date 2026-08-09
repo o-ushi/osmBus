@@ -54,105 +54,7 @@
 
 "取得中…" = "Dang lay…";
 
-"カラーテーマ" = "Chu de mau";
-
-"見た目" = "Giao dien";
-
-"外観" = "Giao dien";
-
-"カスタムで編集…" = "Tuy chinh…";
-
-"枠や見出し" = "Kieu the";
-
-"テクスチャ" = "Nen";
-
-"下地・シーン色" = "Mau nen";
-
-"アプリ背景の下地色を変更します。テクスチャと組み合わせて使えます。" = "Doi mau nen ung dung. Co the ket hop voi nen.";
-
-"カスタム…" = "Tuy chinh…";
-
-"プレビュー" = "Xem truoc";
-
-"プリセットから始める" = "Bat dau tu mau co san";
-
-"カラーをカスタム" = "Tuy chinh mau";
-
-"カード背景" = "Nen the";
-
-"枠線" = "Vien";
-
-"アクセント" = "Nhon manh";
-
-"枠線の太さ  %@ pt" = "Do day vien  %@ pt";
-
-"ダークカード（文字色を自動調整）" = "The toi (tu dong dieu chinh mau chu)";
-
-"枠・見出しのカスタム" = "Tuy chinh kieu the";
-
 "完了" = "Xong";
-
-"シーン色" = "Mau canh";
-
-"カスタム下地色" = "Mau nen tuy chinh";
-
-"適用" = "Ap dung";
-
-"パステル" = "Pastel";
-
-"レトロ電卓風" = "May tinh retro";
-
-"ネオン" = "Neon";
-
-"モノトーン" = "Don sac";
-
-"ハノイ・エディション" = "Phien ban Ha Noi";
-
-"カスタム" = "Tuy chinh";
-
-"既定（方眼＋ドット）" = "Mac dinh (luoi + cham)";
-
-"方眼紙" = "Giay ke";
-
-"ドット" = "Cham tron";
-
-"古い地図風" = "Ban do co";
-
-"レンガ" = "Gach";
-
-"斜め格子" = "Luoi cheo";
-
-"波線" = "Song";
-
-"システムに合わせる" = "Theo he thong";
-
-"アイボリー" = "Ngan";
-
-"スカイブルー" = "Xanh troi";
-
-"ミント" = "Bac ha";
-
-"サンド" = "Cat";
-
-"ラベンダー" = "Oai huong";
-
-"テラコッタ" = "Terracotta";
-
-"標準" = "Tieu chuan";
-
-"シック" = "Thanh lich";
-
-"ポップ" = "Pop";
-
-"モノクロ" = "Don sac";
-
-"iOSデフォルトの配色" = "Mau mac dinh iOS";
-
-"落ち着いたアースカラー" = "Mau dat calm";
-
-"明るくビビッドな配色" = "Mau sang vivid";
-
-"モノクローム配色" = "Bo mau don sac";
 
 "基本操作" = "Thao tac co ban";
 
@@ -196,33 +98,23 @@
 
 "目的地を設定" = "Đặt điểm đến";
 
-"現在地" = "Vị trí hiện tại";
 
 "取得済み" = "Đã lấy";
 
-"取得中…" = "Đang lấy…";
 
 "未取得" = "Chưa lấy";
 
-"位置情報の利用が許可されていません。設定から許可してください。" = "Không được phép dùng vị trí. Hãy bật trong Cài đặt.";
 
-"位置情報の状態を確認できません。" = "Không thể xác định trạng thái vị trí.";
 
-"位置情報を取得できませんでした。" = "Không thể lấy vị trí.";
 
 "履歴" = "Lịch sử";
 
-"設定" = "Cài đặt";
 
-"ヘルプ" = "Trợ giúp";
 
-"プラン管理" = "Quản lý gói";
 
 "目的地" = "Điểm đến";
 
-"バス番号を入力" = "Nhập số xe buýt";
 
-"バス" = "Xe buýt";
 
 "ルートを確認中…" = "Đang kiểm tra tuyến…";
 
@@ -246,9 +138,7 @@
 
 "API連携フッター" = "Một khóa API Google dùng cho cả kiểm tra xe buýt lẫn hiển thị bản đồ. Mở Google API để xem hướng dẫn thiết lập.";
 
-"メイン画面のカードや枠線のスタイルを変更します。" = "Thay đổi kiểu thẻ và viền trên màn hình chính.";
 
-"メイン画面の背景に重ねる模様を選びます。" = "Chọn họa tiết phủ nền màn hình chính.";
 
 "現在の目的地" = "Điểm đến hiện tại";
 
@@ -268,26 +158,17 @@
 
 "候補がありません" = "Không có kết quả";
 
-"検索中…" = "Đang tìm…";
 
 "登録済みの場所" = "Địa điểm đã lưu";
 "場所を登録" = "Lưu địa điểm";
 
-"履歴がありません" = "Chưa có lịch sử";
 
-"目的地を設定すると、ここに履歴として表示されます。" = "Khi bạn đặt điểm đến, nó sẽ hiển thị ở đây.";
 
-"目的地の履歴" = "Lịch sử điểm đến";
 
-"タップすると、その目的地を設定します。" = "Chạm để đặt điểm đến đó.";
 
-"履歴を消去" = "Xóa lịch sử";
 
-"履歴をすべて消去しますか？" = "Xóa toàn bộ lịch sử?";
 
-"この操作は取り消せません。" = "Thao tác này không thể hoàn tác.";
 
-"設定中" = "Đang dùng";
 
 "Google Routes API" = "Google Routes API";
 
@@ -397,15 +278,11 @@
 
 "help_プラン_body" = "Mở … → Quản lý gói để xem gói hiện tại, nâng cấp lên PREMIUM hoặc khôi phục giao dịch. Gói FREE: tối đa %1$d địa điểm đã lưu và %1$d mục lịch sử. PREMIUM: không giới hạn.";
 
-"現在のプラン" = "Gói hiện tại";
 
-"FREE" = "FREE";
 
-"無制限" = "Không giới hạn";
 
 "プラン_FREE説明" = "Bạn đang dùng gói FREE. Nâng cấp PREMIUM để lưu địa điểm và lịch sử không giới hạn, cùng 60 lượt kiểm tra xe buýt/tháng (khóa dùng chung).";
 
-"購入を復元" = "Khôi phục mua hàng";
 
 "プラン_復元フッター" = "Nếu đã mua PREMIUM trên App Store, khôi phục tại đây.";
 
@@ -441,7 +318,6 @@
 
 "学校" = "Trường";
 
-"エラー_バス番号未入力" = "Nhập số xe buýt.";
 
 "エラー_距離超過_%d" = "Vị trí và điểm đến quá xa (khoảng %d km). Kiểm tra vị trí hiện tại.";
 
@@ -457,9 +333,7 @@
 
 "RoutesAPI_接続成功_キー有効" = "Kết nối thành công. Khóa API hợp lệ. Chưa có tuyến transit lúc này nhưng tìm tuyến vẫn hoạt động.";
 
-"URLの生成に失敗しました。" = "Không tạo được URL.";
 
-"レスポンスの解析に失敗しました。" = "Không phân tích được phản hồi.";
 
 "RoutesAPI_HTTP_%d_%@" = "HTTP %d: %@";
 
@@ -483,9 +357,7 @@
 
 "検索_2文字以上" = "Nhập ít nhất 2 ký tự.";
 
-"見つかりませんでした。別のキーワードで試してください。" = "Không tìm thấy. Thử từ khóa khác.";
 
-"基本操作" = "Thao tác cơ bản";
 
 "結果の見方" = "Cách đọc kết quả";
 
@@ -493,27 +365,16 @@
 
 "プラン" = "Gói";
 
-"端末内のみ保存" = "Chỉ lưu trên thiết bị";
 
-"Google に直接送信" = "Gửi trực tiếp đến Google";
 
-"プライバシーとセキュリティ" = "Quyền riêng tư & bảo mật";
 
-"API キー" = "Khóa API";
 
-"導通テスト" = "Kiểm tra kết nối";
 
-"保存" = "Lưu";
 
-"保存しました" = "Đã lưu";
 
-"OK" = "OK";
 
-"完了" = "Xong";
 
-"キャンセル" = "Hủy";
 
-"編集" = "Sửa";
 
 "名前" = "Tên";
 
@@ -555,7 +416,6 @@
 
 "バス停" = "Trạm xe buýt";
 
-"バス停合計_%d" = "%d trạm xe buýt";
 
 "所要時間_%d分" = "Khoảng %d phút";
 
@@ -598,7 +458,7 @@
 "help_乗車中_title" = "Chế độ đang đi";
 "help_乗車中_body" = "Sau kết quả xanh hoặc vàng \"Lên xe!\", chạm Bắt đầu đi (hoặc chạm giữ số xe buýt trong danh sách tuyến) để vào chế độ đang đi. Ứng dụng sẽ theo dõi khoảng cách thẳng đến trạm xuống xe hiện tại và báo bằng cảnh báo bạn đã cài đặt. Khi chuyển tuyến, khoảng cách tự chuyển sang trạm xuống xe tiếp theo. Chạm biểu tượng \"Đang đi\" ở góc trên bên trái để mở bản đồ tuyến. Dùng nút Xuống xe trên thẻ để kết thúc.";
 "help_設定_title" = "Cài đặt & cảnh báo";
-"help_設定_body" = "Từ … → Cài đặt bạn có thể đổi ngôn ngữ, chủ đề màu, giao diện (khung thẻ & hoạ tiết), âm thanh bàn phím và cảnh báo đến nơi. Cảnh báo đến nơi dựa trên khoảng cách đến trạm xuống xe, hỗ trợ tối đa 3 mức — chuông reo 1–3 lần từ xa đến gần. Chuông và cảnh báo hoạt động ngay cả khi ứng dụng ở nền hoặc màn hình tắt. Khóa Maps API và Routes API cũng cài ở đây (PREMIUM).";
+"help_設定_body" = "Từ … → Cài đặt bạn có thể đổi ngôn ngữ, âm thanh bàn phím và cảnh báo đến nơi. Cảnh báo đến nơi dựa trên khoảng cách đến trạm xuống xe, hỗ trợ tối đa 3 mức — chuông reo 1–3 lần từ xa đến gần. Chuông và cảnh báo hoạt động ngay cả khi ứng dụng ở nền hoặc màn hình tắt. Khóa Maps API và Routes API cũng cài ở đây (PREMIUM).";
 
 "方向ヒント_%@" = "Hướng %@";
 "方向バッジ_%@" = "%@";
@@ -613,28 +473,13 @@
 "IAP_復元失敗" = "Khoi phuc that bai";
 "IAP_購入保留" = "Giao dich dang cho duyet";
 "IAP_購入失敗" = "Mua hang that bai";
-"MapsAPI_Google送信説明" = "Yeu cau ban do gui truc tiep tu iPhone den may chu Google.";
-"MapsAPI_はじめて" = "Lan dau dung khóa API?";
 "MapsAPI_エラー_400" = "Yeu cau loi. Hay bat Maps API tren Google Cloud.";
 "MapsAPI_エラー_401" = "Loi xac thuc. Kiem tra khóa API va Maps API.";
 "MapsAPI_エラー_429" = "Qua nhieu yeu cau. Vui long doi va thu lai.";
 "MapsAPI_エラー_500" = "May chu Google tam thoi khong kha dung.";
 "MapsAPI_エラー_不明_%@" = "Loi Maps API: %@";
 "MapsAPI_エラー_拒否_%@" = "Yeu cau bi tu choi: %@";
-"MapsAPI_キーの役割" = "Khóa Google Maps API dung de lam gi";
-"MapsAPI_キー入力フッター" = "Dan khóa da bat Maps API tren Google Cloud Console.";
-"MapsAPI_キー削除" = "Xóa khóa API";
-"MapsAPI_キー取得リンク" = "Lay khóa API (Google Cloud Console)";
-"MapsAPI_初心者_これは何" = "Giong mat khau de ung dung hien thi Google Maps.";
-"MapsAPI_初心者_これは何_見出し" = "Khóa API la gi?";
-"MapsAPI_初心者_手順" = "① Bat Maps API → ② Tao khóa API → ③ Dan va luu → ④ Chay kiem tra ket noi";
-"MapsAPI_初心者_手順_見出し" = "Cac buoc cai dat";
-"MapsAPI_初心者_無料" = "Google Cloud co goi mien phi. Dung ca nhan thuong nam trong han muc mien phi.";
-"MapsAPI_初心者_無料_見出し" = "Co mat phi khong?";
-"MapsAPI_導通テストフッター" = "Kiem tra ket noi xac minh khóa bang yeu cau geocode don gian.";
 "MapsAPI_接続成功" = "Ket noi thanh cong. Khóa Maps API hop le.";
-"MapsAPI_有効化手順" = "Cach bat Maps API";
-"MapsAPI_端末内説明" = "Khóa được lưu trong Keychain và gửi khi xác thực yêu cầu Google Maps.";
 
 "プライバシーとデータ" = "Quyền riêng tư";
 "プライバシー_設定フッター" = "Xem cách dữ liệu được gửi, lưu và xóa.";
@@ -666,16 +511,10 @@
 "プライバシー_Appleメディア規約" = "Điều khoản Dịch vụ Media của Apple";
 "プライバシー_Googleポリシー" = "Chính sách quyền riêng tư Google";
 "プライバシー_関連ポリシー_詳細" = "Điều khoản của Apple áp dụng cho tìm kiếm/mã hóa địa lý MapKit và mua hàng StoreKit; chính sách của Google áp dụng cho Routes API, Maps SDK và Geocoding.";
-"MapsAPIキー_Premium限定_説明" = "Cai khóa Google Maps API co trong goi PREMIUM.";
-"MapsAPIキー保存完了" = "Da luu khóa Google Maps API.";
-"MapsAPI説明_リード" = "osmBus dung Google Maps de hien thi tuyen va ban do tuyen xe. Can khóa Maps API cho tinh nang ban do.";
-"MapsAPI説明_補足" = "Co the tao mien phi voi tai khoan Google.";
 "Maps_お試し残り_%d" = "Luot ban do con lai thang nay: %d";
 "Maps_お試し終了_タイトル" = "Da het han muc ban do thang nay";
 "Maps_お試し終了_本文" = "Nang cap PREMIUM hoac cai khóa Maps API trong Cai dat.";
 "Maps_お試し説明" = "Khong co khóa rieng, goi FREE dung khóa chung voi gioi han hang thang.";
-"Maps_キー設定済み" = "Da cai khóa Maps API";
-"Maps_キー設定済み_説明" = "Dùng khóa riêng để hiển thị bản đồ. Sử dụng khóa riêng giúp xem bản đồ không giới hạn.";
 "Maps_現在の状態" = "Trang thai Maps";
 "Maps_設定に進む" = "Mo Cai dat";
 "Overpass_サーバー_%@" = "May chu Overpass: %@";
@@ -685,7 +524,6 @@
 "Overpass_解析失敗" = "Khong phan tich duoc du lieu tuyen.";
 "Overpass_路線なし" = "Khong tim thay tuyen xe phu hop.";
 "Overpass_通信エラー" = "Khong ket noi duoc may chu Overpass.";
-"PREMIUM_MapsAPI_説明" = "PREMIUM: 60 lần xem bản đồ/tháng với khóa dùng chung. Hoặc cài khóa Maps API riêng để dùng không giới hạn.";
 "PREMIUM_RoutesAPI_説明" = "PREMIUM: 60 lượt kiểm tra xe/tháng với khóa dùng chung. Hoặc cài khóa Routes API riêng để dùng không giới hạn.";
 "PREMIUM_API統合_説明" = "Kiểm tra xe buýt: 60 lượt/tháng với khóa dùng chung. Hiển thị bản đồ: 60 lượt/tháng (đếm riêng). Cài khóa API riêng để dùng không giới hạn cả hai.";
 "PREMIUM_利用中" = "Dang dung PREMIUM";
@@ -720,14 +558,11 @@
 "テンキー_表示" = "Hiện bàn phím số";
 "テンキー_非表示" = "Ẩn bàn phím số";
 "乗車中" = "Dang di";
-"降車_確認" = "Xuống xe?";
 "路線候補_初期化確認" = "Làm mới danh sách tuyến?";
 "はい" = "Có";
 "いいえ" = "Không";
 "乗車開始" = "Bat dau di";
 "他の系統も乗れるかも" = "Bien the khac cung co the di duoc";
-"到着アラート_%d" = "Canh bao con %d tram";
-"到着アラート_タイトル" = "Canh bao so tram con lai";
 "地図_タップヒント" = "Cham ban do de chon dia diem";
 "地図_住所取得中" = "Dang lay dia chi…";
 "地図_出発地" = "Diem di";
@@ -771,4 +606,3 @@
 "降車" = "Xuong xe";
 "直線距離" = "Khoảng cách";
 "乗車中バス_設定タイトル" = "Chon xe buyt dang di";
-"乗車中バス_確認_%@" = "Ban dang di xe buyt %@ khong?";

@@ -16,14 +16,6 @@ struct BusRouteCandidate: Identifiable, Hashable {
     }
 }
 
-/// メイン画面の乗車判定で確定した路線に合わせて OSM 候補を絞り込むためのヒント。
-struct BoardingRouteMatchHint: Sendable {
-    let preferredRef: String
-    let headsign: String?
-    let departureStopName: String?
-    let arrivalStopName: String?
-}
-
 struct BusStop: Identifiable {
     let id: Int
     let name: String
@@ -309,60 +301,4 @@ enum OverpassAPIService {
         }
     }
 
-    /// メイン画面で確定済みの乗車路線に最も合う候補を返す。一意に決まらなければ nil。
-    static func pickResolvedCandidate(
-        from candidates: [BusRouteCandidate],
-        hint: BoardingRouteMatchHint?
-    ) -> BusRouteCandidate? {
-        guard !candidates.isEmpty else { return nil }
-        guard let hint else {
-            return candidates.count == 1 ? candidates[0] : nil
-        }
-
-        let refMatches = candidates.filter {
-            $0.ref.caseInsensitiveCompare(hint.preferredRef) == .orderedSame
-        }
-        let pool = refMatches.isEmpty ? candidates : refMatches
-        if pool.count == 1 { return pool[0] }
-
-        let ranked = pool.sorted {
-            scoreCandidate($0, hint: hint) > scoreCandidate($1, hint: hint)
-        }
-        guard let best = ranked.first, ranked.count > 1 else { return ranked.first }
-
-        let bestScore = scoreCandidate(best, hint: hint)
-        let secondScore = scoreCandidate(ranked[1], hint: hint)
-        if bestScore > 0, bestScore > secondScore {
-            return best
-        }
-        return nil
-    }
-
-    private static func scoreCandidate(_ candidate: BusRouteCandidate, hint: BoardingRouteMatchHint) -> Int {
-        var score = 0
-        if candidate.ref.caseInsensitiveCompare(hint.preferredRef) == .orderedSame {
-            score += 20
-        }
-        if let to = candidate.to {
-            if let headsign = hint.headsign {
-                score += normalizedMatchScore(to, headsign)
-            }
-            if let arrival = hint.arrivalStopName {
-                score += normalizedMatchScore(to, arrival) / 2
-            }
-        }
-        if let from = candidate.from, let departure = hint.departureStopName {
-            score += normalizedMatchScore(from, departure)
-        }
-        return score
-    }
-
-    private static func normalizedMatchScore(_ a: String, _ b: String) -> Int {
-        let x = a.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        let y = b.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        guard !x.isEmpty, !y.isEmpty else { return 0 }
-        if x == y { return 10 }
-        if x.contains(y) || y.contains(x) { return 6 }
-        return 0
-    }
 }

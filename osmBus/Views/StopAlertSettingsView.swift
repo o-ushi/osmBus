@@ -4,21 +4,21 @@ struct StopAlertSettingsView: View {
     @Environment(\.locale) private var locale
 
     // MARK: - Distance alert slots
-    @AppStorage("osmBus_dist_alert_0_enabled") private var dist0Enabled = true
-    @AppStorage("osmBus_dist_alert_0_meters")  private var dist0Meters  = 1000
-    @AppStorage("osmBus_dist_alert_1_enabled") private var dist1Enabled = true
-    @AppStorage("osmBus_dist_alert_1_meters")  private var dist1Meters  = 400
-    @AppStorage("osmBus_dist_alert_2_enabled") private var dist2Enabled = true
-    @AppStorage("osmBus_dist_alert_2_meters")  private var dist2Meters  = 100
+    @AppStorage(wrappedValue: true, DistanceAlertSlot.all[0].enabledKey) private var dist0Enabled
+    @AppStorage(wrappedValue: DistanceAlertSlot.defaultMeters[0], DistanceAlertSlot.all[0].metersKey) private var dist0Meters
+    @AppStorage(wrappedValue: true, DistanceAlertSlot.all[1].enabledKey) private var dist1Enabled
+    @AppStorage(wrappedValue: DistanceAlertSlot.defaultMeters[1], DistanceAlertSlot.all[1].metersKey) private var dist1Meters
+    @AppStorage(wrappedValue: true, DistanceAlertSlot.all[2].enabledKey) private var dist2Enabled
+    @AppStorage(wrappedValue: DistanceAlertSlot.defaultMeters[2], DistanceAlertSlot.all[2].metersKey) private var dist2Meters
 
-    // MARK: - Stop count alert
-    @AppStorage("osmBus_alert_alarm")          private var alarmEnabled    = false
-    @AppStorage("osmBus_alert_soundID")        private var soundID         = AlertSoundCatalog.defaultID
-    @AppStorage("osmBus_alert_followsSystem")  private var followsSystem   = true
-    @AppStorage("osmBus_alert_soundVolume")    private var soundVolume     = 0.8
-    @AppStorage("osmBus_alert_alert")          private var alertEnabled    = true
-    @AppStorage("osmBus_alert_vibration")      private var vibrationEnabled = true
-    @AppStorage("osmBus_alert_vibStyle")       private var vibStyleRaw     = AlertVibrationStyle.heavy.rawValue
+    // MARK: - Alarm sound alert
+    @AppStorage(StopAlertMode.alarm.storageKey) private var alarmEnabled = false
+    @AppStorage(StopAlertSettings.soundIDKey) private var soundID = AlertSoundCatalog.defaultID
+    @AppStorage(StopAlertSettings.followsSystemKey) private var followsSystem = true
+    @AppStorage(StopAlertSettings.volumeKey) private var soundVolume = StopAlertSettings.defaultVolume
+    @AppStorage(StopAlertMode.alert.storageKey) private var alertEnabled = true
+    @AppStorage(StopAlertMode.vibration.storageKey) private var vibrationEnabled = true
+    @AppStorage(StopAlertSettings.vibStyleKey) private var vibStyleRaw = AlertVibrationStyle.heavy.rawValue
 
     private static let distancePresets = [50, 100, 150, 200, 300, 400, 500, 750, 1000, 1500, 2000]
 

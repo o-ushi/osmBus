@@ -1,18 +1,32 @@
 import SwiftUI
 
-private struct BusFrameStyleKey: EnvironmentKey {
-    static let defaultValue = AppFramePreset.pastel.builtInStyle()
+struct BusCardStyle: Equatable {
+    var cardFill: Color
+    var cardBorder: Color
+    var borderWidth: CGFloat
+    var accentStrip: Color
+
+    static let standard = BusCardStyle(
+        cardFill: AppTheme.cardFill,
+        cardBorder: AppTheme.cardBorder,
+        borderWidth: AppTheme.cardBorderWidth,
+        accentStrip: AppTheme.cardAccentStrip
+    )
+}
+
+private struct BusCardStyleKey: EnvironmentKey {
+    static let defaultValue = BusCardStyle.standard
 }
 
 extension EnvironmentValues {
-    var busFrameStyle: AppFrameResolvedStyle {
-        get { self[BusFrameStyleKey.self] }
-        set { self[BusFrameStyleKey.self] = newValue }
+    var busCardStyle: BusCardStyle {
+        get { self[BusCardStyleKey.self] }
+        set { self[BusCardStyleKey.self] = newValue }
     }
 }
 
 struct BusCardBackground: View {
-    let style: AppFrameResolvedStyle
+    var style: BusCardStyle = .standard
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -31,26 +45,23 @@ struct BusCardBackground: View {
     }
 }
 
-struct BusMainScreenThemeModifier: ViewModifier {
-    @Environment(AppAppearanceStore.self) private var appearance
-    @Environment(ColorThemeManager.self) private var themeManager
-
+struct BusMainScreenStyleModifier: ViewModifier {
     func body(content: Content) -> some View {
-        let frameStyle = appearance.resolvedFrameStyle()
-        let cardFill = frameStyle.cardFill
-        let cardScheme: ColorScheme = cardFill.relativeLuminance > 0.18 ? .light : .dark
-        let accent = themeManager.currentTheme.accentColor.readable(against: cardFill)
-
         content
-            .environment(\.busFrameStyle, frameStyle)
-            .environment(\.cardFillColor, cardFill)
-            .environment(\.colorScheme, cardScheme)
-            .tint(accent)
+            .environment(\.busCardStyle, .standard)
+            .environment(\.colorScheme, .light)
+            .tint(AppTheme.accent)
     }
 }
 
 extension View {
-    func busMainScreenThemed() -> some View {
-        modifier(BusMainScreenThemeModifier())
+    func busMainScreenStyled() -> some View {
+        modifier(BusMainScreenStyleModifier())
+    }
+
+    /// 検索・履歴・登録地など、システムライトで統一するシート用。
+    func lightSheetChrome() -> some View {
+        preferredColorScheme(.light)
+            .tint(AppTheme.accent)
     }
 }

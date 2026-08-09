@@ -59,8 +59,7 @@ struct SavedPlacesView: View {
                 }
             }
         }
-        .preferredColorScheme(.light)
-        .tint(.blue)
+        .lightSheetChrome()
     }
 
     private var savedPlacesList: some View {
@@ -560,8 +559,7 @@ private struct SavedPlaceEditorView: View {
             }
         }
         .environment(\.locale, locale)
-        .preferredColorScheme(.light)
-        .tint(.blue)
+        .lightSheetChrome()
     }
 
     private func loadInitialState() {
