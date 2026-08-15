@@ -3,6 +3,8 @@ import SwiftUI
 struct MoreActionsMenuView: View {
     @Environment(\.locale) private var locale
 
+    var screenToggleTitleKey: String? = nil
+    var onToggleScreen: (() -> Void)? = nil
     let onHistory: () -> Void
     let onRegisterPlace: () -> Void
     let onSettings: () -> Void
@@ -12,6 +14,11 @@ struct MoreActionsMenuView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
+                if let screenToggleTitleKey, let onToggleScreen {
+                    menuButton(screenToggleTitleKey, systemImage: "rectangle.on.rectangle", action: onToggleScreen)
+                    menuDivider
+                }
+
                 menuButton("履歴", systemImage: "clock.arrow.circlepath", action: onHistory)
                 menuButton("場所を登録", systemImage: "mappin.and.ellipse", action: onRegisterPlace)
 

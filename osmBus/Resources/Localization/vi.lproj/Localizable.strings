@@ -109,6 +109,27 @@
 
 "履歴" = "Lịch sử";
 
+"メイン画面" = "Màn hình chính";
+
+"トップ画面" = "Màn hình tổng quan";
+
+"距離" = "Khoảng cách";
+
+"あと" = "Còn";
+
+"バス番号表" = "Bảng số xe buýt";
+
+"未接続" = "Chưa kết nối";
+
+"方向" = "Hướng";
+
+"直通" = "Trực tiếp";
+
+"乗換1" = "Đổi 1 lần";
+
+"乗換2+" = "Đổi 2+ lần";
+
+"バス番号表_操作ヒント" = "Chạm để xem bản đồ tuyến, giữ để lên hoặc xuống xe";
 
 
 
@@ -228,7 +249,7 @@
 
 "バージョン" = "Phiên bản %@ (%@)";
 
-"ヘルプ紹介文" = "Ở trạm xe buýt, nhập số xe trước mặt để biết ngay xe có đến điểm đến của bạn không. Bạn cũng có thể xem tuyến đi và theo dõi khi đang đi.";
+"ヘルプ紹介文" = "Ứng dụng mở ở màn hình tổng quan. Đặt điểm đến rồi chọn xe từ bảng số. Bàn phím kiểm tra số xe nằm ở … → Màn hình chính.";
 
 "help_場所を登録_title" = "Địa điểm đã lưu";
 
@@ -236,15 +257,15 @@
 
 "help_目的地_title" = "Đặt điểm đến";
 
-"help_目的地_body" = "Chạm thanh điểm đến ở trên để chọn từ địa điểm đã lưu, lịch sử hoặc kết quả tìm kiếm.";
+"help_目的地_body" = "Chạm thanh điểm đến trên màn hình tổng quan hoặc màn hình chính để chọn từ địa điểm đã lưu, lịch sử hoặc kết quả tìm kiếm. Cũng có thể chọn trên bản đồ bằng biểu tượng bản đồ.";
 
 "help_現在地_title" = "Lấy vị trí hiện tại";
 
-"help_現在地_body" = "Ứng dụng xin quyền vị trí khi mở. Ở trạm xe buýt, chạm làm mới (↻) trên thanh vị trí trước khi nhập số xe.";
+"help_現在地_body" = "Ứng dụng xin quyền vị trí khi mở. Làm mới (↻) hoặc chọn trên bản đồ từ thanh vị trí trên màn hình tổng quan hoặc màn hình chính. Khi đang đi, không sửa được để tránh thao tác nhầm.";
 
 "help_バス番号_title" = "Nhập số xe buýt";
 
-"help_バス番号_body" = "Chỉ nhập số (vd: 35). Ứng dụng tự tìm 35A, 35B… trong tuyến đến điểm đến và báo có nên lên xe hay không.";
+"help_バス番号_body" = "Từ … → Màn hình chính, chỉ nhập số (vd: 35). Ứng dụng tự tìm 35A, 35B… trong tuyến đến điểm đến và báo có nên lên xe hay không.";
 
 "help_APIキー_とは_title" = "Khóa API là gì?";
 
@@ -452,11 +473,17 @@
 "方向_W" = "T";
 "方向_NW" = "TB";
 "help_お試し_title" = "Lượt dùng miễn phí hàng tháng";
-"help_お試し_body" = "Không cần khóa riêng: gói FREE được 30 lần kiểm tra/tháng (khóa dùng chung). Gói PREMIUM được 60 lần/tháng. Đặt lại ngày 1 hàng tháng. Số lần còn lại hiển thị ở giữa thanh công cụ trên. Cài khóa riêng (PREMIUM) để dùng không giới hạn.";
+"help_お試し_body" = "Không cần khóa riêng: gói FREE được 30 lần kiểm tra/tháng (khóa dùng chung). Gói PREMIUM được 60 lần/tháng. Đặt lại ngày 1 hàng tháng. Số lần còn lại hiện dưới bảng số xe trên màn hình tổng quan (hoặc cuối màn hình chính). Cài khóa riêng (PREMIUM) để dùng không giới hạn.";
+"help_トップ_title" = "Màn hình tổng quan";
+"help_トップ_body" = "Đây là màn hình khi mở ứng dụng: điểm đến, vị trí, khoảng cách và bảng số xe. Để kiểm tra số trên bàn phím, mở … → Màn hình chính. Quay lại bằng … → Màn hình tổng quan.";
+"help_距離_title" = "Màu khoảng cách";
+"help_距離_body" = "Thanh khoảng cách là đường thẳng đến điểm đến khi chưa lên xe, hoặc đến trạm xuống của xe hiện tại khi đang đi. Từ 3 km màu xanh dương, từ 1 km xanh lá, từ 500 m vàng, từ 200 m cam, dưới 200 m đỏ. Chạm thanh để mở bản đồ tuyến.";
+"help_バス番号表_title" = "Bảng số xe buýt";
+"help_バス番号表_body" = "Số xe được nhóm theo hướng và số lần chuyển. Chạm để mở bản đồ tuyến, giữ để lên hoặc xuống xe. Xe đang đi được tô nổi.";
 "help_経路_title" = "Tuyến đi";
-"help_経路_body" = "Chạm nút tuyến trên màn hình chính (hoặc lắc thiết bị) để xem các phương án đi công cộng đến điểm đến. Chạm một tuyến để xem trên bản đồ, hoặc chạm giữ vào số xe buýt để bắt đầu chế độ đang đi ngay.";
+"help_経路_body" = "Chạm số xe trên màn hình tổng quan để mở bản đồ tuyến. Để xem danh sách đầy đủ, mở … → Màn hình chính rồi chạm Xem tuyến (hoặc lắc máy). Chạm một tuyến để xem bản đồ, hoặc giữ số xe để lên hoặc xuống.";
 "help_乗車中_title" = "Chế độ đang đi";
-"help_乗車中_body" = "Sau kết quả xanh hoặc vàng \"Lên xe!\", chạm Bắt đầu đi (hoặc chạm giữ số xe buýt trong danh sách tuyến) để vào chế độ đang đi. Ứng dụng sẽ theo dõi khoảng cách thẳng đến trạm xuống xe hiện tại và báo bằng cảnh báo bạn đã cài đặt. Khi chuyển tuyến, khoảng cách tự chuyển sang trạm xuống xe tiếp theo. Chạm biểu tượng \"Đang đi\" ở góc trên bên trái để mở bản đồ tuyến. Dùng nút Xuống xe trên thẻ để kết thúc.";
+"help_乗車中_body" = "Giữ số xe trên màn hình tổng quan để bắt đầu đi. Giữ cùng số lần nữa để xuống xe. Khi chuyển tuyến, giữ xe tiếp theo. Khoảng cách là đường thẳng đến trạm xuống của xe hiện tại và đổi sau khi chuyển. Chạm thanh khoảng cách để mở bản đồ tuyến. Trên … → Màn hình chính, sau kết quả xanh/vàng có thể chạm Bắt đầu đi, và dùng nút Xuống xe trên thẻ.";
 "help_設定_title" = "Cài đặt & cảnh báo";
 "help_設定_body" = "Từ … → Cài đặt bạn có thể đổi ngôn ngữ, âm thanh bàn phím và cảnh báo đến nơi. Cảnh báo đến nơi dựa trên khoảng cách đến trạm xuống xe, hỗ trợ tối đa 3 mức — chuông reo 1–3 lần từ xa đến gần. Chuông và cảnh báo hoạt động ngay cả khi ứng dụng ở nền hoặc màn hình tắt. Khóa Maps API và Routes API cũng cài ở đây (PREMIUM).";
 

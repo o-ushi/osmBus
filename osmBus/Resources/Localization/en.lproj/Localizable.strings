@@ -109,6 +109,27 @@
 
 "履歴" = "History";
 
+"メイン画面" = "Main Screen";
+
+"トップ画面" = "Top Screen";
+
+"距離" = "Distance";
+
+"あと" = "Left";
+
+"バス番号表" = "Bus Number Table";
+
+"未接続" = "Not connected";
+
+"方向" = "Direction";
+
+"直通" = "Direct";
+
+"乗換1" = "1 transfer";
+
+"乗換2+" = "2+ transfers";
+
+"バス番号表_操作ヒント" = "Tap to view the route map, long-press to board or alight";
 
 
 
@@ -228,7 +249,7 @@
 
 "バージョン" = "Version %@ (%@)";
 
-"ヘルプ紹介文" = "At a bus stop, enter the bus number to instantly see if it goes to your destination. You can also browse transit routes and track your ride.";
+"ヘルプ紹介文" = "The app opens on the top screen. Set your destination and pick a bus from the number table. The keypad for checking a number is under … → Main Screen.";
 
 "help_場所を登録_title" = "Saved places";
 
@@ -236,15 +257,15 @@
 
 "help_目的地_title" = "Set destination";
 
-"help_目的地_body" = "Tap the destination bar at the top to pick from saved places, history, or search results.";
+"help_目的地_body" = "Tap the destination bar on the top or main screen to pick from saved places, history, or search results. You can also choose on the map via the map icon.";
 
 "help_現在地_title" = "Get current location";
 
-"help_現在地_body" = "Location permission is requested at launch. At a bus stop, tap refresh (↻) on the location bar before entering the bus number.";
+"help_現在地_body" = "Location permission is requested at launch. Refresh (↻) or pick on the map from the location bar on the top or main screen. Input is locked while riding to prevent mistakes.";
 
 "help_バス番号_title" = "Enter bus number";
 
-"help_バス番号_body" = "Enter digits only (e.g. 35). The app finds matching variants like 35A or 35B from route data and tells you whether to board.";
+"help_バス番号_body" = "From … → Main Screen, enter digits only (e.g. 35). The app finds matching variants like 35A or 35B from route data and tells you whether to board.";
 
 "help_APIキー_とは_title" = "What is an API key?";
 
@@ -452,11 +473,17 @@
 "方向_W" = "W";
 "方向_NW" = "NW";
 "help_お試し_title" = "Monthly free uses";
-"help_お試し_body" = "Without your own API key, the FREE plan gets 30 bus checks per month using the shared key. PREMIUM plan gets 60 per month. Resets on the 1st. Remaining uses appear in the toolbar center. Setting your own API key (PREMIUM) gives unlimited checks.";
+"help_お試し_body" = "Without your own API key, the FREE plan gets 30 bus checks per month using the shared key. PREMIUM plan gets 60 per month. Resets on the 1st. Remaining uses appear below the bus number table on the top screen (or at the bottom of the main screen). Setting your own API key (PREMIUM) gives unlimited checks.";
+"help_トップ_title" = "Top screen";
+"help_トップ_body" = "This is the screen that opens at launch. It shows destination, current location, distance, and the bus number table. To check a number on the keypad, open … → Main Screen. Return with … → Top Screen.";
+"help_距離_title" = "Distance colors";
+"help_距離_body" = "The distance bar is the straight line to your destination when you are not riding, or to the current bus's alighting stop when you are. Blue from 3 km, green from 1 km, yellow from 500 m, orange from 200 m, red under 200 m. Tap the bar to open the route map.";
+"help_バス番号表_title" = "Bus number table";
+"help_バス番号表_body" = "Bus numbers are grouped by direction and number of transfers. Tap to open the route map, long-press to board or alight. The bus you are riding is highlighted.";
 "help_経路_title" = "Transit routes";
-"help_経路_body" = "Tap the routes button on the main screen (or shake the device) to browse transit options to your destination. Tap a route to view it on the map, or long-press a bus number badge to start riding mode right away.";
+"help_経路_body" = "Tap a bus number on the top screen to open the route map. For a full list, open … → Main Screen and tap Transit routes (or shake the device). Tap a candidate to view the map, or long-press a bus number badge to board or alight.";
 "help_乗車中_title" = "Riding mode";
-"help_乗車中_body" = "After a green or yellow \"Get on!\" result, tap Start riding (or long-press a bus number in the route list) to enter riding mode. It tracks the straight-line distance to your current bus's alighting stop and notifies you with your configured alerts. When transferring, the distance switches to the next alighting stop. Tap the \"Riding\" indicator at the top-left to open the route map. Use the Get off button on the card to end riding.";
+"help_乗車中_body" = "Long-press a bus number on the top screen to start riding. Long-press the same number again to get off. When transferring, long-press the next bus. Distance is the straight line to the current bus's alighting stop and switches after a transfer. Tap the distance bar to open the route map. On … → Main Screen you can also use Start riding after a green or yellow result, and Get off on the card.";
 "help_設定_title" = "Settings & alerts";
 "help_設定_body" = "From … → Settings you can change language, keypad sound, and arrival alerts. Arrival alerts are distance-based to the alighting stop, with up to 3 thresholds — alarms play 1–3 times from furthest to closest. Alarms and alerts work even when the app is in the background or the screen is off. Maps and Routes API keys are also configured here (PREMIUM).";
 

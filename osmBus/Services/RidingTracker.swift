@@ -43,6 +43,10 @@ final class RidingTracker {
     private var ridingRoutePolyline: [RouteCoordinate] = []
     private var ridingStartTime: Date?
     private var boardingStopDistanceToDestination: Double = 0
+    /// 直近に乗車した区間の steps インデックス。乗り換え(降車→次のバスへ乗車)の際、
+    /// 既に降りたレグへ再マッチしないようにするための手がかり。endRiding() では
+    /// 保持し、clear() で完全リセットする。
+    private var lastBoardedStepIndex: Int?
 
     /// 降車バス停（直線距離の基準点）
     private(set) var alightCoordinate: CLLocationCoordinate2D?
@@ -54,6 +58,15 @@ final class RidingTracker {
     var isActive: Bool { ridingState != nil }
 
     func clear() {
+        endRiding()
+        lastBoardedStepIndex = nil
+    }
+
+    /// 乗車状態だけを終了する。バス番号入力・経路データベース・目的地には触れない
+    /// (呼び出し元の MainViewModel 側で保持される)。lastBoardedStepIndex も保持し、
+    /// 続けて次のバスへ乗る際に既に降りたレグへ再マッチしないようにする。
+    /// 新しい旅の開始など、完全リセットしたい場合は clear() を使う。
+    func endRiding() {
         ridingState = nil
         isOSMMapRiding = false
         osmRidingRouteCandidate = nil
@@ -80,18 +93,15 @@ final class RidingTracker {
     ) {
         guard let route else { clear(); return }
 
-        let matchingIdx = route.steps.firstIndex(where: { step in
-            step.travelMode == "TRANSIT" &&
-            step.vehicleType == "BUS" &&
-            GoogleRoutesAPIService.stepMatchesBusNumber(step, busNumber: busNumber)
-        }) ?? route.steps.firstIndex(where: { step in
-            step.travelMode == "TRANSIT" && step.vehicleType == "BUS"
-        })
-
-        guard let busStepIdx = matchingIdx else {
+        guard let busStepIdx = Self.resolveBusStepIndex(
+            in: route.steps,
+            busNumber: busNumber,
+            afterStepIndex: lastBoardedStepIndex
+        ) else {
             clear()
             return
         }
+        lastBoardedStepIndex = busStepIdx
         let busStep = route.steps[busStepIdx]
         let alightStop = busStep.arrivalStopName ?? destination?.name ?? ""
 
@@ -245,6 +255,32 @@ final class RidingTracker {
         triggeredDistanceThresholds = []
         lastDistanceToAlight = nil
         nearestDistanceAlertReached = false
+    }
+
+    /// busNumber に一致するバス区間の steps インデックスを選ぶ。同じルート内に同じ番号の
+    /// レグが複数ある場合(乗り換えて再び同じ路線に乗る等)、afterStepIndex より後ろの
+    /// レグを優先し、既に降りたレグへ再マッチしないようにする。該当が無ければ最初の
+    /// 一致を使い、番号自体が見つからなければ最初のバス区間にフォールバックする。
+    private static func resolveBusStepIndex(
+        in steps: [ParsedTransitStep],
+        busNumber: String,
+        afterStepIndex: Int?
+    ) -> Int? {
+        let matchingIndices = steps.indices.filter { idx in
+            let step = steps[idx]
+            return step.travelMode == "TRANSIT" &&
+                step.vehicleType == "BUS" &&
+                GoogleRoutesAPIService.stepMatchesBusNumber(step, busNumber: busNumber)
+        }
+        guard !matchingIndices.isEmpty else {
+            return steps.firstIndex { step in
+                step.travelMode == "TRANSIT" && step.vehicleType == "BUS"
+            }
+        }
+        if let afterStepIndex, let next = matchingIndices.first(where: { $0 > afterStepIndex }) {
+            return next
+        }
+        return matchingIndices.first
     }
 
     private static func resolveAlightCoordinate(

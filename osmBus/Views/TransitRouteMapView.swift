@@ -456,12 +456,11 @@ struct TransitRouteMapView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationBarTitleDisplayMode(.inline)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                routeHeaderBar
+            }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    routeHeaderBusLines
-                }
-                .hideSharedBackgroundIfAvailable()
-                ToolbarItemGroup(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
                     if displayedRouteOptionCount > 1 {
                         Button { openRouteSwitcher() } label: {
                             HStack(spacing: 3) {
@@ -607,24 +606,33 @@ struct TransitRouteMapView: View {
     }
 
     @ViewBuilder
-    private var routeHeaderBusLines: some View {
+    private var routeHeaderBar: some View {
         let busLines = GoogleRoutesAPIService.transitBusLineBadgeLabels(for: displayedRoute)
-        Group {
-            if busLines.isEmpty {
-                Text(GoogleRoutesAPIService.transitLineSummary(for: displayedRoute))
-                    .font(.subheadline.weight(.semibold))
-                    .lineLimit(1)
-                    .fixedSize(horizontal: true, vertical: false)
-            } else {
-                TransitBusLineBadgesRow(
-                    lines: busLines,
-                    ridingBusNumber: ridingBusNumber,
-                    onLongPress: onSelectRidingBus.map { callback in
-                        { line in callback(displayedRouteIndex, line) }
-                    }
-                )
+        ScrollView(.horizontal, showsIndicators: false) {
+            Group {
+                if busLines.isEmpty {
+                    Text(GoogleRoutesAPIService.transitLineSummary(for: displayedRoute))
+                        .font(.subheadline.weight(.semibold))
+                        .lineLimit(1)
+                } else {
+                    TransitBusLineBadgesRow(
+                        lines: busLines,
+                        ridingBusNumber: ridingBusNumber,
+                        font: .caption.weight(.bold),
+                        badgeHorizontalPadding: 7,
+                        badgeVerticalPadding: 3,
+                        onLongPress: onSelectRidingBus.map { callback in
+                            { line in callback(displayedRouteIndex, line) }
+                        }
+                    )
+                }
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
         }
+        .scrollBounceBehavior(.basedOnSize)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.bar)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isStaticText)
     }

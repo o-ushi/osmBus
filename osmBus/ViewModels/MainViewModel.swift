@@ -60,6 +60,28 @@ final class MainViewModel {
         effectiveOriginLatitude != nil && effectiveOriginLongitude != nil
     }
 
+    /// トップ画面の距離欄用。乗車中は現在レグの降車停まで、未乗車は目的地までの直線距離
+    /// (Step 1 で定義した基準点と同じ)。現在地または基準地点が無ければ nil。
+    var topScreenDistanceMeters: Double? {
+        guard let originLat = effectiveOriginLatitude, let originLon = effectiveOriginLongitude else { return nil }
+        if ridingState != nil {
+            guard let alight = ridingAlightCoordinate else { return nil }
+            return GoogleRoutesAPIService.distanceMeters(
+                fromLatitude: originLat,
+                fromLongitude: originLon,
+                toLatitude: alight.latitude,
+                toLongitude: alight.longitude
+            )
+        }
+        guard let destination else { return nil }
+        return GoogleRoutesAPIService.distanceMeters(
+            fromLatitude: originLat,
+            fromLongitude: originLon,
+            toLatitude: destination.latitude,
+            toLongitude: destination.longitude
+        )
+    }
+
     var currentLocationCoordinateText: String? {
         guard let lat = effectiveOriginLatitude, let lon = effectiveOriginLongitude else { return nil }
         return AppLocaleString.currentFormatted(
@@ -636,6 +658,13 @@ final class MainViewModel {
 
     private func clearRidingState() {
         ridingTracker.clear()
+    }
+
+    /// 降車のみを行う。clearBusNumber() と違い、バス番号入力欄・boardingRoute・
+    /// 経路データベース・目的地には触れない。降り続けて別のバスへ乗り換える操作
+    /// (長押しトグル・メイン画面の降車ボタン)から呼ぶ。
+    func endRiding() {
+        ridingTracker.endRiding()
     }
 
     private func registerCompletedBusCheck() {

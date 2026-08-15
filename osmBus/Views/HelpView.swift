@@ -41,6 +41,27 @@ struct HelpView: View {
                         .listRowBackground(Color.clear)
                 }
 
+                Section(AppLocaleString.text("トップ画面", locale: locale)) {
+                    helpRow(
+                        icon: "rectangle.on.rectangle",
+                        color: .blue,
+                        titleKey: "help_トップ_title",
+                        bodyKey: "help_トップ_body"
+                    )
+                    helpRow(
+                        icon: "ruler.fill",
+                        color: .teal,
+                        titleKey: "help_距離_title",
+                        bodyKey: "help_距離_body"
+                    )
+                    helpRow(
+                        icon: "tablecells",
+                        color: .orange,
+                        titleKey: "help_バス番号表_title",
+                        bodyKey: "help_バス番号表_body"
+                    )
+                }
+
                 Section(AppLocaleString.text("基本操作", locale: locale)) {
                     helpRow(
                         icon: "mappin.and.ellipse",

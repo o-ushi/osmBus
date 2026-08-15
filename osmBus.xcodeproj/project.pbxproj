@@ -25,6 +25,8 @@
 		B01D016 /* DestinationSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D018 /* DestinationSearchService.swift */; };
 		B01D017 /* DestinationInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D019 /* DestinationInputView.swift */; };
 		B01D018 /* MoreActionsMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D020 /* MoreActionsMenuView.swift */; };
+		B01D078 /* TopScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D078 /* TopScreenView.swift */; };
+		B01D079 /* BusNumberTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D079 /* BusNumberTableView.swift */; };
 		B01D019 /* PlanManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D021 /* PlanManagementView.swift */; };
 		B01D020 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D022 /* HelpView.swift */; };
 		B01D021 /* SavedPlace.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D023 /* SavedPlace.swift */; };
@@ -95,6 +97,8 @@
 		B02D018 /* DestinationSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationSearchService.swift; sourceTree = "<group>"; };
 		B02D019 /* DestinationInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationInputView.swift; sourceTree = "<group>"; };
 		B02D020 /* MoreActionsMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreActionsMenuView.swift; sourceTree = "<group>"; };
+		B02D078 /* TopScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopScreenView.swift; sourceTree = "<group>"; };
+		B02D079 /* BusNumberTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusNumberTableView.swift; sourceTree = "<group>"; };
 		B02D021 /* PlanManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanManagementView.swift; sourceTree = "<group>"; };
 		B02D022 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		B02D023 /* SavedPlace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlace.swift; sourceTree = "<group>"; };
@@ -215,6 +219,8 @@
 				B02D033 /* SceneBackgroundLayer.swift */,
 				B02D015 /* APIKeySetupBanner.swift */,
 				B02D020 /* MoreActionsMenuView.swift */,
+				B02D078 /* TopScreenView.swift */,
+				B02D079 /* BusNumberTableView.swift */,
 				B02D021 /* PlanManagementView.swift */,
 				B02D022 /* HelpView.swift */,
 				B02D024 /* SavedPlacesView.swift */,
@@ -389,6 +395,8 @@
 				B01D016 /* DestinationSearchService.swift in Sources */,
 				B01D017 /* DestinationInputView.swift in Sources */,
 				B01D018 /* MoreActionsMenuView.swift in Sources */,
+				B01D078 /* TopScreenView.swift in Sources */,
+				B01D079 /* BusNumberTableView.swift in Sources */,
 				B01D019 /* PlanManagementView.swift in Sources */,
 				B01D020 /* HelpView.swift in Sources */,
 				B01D021 /* SavedPlace.swift in Sources */,
