@@ -139,6 +139,12 @@ struct HelpView: View {
                         bodyKey: "help_経路_body"
                     )
                     helpRow(
+                        icon: "map",
+                        color: .indigo,
+                        titleKey: "help_路線図_title",
+                        bodyKey: "help_路線図_body"
+                    )
+                    helpRow(
                         icon: "bus.fill",
                         color: .purple,
                         titleKey: "help_乗車中_title",

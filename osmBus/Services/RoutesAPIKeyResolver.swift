@@ -46,11 +46,10 @@ enum RoutesAPIKeyResolver {
         let trialStore = SharedRoutesTrialStore.shared
         let signature = operationSignature(for: operation)
 
-        if !consumeTrial {
-            if trialStore.hasSessionSignature(signature) {
-                return .sharedTrialKey(sharedKey)
-            }
-            return .unavailable(.noKeyConfigured)
+        // consumeTrial == false は「回数を増やさない」意味。署名済みなら加算せずキーを返す。
+        // 未署名なら初回取得として 1 回消費する。ここで拒否するとマトリクスが空のまま固まる。
+        if !consumeTrial, trialStore.hasSessionSignature(signature) {
+            return .sharedTrialKey(sharedKey)
         }
 
         guard trialStore.consumeTrialIfNeeded(signature: signature) else {

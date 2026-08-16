@@ -216,7 +216,6 @@ struct GoogleMapView: View {
     @Environment(SharedMapsTrialStore.self) private var mapsTrialStore
     @Environment(\.locale) private var locale
     @State private var showsPrivacySheet = false
-    @State private var showsAPISettings = false
     @State private var mapBox = GMSMapViewBox()
 
     var body: some View {
@@ -289,17 +288,13 @@ struct GoogleMapView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Button(AppLocaleString.text("Maps_設定に進む", locale: locale)) {
-                showsAPISettings = true
+                NotificationCenter.default.post(name: .osmBusOpenAPISettings, object: nil)
             }
             .buttonStyle(.borderedProminent)
         }
         .padding(32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(uiColor: .systemGroupedBackground))
-        .sheet(isPresented: $showsAPISettings) {
-            AppSettingsView(opensAPISettingsOnAppear: true)
-                .environment(\.locale, locale)
-        }
     }
 }
 
@@ -348,14 +343,14 @@ struct TransitRouteMapSelection: Identifiable {
 }
 
 /// 乗車中の経路地図シート用。表示時点のスナップショットを保持し、親の再描画ループを防ぐ。
+/// ridingBusNumber・ridingAlightCoordinate はここに含めない
+/// (乗降のたびにスナップショットを取り直す必要が出て更新漏れの元になるため、呼び出し側で常に viewModel から直読みする)。
 struct BoardingRouteMapSheetModel: Identifiable {
     let id: Int
     let route: ParsedTransitRoute
     let origin: RouteCoordinate
     let destination: Destination
     let routeOptionCount: Int
-    var ridingBusNumber: String? = nil
-    var ridingAlightCoordinate: RouteCoordinate? = nil
 }
 
 // MARK: - TransitRouteMapView
@@ -424,18 +419,24 @@ struct TransitRouteMapView: View {
         return CLLocationCoordinate2D(latitude: destination.latitude, longitude: destination.longitude)
     }
 
-    private var effectiveUserCoordinate: CLLocationCoordinate2D? {
-        locationService.currentLocation ?? lastKnownUserCoordinate
-    }
-
-    private var distanceToDestination: Double? {
-        guard let coord = effectiveUserCoordinate else { return nil }
-        let alight = currentLegAlightingCoordinate
+    /// マトリクス／番号入力と同じ。GPS 現在地ではなく経路の出発地
+    /// (`origin` = 手動出発地があればそれ、なければ測位)。
+    private var topBadgeDistanceMeters: Double? {
+        if ridingBusNumber != nil {
+            guard displayedRouteContainsRidingBus else { return nil }
+            let alight = currentLegAlightingCoordinate
+            return GoogleRoutesAPIService.distanceMeters(
+                fromLatitude: origin.latitude,
+                fromLongitude: origin.longitude,
+                toLatitude: alight.latitude,
+                toLongitude: alight.longitude
+            )
+        }
         return GoogleRoutesAPIService.distanceMeters(
-            fromLatitude: coord.latitude,
-            fromLongitude: coord.longitude,
-            toLatitude: alight.latitude,
-            toLongitude: alight.longitude
+            fromLatitude: origin.latitude,
+            fromLongitude: origin.longitude,
+            toLatitude: destination.latitude,
+            toLongitude: destination.longitude
         )
     }
 
@@ -502,18 +503,20 @@ struct TransitRouteMapView: View {
             trialSignature: "maps-transit"
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .overlay(alignment: .bottom) {
-            VStack(spacing: 8) {
-                HStack {
-                    Spacer()
-                    MapLocationButton(
-                        mapBox: mapBox,
-                        fallbackCoordinate: origin.clLocationCoordinate2D
-                    )
-                    .padding(.trailing, 12)
-                }
-                routeSummaryBar
+        .overlay(alignment: .topLeading) {
+            if let meters = topBadgeDistanceMeters {
+                TopDistanceBadge(distanceMeters: meters, onTap: { dismiss() })
+                    .padding(.leading, 12)
+                    .padding(.top, 12)
             }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            MapLocationButton(
+                mapBox: mapBox,
+                fallbackCoordinate: origin.clLocationCoordinate2D
+            )
+            .padding(.trailing, 12)
+            .padding(.bottom, 12)
         }
         .ignoresSafeArea(edges: .bottom)
     }
@@ -591,18 +594,6 @@ struct TransitRouteMapView: View {
             await loadMapOverlays()
         }
         onSwitchRoute?(index)
-    }
-
-    // MARK: - Route summary bar
-
-    private var routeSummaryBar: some View {
-        RouteMapSummaryBar(
-            durationText: GoogleRoutesAPIService.displayDuration(for: displayedRoute, locale: locale),
-            distanceMeters: distanceToDestination,
-            showsDistance: displayedRouteContainsRidingBus,
-            fareText: GoogleRoutesAPIService.displayFare(for: displayedRoute),
-            locale: locale
-        )
     }
 
     @ViewBuilder
@@ -883,7 +874,6 @@ struct RouteMapSummaryBar: View {
     let durationText: String
     let distanceMeters: Double?
     var showsDistance: Bool = true
-    let fareText: String?
     let locale: Locale
 
     var body: some View {
@@ -897,8 +887,6 @@ struct RouteMapSummaryBar: View {
                 distanceLabel
                     .frame(maxWidth: .infinity, alignment: .center)
             }
-
-            fareLabel
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
@@ -931,24 +919,6 @@ struct RouteMapSummaryBar: View {
         }
     }
 
-    @ViewBuilder
-    private var fareLabel: some View {
-        if let fare = fareText {
-            Text(fare)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-                .fixedSize(horizontal: true, vertical: false)
-        } else {
-            Text(AppLocaleString.text("運賃不明", locale: locale))
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.tertiary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-                .fixedSize(horizontal: true, vertical: false)
-        }
-    }
 }
 
 // MARK: - Bus line badges
@@ -982,6 +952,7 @@ struct TransitBusLineBadgesRow: View {
     var font: Font = .subheadline.weight(.bold)
     var badgeHorizontalPadding: CGFloat = 8
     var badgeVerticalPadding: CGFloat = 4
+    var onTap: ((String) -> Void)? = nil
     var onLongPress: ((String) -> Void)? = nil
 
     var body: some View {
@@ -1000,6 +971,9 @@ struct TransitBusLineBadgesRow: View {
                     horizontalPadding: badgeHorizontalPadding,
                     verticalPadding: badgeVerticalPadding
                 )
+                .onTapGesture {
+                    onTap?(line)
+                }
                 .onLongPressGesture {
                     guard let onLongPress else { return }
                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()

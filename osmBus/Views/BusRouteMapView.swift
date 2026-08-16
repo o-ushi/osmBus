@@ -36,7 +36,6 @@ struct BusRouteMapView: View {
     var initialRouteDetail: BusRouteDetail? = nil
     var initialRouteCandidate: BusRouteCandidate? = nil
     var ridingDurationText: String? = nil
-    var ridingFareText: String? = nil
     var onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
@@ -66,7 +65,6 @@ struct BusRouteMapView: View {
         initialRouteDetail: BusRouteDetail? = nil,
         initialRouteCandidate: BusRouteCandidate? = nil,
         ridingDurationText: String? = nil,
-        ridingFareText: String? = nil,
         onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Void)? = nil
     ) {
         self.currentLatitude = currentLatitude
@@ -76,7 +74,6 @@ struct BusRouteMapView: View {
         self.initialRouteDetail = initialRouteDetail
         self.initialRouteCandidate = initialRouteCandidate
         self.ridingDurationText = ridingDurationText
-        self.ridingFareText = ridingFareText
         self.onStartRiding = onStartRiding
         _ridingActive = State(initialValue: isRidingMode)
         _isKeypadVisible = State(initialValue: !isRidingMode)
@@ -97,8 +94,9 @@ struct BusRouteMapView: View {
         return CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }
 
+    /// 距離表示はマトリクスと同じ出発地。GPS は地図上の青点用。
     private var effectiveUserCoordinate: CLLocationCoordinate2D? {
-        locationService.currentLocation ?? lastKnownUserCoordinate ?? contextCoordinate
+        contextCoordinate ?? locationService.currentLocation ?? lastKnownUserCoordinate
     }
 
     var body: some View {
@@ -267,7 +265,6 @@ struct BusRouteMapView: View {
             durationText: ridingDurationText ?? "—",
             distanceMeters: distanceToAlightingStop(detail: detail),
             showsDistance: true,
-            fareText: ridingFareText,
             locale: locale
         )
     }

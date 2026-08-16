@@ -57,7 +57,7 @@ extension GoogleRoutesAPIService {
             outcome: outcome,
             matchingRouteIndex: match.index,
             matchingRoute: match.route,
-            boardingDirectionHint: localizedDirectionHint(for: match.route, busNumber: busNumber),
+            boardingDirectionHint: localizedDirectionHint(for: allRoutes, busNumber: busNumber),
             isBoardingRouteCheapest: isCheapest
         )
     }
@@ -333,10 +333,49 @@ extension GoogleRoutesAPIService {
     }
 
     static func localizedDirectionHint(for route: ParsedTransitRoute, busNumber: String) -> String? {
-        guard let step = route.steps.first(where: { isBusStep($0) && stepMatchesBusNumber($0, busNumber: busNumber) }),
-              let bearing = stepBearing(from: step) else { return nil }
+        localizedDirectionHint(for: [route], busNumber: busNumber)
+    }
+
+    /// 同じ番号が複数案に出るときは方位のばらつきを見る。北向き案と南向き案が両方あるのに
+    /// 採用した1本だけ「北方面」と書くと、目の前の逆向きバスを見送ってしまう。
+    static func localizedDirectionHint(for routes: [ParsedTransitRoute], busNumber: String) -> String? {
+        var bearings: [Double] = []
+        for route in routes {
+            for step in route.steps where isBusStep(step) && stepMatchesBusNumber(step, busNumber: busNumber) {
+                if let bearing = stepBearing(from: step) {
+                    bearings.append(bearing)
+                }
+            }
+        }
+        guard !bearings.isEmpty else { return nil }
+        if bearingsAreDivergent(bearings) {
+            return AppLocaleString.currentText("方向ヒント_どちらでも")
+        }
+        let bearing = circularMeanBearing(bearings)
         let dirText = AppLocaleString.currentText(compassDirectionKeys[Int((bearing + 22.5) / 45) % 8])
         return AppLocaleString.currentFormatted("方向ヒント_%@", dirText)
+    }
+
+    /// 円周上で 120° 超離れた方位が混ざっていれば、向きを限定しない。
+    static func bearingsAreDivergent(_ bearings: [Double]) -> Bool {
+        guard bearings.count >= 2 else { return false }
+        var maxSpread = 0.0
+        for i in 0..<bearings.count {
+            for j in (i + 1)..<bearings.count {
+                let delta = abs(bearings[i] - bearings[j]).truncatingRemainder(dividingBy: 360)
+                maxSpread = max(maxSpread, min(delta, 360 - delta))
+            }
+        }
+        return maxSpread > 120
+    }
+
+    static func circularMeanBearing(_ bearings: [Double]) -> Double {
+        let radians = bearings.map { $0 * .pi / 180 }
+        let y = radians.map(sin).reduce(0, +)
+        let x = radians.map(cos).reduce(0, +)
+        var degrees = atan2(y, x) * 180 / .pi
+        if degrees < 0 { degrees += 360 }
+        return degrees
     }
 
     static func formatArrivalTime(after durationSeconds: TimeInterval) -> String {

@@ -72,7 +72,6 @@ struct BusKeypadView: View {
     private enum KeyStyle {
         case primary
         case clear
-        case letter
     }
 
     private func keypadRow(
@@ -146,8 +145,6 @@ struct BusKeypadView: View {
             return Color.black.opacity(0.08)
         case .clear:
             return Color.black.opacity(0.05)
-        case .letter:
-            return Color.black.opacity(0.06)
         }
     }
 }

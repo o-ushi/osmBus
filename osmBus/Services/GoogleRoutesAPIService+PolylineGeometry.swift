@@ -21,6 +21,20 @@ extension GoogleRoutesAPIService {
         return earthRadius * c
     }
 
+    static func polylineLength(_ coordinates: [RouteCoordinate]) -> Double {
+        guard coordinates.count >= 2 else { return 0 }
+        var total = 0.0
+        for index in 1..<coordinates.count {
+            total += distanceMeters(
+                fromLatitude: coordinates[index - 1].latitude,
+                fromLongitude: coordinates[index - 1].longitude,
+                toLatitude: coordinates[index].latitude,
+                toLongitude: coordinates[index].longitude
+            )
+        }
+        return total
+    }
+
     static func decodePolyline(_ encoded: String) -> [RouteCoordinate] {
         var coordinates: [RouteCoordinate] = []
         var index = encoded.startIndex

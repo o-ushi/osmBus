@@ -2,6 +2,7 @@ import Foundation
 
 extension Notification.Name {
     static let osmBusDataDeleted = Notification.Name("osmBus.dataDeleted")
+    static let osmBusOpenAPISettings = Notification.Name("osmBus.openAPISettings")
 }
 
 enum ThirdPartyDataConsent {

@@ -13,6 +13,10 @@ struct AppSettingsView: View {
     @AppStorage(AppLanguage.storageKey) private var appLanguageCode = AppLanguage.english.rawValue
     @AppStorage(BusKeypadInputMode.storageKey) private var busKeypadInputModeRaw =
         BusKeypadInputMode.appendToExisting.rawValue
+    @AppStorage(BusNumberTableSortMode.storageKey) private var busNumberTableSortModeRaw =
+        BusNumberTableSortMode.byDirection.rawValue
+    @AppStorage(BusNumberTableDistanceMetric.storageKey) private var busNumberTableDistanceMetricRaw =
+        BusNumberTableDistanceMetric.walkPriority.rawValue
     @AppStorage(KeypadHapticManager.hapticEnabledKey)   private var hapticEnabled   = true
     @AppStorage(KeypadHapticManager.hapticIntensityKey) private var hapticIntensityRaw = "medium"
     @AppStorage(KeypadHapticManager.soundEnabledKey)    private var soundEnabled    = false
@@ -27,6 +31,14 @@ struct AppSettingsView: View {
 
     private var currentBusKeypadInputMode: BusKeypadInputMode {
         BusKeypadInputMode(rawValue: busKeypadInputModeRaw) ?? .appendToExisting
+    }
+
+    private var currentBusNumberTableSortMode: BusNumberTableSortMode {
+        BusNumberTableSortMode(rawValue: busNumberTableSortModeRaw) ?? .byDirection
+    }
+
+    private var currentBusNumberTableDistanceMetric: BusNumberTableDistanceMetric {
+        BusNumberTableDistanceMetric(rawValue: busNumberTableDistanceMetricRaw) ?? .walkPriority
     }
 
     var body: some View {
@@ -93,6 +105,54 @@ struct AppSettingsView: View {
                 }
 
                 Section {
+                    ForEach(BusNumberTableSortMode.allCases) { mode in
+                        Button {
+                            busNumberTableSortModeRaw = mode.rawValue
+                        } label: {
+                            HStack {
+                                Text(AppLocaleString.text(mode.settingsTitleKey, locale: locale))
+                                    .foregroundStyle(.primary)
+                                    .fontWeight(currentBusNumberTableSortMode == mode ? .semibold : .regular)
+                                Spacer()
+                                if currentBusNumberTableSortMode == mode {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(.blue)
+                                        .fontWeight(.semibold)
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    Text(AppLocaleString.text("バス番号表の並び順", locale: locale))
+                } footer: {
+                    Text(AppLocaleString.text("バス番号表の並び順_フッター", locale: locale))
+                }
+
+                if currentBusNumberTableSortMode == .byDistance {
+                    Section {
+                        ForEach(BusNumberTableDistanceMetric.allCases) { metric in
+                            Button {
+                                busNumberTableDistanceMetricRaw = metric.rawValue
+                            } label: {
+                                HStack {
+                                    Text(AppLocaleString.text(metric.settingsTitleKey, locale: locale))
+                                        .foregroundStyle(.primary)
+                                        .fontWeight(currentBusNumberTableDistanceMetric == metric ? .semibold : .regular)
+                                    Spacer()
+                                    if currentBusNumberTableDistanceMetric == metric {
+                                        Image(systemName: "checkmark")
+                                            .foregroundStyle(.blue)
+                                            .fontWeight(.semibold)
+                                    }
+                                }
+                            }
+                        }
+                    } footer: {
+                        Text(AppLocaleString.text("距離基準_測り方_フッター", locale: locale))
+                    }
+                }
+
+                Section {
                     if UIDevice.current.userInterfaceIdiom != .pad {
                         Toggle(
                             AppLocaleString.text("キーフィードバック_バイブ", locale: locale),
@@ -149,24 +209,22 @@ struct AppSettingsView: View {
                     Text(AppLocaleString.text("キーフィードバック_フッター", locale: locale))
                 }
 
-                if PlanStore.shared.isPaid {
-                    Section {
-                        NavigationLink(value: AppSettingsRoute.apiSettings) {
-                            HStack {
-                                Label(AppLocaleString.text("Google API", locale: locale), systemImage: "key.horizontal.fill")
-                                Spacer()
-                                if GoogleRoutesAPIKeyStore.hasUserConfiguredKey {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundStyle(.green)
-                                        .font(.caption)
-                                }
+                Section {
+                    NavigationLink(value: AppSettingsRoute.apiSettings) {
+                        HStack {
+                            Label(AppLocaleString.text("Google API", locale: locale), systemImage: "key.horizontal.fill")
+                            Spacer()
+                            if GoogleRoutesAPIKeyStore.hasUserConfiguredKey {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.green)
+                                    .font(.caption)
                             }
                         }
-                    } header: {
-                        Text(AppLocaleString.text("API 連携", locale: locale))
-                    } footer: {
-                        Text(AppLocaleString.text("API連携フッター", locale: locale))
                     }
+                } header: {
+                    Text(AppLocaleString.text("API 連携", locale: locale))
+                } footer: {
+                    Text(AppLocaleString.text("API連携フッター", locale: locale))
                 }
 
                 Section {

@@ -5,8 +5,7 @@ struct MoreActionsMenuView: View {
 
     var screenToggleTitleKey: String? = nil
     var onToggleScreen: (() -> Void)? = nil
-    let onHistory: () -> Void
-    let onRegisterPlace: () -> Void
+    var onRouteMap: (() -> Void)? = nil
     let onSettings: () -> Void
     let onPlanManagement: () -> Void
     let onHelp: () -> Void
@@ -16,13 +15,14 @@ struct MoreActionsMenuView: View {
             VStack(spacing: 0) {
                 if let screenToggleTitleKey, let onToggleScreen {
                     menuButton(screenToggleTitleKey, systemImage: "rectangle.on.rectangle", action: onToggleScreen)
+                    if let onRouteMap {
+                        menuButton("路線図", systemImage: "map", action: onRouteMap)
+                    }
+                    menuDivider
+                } else if let onRouteMap {
+                    menuButton("路線図", systemImage: "map", action: onRouteMap)
                     menuDivider
                 }
-
-                menuButton("履歴", systemImage: "clock.arrow.circlepath", action: onHistory)
-                menuButton("場所を登録", systemImage: "mappin.and.ellipse", action: onRegisterPlace)
-
-                menuDivider
 
                 menuButton("設定", systemImage: "gearshape", action: onSettings)
                 planManagementButton
@@ -97,8 +97,6 @@ struct MoreActionsMenuView: View {
 
 #Preview {
     MoreActionsMenuView(
-        onHistory: {},
-        onRegisterPlace: {},
         onSettings: {},
         onPlanManagement: {},
         onHelp: {}

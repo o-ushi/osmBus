@@ -359,7 +359,7 @@ enum GoogleAPISettingsConfigurations {
         loadUserKey: { GoogleRoutesAPIKeyStore.userConfiguredKey() },
         saveUserKey: { GoogleRoutesAPIKeyStore.setUserConfiguredKey($0) },
         deleteUserKey: { GoogleRoutesAPIKeyStore.setUserConfiguredKey(nil) },
-        hasUserConfiguredKey: { GoogleRoutesAPIKeyStore.isConfigured },
+        hasUserConfiguredKey: { GoogleRoutesAPIKeyStore.hasUserConfiguredKey },
         testConnection: { apiKey in
             let outcome = await GoogleRoutesAPIService.testConnection(apiKey: apiKey)
             return (outcome.isSuccess, outcome.message)

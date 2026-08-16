@@ -157,6 +157,21 @@ extension LocationService: CLLocationManagerDelegate {
         guard let coordinate = locations.last?.coordinate else { return }
         Task { @MainActor in
             cancelFetchTimeout()
+            if let previous = currentLocation {
+                let from = CLLocation(latitude: previous.latitude, longitude: previous.longitude)
+                let to = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                if from.distance(from: to) < 3 {
+                    lastError = nil
+                    if isOneShotActive {
+                        isOneShotActive = false
+                        isUpdating = false
+                        if !isContinuousActive {
+                            manager.stopUpdatingLocation()
+                        }
+                    }
+                    return
+                }
+            }
             currentLocation = coordinate
             lastError = nil
             if isOneShotActive {

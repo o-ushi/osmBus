@@ -9,11 +9,6 @@ extension GoogleRoutesAPIService {
         return AppLocaleString.formatted("所要時間_%d分", locale: locale, minutes)
     }
 
-    static func displayFare(for route: ParsedTransitRoute) -> String? {
-        guard let fareText = route.fareText, !fareText.isEmpty else { return nil }
-        return fareText
-    }
-
     static func transitBusLineLabels(for route: ParsedTransitRoute) -> [String] {
         route.steps.compactMap { step in
             guard isBusStep(step) else { return nil }

@@ -12,12 +12,10 @@ struct MainView: View {
     @State private var showsSettings = false
     @State private var opensAPISettingsOnLaunch = false
     @State private var showsDestinationSheet = false
-    @State private var showsSavedPlacesSheet = false
+    @State private var showsOriginSearchSheet = false
     @State private var showsMoreActions = false
     @State private var showsPlanManagement = false
     @State private var showsHelp = false
-    @State private var showsHistorySheet = false
-    @State private var showsTransitRoutesSheet = false
     @State private var boardingRouteMapSheet: BoardingRouteMapSheetModel?
     @State private var topBusRouteMapSelection: TransitRouteMapSelection?
 @State private var showsMapLocationPicker = false
@@ -27,12 +25,14 @@ struct MainView: View {
     @State private var showsWrongDirectionAlert = false
     @State private var presentedRidingAlert: ActiveRidingAlert?
     @State private var showsRouteDatabaseResetConfirm = false
+    @State private var showsCancelNavigationConfirm = false
     @State private var showsRidingBusCandidateSheet = false
     @State private var ridingBusCandidates: [String] = []
     @State private var isOnboardingRideSelection = false
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.locale) private var locale
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.busCardStyle) private var cardStyle
     @Environment(SharedRoutesTrialStore.self) private var trialStore
     @State private var showsTrialExhaustedAlert = false
 
@@ -41,7 +41,7 @@ struct MainView: View {
     }
 
     private var showsTrialRemainingLabel: Bool {
-        !GoogleRoutesAPIKeyStore.hasUserConfiguredKey && trialStore.isUsingSharedTrialKey
+        !trialStore.hasUserConfiguredKey && trialStore.isUsingSharedTrialKey
     }
 
     private var showsAPIKeyPrompt: Bool {
@@ -49,7 +49,7 @@ struct MainView: View {
     }
 
     private var isTrialExhaustedWithoutUserKey: Bool {
-        !GoogleRoutesAPIKeyStore.hasUserConfiguredKey && trialStore.isTrialExhausted
+        !trialStore.hasUserConfiguredKey && trialStore.isTrialExhausted
             && !Secrets.sharedGoogleRoutesAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
@@ -63,6 +63,14 @@ struct MainView: View {
 
     private var destinationLabel: String {
         viewModel.destination?.name ?? AppLocaleString.text("目的地を設定", locale: locale)
+    }
+
+    /// 出発地検索シートの「現在の出発地」欄に出す。手動出発地が無ければ nil (GPS 使用中)。
+    private var manualOriginAsDestination: Destination? {
+        guard let lat = viewModel.manualOriginLatitude,
+              let lon = viewModel.manualOriginLongitude,
+              let name = viewModel.manualOriginName else { return nil }
+        return Destination(name: name, subtitle: nil, latitude: lat, longitude: lon)
     }
 
     private var currentLocationStatusText: String {
@@ -105,6 +113,8 @@ struct MainView: View {
                     ridingBusNumber: viewModel.ridingState?.busNumber,
                     originLatitude: viewModel.effectiveOriginLatitude,
                     originLongitude: viewModel.effectiveOriginLongitude,
+                    destinationLatitude: viewModel.destination?.latitude,
+                    destinationLongitude: viewModel.destination?.longitude,
                     trialRemainingText: showsTrialRemainingLabel
                         ? AppLocaleString.formatted(
                             "お試し残り_%d",
@@ -112,13 +122,6 @@ struct MainView: View {
                             trialStore.remainingTrialCount
                         )
                         : nil,
-                    distanceMeters: viewModel.topScreenDistanceMeters,
-                    onDistanceTap: {
-                        Task { @MainActor in
-                            await Task.yield()
-                            openRidingRouteMap()
-                        }
-                    },
                     onDestinationTap: { showsDestinationSheet = true },
                     onDestinationMapPick: {
                         mapPickerInitialRole = .destination
@@ -131,9 +134,10 @@ struct MainView: View {
                         mapPickerInitialRole = .origin
                         showsMapLocationPicker = true
                     },
+                    onCurrentLocationTap: { showsOriginSearchSheet = true },
                     onReloadTransitRoutes: { viewModel.refreshTransitRoutes(userInitiated: true) },
-                    onTapBusNumber: { handleTopBusNumberTap($0) },
-                    onLongPressBusNumber: { handleTopBusNumberLongPress($0) }
+                    onTapBusNumber: { handleTopBusNumberTap(routeIndex: $0, busNumber: $1) },
+                    onLongPressBusNumber: { handleTopBusNumberLongPress(routeIndex: $0, busNumber: $1) }
                 )
             } else {
                 mainScreenContent
@@ -141,34 +145,81 @@ struct MainView: View {
         }
         .safeAreaInset(edge: .bottom) {
             if !showsTopScreen, showsTrialRemainingLabel {
-                Text(
-                    AppLocaleString.formatted(
+                TrialRemainingLabel(
+                    text: AppLocaleString.formatted(
                         "お試し残り_%d",
                         locale: locale,
                         trialStore.remainingTrialCount
                     )
                 )
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(sceneTint.opacity(0.88))
-                .padding(.top, 6)
-                .padding(.bottom, 6)
-                .frame(maxWidth: .infinity)
             }
         }
+        .overlay(alignment: .leading) {
+            screenToggleEdgeSwipeHandle
+        }
+    }
+
+    /// 左端からの右スワイプだけでメイン画面⇔トップ画面を切り替える。
+    /// 表や行き先バーの上での誤発火を避けるため、ヒット領域を画面左端に限定する。
+    private var screenToggleEdgeSwipeHandle: some View {
+        Color.clear
+            .frame(width: 24)
+            .frame(maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 40)
+                    .onEnded { value in
+                        let horizontal = value.translation.width
+                        let vertical = value.translation.height
+                        guard horizontal > 60, abs(horizontal) > abs(vertical) * 1.5 else { return }
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showsTopScreen.toggle()
+                        }
+                    }
+            )
+            .accessibilityHidden(true)
     }
 
     private var mainScreenContent: some View {
         GeometryReader { geometry in
             let isZoomedCompact = KeypadMetrics.isZoomedCompact(screenHeight: geometry.size.height)
-            let halfHeight = geometry.size.height / 2
-            let sectionSpacing = isZoomedCompact ? 8.0 : 12.0
+            let locationCardHeight = ScreenChrome.locationRowHeight * 2 + 1
+            let available = geometry.size.height
+                - ScreenChrome.topPadding
+                - ScreenChrome.bottomPadding
+                - locationCardHeight
+                - ScreenChrome.sectionSpacing * 2
+            let minBanner: CGFloat = isZoomedCompact ? 88 : 110
+            let desiredKeypad = geometry.size.height * 0.48
+            let keypadHeight = max(200, min(desiredKeypad, available - minBanner))
 
-            VStack(spacing: 0) {
-                topHalf(
-                    height: halfHeight,
-                    sectionSpacing: sectionSpacing,
-                    isZoomedCompact: isZoomedCompact
+            VStack(spacing: ScreenChrome.sectionSpacing) {
+                OriginDestinationCard(
+                    destinationLabel: destinationLabel,
+                    hasDestination: viewModel.hasDestination,
+                    isDestinationDisabled: viewModel.ridingState != nil,
+                    currentLocationStatusText: currentLocationStatusText,
+                    isUpdatingCurrentLocation: locationService.isUpdating,
+                    showsLocationSettingsAction: locationService.isDenied,
+                    hasManualOrigin: viewModel.hasManualOrigin,
+                    onDestinationTap: { showsDestinationSheet = true },
+                    onDestinationMapPick: {
+                        mapPickerInitialRole = .destination
+                        showsMapLocationPicker = true
+                    },
+                    onCurrentLocationRefresh: { handleCurrentLocationRefreshTap() },
+                    onOpenLocationSettings: openAppSettings,
+                    onClearManualOrigin: { viewModel.clearManualOrigin() },
+                    onCurrentLocationMapPick: {
+                        mapPickerInitialRole = .origin
+                        showsMapLocationPicker = true
+                    },
+                    onCurrentLocationTap: { showsOriginSearchSheet = true }
                 )
+
+                verdictCard
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 BusKeypadView(
                     busNumber: viewModel.enteredBusNumber,
@@ -187,13 +238,14 @@ struct MainView: View {
                         viewModel.clearBusNumber()
                     }
                 )
-                .environment(\.mainScreenCompactLayout, isZoomedCompact)
-                .padding(.horizontal, AppTheme.screenPadding)
-                .padding(.bottom, isZoomedCompact ? 6 : 8)
-                .frame(height: halfHeight)
+                .frame(height: keypadHeight)
             }
+            .padding(.horizontal, AppTheme.screenPadding)
+            .padding(.top, ScreenChrome.topPadding)
+            .padding(.bottom, ScreenChrome.bottomPadding)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .busMainScreenStyled()
+            .environment(\.mainScreenCompactLayout, isZoomedCompact)
         }
     }
 
@@ -202,37 +254,32 @@ struct MainView: View {
             screenContent
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                if !showsTopScreen, viewModel.ridingState != nil {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button {
-                            Task { @MainActor in
-                                await Task.yield()
-                                openRidingRouteMap()
+                // トップ・メインどちらも、距離が出せるときは常時表示。タップは乗車中のみ。
+                if let distanceMeters = viewModel.topScreenDistanceMeters {
+                    let badge = TopDistanceBadge(
+                        distanceMeters: distanceMeters,
+                        onTap: viewModel.ridingState != nil
+                            ? {
+                                Task { @MainActor in
+                                    await Task.yield()
+                                    openRidingRouteMap()
+                                }
                             }
-                        } label: {
-                            Label(
-                                AppLocaleString.text("乗車中", locale: locale),
-                                systemImage: "bus.fill"
-                            )
-                            .font(.caption.weight(.semibold))
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(.green)
+                            : nil,
+                        onLongPress: viewModel.hasDestination
+                            ? { showsCancelNavigationConfirm = true }
+                            : nil
+                    )
+                    // iOS 26 のツールバーは既定でガラス風の白いカプセル背景を自動で敷くため、
+                    // バッジ自身の色付き背景だけを見せたい場合はそれを消す。
+                    if #available(iOS 26.0, *) {
+                        ToolbarItem(placement: .topBarLeading) { badge }
+                            .sharedBackgroundVisibility(.hidden)
+                    } else {
+                        ToolbarItem(placement: .topBarLeading) { badge }
                     }
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button {
-                        if viewModel.isOSMMapRiding, viewModel.osmRidingRouteCandidate != nil {
-                            openOSMRidingRouteMap()
-                        } else {
-                            openBrowseRouteMap()
-                        }
-                    } label: {
-                        Image(systemName: "map")
-                            .foregroundStyle(sceneTint)
-                    }
-                    .accessibilityLabel(AppLocaleString.text("路線図", locale: locale))
-
                     moreMenu
                 }
             }
@@ -268,46 +315,30 @@ struct MainView: View {
                 .environment(\.locale, locale)
                 .presentationDragIndicator(.visible)
             }
-            .sheet(isPresented: $showsSavedPlacesSheet) {
-                SavedPlacesView(
-                    currentDestination: viewModel.destination,
-                    onSelectDestination: { viewModel.setDestination($0) }
+            .sheet(isPresented: $showsOriginSearchSheet) {
+                DestinationInputView(
+                    currentDestination: manualOriginAsDestination,
+                    onSelect: { viewModel.setManualOrigin(latitude: $0.latitude, longitude: $0.longitude, name: $0.name) },
+                    onClear: { viewModel.clearManualOrigin() },
+                    role: .origin
                 )
                 .environment(\.locale, locale)
                 .presentationDragIndicator(.visible)
-            }
-            .sheet(isPresented: $showsHistorySheet) {
-                DestinationHistoryView(
-                    currentDestination: viewModel.destination,
-                    onSelectDestination: { viewModel.setDestination($0) }
-                )
-                .environment(\.locale, locale)
-                .presentationDragIndicator(.visible)
-            }
-            .sheet(isPresented: $showsTransitRoutesSheet) {
-                TransitRoutesSheetView(
-                    destinationName: viewModel.destination?.name ?? "",
-                    destination: viewModel.destination,
-                    originLatitude: viewModel.effectiveOriginLatitude,
-                    originLongitude: viewModel.effectiveOriginLongitude,
-                    loadState: viewModel.transitRoutesLoadState,
-                    routes: viewModel.accumulatedTransitRoutes,
-                    ridingBusNumber: viewModel.ridingState?.busNumber,
-                    onReload: { viewModel.refreshTransitRoutes(userInitiated: true) },
-                    onSwitchRoute: { newIndex in
-                        viewModel.switchBoardingRoute(to: newIndex)
-                    },
-                    onSelectRidingBus: { routeIndex, busNumber in
-                        handleRidingBusLongPress(busNumber: busNumber) {
-                            viewModel.startRidingForBusSelection(routeIndex: routeIndex, busNumber: busNumber)
-                        }
-                    }
-                )
-                .environment(\.locale, locale)
             }
             .sheet(item: $boardingRouteMapSheet) { sheet in
                 BoardingRouteMapCover(
                     sheet: sheet,
+                    origin: {
+                        if let lat = viewModel.effectiveOriginLatitude,
+                           let lon = viewModel.effectiveOriginLongitude {
+                            return RouteCoordinate(latitude: lat, longitude: lon)
+                        }
+                        return sheet.origin
+                    }(),
+                    ridingBusNumber: viewModel.ridingState?.busNumber,
+                    ridingAlightCoordinate: viewModel.ridingAlightCoordinate.map {
+                        RouteCoordinate(latitude: $0.latitude, longitude: $0.longitude)
+                    },
                     onSwitchRoute: { newIndex in
                         viewModel.switchBoardingRoute(to: newIndex)
                     },
@@ -323,7 +354,7 @@ struct MainView: View {
                 )
                 // 乗車中バスの切り替え時、地図のキャッシュ済みポリライン・ピンを
                 // 作り直させるため、乗車バス番号が変わったら別ビューとして再生成する。
-                .id("\(sheet.id)-\(sheet.ridingBusNumber ?? "")")
+                .id("\(sheet.id)-\(viewModel.ridingState?.busNumber ?? "")")
                 .environment(\.locale, locale)
                 .environment(SharedMapsTrialStore.shared)
             }
@@ -337,6 +368,9 @@ struct MainView: View {
                         origin: RouteCoordinate(latitude: originLatitude, longitude: originLongitude),
                         destination: destination,
                         ridingBusNumber: viewModel.ridingState?.busNumber,
+                        ridingAlightCoordinate: viewModel.ridingAlightCoordinate.map {
+                            RouteCoordinate(latitude: $0.latitude, longitude: $0.longitude)
+                        },
                         allRoutes: viewModel.accumulatedTransitRoutes,
                         routeOptionCount: viewModel.accumulatedTransitRoutes.count,
                         onSwitchRoute: { newIndex in
@@ -375,7 +409,6 @@ struct MainView: View {
                 .environment(\.locale, locale)
                 .environment(SharedMapsTrialStore.shared)
             }
-            .onShake(perform: openBoardingRouteMapFromShake)
             .onAppear {
                 locationService.refreshCurrentFromCache()
                 viewModel.updateCurrentLocation(locationService.currentLocation)
@@ -392,10 +425,9 @@ struct MainView: View {
                 updateAdaptiveLocationAccuracy(current: coordinate)
                 // 乗車進捗チェックはシートの有無に関わらず常に実行
                 viewModel.checkRidingProgress(at: coordinate)
-                // 地図シート・経路一覧シート表示中は viewModel 更新を止め、re-render ループを防ぐ
+                // 地図シート表示中は viewModel 更新を止め、re-render ループを防ぐ
                 guard busRouteMapPresentation == nil,
-                      boardingRouteMapSheet == nil,
-                      !showsTransitRoutesSheet else { return }
+                      boardingRouteMapSheet == nil else { return }
 
                 viewModel.updateCurrentLocation(locationService.currentLocation)
                 // 乗車中はバス判定・経路更新の頻繁なリフレッシュを止める
@@ -417,6 +449,14 @@ struct MainView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .osmBusDataDeleted)) { _ in
                 viewModel.clearDestination()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .osmBusOpenAPISettings)) { _ in
+                topBusRouteMapSelection = nil
+                boardingRouteMapSheet = nil
+                busRouteMapPresentation = nil
+                showsMapLocationPicker = false
+                opensAPISettingsOnLaunch = true
+                showsSettings = true
             }
             .onChange(of: viewModel.destination?.id) { _, _ in
                 viewModel.refreshTransitRoutes()
@@ -464,6 +504,16 @@ struct MainView: View {
                 Button(AppLocaleString.text("いいえ", locale: locale), role: .cancel) {
                     locationService.fetchCurrentLocation()
                 }
+            }
+            .confirmationDialog(
+                AppLocaleString.text("ナビ中止_確認", locale: locale),
+                isPresented: $showsCancelNavigationConfirm,
+                titleVisibility: .visible
+            ) {
+                Button(AppLocaleString.text("ナビを中止", locale: locale), role: .destructive) {
+                    cancelNavigation()
+                }
+                Button(AppLocaleString.text("キャンセル", locale: locale), role: .cancel) {}
             }
             .alert(
                 AppLocaleString.text("お試し枠_使い切り_タイトル", locale: locale),
@@ -561,125 +611,50 @@ struct MainView: View {
         }
     }
 
-    @ViewBuilder
-    private func topHalf(height: CGFloat, sectionSpacing: CGFloat, isZoomedCompact: Bool) -> some View {
-        VStack(spacing: sectionSpacing) {
+    /// 判定バナー専用カード。行が増えてもこの枠内だけスクロールし、目的地・出発地は動かさない。
+    private var verdictCard: some View {
+        VStack(spacing: 0) {
             if showsAPIKeyPrompt {
                 APIKeySetupBanner(isTrialExhausted: isTrialExhaustedWithoutUserKey) {
                     opensAPISettingsOnLaunch = true
                     showsSettings = true
                 }
+                Divider().padding(.leading, AppTheme.cardPaddingH + 10)
             }
 
-            DestinationBarView(
-                label: destinationLabel,
-                hasDestination: viewModel.hasDestination,
-                isDisabled: viewModel.ridingState != nil,
-                onTap: { showsDestinationSheet = true },
-                onMapPick: {
-                    mapPickerInitialRole = .destination
-                    showsMapLocationPicker = true
+            GeometryReader { bannerGeo in
+                ScrollView(.vertical, showsIndicators: true) {
+                    ResultBannerView(
+                        state: viewModel.resultState,
+                        busNumber: viewModel.enteredBusNumber,
+                        onRetry: viewModel.enteredBusNumber.isEmpty ? nil : {
+                            viewModel.refreshBusCheck()
+                        },
+                        onStartRiding: {
+                            beginRidingOnboarding(for: viewModel.resolvedBoardingBusRef())
+                        },
+                        onStartRidingWithVariant: { variantName in
+                            beginRidingOnboarding(for: variantName)
+                        },
+                        isBoardingRouteCheapest: viewModel.isBoardingRouteCheapest,
+                        isRiding: viewModel.ridingState != nil,
+                        onStopRiding: viewModel.ridingState != nil ? {
+                            alightForTransfer()
+                        } : nil,
+                        fillsAvailableHeight: false
+                    )
+                    .environment(\.busCardStyle, .flat)
+                    .frame(
+                        minWidth: bannerGeo.size.width,
+                        minHeight: bannerGeo.size.height,
+                        alignment: .center
+                    )
                 }
-            )
-            .frame(maxHeight: .infinity)
-
-            CurrentLocationBarView(
-                statusText: currentLocationStatusText,
-                isUpdating: locationService.isUpdating,
-                showsSettingsAction: locationService.isDenied,
-                hasManualOrigin: viewModel.hasManualOrigin,
-                isDisabled: viewModel.ridingState != nil,
-                onRefresh: { handleCurrentLocationRefreshTap() },
-                onOpenSettings: openAppSettings,
-                onClearManualOrigin: { viewModel.clearManualOrigin() },
-                onMapPick: {
-                    mapPickerInitialRole = .origin
-                    showsMapLocationPicker = true
-                }
-            )
-            .frame(maxHeight: .infinity)
-
-            if viewModel.hasDestination && canUseRoutesAPI {
-                transitRoutesAccessButton
-                    .frame(maxHeight: .infinity)
+                .scrollBounceBehavior(.basedOnSize)
             }
-
-            ResultBannerView(
-                state: viewModel.resultState,
-                busNumber: viewModel.enteredBusNumber,
-                onRetry: viewModel.enteredBusNumber.isEmpty ? nil : {
-                    viewModel.refreshBusCheck()
-                },
-                onStartRiding: {
-                    beginRidingOnboarding(for: viewModel.resolvedBoardingBusRef())
-                },
-                onStartRidingWithVariant: { variantName in
-                    beginRidingOnboarding(for: variantName)
-                },
-                isBoardingRouteCheapest: viewModel.isBoardingRouteCheapest,
-                isRiding: viewModel.ridingState != nil,
-                onStopRiding: viewModel.ridingState != nil ? {
-                    viewModel.endRiding()
-                } : nil,
-                otherBoardableVariants: viewModel.otherBoardableVariants
-            )
-            .frame(maxHeight: .infinity)
         }
-        .padding(.horizontal, AppTheme.screenPadding)
-        .padding(.top, isZoomedCompact ? 4 : 6)
-        .padding(.bottom, isZoomedCompact ? 4 : 6)
-        .frame(height: height)
-        .environment(\.mainScreenCompactLayout, isZoomedCompact)
-    }
-
-    private var transitRoutesAccessButton: some View {
-        Button {
-            viewModel.refreshTransitRoutes(userInitiated: true)
-            showsTransitRoutesSheet = true
-        } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "list.bullet.rectangle")
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(.blue)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(AppLocaleString.text("経路を見る", locale: locale))
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.primary)
-
-                    Text(transitRoutesSubtitle)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-
-                Spacer(minLength: 0)
-
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.horizontal, AppTheme.cardPaddingH)
-            .padding(.vertical, 10)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .background(BusCardBackground())
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var transitRoutesSubtitle: String {
-        switch viewModel.transitRoutesLoadState {
-        case .idle, .loading:
-            return AppLocaleString.text("経路読込中", locale: locale)
-        case .loaded:
-            return AppLocaleString.formatted(
-                "経路件数_%d",
-                locale: locale,
-                viewModel.accumulatedTransitRoutes.count
-            )
-        case .failed:
-            return AppLocaleString.text("経路取得失敗", locale: locale)
-        }
+        .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius))
+        .background(BusCardBackground(style: cardStyle))
     }
 
     private func applyPendingDeepLinkIfNeeded() {
@@ -687,7 +662,10 @@ struct MainView: View {
         viewModel.setDestination(destination)
         pendingDeepLinkDestination = nil
         viewModel.refreshTransitRoutes(userInitiated: true)
-        showsTransitRoutesSheet = true
+        topBusRouteMapSelection = nil
+        boardingRouteMapSheet = nil
+        busRouteMapPresentation = nil
+        showsTopScreen = true
     }
 
     private var moreMenu: some View {
@@ -700,9 +678,22 @@ struct MainView: View {
         .popover(isPresented: $showsMoreActions, arrowEdge: .top) {
             MoreActionsMenuView(
                 screenToggleTitleKey: showsTopScreen ? "メイン画面" : "トップ画面",
-                onToggleScreen: { performMoreAction { showsTopScreen.toggle() } },
-                onHistory: { performMoreAction { showsHistorySheet = true } },
-                onRegisterPlace: { performMoreAction { showsSavedPlacesSheet = true } },
+                onToggleScreen: {
+                    performMoreAction {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showsTopScreen.toggle()
+                        }
+                    }
+                },
+                onRouteMap: {
+                    performMoreAction {
+                        if viewModel.ridingState != nil {
+                            openRidingRouteMap()
+                        } else {
+                            openBrowseRouteMap()
+                        }
+                    }
+                },
                 onSettings: { performMoreAction { showsSettings = true } },
                 onPlanManagement: { performMoreAction { showsPlanManagement = true } },
                 onHelp: { performMoreAction { showsHelp = true } }
@@ -727,6 +718,12 @@ struct MainView: View {
     }
 
     private func handleCurrentLocationRefreshTap() {
+        // 乗車中は経路データベース・乗車状態・目的地を消さない。確認ダイアログも出さない。
+        if viewModel.ridingState != nil {
+            viewModel.clearManualOriginWhileRiding()
+            locationService.fetchCurrentLocation()
+            return
+        }
         guard viewModel.hasAccumulatedTransitRoutes else {
             locationService.fetchCurrentLocation()
             return
@@ -758,29 +755,42 @@ struct MainView: View {
     private func handleRidingBusLongPress(busNumber: String, otherwise selectRidingBus: () -> Void) {
         if let currentBusNumber = viewModel.ridingState?.busNumber,
            currentBusNumber.uppercased() == busNumber.uppercased() {
-            viewModel.endRiding()
+            alightForTransfer()
         } else {
             selectRidingBus()
         }
     }
 
-    /// トップのバス番号表タップ: その番号を含む代表ルート(直通優先)のルート図を出す。
-    private func handleTopBusNumberTap(_ busNumber: String) {
-        guard let match = GoogleRoutesAPIService.findMatchingRouteWithIndex(
-            routes: viewModel.accumulatedTransitRoutes,
-            busNumber: busNumber
-        ), GoogleRoutesAPIService.routeHasMapGeometry(match.route) else { return }
-        topBusRouteMapSelection = TransitRouteMapSelection(id: match.index, route: match.route)
+    /// 乗換のための降車直後処理: 長押し降車・メイン画面の「降車」ボタン共通 (Step 8)。
+    /// 番号欄・蓄積経路・目的地は消さず、現在地を取り直して新しい出発地から経路を取り直す。
+    /// 最終降車(ナビ終了)や目的地クリア(Step 9)とは別。
+    private func alightForTransfer() {
+        viewModel.endRiding()
+        viewModel.clearManualOriginWhileRiding()
+        locationService.fetchCurrentLocation()
+        viewModel.refreshTransitRoutes(userInitiated: true)
     }
 
-    /// トップのバス番号表長押し: 経路一覧の長押しと同じトグル・レグ選択を使う。
-    private func handleTopBusNumberLongPress(_ busNumber: String) {
+    /// 目的地バーの左スワイプ中止 (Step 9): 乗車中なら降車し、目的地・蓄積経路を消す。
+    private func cancelNavigation() {
+        if viewModel.ridingState != nil {
+            viewModel.endRiding()
+        }
+        viewModel.clearDestination()
+    }
+
+    /// トップのバス番号表タップ: 表がその番号を載せたルート（乗車停が近い方）を開く。
+    private func handleTopBusNumberTap(routeIndex: Int, busNumber _: String) {
+        guard routeIndex >= 0, routeIndex < viewModel.accumulatedTransitRoutes.count else { return }
+        let route = viewModel.accumulatedTransitRoutes[routeIndex]
+        guard GoogleRoutesAPIService.routeHasMapGeometry(route) else { return }
+        topBusRouteMapSelection = TransitRouteMapSelection(id: routeIndex, route: route)
+    }
+
+    /// トップのバス番号表長押し: 表と同じルートで乗車/降車トグル。
+    private func handleTopBusNumberLongPress(routeIndex: Int, busNumber: String) {
         handleRidingBusLongPress(busNumber: busNumber) {
-            guard let match = GoogleRoutesAPIService.findMatchingRouteWithIndex(
-                routes: viewModel.accumulatedTransitRoutes,
-                busNumber: busNumber
-            ) else { return }
-            viewModel.startRidingForBusSelection(routeIndex: match.index, busNumber: busNumber)
+            viewModel.startRidingForBusSelection(routeIndex: routeIndex, busNumber: busNumber)
         }
     }
 
@@ -804,17 +814,12 @@ struct MainView: View {
               let destination = viewModel.destination,
               let originLatitude = viewModel.effectiveOriginLatitude,
               let originLongitude = viewModel.effectiveOriginLongitude else { return false }
-        let ridingAlight = viewModel.ridingAlightCoordinate.map {
-            RouteCoordinate(latitude: $0.latitude, longitude: $0.longitude)
-        }
         boardingRouteMapSheet = BoardingRouteMapSheetModel(
             id: index,
             route: route,
             origin: RouteCoordinate(latitude: originLatitude, longitude: originLongitude),
             destination: destination,
-            routeOptionCount: viewModel.accumulatedTransitRoutes.count,
-            ridingBusNumber: viewModel.ridingState?.busNumber,
-            ridingAlightCoordinate: ridingAlight
+            routeOptionCount: viewModel.accumulatedTransitRoutes.count
         )
         return true
     }
@@ -828,9 +833,6 @@ struct MainView: View {
             mode: .riding(candidate, cachedDetail: viewModel.osmRidingRouteDetail),
             ridingDurationText: viewModel.boardingRoute.map {
                 GoogleRoutesAPIService.displayDuration(for: $0, locale: locale)
-            },
-            ridingFareText: viewModel.boardingRoute.flatMap {
-                GoogleRoutesAPIService.displayFare(for: $0)
             }
         )
     }
@@ -841,13 +843,6 @@ struct MainView: View {
             return
         }
         guard presentBoardingRouteMapSheet() else { return }
-    }
-
-    private func openBoardingRouteMapFromShake() {
-        guard viewModel.hasDestination, canUseRoutesAPI else { return }
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        viewModel.refreshTransitRoutes(userInitiated: true)
-        showsTransitRoutesSheet = true
     }
 }
 
@@ -865,6 +860,10 @@ private struct BusRouteMapCover: View {
 
 private struct BoardingRouteMapCover: View {
     let sheet: BoardingRouteMapSheetModel
+    /// 乗降・出発地のたびに viewModel から直読みする(スナップショットだと距離が固まる)。
+    let origin: RouteCoordinate
+    let ridingBusNumber: String?
+    let ridingAlightCoordinate: RouteCoordinate?
     let onSwitchRoute: (Int) -> Void
     let onLoadRouteOptions: () -> [ParsedTransitRoute]
     let onSelectRidingBus: (Int, String) -> Void
@@ -873,10 +872,10 @@ private struct BoardingRouteMapCover: View {
         TransitRouteMapView(
             routeIndex: sheet.id,
             route: sheet.route,
-            origin: sheet.origin,
+            origin: origin,
             destination: sheet.destination,
-            ridingBusNumber: sheet.ridingBusNumber,
-            ridingAlightCoordinate: sheet.ridingAlightCoordinate,
+            ridingBusNumber: ridingBusNumber,
+            ridingAlightCoordinate: ridingAlightCoordinate,
             routeOptionCount: sheet.routeOptionCount,
             onLoadRouteOptions: onLoadRouteOptions,
             onSwitchRoute: onSwitchRoute,
@@ -906,8 +905,7 @@ private struct BusRouteMapSheet: View {
                 isRidingMode: true,
                 initialRouteDetail: cachedDetail,
                 initialRouteCandidate: cachedDetail == nil ? candidate : nil,
-                ridingDurationText: presentation.ridingDurationText,
-                ridingFareText: presentation.ridingFareText
+                ridingDurationText: presentation.ridingDurationText
             )
         }
     }
@@ -925,51 +923,6 @@ private struct BusRouteMapPresentation: Identifiable {
     let destination: Destination?
     let mode: Mode
     var ridingDurationText: String? = nil
-    var ridingFareText: String? = nil
-}
-
-private struct DeviceShakeView: UIViewControllerRepresentable {
-    let onShake: () -> Void
-
-    func makeUIViewController(context: Context) -> DeviceShakeViewController {
-        DeviceShakeViewController(onShake: onShake)
-    }
-
-    func updateUIViewController(_ uiViewController: DeviceShakeViewController, context: Context) {
-        uiViewController.onShake = onShake
-    }
-}
-
-private final class DeviceShakeViewController: UIViewController {
-    var onShake: () -> Void
-
-    init(onShake: @escaping () -> Void) {
-        self.onShake = onShake
-        super.init(nibName: nil, bundle: nil)
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        nil
-    }
-
-    override var canBecomeFirstResponder: Bool { true }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        becomeFirstResponder()
-    }
-
-    override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
-        guard motion == .motionShake else { return }
-        onShake()
-    }
-}
-
-private extension View {
-    func onShake(perform action: @escaping () -> Void) -> some View {
-        background(DeviceShakeView(onShake: action))
-    }
 }
 
 #Preview {

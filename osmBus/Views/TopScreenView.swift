@@ -1,6 +1,7 @@
 import SwiftUI
+import UIKit
 
-/// トップ画面。行き先・現在地の上に横長の距離バー、その下にバス番号表を置く。
+/// トップ画面。行き先・現在地カードの下にバス番号表を置く。距離はナビゲーションバーのバッジ（MainView 側）で表示する。
 struct TopScreenView: View {
     let destinationLabel: String
     let hasDestination: Bool
@@ -14,11 +15,10 @@ struct TopScreenView: View {
     let ridingBusNumber: String?
     var originLatitude: Double? = nil
     var originLongitude: Double? = nil
+    var destinationLatitude: Double? = nil
+    var destinationLongitude: Double? = nil
     /// バス番号表の枠の外（下）に出すお試し残り回数。nil なら非表示。
     var trialRemainingText: String? = nil
-    /// 行き先・現在地カードの上に出す距離。nil なら非表示。
-    var distanceMeters: Double? = nil
-    var onDistanceTap: (() -> Void)? = nil
 
     let onDestinationTap: () -> Void
     let onDestinationMapPick: () -> Void
@@ -26,23 +26,30 @@ struct TopScreenView: View {
     let onOpenLocationSettings: () -> Void
     let onClearManualOrigin: () -> Void
     let onCurrentLocationMapPick: () -> Void
+    /// 現在地バー本体タップで出発地の地名検索シートを出す (Step 10)。
+    var onCurrentLocationTap: (() -> Void)? = nil
     let onReloadTransitRoutes: () -> Void
-    let onTapBusNumber: (String) -> Void
-    let onLongPressBusNumber: (String) -> Void
-
-    @Environment(\.busCardStyle) private var cardStyle
-
-    private let locationRowHeight: CGFloat = 56
+    let onTapBusNumber: (Int, String) -> Void
+    let onLongPressBusNumber: (Int, String) -> Void
 
     var body: some View {
-        VStack(spacing: 12) {
-            if let distanceMeters, let onDistanceTap {
-                TopDistanceBadge(distanceMeters: distanceMeters, onTap: onDistanceTap)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: locationRowHeight)
-            }
-
-            locationCard
+        VStack(spacing: ScreenChrome.sectionSpacing) {
+            OriginDestinationCard(
+                destinationLabel: destinationLabel,
+                hasDestination: hasDestination,
+                isDestinationDisabled: isInputDisabled,
+                currentLocationStatusText: currentLocationStatusText,
+                isUpdatingCurrentLocation: isUpdatingCurrentLocation,
+                showsLocationSettingsAction: showsLocationSettingsAction,
+                hasManualOrigin: hasManualOrigin,
+                onDestinationTap: onDestinationTap,
+                onDestinationMapPick: onDestinationMapPick,
+                onCurrentLocationRefresh: onCurrentLocationRefresh,
+                onOpenLocationSettings: onOpenLocationSettings,
+                onClearManualOrigin: onClearManualOrigin,
+                onCurrentLocationMapPick: onCurrentLocationMapPick,
+                onCurrentLocationTap: onCurrentLocationTap
+            )
 
             BusNumberTableView(
                 routes: accumulatedTransitRoutes,
@@ -50,6 +57,8 @@ struct TopScreenView: View {
                 ridingBusNumber: ridingBusNumber,
                 originLatitude: originLatitude,
                 originLongitude: originLongitude,
+                destinationLatitude: destinationLatitude,
+                destinationLongitude: destinationLongitude,
                 onReload: onReloadTransitRoutes,
                 onTapBusNumber: onTapBusNumber,
                 onLongPressBusNumber: onLongPressBusNumber
@@ -57,34 +66,56 @@ struct TopScreenView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
 
             if let trialRemainingText {
-                Text(trialRemainingText)
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(Color.accentColor.opacity(0.88))
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 4)
-                    .padding(.bottom, 6)
+                TrialRemainingLabel(text: trialRemainingText)
             }
         }
         .padding(.horizontal, AppTheme.screenPadding)
-        .padding(.top, 12)
-        .padding(.bottom, 8)
+        .padding(.top, ScreenChrome.topPadding)
+        .padding(.bottom, ScreenChrome.bottomPadding)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .busMainScreenStyled()
     }
+}
 
-    /// 行き先・現在地を1枚のカードにまとめ、個別の枠を減らしてスペースを節約する。
-    private var locationCard: some View {
+/// トップとメインで目的地・出発地カードの位置を揃えるための余白。
+enum ScreenChrome {
+    static let topPadding: CGFloat = 12
+    static let bottomPadding: CGFloat = 8
+    static let sectionSpacing: CGFloat = 12
+    static let locationRowHeight: CGFloat = 56
+}
+
+/// 行き先・現在地を1枚のカードにまとめる。トップ／メインで同じビューを使い、切り替え時に枠が動かないようにする。
+struct OriginDestinationCard: View {
+    let destinationLabel: String
+    let hasDestination: Bool
+    let isDestinationDisabled: Bool
+    let currentLocationStatusText: String
+    let isUpdatingCurrentLocation: Bool
+    let showsLocationSettingsAction: Bool
+    let hasManualOrigin: Bool
+    let onDestinationTap: () -> Void
+    let onDestinationMapPick: () -> Void
+    let onCurrentLocationRefresh: () -> Void
+    let onOpenLocationSettings: () -> Void
+    let onClearManualOrigin: () -> Void
+    let onCurrentLocationMapPick: () -> Void
+    var onCurrentLocationTap: (() -> Void)? = nil
+
+    @Environment(\.busCardStyle) private var cardStyle
+
+    var body: some View {
         VStack(spacing: 0) {
             DestinationBarView(
                 label: destinationLabel,
                 hasDestination: hasDestination,
-                isDisabled: isInputDisabled,
+                isDisabled: isDestinationDisabled,
                 onTap: onDestinationTap,
                 onMapPick: onDestinationMapPick
             )
-            .frame(height: locationRowHeight)
+            .frame(height: ScreenChrome.locationRowHeight)
             .environment(\.busCardStyle, .flat)
+            .environment(\.mainScreenCompactLayout, false)
 
             Divider().padding(.leading, AppTheme.cardPaddingH + 10)
 
@@ -93,17 +124,34 @@ struct TopScreenView: View {
                 isUpdating: isUpdatingCurrentLocation,
                 showsSettingsAction: showsLocationSettingsAction,
                 hasManualOrigin: hasManualOrigin,
-                isDisabled: isInputDisabled,
+                isDisabled: false,
                 onRefresh: onCurrentLocationRefresh,
                 onOpenSettings: onOpenLocationSettings,
                 onClearManualOrigin: onClearManualOrigin,
-                onMapPick: onCurrentLocationMapPick
+                onMapPick: onCurrentLocationMapPick,
+                onTap: onCurrentLocationTap
             )
-            .frame(height: locationRowHeight)
+            .frame(height: ScreenChrome.locationRowHeight)
             .environment(\.busCardStyle, .flat)
+            .environment(\.mainScreenCompactLayout, false)
         }
         .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius))
         .background(BusCardBackground(style: cardStyle))
+    }
+}
+
+/// トップ・メインで同じ見た目の残り回数。表／キーパッドの枠の外（下）に出す。
+struct TrialRemainingLabel: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.caption2.weight(.medium))
+            .foregroundStyle(Color.accentColor.opacity(0.88))
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 4)
+            .padding(.bottom, 6)
     }
 }
 
@@ -146,35 +194,68 @@ enum DistanceColorBand {
     }
 }
 
-/// 行き先・現在地カードの上に置く、角丸の横長距離バー。タップでルート図を開く。
+/// ナビゲーションバーに置く、あと距離のバッジ。トップ・メイン共通、タップでルート図を開く。
 struct TopDistanceBadge: View {
     let distanceMeters: Double
-    let onTap: () -> Void
+    /// nil のときは乗車していないので、タップしても路線図を開かない（表示のみ）。
+    let onTap: (() -> Void)?
+    /// 長押しでナビ中止。nil なら長押しを無効化する。
+    var onLongPress: (() -> Void)? = nil
 
     @Environment(\.locale) private var locale
 
-    private let shape = RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous)
+    private let labelFontSize: CGFloat = 15
+    private let valueFontSize: CGFloat = 23
+    private let horizontalPadding: CGFloat = 14
+    private let verticalPadding: CGFloat = 9
+
+    private var shape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: 12, style: .continuous)
+    }
 
     var body: some View {
         let band = DistanceColorBand(meters: distanceMeters)
 
-        Button(action: onTap) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(AppLocaleString.text("あと", locale: locale))
-                    .font(.subheadline.weight(.semibold))
-                Text(DistanceColorBand.formattedDistanceText(meters: distanceMeters))
-                    .font(.title2.weight(.bold))
-                    .minimumScaleFactor(0.7)
-                    .lineLimit(1)
+        Group {
+            if let onTap {
+                Button(action: onTap) {
+                    content(band: band)
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint(AppLocaleString.text("タップで地図", locale: locale))
+            } else {
+                content(band: band)
             }
-            .foregroundStyle(band.textColor)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(band.color, in: shape)
         }
-        .buttonStyle(.plain)
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.6)
+                .onEnded { _ in
+                    guard let onLongPress else { return }
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    onLongPress()
+                }
+        )
         .accessibilityLabel(AppLocaleString.text("あと", locale: locale))
         .accessibilityValue(DistanceColorBand.formattedDistanceText(meters: distanceMeters))
-        .accessibilityHint(AppLocaleString.text("タップで地図", locale: locale))
+        .accessibilityAction(named: Text(AppLocaleString.text("ナビを中止", locale: locale))) {
+            onLongPress?()
+        }
+    }
+
+    private func content(band: DistanceColorBand) -> some View {
+        VStack(spacing: 1) {
+            Text(AppLocaleString.text("あと", locale: locale))
+                .font(.system(size: labelFontSize, weight: .semibold))
+            Text(DistanceColorBand.formattedDistanceText(meters: distanceMeters))
+                .font(.system(size: valueFontSize, weight: .bold))
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+        }
+        .fixedSize()
+        .foregroundStyle(band.textColor)
+        .padding(.horizontal, horizontalPadding)
+        .padding(.vertical, verticalPadding)
+        .background(band.color, in: shape)
     }
 }
 
@@ -199,8 +280,8 @@ struct TopDistanceBadge: View {
             onClearManualOrigin: {},
             onCurrentLocationMapPick: {},
             onReloadTransitRoutes: {},
-            onTapBusNumber: { _ in },
-            onLongPressBusNumber: { _ in }
+            onTapBusNumber: { _, _ in },
+            onLongPressBusNumber: { _, _ in }
         )
     }
 }
