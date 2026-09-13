@@ -75,30 +75,38 @@ enum OverpassAPIService {
     static func searchCandidates(
         ref: String,
         near coord: CLLocationCoordinate2D,
-        radiusMeters: Int = 80_000
+        radiusMeters: Int = 80_000,
+        timeoutSeconds: TimeInterval = 30,
+        maxEndpoints: Int = 3
     ) async throws -> [BusRouteCandidate] {
         guard ThirdPartyDataConsent.isGranted else { throw OverpassError.consentRequired }
         let pattern = buildRefPattern(ref)
+        let queryTimeout = max(5, Int(timeoutSeconds.rounded(.down)))
         let query = """
-        [out:json][timeout:30];
+        [out:json][timeout:\(queryTimeout)];
         relation["type"="route"]["route"~"bus|trolleybus"]["ref"~"\(pattern)"](around:\(radiusMeters),\(coord.latitude),\(coord.longitude));
         out tags;
         """
-        let data = try await post(query)
+        let data = try await post(query, timeoutSeconds: timeoutSeconds, maxEndpoints: maxEndpoints)
         return try parseCandidates(from: data)
     }
 
     /// 路線IDからポリライン＋バス停の完全データを取得。
-    static func fetchRouteDetail(_ candidate: BusRouteCandidate) async throws -> BusRouteDetail {
+    static func fetchRouteDetail(
+        _ candidate: BusRouteCandidate,
+        timeoutSeconds: TimeInterval = 60,
+        maxEndpoints: Int = 3
+    ) async throws -> BusRouteDetail {
         guard ThirdPartyDataConsent.isGranted else { throw OverpassError.consentRequired }
+        let queryTimeout = max(5, Int(timeoutSeconds.rounded(.down)))
         let query = """
-        [out:json][timeout:60];
+        [out:json][timeout:\(queryTimeout)];
         relation(\(candidate.id));
         out body;
         >;
         out body;
         """
-        let data = try await post(query)
+        let data = try await post(query, timeoutSeconds: timeoutSeconds, maxEndpoints: maxEndpoints)
         return try parseDetail(from: data, candidate: candidate)
     }
 
@@ -130,11 +138,16 @@ enum OverpassAPIService {
         return "^\(escaped)$"
     }
 
-    private static func post(_ query: String) async throws -> Data {
+    private static func post(
+        _ query: String,
+        timeoutSeconds: TimeInterval = 60,
+        maxEndpoints: Int = 3
+    ) async throws -> Data {
         var lastError: Error = OverpassError.network(URLError(.timedOut))
-        for endpoint in endpoints {
+        let servers = Array(endpoints.prefix(max(1, maxEndpoints)))
+        for endpoint in servers {
             do {
-                return try await postTo(endpoint, query: query)
+                return try await postTo(endpoint, query: query, timeoutSeconds: timeoutSeconds)
             } catch let e as OverpassError {
                 switch e {
                 case .serverTimeout, .serverProcessing, .serverHTTP, .network:
@@ -149,8 +162,8 @@ enum OverpassAPIService {
         throw lastError
     }
 
-    private static func postTo(_ endpoint: URL, query: String) async throws -> Data {
-        var req = URLRequest(url: endpoint, timeoutInterval: 60)
+    private static func postTo(_ endpoint: URL, query: String, timeoutSeconds: TimeInterval) async throws -> Data {
+        var req = URLRequest(url: endpoint, timeoutInterval: timeoutSeconds)
         req.httpMethod = "POST"
         var safeChars = CharacterSet.urlQueryAllowed
         safeChars.remove(charactersIn: "+")

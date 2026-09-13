@@ -119,7 +119,6 @@
 
 "トップ画面" = "Matrix";
 
-"距離" = "Distance";
 
 "あと" = "Left";
 
@@ -201,7 +200,6 @@
 
 
 
-"Google Routes API" = "Google Routes API";
 
 "APIキー未設定" = "Set up your API key first";
 
@@ -215,7 +213,6 @@
 
 "エラー_現在地未取得" = "Could not get your location. Please allow location access.";
 
-"座標表示" = "Lat %@ / Lon %@";
 
 "RoutesAPIキー保存完了" = "Your Google Routes API key has been saved. It will be used for bus route checks.";
 
@@ -295,7 +292,7 @@
 
 "help_不可_title" = "Skip this bus!";
 
-"help_不可_body" = "No matching variants appear on routes to your destination — you'll see red \"Skip this bus!\". If the bus still goes to a Google transfer stop, keypad entry may say you can board.";
+"help_不可_body" = "No matching variants appear on routes to your destination — you'll see red \"Skip this bus!\". If a stored line map still runs from your current stop to the destination (or a transfer stop), keypad entry may say you can board.";
 
 "help_ルートなし_title" = "No route found";
 
@@ -503,7 +500,7 @@
 "help_トップ_title" = "Matrix";
 "help_トップ_body" = "This is the screen that opens at launch. It shows destination, current location, distance, and the bus number table. To check a number on the keypad, open … → Number entry. You can also swipe right from the left edge. Return with … → Matrix, or swipe from the left edge again.";
 "help_距離_title" = "Distance colors";
-"help_距離_body" = "When you are not riding, the badge is the straight-line distance to your destination. While riding, it is the distance to the current bus's alighting stop. Blue from 3 km, green from 1 km, yellow from 500 m, orange from 200 m, red under 200 m. Tap the badge while riding to open the route map (display-only when not riding). Long-press the badge to cancel navigation (this also clears the destination). To alight for a transfer, long-press the bus number on the table.";
+"help_距離_body" = "When you are not riding, the badge is the straight-line distance to your destination. While riding, it is the distance to the current bus's alighting stop. Blue from 3 km, green from 1 km, yellow from 500 m, orange from 200 m, red under 200 m. Tap the badge while riding to open the route map (display-only when not riding). Long-press the badge to cancel navigation (this also clears the destination). To alight for a transfer, long-press the bus number on the table. If you start riding from the route map without setting a destination, the badge shows \"—\" and no distance is displayed.";
 "help_バス番号表_title" = "Bus number table";
 "help_バス番号表_body" = "Bus numbers are grouped by direction and number of transfers. Tap to open the route map, long-press to board or alight. The bus you are riding is highlighted.";
 "help_経路_title" = "Transit routes";
@@ -521,7 +518,6 @@
 
 "APIキー_Premium限定_タイトル" = "PREMIUM feature";
 "APIキー_Premium限定_説明" = "Setting your own Google API key is available on the PREMIUM plan.";
-"Google Maps API" = "Google Maps API";
 "IAP_再読み込み" = "Reload products";
 "IAP_商品が見つかりません" = "Product not found";
 "IAP_商品読み込み中" = "Loading products…";
@@ -644,6 +640,10 @@
 "路線図_候補" = "Route candidates";
 "路線図_候補_ヒント" = "Select a route matching your bus number.";
 "路線図_現在地なし警告" = "Current location needed to show the route map.";
+"路線図_履歴" = "History";
+"路線図_乗降ヒント" = "Long-press to board or alight";
+"路線図_履歴_空状態" = "No history yet";
+"路線図_履歴_空状態_詳細" = "Bus routes you've viewed on the route map appear here.";
 "路線図_空状態" = "Enter a bus number to search for routes";
 "路線図_空状態_コンテキスト" = "Enter a bus number to find nearby routes";
 "路線図_読込中_%@" = "Loading %@…";

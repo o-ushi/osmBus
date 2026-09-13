@@ -29,6 +29,7 @@ private struct _GoogleMSMapWrapper: UIViewRepresentable {
     let markers: [GMapMarkerData]
     var shouldFollowUser: Bool = false
     var fitBoundsOnAppear: GMSCoordinateBounds? = nil
+    var myLocationIsRiding: Bool = false
     var onSetup: ((GMSMapView) -> Void)? = nil
     var onTap: ((CLLocationCoordinate2D) -> Void)? = nil
 
@@ -108,18 +109,28 @@ private struct _GoogleMSMapWrapper: UIViewRepresentable {
         if let userCoordinate {
             if let marker = c.myLocationMarker {
                 marker.position = userCoordinate
+                if c.myLocationMarkerIsRiding != myLocationIsRiding {
+                    marker.icon = TransitMapMarkerIcons.myLocationDot(
+                        fill: myLocationIsRiding ? .systemOrange : AppTheme.brandBlueUIColor
+                    )
+                    c.myLocationMarkerIsRiding = myLocationIsRiding
+                }
             } else {
                 let marker = GMSMarker(position: userCoordinate)
-                marker.icon = TransitMapMarkerIcons.myLocationDot()
+                marker.icon = TransitMapMarkerIcons.myLocationDot(
+                    fill: myLocationIsRiding ? .systemOrange : AppTheme.brandBlueUIColor
+                )
                 marker.groundAnchor = CGPoint(x: 0.5, y: 0.5)
                 marker.zIndex = 20
                 marker.isTappable = false
                 marker.map = mapView
                 c.myLocationMarker = marker
+                c.myLocationMarkerIsRiding = myLocationIsRiding
             }
         } else if let marker = c.myLocationMarker {
             marker.map = nil
             c.myLocationMarker = nil
+            c.myLocationMarkerIsRiding = nil
         }
 
         if shouldFollowUser, let coord = userCoordinate {
@@ -147,6 +158,7 @@ private struct _GoogleMSMapWrapper: UIViewRepresentable {
         var pendingPolylines: [GMapPolylineData] = []
         var isSchedulingPolylines = false
         var myLocationMarker: GMSMarker?
+        var myLocationMarkerIsRiding: Bool?
 
         init(_ parent: _GoogleMSMapWrapper) { self.parent = parent }
 
@@ -209,6 +221,7 @@ struct GoogleMapView: View {
     var locationButtonFallback: CLLocationCoordinate2D? = nil
     var shouldFollowUser: Bool = false
     var fitBoundsOnAppear: GMSCoordinateBounds? = nil
+    var myLocationIsRiding: Bool = false
     var onSetup: ((GMSMapView) -> Void)? = nil
     var onTap: ((CLLocationCoordinate2D) -> Void)? = nil
     var trialSignature: String = "maps"
@@ -228,6 +241,7 @@ struct GoogleMapView: View {
                 markers: markers,
                 shouldFollowUser: shouldFollowUser,
                 fitBoundsOnAppear: fitBoundsOnAppear,
+                myLocationIsRiding: myLocationIsRiding,
                 onSetup: { mapView in
                     mapBox.view = mapView
                     onSetup?(mapView)
@@ -378,7 +392,6 @@ struct TransitRouteMapView: View {
     @State private var cachedPolylines: [GMapPolylineData] = []
     @State private var cachedMarkers: [GMapMarkerData] = []
     @State private var isMapEngineReady = false
-    @State private var lastKnownUserCoordinate: CLLocationCoordinate2D? = nil
 
     @EnvironmentObject private var locationService: LocationService
 
@@ -419,22 +432,28 @@ struct TransitRouteMapView: View {
         return CLLocationCoordinate2D(latitude: destination.latitude, longitude: destination.longitude)
     }
 
-    /// マトリクス／番号入力と同じ。GPS 現在地ではなく経路の出発地
-    /// (`origin` = 手動出発地があればそれ、なければ測位)。
+    /// 距離計算用の出発地。`LocationService.currentLocation` は測位済みなら常に最新値を
+    /// 保持するので、これをそのまま使う。まだ一度も測位できていない最初の一瞬だけ、この地図を
+    /// 開いた時点の `origin` にフォールバックする。
+    private var effectiveOriginForDistance: CLLocationCoordinate2D {
+        locationService.currentLocation ?? origin.clLocationCoordinate2D
+    }
+
     private var topBadgeDistanceMeters: Double? {
+        let originCoordinate = effectiveOriginForDistance
         if ridingBusNumber != nil {
             guard displayedRouteContainsRidingBus else { return nil }
             let alight = currentLegAlightingCoordinate
             return GoogleRoutesAPIService.distanceMeters(
-                fromLatitude: origin.latitude,
-                fromLongitude: origin.longitude,
+                fromLatitude: originCoordinate.latitude,
+                fromLongitude: originCoordinate.longitude,
                 toLatitude: alight.latitude,
                 toLongitude: alight.longitude
             )
         }
         return GoogleRoutesAPIService.distanceMeters(
-            fromLatitude: origin.latitude,
-            fromLongitude: origin.longitude,
+            fromLatitude: originCoordinate.latitude,
+            fromLongitude: originCoordinate.longitude,
             toLatitude: destination.latitude,
             toLongitude: destination.longitude
         )
@@ -483,7 +502,7 @@ struct TransitRouteMapView: View {
                 routeSwitcherSheet
             }
             .task { await bootMapEngine() }
-            .syncMapLiveLocation(lastKnown: $lastKnownUserCoordinate)
+            .onAppear { locationService.refreshCurrentFromCache() }
         }
     }
 
@@ -493,6 +512,7 @@ struct TransitRouteMapView: View {
             markers: cachedMarkers,
             shouldFollowUser: false,
             fitBoundsOnAppear: nil,
+            myLocationIsRiding: ridingBusNumber != nil,
             onSetup: { mapView in
                 mapBox.view = mapView
                 mapView.camera = GMSCameraPosition(
@@ -842,17 +862,17 @@ private enum TransitMapMarkerIcons {
         }
     }
 
-    /// 自前追跡の現在地マーカー。Google Maps 純正の青い現在地ドットの簡易版。
-    static func myLocationDot() -> UIImage {
-        let diameter: CGFloat = 22
+    /// 自前追跡の現在地マーカー。乗車中は橙、降車中（未乗車含む）はブランド青で塗り分ける。
+    static func myLocationDot(fill: UIColor = AppTheme.brandBlueUIColor) -> UIImage {
+        let diameter: CGFloat = 26
         return UIGraphicsImageRenderer(size: CGSize(width: diameter, height: diameter)).image { _ in
             let outerRect = CGRect(x: 1, y: 1, width: diameter - 2, height: diameter - 2)
             UIColor.white.setFill()
             UIBezierPath(ovalIn: outerRect).fill()
 
-            let innerInset: CGFloat = 3
+            let innerInset: CGFloat = 5
             let innerRect = outerRect.insetBy(dx: innerInset, dy: innerInset)
-            UIColor.systemBlue.setFill()
+            fill.setFill()
             UIBezierPath(ovalIn: innerRect).fill()
         }
     }
@@ -898,9 +918,7 @@ struct RouteMapSummaryBar: View {
     private var distanceLabel: some View {
         let prefix = AppLocaleString.text("直線距離", locale: locale)
         if let meters = distanceMeters {
-            let formatted = meters < 1000
-                ? String(format: "%.0f m", meters)
-                : String(format: "%.1f km", meters / 1000)
+            let formatted = DistanceColorBand.formattedDistanceText(meters: meters)
             Label(
                 "\(prefix) \(formatted)",
                 systemImage: "location.fill"
@@ -1069,31 +1087,3 @@ private extension RouteCoordinate {
     }
 }
 
-// MARK: - Live location sync for map footers
-
-private struct MapLiveLocationSyncModifier: ViewModifier {
-    @EnvironmentObject private var locationService: LocationService
-    @Binding var lastKnownCoordinate: CLLocationCoordinate2D?
-
-    func body(content: Content) -> some View {
-        content
-            .onAppear {
-                locationService.refreshCurrentFromCache()
-                ingest(locationService.currentLocation)
-            }
-            .onReceive(locationService.$currentLocation) { coordinate in
-                ingest(coordinate)
-            }
-    }
-
-    private func ingest(_ coordinate: CLLocationCoordinate2D?) {
-        guard let coordinate else { return }
-        lastKnownCoordinate = coordinate
-    }
-}
-
-extension View {
-    func syncMapLiveLocation(lastKnown: Binding<CLLocationCoordinate2D?>) -> some View {
-        modifier(MapLiveLocationSyncModifier(lastKnownCoordinate: lastKnown))
-    }
-}

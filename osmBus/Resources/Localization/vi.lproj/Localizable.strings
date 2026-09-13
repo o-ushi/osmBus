@@ -119,7 +119,6 @@
 
 "トップ画面" = "Ma trận";
 
-"距離" = "Khoảng cách";
 
 "あと" = "Còn";
 
@@ -201,7 +200,6 @@
 
 
 
-"Google Routes API" = "Google Routes API";
 
 "APIキー未設定" = "Hãy đặt khóa API trước";
 
@@ -215,7 +213,6 @@
 
 "エラー_現在地未取得" = "Không lấy được vị trí. Hãy cho phép truy cập vị trí.";
 
-"座標表示" = "Vĩ %@ / Kinh %@";
 
 "RoutesAPIキー保存完了" = "Đã lưu khóa Google Routes API. Dùng để kiểm tra tuyến xe buýt.";
 
@@ -295,7 +292,7 @@
 
 "help_不可_title" = "Bỏ qua xe này!";
 
-"help_不可_body" = "Không có biến thể phù hợp trên tuyến đến điểm đến — màn hình hiển thị đỏ \"Bỏ qua xe này!\". Nếu xe vẫn tới điểm trung chuyển trên gợi ý của Google, nhập số trên bàn phím vẫn có thể được lên xe.";
+"help_不可_body" = "Không có biến thể phù hợp trên tuyến đến điểm đến — màn hình hiển thị đỏ \"Bỏ qua xe này!\". Nếu sơ đồ tuyến đã lưu vẫn chạy từ trạm hiện tại đến điểm đến (hoặc điểm trung chuyển), nhập số trên bàn phím vẫn có thể được lên xe.";
 
 "help_ルートなし_title" = "Không tìm thấy tuyến";
 
@@ -503,7 +500,7 @@
 "help_トップ_title" = "Ma trận";
 "help_トップ_body" = "Đây là màn hình khi mở ứng dụng: điểm đến, vị trí, khoảng cách và bảng số xe. Để kiểm tra số trên bàn phím, mở … → Nhập số. Cũng có thể vuốt sang phải từ mép trái. Quay lại bằng … → Ma trận, hoặc vuốt từ mép trái lần nữa.";
 "help_距離_title" = "Màu khoảng cách";
-"help_距離_body" = "Khi chưa lên xe, huy hiệu là khoảng cách thẳng đến điểm đến. Khi đang đi, là khoảng cách đến trạm xuống của xe hiện tại. Từ 3 km xanh dương, từ 1 km xanh lá, từ 500 m vàng, từ 200 m cam, dưới 200 m đỏ. Khi đang đi, chạm huy hiệu để mở bản đồ tuyến (chưa lên xe thì chỉ hiển thị). Giữ huy hiệu để hủy điều hướng (cũng xóa điểm đến). Để xuống xe chuyển tuyến, giữ số xe trên bảng.";
+"help_距離_body" = "Khi chưa lên xe, huy hiệu là khoảng cách thẳng đến điểm đến. Khi đang đi, là khoảng cách đến trạm xuống của xe hiện tại. Từ 3 km xanh dương, từ 1 km xanh lá, từ 500 m vàng, từ 200 m cam, dưới 200 m đỏ. Khi đang đi, chạm huy hiệu để mở bản đồ tuyến (chưa lên xe thì chỉ hiển thị). Giữ huy hiệu để hủy điều hướng (cũng xóa điểm đến). Để xuống xe chuyển tuyến, giữ số xe trên bảng. Nếu lên xe từ bản đồ tuyến mà chưa đặt điểm đến, huy hiệu sẽ hiện \"—\" và không hiển thị khoảng cách.";
 "help_バス番号表_title" = "Bảng số xe buýt";
 "help_バス番号表_body" = "Số xe được nhóm theo hướng và số lần chuyển. Chạm để mở bản đồ tuyến, giữ để lên hoặc xuống xe. Xe đang đi được tô nổi.";
 "help_経路_title" = "Tuyến đi";
@@ -521,7 +518,6 @@
 
 "APIキー_Premium限定_タイトル" = "Tinh nang PREMIUM";
 "APIキー_Premium限定_説明" = "Cai khóa Google API riêng có trong gói PREMIUM.";
-"Google Maps API" = "Google Maps API";
 "IAP_再読み込み" = "Tai lai san pham";
 "IAP_商品が見つかりません" = "Khong tim thay san pham";
 "IAP_商品読み込み中" = "Dang tai san pham…";
@@ -644,6 +640,10 @@
 "路線図_候補" = "Tuyen ung vien";
 "路線図_候補_ヒント" = "Chon tuyen khop voi so xe buyt.";
 "路線図_現在地なし警告" = "Can vi tri hien tai de hien thi ban do tuyen.";
+"路線図_履歴" = "Lịch sử";
+"路線図_乗降ヒント" = "Giữ để lên hoặc xuống xe";
+"路線図_履歴_空状態" = "Chưa có lịch sử";
+"路線図_履歴_空状態_詳細" = "Các tuyến xe buýt bạn đã xem trên bản đồ tuyến sẽ hiện ở đây.";
 "路線図_空状態" = "Nhập số xe buýt để tìm tuyến";
 "路線図_空状態_コンテキスト" = "Nhập số xe buýt để tìm tuyến gần đây";
 "路線図_読込中_%@" = "Dang tai %@…";

@@ -5,8 +5,8 @@ import UIKit
 struct MainView: View {
     @Binding var pendingDeepLinkDestination: Destination?
 
-    @State private var viewModel = MainViewModel()
-    @StateObject private var locationService = LocationService()
+    @State private var viewModel: MainViewModel
+    @StateObject private var locationService: LocationService
     /// 既定表示はトップ画面。false でメイン画面（キーパッド判定 UI）を表示する。
     @State private var showsTopScreen = true
     @State private var showsSettings = false
@@ -21,7 +21,6 @@ struct MainView: View {
 @State private var showsMapLocationPicker = false
     @State private var mapPickerInitialRole: MapPickRole = .destination
     @State private var busRouteMapPresentation: BusRouteMapPresentation?
-    @State private var pendingOSMRidingStart: (routeRef: String, candidate: BusRouteCandidate, detail: BusRouteDetail)?
     @State private var showsWrongDirectionAlert = false
     @State private var presentedRidingAlert: ActiveRidingAlert?
     @State private var showsRouteDatabaseResetConfirm = false
@@ -35,6 +34,13 @@ struct MainView: View {
     @Environment(\.busCardStyle) private var cardStyle
     @Environment(SharedRoutesTrialStore.self) private var trialStore
     @State private var showsTrialExhaustedAlert = false
+
+    init(pendingDeepLinkDestination: Binding<Destination?>) {
+        _pendingDeepLinkDestination = pendingDeepLinkDestination
+        let service = LocationService()
+        _locationService = StateObject(wrappedValue: service)
+        _viewModel = State(wrappedValue: MainViewModel(locationService: service))
+    }
 
     private var canUseRoutesAPI: Bool {
         GoogleRoutesAPIKeyStore.isConfigured
@@ -254,16 +260,14 @@ struct MainView: View {
             screenContent
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                // トップ・メインどちらも、距離が出せるときは常時表示。タップは乗車中のみ。
-                if let distanceMeters = viewModel.topScreenDistanceMeters {
+                // トップ・メインどちらも、距離が出せるとき、または乗車中（目的地未設定で「—」表示のときも含む）は常時表示。タップは乗車中のみ。
+                if viewModel.topScreenDistanceMeters != nil || viewModel.ridingState != nil {
                     let badge = TopDistanceBadge(
-                        distanceMeters: distanceMeters,
+                        distanceMeters: viewModel.topScreenDistanceMeters,
                         onTap: viewModel.ridingState != nil
                             ? {
-                                Task { @MainActor in
-                                    await Task.yield()
-                                    openRidingRouteMap()
-                                }
+                                guard !showsCancelNavigationConfirm else { return }
+                                openRidingRouteMap()
                             }
                             : nil,
                         onLongPress: viewModel.hasDestination
@@ -399,11 +403,19 @@ struct MainView: View {
                 )
                 .environment(\.locale, locale)
             }
-            .sheet(item: $busRouteMapPresentation, onDismiss: applyPendingOSMRidingStartIfNeeded) { presentation in
+            .sheet(item: $busRouteMapPresentation) { presentation in
                 BusRouteMapCover(
                     presentation: presentation,
                     onStartRiding: { routeRef, candidate, detail in
-                        pendingOSMRidingStart = (routeRef, candidate, detail)
+                        viewModel.startRidingFromOSMMap(
+                            routeRef: routeRef,
+                            candidate: candidate,
+                            routeDetail: detail
+                        )
+                    },
+                    onEndRiding: {
+                        // 路線図の画面は維持したまま降車する（メイン画面へは戻らない）。
+                        alightForTransfer()
                     }
                 )
                 .environment(\.locale, locale)
@@ -411,7 +423,6 @@ struct MainView: View {
             }
             .onAppear {
                 locationService.refreshCurrentFromCache()
-                viewModel.updateCurrentLocation(locationService.currentLocation)
                 locationService.fetchCurrentLocation()
                 syncContinuousLocationTracking()
                 applyPendingDeepLinkIfNeeded()
@@ -425,11 +436,11 @@ struct MainView: View {
                 updateAdaptiveLocationAccuracy(current: coordinate)
                 // 乗車進捗チェックはシートの有無に関わらず常に実行
                 viewModel.checkRidingProgress(at: coordinate)
-                // 地図シート表示中は viewModel 更新を止め、re-render ループを防ぐ
+                // 現在地(viewModel.currentLatitude/Longitude)は LocationService を直接読むので
+                // シート表示中でも止まらない。ここで止めるのは重いネットワーク再判定だけ。
                 guard busRouteMapPresentation == nil,
                       boardingRouteMapSheet == nil else { return }
 
-                viewModel.updateCurrentLocation(locationService.currentLocation)
                 // 乗車中はバス判定・経路更新の頻繁なリフレッシュを止める
                 if viewModel.ridingState == nil {
                     viewModel.refreshBusCheck(userInitiated: false)
@@ -555,6 +566,7 @@ struct MainView: View {
         let needsTracking = viewModel.shouldTrackRiding
             || boardingRouteMapSheet != nil
             || busRouteMapPresentation != nil
+            || topBusRouteMapSelection != nil
         if needsTracking {
             // 乗車中は画面を見ていなくても距離アラートを続ける必要があるためバックグラウンド追跡を許可する。
             // 地図を眺めているだけの間は前面のみで十分なので iOS の自動休止に任せる。
@@ -593,7 +605,8 @@ struct MainView: View {
             viewModel.shouldTrackRiding ? "1" : "0",
             viewModel.ridingNearestAlertReached ? "1" : "0",
             boardingRouteMapSheet.map { String($0.id) } ?? "",
-            busRouteMapPresentation?.id.uuidString ?? ""
+            busRouteMapPresentation?.id.uuidString ?? "",
+            topBusRouteMapSelection.map { String($0.id) } ?? ""
         ].joined(separator: "|")
     }
 
@@ -731,16 +744,6 @@ struct MainView: View {
         showsRouteDatabaseResetConfirm = true
     }
 
-    private func applyPendingOSMRidingStartIfNeeded() {
-        guard let pending = pendingOSMRidingStart else { return }
-        pendingOSMRidingStart = nil
-        viewModel.startRidingFromOSMMap(
-            routeRef: pending.routeRef,
-            candidate: pending.candidate,
-            routeDetail: pending.detail
-        )
-    }
-
     private func beginRidingOnboarding(for busNumber: String) {
         let candidates = viewModel.ridingBusCandidates(for: busNumber)
         guard candidates.count > 1 else {
@@ -849,11 +852,13 @@ struct MainView: View {
 private struct BusRouteMapCover: View {
     let presentation: BusRouteMapPresentation
     let onStartRiding: (String, BusRouteCandidate, BusRouteDetail) -> Void
+    let onEndRiding: () -> Void
 
     var body: some View {
         BusRouteMapSheet(
             presentation: presentation,
-            onStartRiding: onStartRiding
+            onStartRiding: onStartRiding,
+            onEndRiding: onEndRiding
         )
     }
 }
@@ -887,6 +892,7 @@ private struct BoardingRouteMapCover: View {
 private struct BusRouteMapSheet: View {
     let presentation: BusRouteMapPresentation
     let onStartRiding: (String, BusRouteCandidate, BusRouteDetail) -> Void
+    let onEndRiding: () -> Void
 
     var body: some View {
         switch presentation.mode {
@@ -895,7 +901,8 @@ private struct BusRouteMapSheet: View {
                 currentLatitude: presentation.latitude,
                 currentLongitude: presentation.longitude,
                 destination: presentation.destination,
-                onStartRiding: onStartRiding
+                onStartRiding: onStartRiding,
+                onEndRiding: onEndRiding
             )
         case .riding(let candidate, let cachedDetail):
             BusRouteMapView(
@@ -905,7 +912,8 @@ private struct BusRouteMapSheet: View {
                 isRidingMode: true,
                 initialRouteDetail: cachedDetail,
                 initialRouteCandidate: cachedDetail == nil ? candidate : nil,
-                ridingDurationText: presentation.ridingDurationText
+                ridingDurationText: presentation.ridingDurationText,
+                onEndRiding: onEndRiding
             )
         }
     }

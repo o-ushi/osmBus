@@ -22,9 +22,14 @@ enum BusNumberInput {
 @MainActor
 @Observable
 final class MainViewModel {
+    private let locationService: LocationService
     private(set) var destination: Destination?
-    private(set) var currentLatitude: Double?
-    private(set) var currentLongitude: Double?
+    /// 現在地は `LocationService.currentLocation` を都度直接読む(コピーを持たない)。
+    /// 以前はここへ View 層からプッシュしていたが、地図シート表示中は更新が止まる導線に
+    /// なっていて、シートを開いたまま降車して乗り換え検索を続けるとホーム画面の距離表示が
+    /// 固まったまま動かなくなる不具合の原因になっていた。
+    var currentLatitude: Double? { locationService.currentLocation?.latitude }
+    var currentLongitude: Double? { locationService.currentLocation?.longitude }
     private(set) var manualOriginLatitude: Double?
     private(set) var manualOriginLongitude: Double?
     private(set) var manualOriginName: String?
@@ -55,19 +60,37 @@ final class MainViewModel {
         effectiveOriginLatitude != nil && effectiveOriginLongitude != nil
     }
 
-    /// トップ画面の距離欄用。乗車中は現在レグの降車停まで、未乗車は目的地までの直線距離
-    /// (Step 1 で定義した基準点と同じ)。現在地または基準地点が無ければ nil。
+    /// 乗車中に降車座標が瞬間的に欠けても、距離バッジを消さないための直前値。
+    private var lastRidingDistanceMeters: Double?
+
+    /// トップ画面の距離欄用。
+    /// - 目的地あり・未乗車: 現在地 → 目的地
+    /// - 目的地あり・乗車中: 現在地 → 今の降車停（Google レグ、または OSM 側の解決結果）
+    /// - 目的地なし（乗車中含む）: nil。OSM 路線図から目的地未設定のまま乗車した場合、
+    ///   `RidingTracker.resolveOSMAlightCoordinate` は路線の終点を降車座標として使うが、
+    ///   それはユーザーの行き先ではなくナビとして意味が薄いため「あと」には出さない。
+    /// 現在地または基準地点が無ければ nil。
     var topScreenDistanceMeters: Double? {
-        guard let originLat = effectiveOriginLatitude, let originLon = effectiveOriginLongitude else { return nil }
+        if ridingState != nil, destination == nil {
+            lastRidingDistanceMeters = nil
+            return nil
+        }
+        guard let originLat = effectiveOriginLatitude, let originLon = effectiveOriginLongitude else {
+            if ridingState == nil { lastRidingDistanceMeters = nil }
+            return ridingState == nil ? nil : lastRidingDistanceMeters
+        }
         if ridingState != nil {
-            guard let alight = ridingAlightCoordinate else { return nil }
-            return GoogleRoutesAPIService.distanceMeters(
+            guard let alight = ridingAlightCoordinate else { return lastRidingDistanceMeters }
+            let meters = GoogleRoutesAPIService.distanceMeters(
                 fromLatitude: originLat,
                 fromLongitude: originLon,
                 toLatitude: alight.latitude,
                 toLongitude: alight.longitude
             )
+            lastRidingDistanceMeters = meters
+            return meters
         }
+        lastRidingDistanceMeters = nil
         guard let destination else { return nil }
         return GoogleRoutesAPIService.distanceMeters(
             fromLatitude: originLat,
@@ -124,15 +147,11 @@ final class MainViewModel {
     /// ハプティクの重複判定用。resultState は判定中に .checking を挟むため、これとは別に最後に確定した結果を追跡する。
     private var lastSettledResultState: ResultDisplayState?
 
-    init() {
+    init(locationService: LocationService) {
+        self.locationService = locationService
         destination = DestinationStore.load()
         routeArchive = TransitRouteArchive.load()
         activateBucketForCurrentDestination()
-    }
-
-    func updateCurrentLocation(_ coordinate: CLLocationCoordinate2D?) {
-        currentLatitude = coordinate?.latitude
-        currentLongitude = coordinate?.longitude
     }
 
     func setDestination(_ destination: Destination) {
@@ -553,7 +572,18 @@ final class MainViewModel {
 
         var response = GoogleRoutesAPIService.evaluateBusQuery(busNumber, routes: accumulatedTransitRoutes)
         if case .doNotBoard = response.outcome, allowNetworkAlternate {
-            if let remembered = rememberedAlternateResponse(busNumber: busNumber) {
+            if let fromStoredMaps = GoogleRoutesAPIService.matchViaStoredLineMaps(
+                busNumber: busNumber,
+                destinationRoutes: accumulatedTransitRoutes,
+                originLatitude: originLatitude,
+                originLongitude: originLongitude,
+                destinationLatitude: destination.latitude,
+                destinationLongitude: destination.longitude,
+                destinationName: destination.name
+            ) {
+                response = fromStoredMaps
+                rememberAlternateBoardingRoutes(from: fromStoredMaps)
+            } else if let remembered = rememberedAlternateResponse(busNumber: busNumber) {
                 response = remembered
             } else if !alternateSearchCompletedFor.contains(busNumber) {
                 if showCheckingWhileWaiting, resultState != .checking {
@@ -568,6 +598,9 @@ final class MainViewModel {
                         destinationRoutes: accumulatedTransitRoutes,
                         originLatitude: originLatitude,
                         originLongitude: originLongitude,
+                        destinationLatitude: destination.latitude,
+                        destinationLongitude: destination.longitude,
+                        destinationName: destination.name,
                         apiKey: apiKey
                     ) {
                         response = alternate

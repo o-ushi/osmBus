@@ -2,29 +2,38 @@ import CoreLocation
 import Foundation
 
 extension GoogleRoutesAPIService {
-    /// Google の行き先案に入力番号が無くても、乗換停留所まで同じ方向に走るバスなら乗車可とする。
-    /// 番号表の蓄積データベースには混ぜない。見つかった経路は matchingRoute にだけ載せる。
+    /// Google 案に入力番号が無くても、溜めた全線または追加検索で乗れるなら乗車可とする。
+    /// 乗換の有無は問わない。目的地まで同じ路線なら直通としてナビに使う。
     static func evaluateAlternateTransferBoarding(
         busNumber: String,
         destinationRoutes: [ParsedTransitRoute],
         originLatitude: Double,
         originLongitude: Double,
-        apiKey: String
+        destinationLatitude: Double,
+        destinationLongitude: Double,
+        destinationName: String?,
+        apiKey _: String
     ) async -> BusCheckResponse? {
-        let hubs = uniqueTransferHubs(in: destinationRoutes)
+        let hubs = alternateAlightTargets(
+            in: destinationRoutes,
+            destinationLatitude: destinationLatitude,
+            destinationLongitude: destinationLongitude,
+            destinationName: destinationName
+        )
         guard !hubs.isEmpty else { return nil }
 
-        if let googleMatch = await matchViaGoogleHubRoutes(
+        if let stored = matchViaStoredLineMaps(
             busNumber: busNumber,
             hubs: hubs,
             destinationRoutes: destinationRoutes,
             originLatitude: originLatitude,
-            originLongitude: originLongitude,
-            apiKey: apiKey
+            originLongitude: originLongitude
         ) {
-            return googleMatch
+            return stored
         }
 
+        // 向かってくるバスを判定するので、Google の乗換再検索は待たない。
+        // 手元に無い初回だけ OSM 全線を短時間で取り、溜めて次から即判定する。
         return await matchViaOSMRoute(
             busNumber: busNumber,
             hubs: hubs,
@@ -35,10 +44,17 @@ extension GoogleRoutesAPIService {
     }
 
     struct TransferHub {
+        enum Kind {
+            case transfer
+            case destination
+        }
+
         let parentRouteIndex: Int
         let firstBusStepIndex: Int
         let stopName: String
         let location: RouteCoordinate
+        let kind: Kind
+        let matchRadiusMeters: Double
     }
 
     static func uniqueTransferHubs(in routes: [ParsedTransitRoute]) -> [TransferHub] {
@@ -61,10 +77,42 @@ extension GoogleRoutesAPIService {
                     parentRouteIndex: routeIndex,
                     firstBusStepIndex: firstBusIdx,
                     stopName: name,
-                    location: location
+                    location: location,
+                    kind: .transfer,
+                    matchRadiusMeters: 280
                 )
             )
             if hubs.count >= 3 { break }
+        }
+        return hubs
+    }
+
+    static func alternateAlightTargets(
+        in routes: [ParsedTransitRoute],
+        destinationLatitude: Double,
+        destinationLongitude: Double,
+        destinationName: String?
+    ) -> [TransferHub] {
+        var hubs = uniqueTransferHubs(in: routes)
+        let destLocation = RouteCoordinate(latitude: destinationLatitude, longitude: destinationLongitude)
+        let destKey = hubKey(destLocation)
+        if !hubs.contains(where: { hubKey($0.location) == destKey }) {
+            let parentIndex = routes.enumerated().min(by: { $0.element.durationSeconds < $1.element.durationSeconds })?.offset ?? 0
+            let firstBusIdx = routes.indices.contains(parentIndex)
+                ? (routes[parentIndex].steps.firstIndex(where: { isBusStep($0) }) ?? 0)
+                : 0
+            let name = destinationName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            hubs.insert(
+                TransferHub(
+                    parentRouteIndex: parentIndex,
+                    firstBusStepIndex: firstBusIdx,
+                    stopName: name,
+                    location: destLocation,
+                    kind: .destination,
+                    matchRadiusMeters: 550
+                ),
+                at: 0
+            )
         }
         return hubs
     }
@@ -75,76 +123,60 @@ extension GoogleRoutesAPIService {
         return "\(lat),\(lon)"
     }
 
-    private static func matchViaGoogleHubRoutes(
+    /// 溜め込んだ全線から、今の出発地と目的地（または乗換停）が同じ路線上なら乗車可。
+    static func matchViaStoredLineMaps(
         busNumber: String,
-        hubs: [TransferHub],
+        hubs: [TransferHub]? = nil,
         destinationRoutes: [ParsedTransitRoute],
         originLatitude: Double,
         originLongitude: Double,
-        apiKey: String
-    ) async -> BusCheckResponse? {
-        await withTaskGroup(of: (TransferHub, [ParsedTransitRoute])?.self) { group in
-            for hub in hubs {
-                group.addTask {
-                    let result = await fetchTransitRoutes(
-                        originLatitude: originLatitude,
-                        originLongitude: originLongitude,
-                        destinationLatitude: hub.location.latitude,
-                        destinationLongitude: hub.location.longitude,
-                        apiKey: apiKey
-                    )
-                    guard case .success(let routes) = result, !routes.isEmpty else { return nil }
-                    return (hub, routes)
-                }
-            }
-
-            var best: BusCheckResponse?
-            for await item in group {
-                guard let (hub, routes) = item else { continue }
-                let response = evaluateBusQuery(busNumber, routes: routes)
-                switch response.outcome {
-                case .doNotBoard, .noTransitRoutes, .configurationError, .apiError:
-                    continue
-                case .boardAll, .boardIfVariant:
-                    break
-                }
-                guard let matchRoute = response.matchingRoute else { continue }
-                let resolvedNumber = discoverBusCandidates(in: [matchRoute], numericQuery: busNumber).first
-                    ?? primaryBusLineRef(route: matchRoute, busNumber: busNumber)
-                    ?? busNumber
-                guard let replacement = boardingBusStep(route: matchRoute, busNumber: resolvedNumber),
-                      isFirstBusOnRoute(matchRoute, busNumber: resolvedNumber) else { continue }
-
-                let parent = destinationRoutes[hub.parentRouteIndex]
-                let stitched = replacingBusStep(
-                    in: parent,
-                    at: hub.firstBusStepIndex,
-                    with: replacement
-                )
-                best = boardingResponse(
-                    outcome: alternateOutcome(for: resolvedNumber, route: stitched, variantNames: variantNames(from: response)),
-                    match: (hub.parentRouteIndex, stitched),
-                    busNumber: resolvedNumber,
-                    allRoutes: destinationRoutes,
-                    directionHintOverride: alternateHint(hubName: hub.stopName, route: stitched, busNumber: resolvedNumber)
-                )
-                group.cancelAll()
-                break
-            }
-            return best
+        destinationLatitude: Double? = nil,
+        destinationLongitude: Double? = nil,
+        destinationName: String? = nil
+    ) -> BusCheckResponse? {
+        let resolvedHubs: [TransferHub]
+        if let hubs, !hubs.isEmpty {
+            resolvedHubs = hubs
+        } else if let destinationLatitude, let destinationLongitude {
+            resolvedHubs = alternateAlightTargets(
+                in: destinationRoutes,
+                destinationLatitude: destinationLatitude,
+                destinationLongitude: destinationLongitude,
+                destinationName: destinationName
+            )
+        } else {
+            resolvedHubs = uniqueTransferHubs(in: destinationRoutes)
         }
-    }
+        guard !resolvedHubs.isEmpty else { return nil }
+        let origin = CLLocationCoordinate2D(latitude: originLatitude, longitude: originLongitude)
+        let details = BusLineMapStore.details(matching: busNumber)
+        guard !details.isEmpty else { return nil }
 
-    private static func isFirstBusOnRoute(_ route: ParsedTransitRoute, busNumber: String) -> Bool {
-        guard let firstIdx = route.steps.firstIndex(where: { isBusStep($0) }) else { return false }
-        return stepMatchesBusNumber(route.steps[firstIdx], busNumber: busNumber)
-    }
-
-    private static func variantNames(from response: BusCheckResponse) -> [String]? {
-        if case .boardIfVariant(let names, _, _) = response.outcome {
-            return names
+        var matched: [(detail: BusRouteDetail, hub: TransferHub, step: ParsedTransitStep)] = []
+        for detail in details {
+            guard let hit = osmStepTowardHub(detail: detail, origin: origin, hubs: resolvedHubs) else { continue }
+            matched.append((detail, hit.hub, hit.step))
         }
-        return nil
+        guard let first = matched.first else { return nil }
+        BusLineMapStore.touch(relationId: first.detail.candidate.id)
+
+        let refs = Array(Set(matched.map(\.detail.candidate.ref))).sorted()
+        let primaryRef = refs.contains(where: { $0.caseInsensitiveCompare(busNumber) == .orderedSame })
+            ? busNumber
+            : (refs.first ?? first.detail.candidate.ref)
+        let route = navigationRoute(
+            for: first.hub,
+            step: first.step,
+            parent: destinationRoutes[first.hub.parentRouteIndex]
+        )
+
+        return boardingResponse(
+            outcome: alternateOutcome(for: primaryRef, route: route, variantNames: refs.count > 1 ? refs : nil),
+            match: (first.hub.parentRouteIndex, route),
+            busNumber: primaryRef,
+            allRoutes: destinationRoutes,
+            directionHintOverride: alternateHint(hubName: first.hub.stopName, route: route, busNumber: primaryRef)
+        )
     }
 
     private static func matchViaOSMRoute(
@@ -160,46 +192,68 @@ extension GoogleRoutesAPIService {
         let candidates: [BusRouteCandidate]
         do {
             candidates = Array(
-                try await OverpassAPIService.searchCandidates(ref: busNumber, near: origin, radiusMeters: 8_000)
-                    .prefix(6)
+                try await OverpassAPIService.searchCandidates(
+                    ref: busNumber,
+                    near: origin,
+                    radiusMeters: 8_000,
+                    timeoutSeconds: 8,
+                    maxEndpoints: 1
+                )
+                .prefix(4)
             )
         } catch {
             return nil
         }
         guard !candidates.isEmpty else { return nil }
 
-        var matched: [(ref: String, hub: TransferHub, step: ParsedTransitStep)] = []
-
-        for candidate in candidates {
-            let detail: BusRouteDetail
-            do {
-                detail = try await OverpassAPIService.fetchRouteDetail(candidate)
-            } catch {
-                continue
+        return await withTaskGroup(
+            of: (BusRouteDetail, TransferHub, ParsedTransitStep)?.self
+        ) { group in
+            for candidate in candidates {
+                group.addTask {
+                    let detail: BusRouteDetail
+                    do {
+                        detail = try await OverpassAPIService.fetchRouteDetail(
+                            candidate,
+                            timeoutSeconds: 10,
+                            maxEndpoints: 1
+                        )
+                    } catch {
+                        return nil
+                    }
+                    BusLineMapStore.remember(detail)
+                    guard let hit = osmStepTowardHub(detail: detail, origin: origin, hubs: hubs) else {
+                        return nil
+                    }
+                    return (detail, hit.hub, hit.step)
+                }
             }
-            guard let hit = osmStepTowardHub(detail: detail, origin: origin, hubs: hubs) else { continue }
-            matched.append((candidate.ref, hit.hub, hit.step))
+
+            var matched: [(detail: BusRouteDetail, hub: TransferHub, step: ParsedTransitStep)] = []
+            for await item in group {
+                guard let (detail, hub, step) = item else { continue }
+                matched.append((detail, hub, step))
+                group.cancelAll()
+                break
+            }
+            guard let first = matched.first else { return nil }
+            let refs = Array(Set(matched.map(\.detail.candidate.ref))).sorted()
+            let primaryRef = refs.contains(where: { $0.caseInsensitiveCompare(busNumber) == .orderedSame })
+                ? busNumber
+                : (refs.first ?? first.detail.candidate.ref)
+            let route = navigationRoute(
+                for: first.hub,
+                step: first.step,
+                parent: destinationRoutes[first.hub.parentRouteIndex]
+            )
+            return boardingResponse(
+                outcome: alternateOutcome(for: primaryRef, route: route, variantNames: refs.count > 1 ? refs : nil),
+                match: (first.hub.parentRouteIndex, route),
+                busNumber: primaryRef,
+                allRoutes: destinationRoutes,
+                directionHintOverride: alternateHint(hubName: first.hub.stopName, route: route, busNumber: primaryRef)
+            )
         }
-
-        guard let first = matched.first else { return nil }
-        let refs = Array(Set(matched.map(\.ref))).sorted()
-        let parent = destinationRoutes[first.hub.parentRouteIndex]
-        let stitched = replacingBusStep(
-            in: parent,
-            at: first.hub.firstBusStepIndex,
-            with: first.step
-        )
-        let primaryRef = refs.contains(where: { $0.caseInsensitiveCompare(busNumber) == .orderedSame })
-            ? busNumber
-            : (refs.first ?? first.ref)
-
-        return boardingResponse(
-            outcome: alternateOutcome(for: primaryRef, route: stitched, variantNames: refs.count > 1 ? refs : nil),
-            match: (first.hub.parentRouteIndex, stitched),
-            busNumber: primaryRef,
-            allRoutes: destinationRoutes,
-            directionHintOverride: alternateHint(hubName: first.hub.stopName, route: stitched, busNumber: primaryRef)
-        )
     }
 
     private static func osmStepTowardHub(
@@ -211,7 +265,6 @@ extension GoogleRoutesAPIService {
         guard stops.count >= 2 else { return nil }
 
         let originWalkMeters: Double = 700
-        let hubMeters: Double = 280
 
         guard let originIdx = nearestStopIndex(in: stops, to: origin, maxMeters: originWalkMeters) else {
             return nil
@@ -219,7 +272,7 @@ extension GoogleRoutesAPIService {
 
         for hub in hubs {
             let hubCoord = CLLocationCoordinate2D(latitude: hub.location.latitude, longitude: hub.location.longitude)
-            guard let hubIdx = nearestStopIndex(in: stops, to: hubCoord, maxMeters: hubMeters),
+            guard let hubIdx = nearestStopIndex(in: stops, to: hubCoord, maxMeters: hub.matchRadiusMeters),
                   originIdx < hubIdx else { continue }
 
             let coords = polyline(from: detail, start: stops[originIdx].coordinate, end: stops[hubIdx].coordinate)
@@ -317,6 +370,26 @@ extension GoogleRoutesAPIService {
             fareAmount: parent.fareAmount,
             steps: steps
         )
+    }
+
+    /// 目的地まで同じ全線なら直通路線として使う。乗換停までのときだけ Google 案の後半を残す。
+    private static func navigationRoute(
+        for hub: TransferHub,
+        step: ParsedTransitStep,
+        parent: ParsedTransitRoute
+    ) -> ParsedTransitRoute {
+        if hub.kind == .destination {
+            let meters = polylineLength(step.polylineCoordinates)
+            let seconds = max(60, meters / 5.5)
+            return ParsedTransitRoute(
+                durationSeconds: seconds,
+                durationText: nil,
+                fareText: nil,
+                fareAmount: nil,
+                steps: [step]
+            )
+        }
+        return replacingBusStep(in: parent, at: hub.firstBusStepIndex, with: step)
     }
 
     private static func alternateOutcome(

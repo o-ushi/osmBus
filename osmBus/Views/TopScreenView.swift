@@ -196,7 +196,8 @@ enum DistanceColorBand {
 
 /// ナビゲーションバーに置く、あと距離のバッジ。トップ・メイン共通、タップでルート図を開く。
 struct TopDistanceBadge: View {
-    let distanceMeters: Double
+    /// nil は「距離を出さない」（例: 目的地未設定のまま乗車中）。値は — で表示する。
+    let distanceMeters: Double?
     /// nil のときは乗車していないので、タップしても路線図を開かない（表示のみ）。
     let onTap: (() -> Void)?
     /// 長押しでナビ中止。nil なら長押しを無効化する。
@@ -214,48 +215,99 @@ struct TopDistanceBadge: View {
     }
 
     var body: some View {
-        let band = DistanceColorBand(meters: distanceMeters)
+        let band = distanceMeters.map(DistanceColorBand.init)
 
-        Group {
-            if let onTap {
-                Button(action: onTap) {
-                    content(band: band)
-                }
-                .buttonStyle(.plain)
-                .accessibilityHint(AppLocaleString.text("タップで地図", locale: locale))
-            } else {
-                content(band: band)
+        content(band: band)
+            // ツールバー内の Button + SwiftUI 長押しは、乗車中の GPS 再描画でジェスチャーが
+            // 壊れ、長押しがタップ扱いになったりバッジが消えたりする。認識は UIKit 側で固定する。
+            .overlay {
+                DistanceBadgePressOverlay(onTap: onTap, onLongPress: onLongPress)
             }
-        }
-        .simultaneousGesture(
-            LongPressGesture(minimumDuration: 0.6)
-                .onEnded { _ in
-                    guard let onLongPress else { return }
-                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                    onLongPress()
-                }
-        )
-        .accessibilityLabel(AppLocaleString.text("あと", locale: locale))
-        .accessibilityValue(DistanceColorBand.formattedDistanceText(meters: distanceMeters))
-        .accessibilityAction(named: Text(AppLocaleString.text("ナビを中止", locale: locale))) {
-            onLongPress?()
-        }
+            .accessibilityAddTraits(onTap == nil ? [] : .isButton)
+            .accessibilityHint(onTap == nil ? "" : AppLocaleString.text("タップで地図", locale: locale))
+            .accessibilityLabel(AppLocaleString.text("あと", locale: locale))
+            .accessibilityValue(distanceMeters.map(DistanceColorBand.formattedDistanceText) ?? "—")
+            .accessibilityAction(named: Text(AppLocaleString.text("ナビを中止", locale: locale))) {
+                onLongPress?()
+            }
     }
 
-    private func content(band: DistanceColorBand) -> some View {
+    private func content(band: DistanceColorBand?) -> some View {
         VStack(spacing: 1) {
             Text(AppLocaleString.text("あと", locale: locale))
                 .font(.system(size: labelFontSize, weight: .semibold))
-            Text(DistanceColorBand.formattedDistanceText(meters: distanceMeters))
+            Text(distanceMeters.map(DistanceColorBand.formattedDistanceText) ?? "—")
                 .font(.system(size: valueFontSize, weight: .bold))
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
         }
         .fixedSize()
-        .foregroundStyle(band.textColor)
+        .foregroundStyle(band?.textColor ?? Color(UIColor.secondaryLabel))
         .padding(.horizontal, horizontalPadding)
         .padding(.vertical, verticalPadding)
-        .background(band.color, in: shape)
+        .background(band?.color ?? Color(UIColor.systemGray5), in: shape)
+    }
+}
+
+/// ナビバーの再描画でも長押しが切れないよう、タップ/長押しを UIKit で扱う。
+private struct DistanceBadgePressOverlay: UIViewRepresentable {
+    var onTap: (() -> Void)?
+    var onLongPress: (() -> Void)?
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.backgroundColor = .clear
+        let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap))
+        let longPress = UILongPressGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handleLongPress(_:))
+        )
+        longPress.minimumPressDuration = 0.6
+        tap.cancelsTouchesInView = false
+        longPress.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+        view.addGestureRecognizer(longPress)
+        context.coordinator.tapRecognizer = tap
+        context.coordinator.longPressRecognizer = longPress
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        context.coordinator.onTap = onTap
+        context.coordinator.onLongPress = onLongPress
+        context.coordinator.tapRecognizer?.isEnabled = onTap != nil
+        context.coordinator.longPressRecognizer?.isEnabled = onLongPress != nil
+    }
+
+    final class Coordinator: NSObject {
+        var onTap: (() -> Void)?
+        var onLongPress: (() -> Void)?
+        weak var tapRecognizer: UITapGestureRecognizer?
+        weak var longPressRecognizer: UILongPressGestureRecognizer?
+        private var ignoreNextTap = false
+
+        @objc func handleTap() {
+            guard !ignoreNextTap else { return }
+            onTap?()
+        }
+
+        @objc func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+            if gesture.state == .began {
+                ignoreNextTap = true
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                onLongPress?()
+                return
+            }
+            if gesture.state == .ended || gesture.state == .cancelled || gesture.state == .failed {
+                DispatchQueue.main.async { [weak self] in
+                    self?.ignoreNextTap = false
+                }
+            }
+        }
     }
 }
 

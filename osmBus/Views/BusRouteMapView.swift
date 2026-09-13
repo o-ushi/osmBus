@@ -37,6 +37,8 @@ struct BusRouteMapView: View {
     var initialRouteCandidate: BusRouteCandidate? = nil
     var ridingDurationText: String? = nil
     var onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Void)? = nil
+    /// バス番号バッジの長押し降車（乗換用）。トップ表の長押し降車と同じ経路を呼ぶ想定。
+    var onEndRiding: (() -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
@@ -51,9 +53,9 @@ struct BusRouteMapView: View {
     @State private var isKeypadVisible: Bool
     @State private var clearsOnNextInput = false
     @State private var ridingActive: Bool
+    @State private var showsHistorySheet = false
     @State private var cachedPolylines: [GMapPolylineData] = []
     @State private var cachedMarkers: [GMapMarkerData] = []
-    @State private var lastKnownUserCoordinate: CLLocationCoordinate2D? = nil
 
     @EnvironmentObject private var locationService: LocationService
 
@@ -65,7 +67,8 @@ struct BusRouteMapView: View {
         initialRouteDetail: BusRouteDetail? = nil,
         initialRouteCandidate: BusRouteCandidate? = nil,
         ridingDurationText: String? = nil,
-        onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Void)? = nil
+        onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Void)? = nil,
+        onEndRiding: (() -> Void)? = nil
     ) {
         self.currentLatitude = currentLatitude
         self.currentLongitude = currentLongitude
@@ -75,6 +78,7 @@ struct BusRouteMapView: View {
         self.initialRouteCandidate = initialRouteCandidate
         self.ridingDurationText = ridingDurationText
         self.onStartRiding = onStartRiding
+        self.onEndRiding = onEndRiding
         _ridingActive = State(initialValue: isRidingMode)
         _isKeypadVisible = State(initialValue: !isRidingMode)
         if isRidingMode, let detail = initialRouteDetail {
@@ -94,9 +98,11 @@ struct BusRouteMapView: View {
         return CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }
 
-    /// 距離表示はマトリクスと同じ出発地。GPS は地図上の青点用。
+    /// `LocationService.currentLocation` は測位済みなら常に最新値を保持するので、これを
+    /// そのまま距離計算に使う。まだ一度も測位できていない最初の一瞬だけ、この地図を開いた
+    /// 時点の位置 (`contextCoordinate`) にフォールバックする。
     private var effectiveUserCoordinate: CLLocationCoordinate2D? {
-        contextCoordinate ?? locationService.currentLocation ?? lastKnownUserCoordinate
+        locationService.currentLocation ?? contextCoordinate
     }
 
     var body: some View {
@@ -107,6 +113,7 @@ struct BusRouteMapView: View {
                         polylines: cachedPolylines,
                         markers: cachedMarkers,
                         shouldFollowUser: false,
+                        myLocationIsRiding: ridingActive,
                         onSetup: { mapView in
                             mapBox.view = mapView
                             if let coord = contextCoordinate {
@@ -155,6 +162,7 @@ struct BusRouteMapView: View {
                             onClear: {
                                 clearsOnNextInput = false
                                 if searchState.loadedDetail != nil || searchState.isLoading {
+                                    endRiding()
                                     clearRoute()
                                 } else {
                                     routeNumberInput = ""
@@ -175,14 +183,17 @@ struct BusRouteMapView: View {
                     rebuildMapLayers(from: detail)
                 }
                 loadInitialRidingRouteIfNeeded()
+                locationService.refreshCurrentFromCache()
             }
-            .syncMapLiveLocation(lastKnown: $lastKnownUserCoordinate)
             .onDisappear(perform: releaseMapResources)
             .toolbar { toolbarContent }
             .sheet(isPresented: $showsCandidateSheet, onDismiss: {
                 if case .multipleCandidates = searchState { searchState = .idle }
             }) {
                 candidateSheet
+            }
+            .sheet(isPresented: $showsHistorySheet) {
+                BusRouteMapHistoryView(onSelect: loadFromHistory)
             }
             .alert(
                 AppLocaleString.text("路線図_エラー_タイトル", locale: locale),
@@ -232,6 +243,24 @@ struct BusRouteMapView: View {
         onStartRiding?(ref, candidate, detail)
     }
 
+    /// バス番号バッジの長押し。トップ表と同じく、未乗車なら乗車開始、この路線で乗車中なら降車（乗換用）。
+    /// 別番号への乗換は、この画面には常に1路線しか読み込めない（乗車中は検索UIを隠している）ため発生しない。
+    private func toggleRiding(detail: BusRouteDetail) {
+        if ridingActive {
+            endRiding()
+        } else {
+            beginRidingTransition(ref: detail.candidate.ref, candidate: detail.candidate)
+        }
+    }
+
+    /// 乗車中に他の操作（削除／履歴選択／別番号検索、長押し降車も含む）をしたら自動的に降車する。
+    /// 今の画面（この BusRouteMapView）は維持し、呼び出し元へは戻らない。
+    private func endRiding() {
+        guard ridingActive else { return }
+        ridingActive = false
+        onEndRiding?()
+    }
+
     // MARK: - Marker icons
 
     private static let contextPinIcon: UIImage = {
@@ -264,7 +293,9 @@ struct BusRouteMapView: View {
         RouteMapSummaryBar(
             durationText: ridingDurationText ?? "—",
             distanceMeters: distanceToAlightingStop(detail: detail),
-            showsDistance: true,
+            // 目的地未設定のときの最終停留所までの距離は、ユーザーの行き先ではなくナビとして
+            // 意味が薄いため出さない（Step 1: 目的地なしは「あと」に載せない）。
+            showsDistance: destination != nil,
             locale: locale
         )
     }
@@ -416,48 +447,54 @@ struct BusRouteMapView: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        if ridingActive, let detail = displayedRidingDetail {
-            ToolbarItem(placement: .topBarLeading) {
-                TransitBusLineBadgeLabel(text: detail.candidate.ref, isRidingBus: true)
-                    .allowsHitTesting(false)
-                    .accessibilityElement(children: .combine)
-                    .accessibilityAddTraits(.isStaticText)
-            }
-            .hideSharedBackgroundIfAvailable()
-        } else {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                HStack(spacing: 4) {
-                    if let detail = searchState.loadedDetail, !ridingActive {
-                        Button {
-                            beginRidingTransition(ref: detail.candidate.ref, candidate: detail.candidate)
-                        } label: {
-                            Image(systemName: "bus.fill")
-                                .foregroundStyle(.green)
-                        }
-                        .accessibilityLabel(AppLocaleString.text("乗車開始", locale: locale))
-                    }
-                    if searchState.loadedDetail != nil, !ridingActive {
-                        Button(action: clearRoute) {
-                            Image(systemName: "trash")
-                        }
-                        .accessibilityLabel(AppLocaleString.text("路線図_クリア", locale: locale))
-                    }
-                    if !ridingActive {
-                        Button {
-                            withAnimation(.spring(duration: 0.35)) { isKeypadVisible.toggle() }
-                        } label: {
-                            Image(systemName: isKeypadVisible ? "keyboard.chevron.compact.down" : "keyboard")
-                        }
-                        .accessibilityLabel(
-                            AppLocaleString.text(
-                                isKeypadVisible ? "テンキー_非表示" : "テンキー_表示",
-                                locale: locale
-                            )
-                        )
-                    }
+        ToolbarItem(placement: .navigationBarTrailing) {
+            HStack(spacing: 4) {
+                if let detail = ridingActive ? displayedRidingDetail : searchState.loadedDetail {
+                    busNumberBadge(detail: detail)
                 }
+                if searchState.loadedDetail != nil {
+                    Button {
+                        endRiding()
+                        clearRoute()
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                    .accessibilityLabel(AppLocaleString.text("路線図_クリア", locale: locale))
+                }
+                if ThirdPartyDataConsent.isGranted {
+                    Button {
+                        showsHistorySheet = true
+                    } label: {
+                        Image(systemName: "clock.arrow.circlepath")
+                    }
+                    .accessibilityLabel(AppLocaleString.text("路線図_履歴", locale: locale))
+                }
+
+                Button {
+                    withAnimation(.spring(duration: 0.35)) { isKeypadVisible.toggle() }
+                } label: {
+                    Image(systemName: isKeypadVisible ? "keyboard.chevron.compact.down" : "keyboard")
+                }
+                .accessibilityLabel(
+                    AppLocaleString.text(
+                        isKeypadVisible ? "テンキー_非表示" : "テンキー_表示",
+                        locale: locale
+                    )
+                )
             }
         }
+    }
+
+    /// ロード中の路線のバス番号バッジ。タップでは何もしない（誤乗車防止）。
+    /// 長押しで乗車開始／降車をトグルする（トップのバス番号表と同じ思想）。
+    private func busNumberBadge(detail: BusRouteDetail) -> some View {
+        TransitBusLineBadgeLabel(text: detail.candidate.ref, isRidingBus: ridingActive)
+            .onLongPressGesture {
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                toggleRiding(detail: detail)
+            }
+            .accessibilityLabel(detail.candidate.ref)
+            .accessibilityHint(AppLocaleString.text("路線図_乗降ヒント", locale: locale))
     }
 
     // MARK: - Actions
@@ -480,12 +517,34 @@ struct BusRouteMapView: View {
         let ref = routeNumberInput.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !ref.isEmpty else { return }
 
+        // 乗車中に別の番号を検索したら、その番号への乗り換え扱いではなく自動的に降車する。
+        endRiding()
+
+        searchTask?.cancel()
+
+        // すでに履歴一覧（BusLineMapStore）に同じ番号の路線があれば、Overpass への再検索なしでそれを表示する。
+        if ThirdPartyDataConsent.isGranted {
+            let cachedMatches = BusLineMapStore.details(matching: ref)
+            switch cachedMatches.count {
+            case 0:
+                break
+            case 1:
+                let match = cachedMatches[0]
+                BusLineMapStore.touch(relationId: match.candidate.id)
+                applyLoadedRoute(match, collapseKeypad: true)
+                return
+            default:
+                searchState = .multipleCandidates(cachedMatches.map(\.candidate))
+                showsCandidateSheet = true
+                return
+            }
+        }
+
         guard let coord = contextCoordinate else {
             showError(OverpassError.noLocation.errorDescription ?? "")
             return
         }
 
-        searchTask?.cancel()
         searchState = .searching
 
         searchTask = Task { @MainActor in
@@ -511,22 +570,48 @@ struct BusRouteMapView: View {
 
     private func loadRoute(_ candidate: BusRouteCandidate, collapseKeypad: Bool = false) {
         searchTask?.cancel()
+
+        // 一覧に既にあるバス（同じ relationId）ならキャッシュからそのまま表示し、再取得しない。
+        if let cached = BusLineMapStore.detail(forRelationId: candidate.id) {
+            BusLineMapStore.touch(relationId: candidate.id)
+            applyLoadedRoute(cached, collapseKeypad: collapseKeypad)
+            return
+        }
+
         searchState = .loadingRoute(candidate)
 
         searchTask = Task { @MainActor in
             do {
                 let detail = try await OverpassAPIService.fetchRouteDetail(candidate)
                 guard !Task.isCancelled else { return }
-                searchState = .loaded(detail)
-                rebuildMapLayers(from: detail)
-                fitCamera(to: detail)
-                if collapseKeypad {
-                    isKeypadVisible = false
-                }
+                BusLineMapStore.remember(detail)
+                applyLoadedRoute(detail, collapseKeypad: collapseKeypad)
             } catch {
                 guard !Task.isCancelled else { return }
                 showError(AppLocaleString.userFacingError(error))
             }
+        }
+    }
+
+    /// 履歴一覧からの選択。キャッシュ済みの `BusRouteDetail` をそのまま地図に載せる（再取得なし）。
+    private func loadFromHistory(_ detail: BusRouteDetail) {
+        // 乗車中に履歴から別の路線を選んだら、自動的に降車してから切り替える。
+        endRiding()
+        searchTask?.cancel()
+        searchTask = nil
+        routeNumberInput = ""
+        clearsOnNextInput = false
+        BusLineMapStore.touch(relationId: detail.candidate.id)
+        applyLoadedRoute(detail, collapseKeypad: true)
+    }
+
+    /// 検索結果・履歴・キャッシュのいずれから来ても、地図への反映はここに統一する。
+    private func applyLoadedRoute(_ detail: BusRouteDetail, collapseKeypad: Bool) {
+        searchState = .loaded(detail)
+        rebuildMapLayers(from: detail)
+        fitCamera(to: detail)
+        if collapseKeypad {
+            isKeypadVisible = false
         }
     }
 

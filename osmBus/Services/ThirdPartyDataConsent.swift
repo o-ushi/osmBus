@@ -43,6 +43,8 @@ enum AppDataDeletion {
         DestinationHistoryStore.clearAll()
         SavedPlaceStore.clearAll()
         DestinationStore.save(nil)
+        TransitRouteArchive.clear()
+        BusLineMapStore.clear()
         GoogleRoutesAPIKeyStore.setUserConfiguredKey(nil)
         ThirdPartyDataConsent.deleteDecision()
         NotificationCenter.default.post(name: .osmBusDataDeleted, object: nil)
