@@ -407,11 +407,15 @@ struct MainView: View {
                 BusRouteMapCover(
                     presentation: presentation,
                     onStartRiding: { routeRef, candidate, detail in
+                        // 路線図（メニュー経由）は乗車中でも開けるため、既に他の経路で乗車中なら
+                        // ここからの乗車開始は無視し、既存の乗車状態を上書きしない。
+                        guard viewModel.ridingState == nil else { return false }
                         viewModel.startRidingFromOSMMap(
                             routeRef: routeRef,
                             candidate: candidate,
                             routeDetail: detail
                         )
+                        return true
                     },
                     onEndRiding: {
                         // 路線図の画面は維持したまま降車する（メイン画面へは戻らない）。
@@ -699,13 +703,8 @@ struct MainView: View {
                     }
                 },
                 onRouteMap: {
-                    performMoreAction {
-                        if viewModel.ridingState != nil {
-                            openRidingRouteMap()
-                        } else {
-                            openBrowseRouteMap()
-                        }
-                    }
+                    // メニューからの路線図は乗車中かどうかに関わらず、常に任意のバスを検索できる一覧を開く。
+                    performMoreAction { openBrowseRouteMap() }
                 },
                 onSettings: { performMoreAction { showsSettings = true } },
                 onPlanManagement: { performMoreAction { showsPlanManagement = true } },
@@ -851,7 +850,7 @@ struct MainView: View {
 
 private struct BusRouteMapCover: View {
     let presentation: BusRouteMapPresentation
-    let onStartRiding: (String, BusRouteCandidate, BusRouteDetail) -> Void
+    let onStartRiding: (String, BusRouteCandidate, BusRouteDetail) -> Bool
     let onEndRiding: () -> Void
 
     var body: some View {
@@ -891,7 +890,7 @@ private struct BoardingRouteMapCover: View {
 
 private struct BusRouteMapSheet: View {
     let presentation: BusRouteMapPresentation
-    let onStartRiding: (String, BusRouteCandidate, BusRouteDetail) -> Void
+    let onStartRiding: (String, BusRouteCandidate, BusRouteDetail) -> Bool
     let onEndRiding: () -> Void
 
     var body: some View {

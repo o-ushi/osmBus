@@ -36,7 +36,9 @@ struct BusRouteMapView: View {
     var initialRouteDetail: BusRouteDetail? = nil
     var initialRouteCandidate: BusRouteCandidate? = nil
     var ridingDurationText: String? = nil
-    var onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Void)? = nil
+    /// 乗車開始を要求する。呼び出し元が実際に乗車を開始できた場合は true を返す想定
+    /// （例: 既に別ルートで乗車中なら false を返し、この画面のローカル状態は乗車中へ遷移しない）。
+    var onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Bool)? = nil
     /// バス番号バッジの長押し降車（乗換用）。トップ表の長押し降車と同じ経路を呼ぶ想定。
     var onEndRiding: (() -> Void)? = nil
 
@@ -67,7 +69,7 @@ struct BusRouteMapView: View {
         initialRouteDetail: BusRouteDetail? = nil,
         initialRouteCandidate: BusRouteCandidate? = nil,
         ridingDurationText: String? = nil,
-        onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Void)? = nil,
+        onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Bool)? = nil,
         onEndRiding: (() -> Void)? = nil
     ) {
         self.currentLatitude = currentLatitude
@@ -235,12 +237,12 @@ struct BusRouteMapView: View {
 
     private func beginRidingTransition(ref: String, candidate: BusRouteCandidate) {
         guard let detail = searchState.loadedDetail else { return }
+        guard onStartRiding?(ref, candidate, detail) == true else { return }
         isKeypadVisible = false
         ridingActive = true
         if let coord = contextCoordinate {
             mapBox.view?.animate(to: GMSCameraPosition(target: coord, zoom: 15))
         }
-        onStartRiding?(ref, candidate, detail)
     }
 
     /// バス番号バッジの長押し。トップ表と同じく、未乗車なら乗車開始、この路線で乗車中なら降車（乗換用）。
