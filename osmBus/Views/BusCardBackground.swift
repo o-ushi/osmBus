@@ -12,6 +12,15 @@ struct BusCardStyle: Equatable {
         borderWidth: AppTheme.cardBorderWidth,
         accentStrip: AppTheme.cardAccentStrip
     )
+
+    /// 枠・縁取り・アクセント帯なし。複数の行を1枚のカードにまとめる際、
+    /// 各行の個別背景を消して外側のカード1枚分だけを見せたい場合に使う。
+    static let flat = BusCardStyle(
+        cardFill: .clear,
+        cardBorder: .clear,
+        borderWidth: 0,
+        accentStrip: .clear
+    )
 }
 
 private struct BusCardStyleKey: EnvironmentKey {

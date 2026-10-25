@@ -88,6 +88,12 @@
 
 "タップすると、その目的地を設定します。" = "Tap to set that destination.";
 
+"検索したルート" = "Searched routes";
+
+"検索したルート_フッター" = "Tap to browse saved itineraries and open them on the map.";
+
+"この目的地を設定" = "Use this destination";
+
 "履歴を消去" = "Clear history";
 
 "履歴をすべて消去しますか？" = "Clear all history?";
@@ -109,18 +115,38 @@
 
 "履歴" = "History";
 
+"メイン画面" = "Number entry";
+
+"トップ画面" = "Matrix";
+
+
+"あと" = "Left";
+
+"バス番号表" = "Bus Number Table";
+
+"方向" = "Direction";
+
+"直通" = "Direct";
+
+"乗換1" = "1 transfer";
+
+"乗換2+" = "2+ transfers";
+
+"バス番号表_操作ヒント" = "Tap to view the route map, long-press to board or alight";
 
 
 
 "目的地" = "Destination";
+
+"ナビを中止" = "Cancel navigation";
+
+"ナビ中止_確認" = "Cancel this trip? If you're riding, this counts as getting off.";
 
 
 
 "ルートを確認中…" = "Checking route…";
 
 "ルートを確認しています…" = "Checking the route…";
-
-"乗ってください！" = "Get on!";
 
 "もう一度試す" = "Try again";
 
@@ -141,6 +167,10 @@
 
 
 "現在の目的地" = "Current destination";
+
+"現在の出発地" = "Current origin";
+
+"現在地を使用中" = "Using current location";
 
 "履歴から探す" = "Search from history";
 
@@ -170,7 +200,6 @@
 
 
 
-"Google Routes API" = "Google Routes API";
 
 "APIキー未設定" = "Set up your API key first";
 
@@ -184,7 +213,6 @@
 
 "エラー_現在地未取得" = "Could not get your location. Please allow location access.";
 
-"座標表示" = "Lat %@ / Lon %@";
 
 "RoutesAPIキー保存完了" = "Your Google Routes API key has been saved. It will be used for bus route checks.";
 
@@ -228,23 +256,23 @@
 
 "バージョン" = "Version %@ (%@)";
 
-"ヘルプ紹介文" = "At a bus stop, enter the bus number to instantly see if it goes to your destination. You can also browse transit routes and track your ride.";
+"ヘルプ紹介文" = "The app opens on Matrix. Set your destination and pick a bus from the number table. The keypad is under … → Number entry, or swipe right from the left edge.";
 
 "help_場所を登録_title" = "Saved places";
 
-"help_場所を登録_body" = "From … → Saved places, register home and frequent places. Tap one to set it as your destination.";
+"help_場所を登録_body" = "Tap the destination bar, then Saved places, to register home and frequent places. Tap one to set it as your destination.";
 
 "help_目的地_title" = "Set destination";
 
-"help_目的地_body" = "Tap the destination bar at the top to pick from saved places, history, or search results.";
+"help_目的地_body" = "Tap the destination bar to pick from search, history, or saved places. You can also choose on the map via the map icon. History and saved places live inside that destination sheet.";
 
 "help_現在地_title" = "Get current location";
 
-"help_現在地_body" = "Location permission is requested at launch. At a bus stop, tap refresh (↻) on the location bar before entering the bus number.";
+"help_現在地_body" = "Location permission is requested at launch. Refresh (↻) or pick on the map from the location bar. While riding, only the destination bar is locked; you can still update your origin.";
 
 "help_バス番号_title" = "Enter bus number";
 
-"help_バス番号_body" = "Enter digits only (e.g. 35). The app finds matching variants like 35A or 35B from route data and tells you whether to board.";
+"help_バス番号_body" = "Only when a number is missing from the table, open … → Number entry (or swipe from the left edge) and enter digits (e.g. 35). The app matches your trip and can still say board if that bus reaches a transfer stop.";
 
 "help_APIキー_とは_title" = "What is an API key?";
 
@@ -252,19 +280,19 @@
 
 "help_APIキー_設定_title" = "How to set it up";
 
-"help_APIキー_設定_body" = "Open … → Settings → Google Routes API and follow the on-screen guide to create a key in Google Cloud Console, paste it, and save. You can also run Connection test.";
+"help_APIキー_設定_body" = "Open … → Settings → Google API and follow the on-screen guide to create a key in Google Cloud Console, paste it, and save. You can also run Connection test. Saving a key requires PREMIUM.";
 
 "help_APIキー_安心_title" = "Is my key safe?";
 
 "help_APIキー_安心_body" = "Your key is stored in Keychain and sent to Google for API authentication. It is not sent to the developer's own server.";
 
-"help_乗車_title" = "Get on!";
+"help_乗車_title" = "Start riding";
 
-"help_乗車_body" = "When the bus clearly matches your destination (exact route or all variants like both 35A and 35B), you'll see a large green \"Get on!\" message. If only some variants work, yellow messages like \"Get on if it's 35A!\" appear.";
+"help_乗車_body" = "On Number entry, when the bus you entered clearly matches your destination (exact route, or all variants like both 35A and 35B), a green \"Start riding\" button appears — the button itself is the sign you can board. If only some variants work, a yellow message like \"Get on if it's 35A!\" appears, and you can still tap Start riding for that variant.";
 
 "help_不可_title" = "Skip this bus!";
 
-"help_不可_body" = "No matching variants appear on routes to your destination — you'll see red \"Skip this bus!\"";
+"help_不可_body" = "No matching variants appear on routes to your destination — you'll see red \"Skip this bus!\". If a stored line map still runs from your current stop to the destination (or a transfer stop), keypad entry may say you can board.";
 
 "help_ルートなし_title" = "No route found";
 
@@ -328,6 +356,10 @@
 "降車_%@" = "Alight at %@";
 
 "降車_目的地方面" = "Alight at a stop toward your destination";
+
+"代替乗車_乗換まで" = "This bus can take you to the Google transfer stop";
+
+"代替乗車_乗換_%@" = "Can ride to the transfer stop (%@)";
 
 "RoutesAPI_接続成功_公共交通" = "Connected. Public transit route retrieved.";
 
@@ -402,17 +434,9 @@
 
 "経路番号_%d" = "Route %d";
 
-"運賃不明" = "Fare unavailable";
-
 "経路を見る" = "View route options";
 
 "経路件数_%d" = "%d options";
-
-"経路取得失敗" = "Could not load routes";
-
-"経路一覧フッター" = "Public transit routes from Google Routes API. Fares may be unavailable depending on region or line.";
-
-"経路一覧フッター_地図" = "Tap a route to preview it on the map with transfer stops.";
 
 "バス停" = "Bus stop";
 
@@ -428,6 +452,26 @@
 "テンキー_継ぎ足し" = "Append digits after a result";
 
 "テンキー入力_フッター" = "Choose what happens when you tap a digit on the keypad after a bus check result is shown.";
+
+"バス番号表の並び順" = "Bus number table order";
+
+"表の並び_方向基準" = "By direction";
+
+"表の並び_距離基準" = "By distance";
+
+"表の並び_乗換回数基準" = "By transfer count";
+
+"バス番号表の並び順_フッター" = "By direction shows one row per direction with transfer-count columns. By distance and by transfer count skip the direction grouping and list every bus flat, shortest walking distance first (then shortest bus-ride distance).";
+
+"距離基準_歩行距離優先" = "Walking distance priority";
+
+"距離基準_合計距離" = "Bus + walking distance";
+
+"距離基準_測り方_フッター" = "Walking distance priority ranks by total walking (boarding + transfers + alighting) first, then bus-ride distance as a tiebreak. Bus + walking distance ranks by the simple sum of the bus-ride distance and total walking distance.";
+
+"乗換回数" = "Transfers";
+
+"バス番号" = "Bus number";
 
 "お試し残り_%d" = "Monthly uses remaining: %d";
 
@@ -452,20 +496,28 @@
 "方向_W" = "W";
 "方向_NW" = "NW";
 "help_お試し_title" = "Monthly free uses";
-"help_お試し_body" = "Without your own API key, the FREE plan gets 30 bus checks per month using the shared key. PREMIUM plan gets 60 per month. Resets on the 1st. Remaining uses appear in the toolbar center. Setting your own API key (PREMIUM) gives unlimited checks.";
+"help_お試し_body" = "Without your own API key, the FREE plan gets 30 bus checks per month using the shared key. PREMIUM plan gets 60 per month. Resets on the 1st. Remaining uses appear below the bus number table on Matrix (or at the bottom of Number entry). Setting your own API key (PREMIUM) gives unlimited checks.";
+"help_トップ_title" = "Matrix";
+"help_トップ_body" = "This is the screen that opens at launch. It shows destination, current location, distance, and the bus number table. To check a number on the keypad, open … → Number entry. You can also swipe right from the left edge. Return with … → Matrix, or swipe from the left edge again.";
+"help_距離_title" = "Distance colors";
+"help_距離_body" = "When you are not riding, the badge is the straight-line distance to your destination. While riding, it is the distance to the current bus's alighting stop. Blue from 3 km, green from 1 km, yellow from 500 m, orange from 200 m, red under 200 m. Tap the badge while riding to open the route map (display-only when not riding). Long-press the badge to cancel navigation (this also clears the destination). To alight for a transfer, long-press the bus number on the table. If you start riding from the route map without setting a destination, the badge shows \"—\" and no distance is displayed.";
+"help_バス番号表_title" = "Bus number table";
+"help_バス番号表_body" = "Bus numbers are grouped by direction and number of transfers. Tap to open the route map, long-press to board or alight. The bus you are riding is highlighted.";
 "help_経路_title" = "Transit routes";
-"help_経路_body" = "Tap the routes button on the main screen (or shake the device) to browse transit options to your destination. Tap a route to view it on the map, or long-press a bus number badge to start riding mode right away.";
+"help_経路_body" = "Tap a bus number on the top table to open that Google route map. Long-press a bus number to board or alight.";
+"help_路線図_title" = "Line map (OSM)";
+"help_路線図_body" = "When you are not riding, … → Line map opens an OpenStreetMap browse of full bus lines — not your Google trip. If you boarded from that OSM map, riding stays on OSM. While riding a Google bus, Line map and the distance badge both open the current Google route.";
 "help_乗車中_title" = "Riding mode";
-"help_乗車中_body" = "After a green or yellow \"Get on!\" result, tap Start riding (or long-press a bus number in the route list) to enter riding mode. It tracks the straight-line distance to your current bus's alighting stop and notifies you with your configured alerts. When transferring, the distance switches to the next alighting stop. Tap the \"Riding\" indicator at the top-left to open the route map. Use the Get off button on the card to end riding.";
+"help_乗車中_body" = "Long-press a bus number on the top table to start riding. Long-press the same number again to alight for a transfer, then long-press the next bus. While riding, distance is the straight line to the current bus's alighting stop and switches after a transfer. The distance-badge tap and … → Line map open the same route map. On … → Number entry you can also use Start riding and Get off on the card.";
 "help_設定_title" = "Settings & alerts";
-"help_設定_body" = "From … → Settings you can change language, keypad sound, and arrival alerts. Arrival alerts are distance-based to the alighting stop, with up to 3 thresholds — alarms play 1–3 times from furthest to closest. Alarms and alerts work even when the app is in the background or the screen is off. Maps and Routes API keys are also configured here (PREMIUM).";
+"help_設定_body" = "From … → Settings you can change language, keypad sound, and arrival alerts. Arrival alerts are distance-based to the alighting stop, with up to 3 thresholds — alarms play 1–3 times from furthest to closest. Alarms and alerts work even when the app is in the background or the screen is off. The shared Google API key (Routes and Maps) is also configured here. Saving a key requires PREMIUM.";
 
-"方向ヒント_%@" = "Heading %@";
+"方向ヒント_%@" = "Often heading %@ — not required";
+"方向ヒント_どちらでも" = "Either direction is OK if it goes toward your destination";
 "方向バッジ_%@" = "%@";
 
 "APIキー_Premium限定_タイトル" = "PREMIUM feature";
 "APIキー_Premium限定_説明" = "Setting your own Google API key is available on the PREMIUM plan.";
-"Google Maps API" = "Google Maps API";
 "IAP_再読み込み" = "Reload products";
 "IAP_商品が見つかりません" = "Product not found";
 "IAP_商品読み込み中" = "Loading products…";
@@ -473,13 +525,6 @@
 "IAP_復元失敗" = "Restore failed";
 "IAP_購入保留" = "Purchase pending approval";
 "IAP_購入失敗" = "Purchase failed";
-"MapsAPI_エラー_400" = "Bad request. Make sure Maps API is enabled in Google Cloud.";
-"MapsAPI_エラー_401" = "Authentication error. Check your API key and Maps API status.";
-"MapsAPI_エラー_429" = "Too many requests. Please wait and try again.";
-"MapsAPI_エラー_500" = "Google servers are temporarily unavailable.";
-"MapsAPI_エラー_不明_%@" = "Maps API error: %@";
-"MapsAPI_エラー_拒否_%@" = "Request denied: %@";
-"MapsAPI_接続成功" = "Connected. Maps API key is valid.";
 
 "プライバシーとデータ" = "Privacy";
 "プライバシー_設定フッター" = "Review how data is sent, stored, and deleted.";
@@ -524,7 +569,6 @@
 "Overpass_解析失敗" = "Could not parse route data.";
 "Overpass_路線なし" = "No matching bus route found.";
 "Overpass_通信エラー" = "Could not reach Overpass server.";
-"PREMIUM_RoutesAPI_説明" = "PREMIUM: 60 bus checks/month with the shared key. Or use your own Routes API key for unlimited access.";
 "PREMIUM_API統合_説明" = "Bus checks: 60/month with the shared key. Map display: 60/month (separate counter). Set your own API key for unlimited access to both.";
 "PREMIUM_利用中" = "PREMIUM active";
 "RoutesAPI_お試し状況_補足" = "Resets on the 1st of each month. PREMIUM plan gets 60 checks/month.";
@@ -558,11 +602,10 @@
 "テンキー_表示" = "Show keypad";
 "テンキー_非表示" = "Hide keypad";
 "乗車中" = "Riding";
-"路線候補_初期化確認" = "Clear route candidates?";
+"路線候補_初期化確認" = "Clear all saved routes? This includes routes kept after changing destinations.";
 "はい" = "Yes";
 "いいえ" = "No";
 "乗車開始" = "Start riding";
-"他の系統も乗れるかも" = "Other variants might work too";
 "地図_タップヒント" = "Tap the map to pick a location";
 "地図_住所取得中" = "Looking up address…";
 "地図_出発地" = "Origin";
@@ -590,13 +633,31 @@
 "設定_距離アラート_距離" = "Distance (m)";
 "距離アラート_%d" = "Alert at %d m";
 "距離アラート_タイトル" = "Distance alert";
-"路線図" = "Route map";
+"路線図" = "Line map";
 "路線図_OSM出典" = "Route data © OpenStreetMap contributors";
 "路線図_エラー_タイトル" = "Route map error";
 "路線図_クリア" = "Clear";
 "路線図_候補" = "Route candidates";
 "路線図_候補_ヒント" = "Select a route matching your bus number.";
 "路線図_現在地なし警告" = "Current location needed to show the route map.";
+"路線図_一覧" = "Route list";
+"路線図_一覧_空状態" = "No saved routes";
+"路線図_一覧_空状態_詳細" = "Download route data in Settings to list them here.";
+"設定_路線データベース" = "Route database";
+"設定_路線_全件ダウンロード" = "Download all route data";
+"設定_路線_更新" = "Update route data";
+"設定_路線_フッター" = "Saves bus routes within 80 km of your location. Number entry and the list open from this saved data. Update fetches only routes that changed.";
+"設定_路線_未取得" = "Not downloaded";
+"設定_路線_件数_%d_%d" = "%d routes (%d with shape)";
+"設定_路線_進捗_%d_%d" = "Downloading %d / %d";
+"設定_路線_完了_%d" = "Saved %d routes";
+"設定_路線_更新なし" = "No route updates";
+"設定_路線_更新完了_%d" = "Updated %d routes";
+"設定_路線_現在地なし" = "Current location is needed to download.";
+"路線図_履歴" = "History";
+"路線図_乗降ヒント" = "Long-press to board or alight";
+"路線図_履歴_空状態" = "No history yet";
+"路線図_履歴_空状態_詳細" = "Bus routes you've viewed on the route map appear here.";
 "路線図_空状態" = "Enter a bus number to search for routes";
 "路線図_空状態_コンテキスト" = "Enter a bus number to find nearby routes";
 "路線図_読込中_%@" = "Loading %@…";

@@ -36,8 +36,11 @@ struct BusRouteMapView: View {
     var initialRouteDetail: BusRouteDetail? = nil
     var initialRouteCandidate: BusRouteCandidate? = nil
     var ridingDurationText: String? = nil
-    var ridingFareText: String? = nil
-    var onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Void)? = nil
+    /// 乗車開始を要求する。呼び出し元が実際に乗車を開始できた場合は true を返す想定
+    /// （例: 既に別ルートで乗車中なら false を返し、この画面のローカル状態は乗車中へ遷移しない）。
+    var onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Bool)? = nil
+    /// バス番号バッジの長押し降車（乗換用）。トップ表の長押し降車と同じ経路を呼ぶ想定。
+    var onEndRiding: (() -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
@@ -52,9 +55,10 @@ struct BusRouteMapView: View {
     @State private var isKeypadVisible: Bool
     @State private var clearsOnNextInput = false
     @State private var ridingActive: Bool
+    @State private var showsRouteListSheet = false
+    @State private var keypadMatches: [BusRouteListItem] = []
     @State private var cachedPolylines: [GMapPolylineData] = []
     @State private var cachedMarkers: [GMapMarkerData] = []
-    @State private var lastKnownUserCoordinate: CLLocationCoordinate2D? = nil
 
     @EnvironmentObject private var locationService: LocationService
 
@@ -66,8 +70,8 @@ struct BusRouteMapView: View {
         initialRouteDetail: BusRouteDetail? = nil,
         initialRouteCandidate: BusRouteCandidate? = nil,
         ridingDurationText: String? = nil,
-        ridingFareText: String? = nil,
-        onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Void)? = nil
+        onStartRiding: ((_ routeRef: String, _ candidate: BusRouteCandidate, _ detail: BusRouteDetail) -> Bool)? = nil,
+        onEndRiding: (() -> Void)? = nil
     ) {
         self.currentLatitude = currentLatitude
         self.currentLongitude = currentLongitude
@@ -76,8 +80,8 @@ struct BusRouteMapView: View {
         self.initialRouteDetail = initialRouteDetail
         self.initialRouteCandidate = initialRouteCandidate
         self.ridingDurationText = ridingDurationText
-        self.ridingFareText = ridingFareText
         self.onStartRiding = onStartRiding
+        self.onEndRiding = onEndRiding
         _ridingActive = State(initialValue: isRidingMode)
         _isKeypadVisible = State(initialValue: !isRidingMode)
         if isRidingMode, let detail = initialRouteDetail {
@@ -97,8 +101,11 @@ struct BusRouteMapView: View {
         return CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }
 
+    /// `LocationService.currentLocation` は測位済みなら常に最新値を保持するので、これを
+    /// そのまま距離計算に使う。まだ一度も測位できていない最初の一瞬だけ、この地図を開いた
+    /// 時点の位置 (`contextCoordinate`) にフォールバックする。
     private var effectiveUserCoordinate: CLLocationCoordinate2D? {
-        locationService.currentLocation ?? lastKnownUserCoordinate ?? contextCoordinate
+        locationService.currentLocation ?? contextCoordinate
     }
 
     var body: some View {
@@ -109,6 +116,7 @@ struct BusRouteMapView: View {
                         polylines: cachedPolylines,
                         markers: cachedMarkers,
                         shouldFollowUser: false,
+                        myLocationIsRiding: ridingActive,
                         onSetup: { mapView in
                             mapBox.view = mapView
                             if let coord = contextCoordinate {
@@ -135,38 +143,19 @@ struct BusRouteMapView: View {
                                 ridingSummaryBar(detail: detail)
                             }
                         }
-                        .padding(.bottom, isKeypadVisible ? geo.size.height * 0.45 + 8 : 0)
+                        .padding(.bottom, keypadBottomInset(in: geo.size.height))
                     }
                     .ignoresSafeArea(edges: .bottom)
 
                     if isKeypadVisible {
-                        BusKeypadView(
-                            busNumber: routeNumberInput,
-                            canSubmit: !routeNumberInput.isEmpty && !searchState.isLoading,
-                            onCharacter: {
-                                if clearsOnNextInput {
-                                    routeNumberInput = ""
-                                    clearsOnNextInput = false
-                                }
-                                routeNumberInput += $0
-                            },
-                            onSubmit: {
-                                startSearch()
-                                clearsOnNextInput = true
-                            },
-                            onClear: {
-                                clearsOnNextInput = false
-                                if searchState.loadedDetail != nil || searchState.isLoading {
-                                    clearRoute()
-                                } else {
-                                    routeNumberInput = ""
-                                }
+                        VStack(spacing: 8) {
+                            if !keypadMatches.isEmpty {
+                                keypadMatchList
                             }
-                        )
-                        .busMainScreenStyled()
+                            keypad(height: geo.size.height)
+                        }
                         .padding(.horizontal, AppTheme.screenPadding)
                         .padding(.bottom, 8)
-                        .frame(height: geo.size.height * 0.45)
                     }
                 }
             }
@@ -177,14 +166,21 @@ struct BusRouteMapView: View {
                     rebuildMapLayers(from: detail)
                 }
                 loadInitialRidingRouteIfNeeded()
+                locationService.refreshCurrentFromCache()
+                refreshKeypadMatches()
             }
-            .syncMapLiveLocation(lastKnown: $lastKnownUserCoordinate)
+            .onChange(of: routeNumberInput) { _, _ in
+                refreshKeypadMatches()
+            }
             .onDisappear(perform: releaseMapResources)
             .toolbar { toolbarContent }
             .sheet(isPresented: $showsCandidateSheet, onDismiss: {
                 if case .multipleCandidates = searchState { searchState = .idle }
             }) {
                 candidateSheet
+            }
+            .sheet(isPresented: $showsRouteListSheet) {
+                BusRouteMapHistoryView(onSelect: openListedRoute)
             }
             .alert(
                 AppLocaleString.text("路線図_エラー_タイトル", locale: locale),
@@ -226,12 +222,30 @@ struct BusRouteMapView: View {
 
     private func beginRidingTransition(ref: String, candidate: BusRouteCandidate) {
         guard let detail = searchState.loadedDetail else { return }
+        guard onStartRiding?(ref, candidate, detail) == true else { return }
         isKeypadVisible = false
         ridingActive = true
         if let coord = contextCoordinate {
             mapBox.view?.animate(to: GMSCameraPosition(target: coord, zoom: 15))
         }
-        onStartRiding?(ref, candidate, detail)
+    }
+
+    /// バス番号バッジの長押し。トップ表と同じく、未乗車なら乗車開始、この路線で乗車中なら降車（乗換用）。
+    /// 別番号への乗換は、この画面には常に1路線しか読み込めない（乗車中は検索UIを隠している）ため発生しない。
+    private func toggleRiding(detail: BusRouteDetail) {
+        if ridingActive {
+            endRiding()
+        } else {
+            beginRidingTransition(ref: detail.candidate.ref, candidate: detail.candidate)
+        }
+    }
+
+    /// 乗車中に他の操作（削除／履歴選択／別番号検索、長押し降車も含む）をしたら自動的に降車する。
+    /// 今の画面（この BusRouteMapView）は維持し、呼び出し元へは戻らない。
+    private func endRiding() {
+        guard ridingActive else { return }
+        ridingActive = false
+        onEndRiding?()
     }
 
     // MARK: - Marker icons
@@ -266,8 +280,9 @@ struct BusRouteMapView: View {
         RouteMapSummaryBar(
             durationText: ridingDurationText ?? "—",
             distanceMeters: distanceToAlightingStop(detail: detail),
-            showsDistance: true,
-            fareText: ridingFareText,
+            // 目的地未設定のときの最終停留所までの距離は、ユーザーの行き先ではなくナビとして
+            // 意味が薄いため出さない（Step 1: 目的地なしは「あと」に載せない）。
+            showsDistance: destination != nil,
             locale: locale
         )
     }
@@ -419,48 +434,54 @@ struct BusRouteMapView: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        if ridingActive, let detail = displayedRidingDetail {
-            ToolbarItem(placement: .topBarLeading) {
-                TransitBusLineBadgeLabel(text: detail.candidate.ref, isRidingBus: true)
-                    .allowsHitTesting(false)
-                    .accessibilityElement(children: .combine)
-                    .accessibilityAddTraits(.isStaticText)
-            }
-            .hideSharedBackgroundIfAvailable()
-        } else {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                HStack(spacing: 4) {
-                    if let detail = searchState.loadedDetail, !ridingActive {
-                        Button {
-                            beginRidingTransition(ref: detail.candidate.ref, candidate: detail.candidate)
-                        } label: {
-                            Image(systemName: "bus.fill")
-                                .foregroundStyle(.green)
-                        }
-                        .accessibilityLabel(AppLocaleString.text("乗車開始", locale: locale))
-                    }
-                    if searchState.loadedDetail != nil, !ridingActive {
-                        Button(action: clearRoute) {
-                            Image(systemName: "trash")
-                        }
-                        .accessibilityLabel(AppLocaleString.text("路線図_クリア", locale: locale))
-                    }
-                    if !ridingActive {
-                        Button {
-                            withAnimation(.spring(duration: 0.35)) { isKeypadVisible.toggle() }
-                        } label: {
-                            Image(systemName: isKeypadVisible ? "keyboard.chevron.compact.down" : "keyboard")
-                        }
-                        .accessibilityLabel(
-                            AppLocaleString.text(
-                                isKeypadVisible ? "テンキー_非表示" : "テンキー_表示",
-                                locale: locale
-                            )
-                        )
-                    }
+        ToolbarItem(placement: .navigationBarTrailing) {
+            HStack(spacing: 4) {
+                if let detail = ridingActive ? displayedRidingDetail : searchState.loadedDetail {
+                    busNumberBadge(detail: detail)
                 }
+                if searchState.loadedDetail != nil {
+                    Button {
+                        endRiding()
+                        clearRoute()
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                    .accessibilityLabel(AppLocaleString.text("路線図_クリア", locale: locale))
+                }
+                if ThirdPartyDataConsent.isGranted {
+                    Button {
+                        showsRouteListSheet = true
+                    } label: {
+                        Image(systemName: "list.bullet")
+                    }
+                    .accessibilityLabel(AppLocaleString.text("路線図_一覧", locale: locale))
+                }
+
+                Button {
+                    withAnimation(.spring(duration: 0.35)) { isKeypadVisible.toggle() }
+                } label: {
+                    Image(systemName: isKeypadVisible ? "keyboard.chevron.compact.down" : "keyboard")
+                }
+                .accessibilityLabel(
+                    AppLocaleString.text(
+                        isKeypadVisible ? "テンキー_非表示" : "テンキー_表示",
+                        locale: locale
+                    )
+                )
             }
         }
+    }
+
+    /// ロード中の路線のバス番号バッジ。タップでは何もしない（誤乗車防止）。
+    /// 長押しで乗車開始／降車をトグルする（トップのバス番号表と同じ思想）。
+    private func busNumberBadge(detail: BusRouteDetail) -> some View {
+        TransitBusLineBadgeLabel(text: detail.candidate.ref, isRidingBus: ridingActive)
+            .onLongPressGesture {
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                toggleRiding(detail: detail)
+            }
+            .accessibilityLabel(detail.candidate.ref)
+            .accessibilityHint(AppLocaleString.text("路線図_乗降ヒント", locale: locale))
     }
 
     // MARK: - Actions
@@ -479,16 +500,123 @@ struct BusRouteMapView: View {
         loadRoute(candidate)
     }
 
+    private func keypad(height: CGFloat) -> some View {
+        BusKeypadView(
+            busNumber: routeNumberInput,
+            canSubmit: !routeNumberInput.isEmpty && !searchState.isLoading,
+            onCharacter: {
+                if clearsOnNextInput {
+                    routeNumberInput = ""
+                    clearsOnNextInput = false
+                }
+                routeNumberInput += $0
+            },
+            onSubmit: {
+                startSearch()
+                clearsOnNextInput = true
+            },
+            onClear: {
+                clearsOnNextInput = false
+                if searchState.loadedDetail != nil || searchState.isLoading {
+                    endRiding()
+                    clearRoute()
+                } else {
+                    routeNumberInput = ""
+                }
+            }
+        )
+        .busMainScreenStyled()
+        .frame(height: height * 0.42)
+    }
+
+    private var keypadMatchList: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                ForEach(keypadMatches.prefix(12)) { item in
+                    Button {
+                        openListedRoute(item)
+                    } label: {
+                        BusRouteCatalogRow(item: item)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.plain)
+                    Divider()
+                }
+            }
+        }
+        .frame(maxHeight: 180)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    private func keypadBottomInset(in height: CGFloat) -> CGFloat {
+        guard isKeypadVisible else { return 0 }
+        let listHeight: CGFloat = keypadMatches.isEmpty ? 0 : 188
+        return height * 0.42 + listHeight + 16
+    }
+
+    private func refreshKeypadMatches() {
+        keypadMatches = BusRouteCatalogStore.matching(routeNumberInput)
+    }
+
+    private func openListedRoute(_ item: BusRouteListItem) {
+        endRiding()
+        searchTask?.cancel()
+        routeNumberInput = ""
+        clearsOnNextInput = false
+        keypadMatches = []
+        if let detail = BusRouteCatalogStore.detail(forRelationId: item.relationId)
+            ?? BusLineMapStore.detail(forRelationId: item.relationId) {
+            BusLineMapStore.touch(relationId: item.relationId)
+            applyLoadedRoute(detail, collapseKeypad: true)
+            return
+        }
+        guard let candidate = BusRouteCatalogStore.candidate(forRelationId: item.relationId) else { return }
+        loadRoute(candidate, collapseKeypad: true)
+    }
+
     private func startSearch() {
         let ref = routeNumberInput.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !ref.isEmpty else { return }
+
+        // 乗車中に別の番号を検索したら、その番号への乗り換え扱いではなく自動的に降車する。
+        endRiding()
+
+        searchTask?.cancel()
+
+        let localMatches = BusRouteCatalogStore.matching(ref)
+        if localMatches.count == 1 {
+            openListedRoute(localMatches[0])
+            return
+        }
+        if localMatches.count > 1 {
+            keypadMatches = localMatches
+            return
+        }
+
+        // すでに履歴一覧（BusLineMapStore）に同じ番号の路線があれば、Overpass への再検索なしでそれを表示する。
+        if ThirdPartyDataConsent.isGranted {
+            let cachedMatches = BusLineMapStore.details(matching: ref)
+            switch cachedMatches.count {
+            case 0:
+                break
+            case 1:
+                let match = cachedMatches[0]
+                BusLineMapStore.touch(relationId: match.candidate.id)
+                applyLoadedRoute(match, collapseKeypad: true)
+                return
+            default:
+                searchState = .multipleCandidates(cachedMatches.map(\.candidate))
+                showsCandidateSheet = true
+                return
+            }
+        }
 
         guard let coord = contextCoordinate else {
             showError(OverpassError.noLocation.errorDescription ?? "")
             return
         }
 
-        searchTask?.cancel()
         searchState = .searching
 
         searchTask = Task { @MainActor in
@@ -514,22 +642,36 @@ struct BusRouteMapView: View {
 
     private func loadRoute(_ candidate: BusRouteCandidate, collapseKeypad: Bool = false) {
         searchTask?.cancel()
+
+        // 一覧に既にあるバス（同じ relationId）ならキャッシュからそのまま表示し、再取得しない。
+        if let cached = BusLineMapStore.detail(forRelationId: candidate.id) {
+            BusLineMapStore.touch(relationId: candidate.id)
+            applyLoadedRoute(cached, collapseKeypad: collapseKeypad)
+            return
+        }
+
         searchState = .loadingRoute(candidate)
 
         searchTask = Task { @MainActor in
             do {
                 let detail = try await OverpassAPIService.fetchRouteDetail(candidate)
                 guard !Task.isCancelled else { return }
-                searchState = .loaded(detail)
-                rebuildMapLayers(from: detail)
-                fitCamera(to: detail)
-                if collapseKeypad {
-                    isKeypadVisible = false
-                }
+                BusLineMapStore.remember(detail)
+                applyLoadedRoute(detail, collapseKeypad: collapseKeypad)
             } catch {
                 guard !Task.isCancelled else { return }
                 showError(AppLocaleString.userFacingError(error))
             }
+        }
+    }
+
+    /// 検索結果・一覧・キャッシュのいずれから来ても、地図への反映はここに統一する。
+    private func applyLoadedRoute(_ detail: BusRouteDetail, collapseKeypad: Bool) {
+        searchState = .loaded(detail)
+        rebuildMapLayers(from: detail)
+        fitCamera(to: detail)
+        if collapseKeypad {
+            isKeypadVisible = false
         }
     }
 

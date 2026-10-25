@@ -41,7 +41,6 @@
 		B01D036 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B02D043 /* InfoPlist.strings */; };
 		B01D037 /* PlanStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D044 /* PlanStore.swift */; };
 		B01D038 /* OsmBusDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D045 /* OsmBusDeepLink.swift */; };
-		B01D039 /* TransitRoutesSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D046 /* TransitRoutesSheetView.swift */; };
 		B01D040 /* TransitRouteMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D047 /* TransitRouteMapView.swift */; };
 		B01D041 /* BusKeypadInputMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D048 /* BusKeypadInputMode.swift */; };
 		B01D042 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D049 /* Secrets.swift */; };
@@ -57,7 +56,6 @@
 		B01D061 /* MapLocationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D061 /* MapLocationPickerView.swift */; };
 		B01D062 /* BusRouteMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D062 /* BusRouteMapView.swift */; };
 		B01D063 /* OverpassAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D063 /* OverpassAPIService.swift */; };
-		B01D064 /* GoogleMapsAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D064 /* GoogleMapsAPIService.swift */; };
 		B01D065 /* APINetworkHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D065 /* APINetworkHelpers.swift */; };
 		B01D066 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D066 /* LocationService.swift */; };
 		B01D067 /* TransitRouteModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D067 /* TransitRouteModels.swift */; };
@@ -71,6 +69,13 @@
 		B01D075 /* SwipeBackEnabler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D075 /* SwipeBackEnabler.swift */; };
 		B01D076 /* ThirdPartyDataConsent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D076 /* ThirdPartyDataConsent.swift */; };
 		B01D077 /* PrivacyDataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D077 /* PrivacyDataView.swift */; };
+		B01D078 /* TopScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D078 /* TopScreenView.swift */; };
+		B01D079 /* BusNumberTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D079 /* BusNumberTableView.swift */; };
+		B01D080 /* GoogleRoutesAPIService+AlternateBoarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D080 /* GoogleRoutesAPIService+AlternateBoarding.swift */; };
+		B10D002 /* BusNumberTableSortMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10D001 /* BusNumberTableSortMode.swift */; };
+		B11D001 /* BusLineMapStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B11D002 /* BusLineMapStore.swift */; };
+		B13D001 /* BusRouteCatalogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B13D002 /* BusRouteCatalogStore.swift */; };
+		B12D001 /* BusRouteMapHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12D002 /* BusRouteMapHistoryView.swift */; };
 		EA15861A27C6E4A6A312B1F7 /* RidingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98480A3BA1B534FB5BAAB123 /* RidingState.swift */; };
 /* End PBXBuildFile section */
 
@@ -114,7 +119,6 @@
 		B02D042 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = Localization/vi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B02D044 /* PlanStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanStore.swift; sourceTree = "<group>"; };
 		B02D045 /* OsmBusDeepLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsmBusDeepLink.swift; sourceTree = "<group>"; };
-		B02D046 /* TransitRoutesSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitRoutesSheetView.swift; sourceTree = "<group>"; };
 		B02D047 /* TransitRouteMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitRouteMapView.swift; sourceTree = "<group>"; };
 		B02D048 /* BusKeypadInputMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusKeypadInputMode.swift; sourceTree = "<group>"; };
 		B02D049 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
@@ -131,7 +135,6 @@
 		B02D061 /* MapLocationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapLocationPickerView.swift; sourceTree = "<group>"; };
 		B02D062 /* BusRouteMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusRouteMapView.swift; sourceTree = "<group>"; };
 		B02D063 /* OverpassAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverpassAPIService.swift; sourceTree = "<group>"; };
-		B02D064 /* GoogleMapsAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleMapsAPIService.swift; sourceTree = "<group>"; };
 		B02D065 /* APINetworkHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APINetworkHelpers.swift; sourceTree = "<group>"; };
 		B02D066 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		B02D067 /* TransitRouteModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitRouteModels.swift; sourceTree = "<group>"; };
@@ -145,6 +148,13 @@
 		B02D075 /* SwipeBackEnabler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeBackEnabler.swift; sourceTree = "<group>"; };
 		B02D076 /* ThirdPartyDataConsent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThirdPartyDataConsent.swift; sourceTree = "<group>"; };
 		B02D077 /* PrivacyDataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyDataView.swift; sourceTree = "<group>"; };
+		B02D078 /* TopScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopScreenView.swift; sourceTree = "<group>"; };
+		B02D079 /* BusNumberTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusNumberTableView.swift; sourceTree = "<group>"; };
+		B02D080 /* GoogleRoutesAPIService+AlternateBoarding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GoogleRoutesAPIService+AlternateBoarding.swift"; sourceTree = "<group>"; };
+		B10D001 /* BusNumberTableSortMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusNumberTableSortMode.swift; sourceTree = "<group>"; };
+		B11D002 /* BusLineMapStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusLineMapStore.swift; sourceTree = "<group>"; };
+		B13D002 /* BusRouteCatalogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusRouteCatalogStore.swift; sourceTree = "<group>"; };
+		B12D002 /* BusRouteMapHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusRouteMapHistoryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -215,15 +225,17 @@
 				B02D033 /* SceneBackgroundLayer.swift */,
 				B02D015 /* APIKeySetupBanner.swift */,
 				B02D020 /* MoreActionsMenuView.swift */,
+				B02D078 /* TopScreenView.swift */,
+				B02D079 /* BusNumberTableView.swift */,
 				B02D021 /* PlanManagementView.swift */,
 				B02D022 /* HelpView.swift */,
 				B02D024 /* SavedPlacesView.swift */,
 				B02D026 /* DestinationHistoryView.swift */,
-				B02D046 /* TransitRoutesSheetView.swift */,
 				B02D047 /* TransitRouteMapView.swift */,
 				B02D060 /* StopAlertSettingsView.swift */,
 				B02D061 /* MapLocationPickerView.swift */,
 				B02D062 /* BusRouteMapView.swift */,
+				B12D002 /* BusRouteMapHistoryView.swift */,
 				B02D075 /* SwipeBackEnabler.swift */,
 				B02D077 /* PrivacyDataView.swift */,
 			);
@@ -256,10 +268,12 @@
 				B02D067 /* TransitRouteModels.swift */,
 				B02D068 /* GoogleRoutesAPIService+APIClient.swift */,
 				B02D069 /* GoogleRoutesAPIService+BusMatching.swift */,
+				B02D080 /* GoogleRoutesAPIService+AlternateBoarding.swift */,
+				B11D002 /* BusLineMapStore.swift */,
+				B13D002 /* BusRouteCatalogStore.swift */,
 				B02D070 /* GoogleRoutesAPIService+PolylineGeometry.swift */,
 				B02D071 /* GoogleRoutesAPIService+RouteDisplay.swift */,
 				B02D073 /* RidingTracker.swift */,
-				B02D064 /* GoogleMapsAPIService.swift */,
 				B02D065 /* APINetworkHelpers.swift */,
 				B02D066 /* LocationService.swift */,
 				B02D017 /* DestinationStore.swift */,
@@ -269,6 +283,7 @@
 				B02D076 /* ThirdPartyDataConsent.swift */,
 				B02D027 /* AppLanguage.swift */,
 				B02D048 /* BusKeypadInputMode.swift */,
+				B10D001 /* BusNumberTableSortMode.swift */,
 				B02D050 /* SharedRoutesTrialStore.swift */,
 				B02D056 /* StopAlertSettings.swift */,
 				B02D058 /* KeypadFeedbackSettings.swift */,
@@ -389,6 +404,8 @@
 				B01D016 /* DestinationSearchService.swift in Sources */,
 				B01D017 /* DestinationInputView.swift in Sources */,
 				B01D018 /* MoreActionsMenuView.swift in Sources */,
+				B01D078 /* TopScreenView.swift in Sources */,
+				B01D079 /* BusNumberTableView.swift in Sources */,
 				B01D019 /* PlanManagementView.swift in Sources */,
 				B01D020 /* HelpView.swift in Sources */,
 				B01D021 /* SavedPlace.swift in Sources */,
@@ -401,6 +418,7 @@
 				B01D024 /* DestinationHistoryView.swift in Sources */,
 				B01D025 /* AppLanguage.swift in Sources */,
 				B01D041 /* BusKeypadInputMode.swift in Sources */,
+				B10D002 /* BusNumberTableSortMode.swift in Sources */,
 				B01D042 /* Secrets.swift in Sources */,
 				B01D043 /* SharedRoutesTrialStore.swift in Sources */,
 				B01D055 /* StopAlertSettings.swift in Sources */,
@@ -409,13 +427,16 @@
 				B01D060 /* StopAlertSettingsView.swift in Sources */,
 				B01D061 /* MapLocationPickerView.swift in Sources */,
 				B01D062 /* BusRouteMapView.swift in Sources */,
+				B12D001 /* BusRouteMapHistoryView.swift in Sources */,
 				B01D063 /* OverpassAPIService.swift in Sources */,
-				B01D064 /* GoogleMapsAPIService.swift in Sources */,
 				B01D065 /* APINetworkHelpers.swift in Sources */,
 				B01D066 /* LocationService.swift in Sources */,
 				B01D067 /* TransitRouteModels.swift in Sources */,
 				B01D068 /* GoogleRoutesAPIService+APIClient.swift in Sources */,
 				B01D069 /* GoogleRoutesAPIService+BusMatching.swift in Sources */,
+				B01D080 /* GoogleRoutesAPIService+AlternateBoarding.swift in Sources */,
+				B11D001 /* BusLineMapStore.swift in Sources */,
+				B13D001 /* BusRouteCatalogStore.swift in Sources */,
 				B01D070 /* GoogleRoutesAPIService+PolylineGeometry.swift in Sources */,
 				B01D071 /* GoogleRoutesAPIService+RouteDisplay.swift in Sources */,
 				B01D072 /* GoogleAPISettingsView.swift in Sources */,
@@ -428,7 +449,6 @@
 				B01D031 /* SceneBackgroundLayer.swift in Sources */,
 				B01D037 /* PlanStore.swift in Sources */,
 				B01D038 /* OsmBusDeepLink.swift in Sources */,
-				B01D039 /* TransitRoutesSheetView.swift in Sources */,
 				B01D040 /* TransitRouteMapView.swift in Sources */,
 				B01D045 /* IAPProductIDs.swift in Sources */,
 				B01D046 /* StorePurchaseManager.swift in Sources */,
@@ -604,7 +624,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.36;
+				MARKETING_VERSION = 1.54;
 				PRODUCT_BUNDLE_IDENTIFIER = com.osamushikubo.osmBus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -629,7 +649,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.36;
+				MARKETING_VERSION = 1.54;
 				PRODUCT_BUNDLE_IDENTIFIER = com.osamushikubo.osmBus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

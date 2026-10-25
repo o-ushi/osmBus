@@ -22,15 +22,24 @@ enum BusNumberInput {
 @MainActor
 @Observable
 final class MainViewModel {
+    private let locationService: LocationService
     private(set) var destination: Destination?
-    private(set) var currentLatitude: Double?
-    private(set) var currentLongitude: Double?
+    /// 現在地は `LocationService.currentLocation` を都度直接読む(コピーを持たない)。
+    /// 以前はここへ View 層からプッシュしていたが、地図シート表示中は更新が止まる導線に
+    /// なっていて、シートを開いたまま降車して乗り換え検索を続けるとホーム画面の距離表示が
+    /// 固まったまま動かなくなる不具合の原因になっていた。
+    var currentLatitude: Double? { locationService.currentLocation?.latitude }
+    var currentLongitude: Double? { locationService.currentLocation?.longitude }
+    /// 乗車中の残り距離用。手動出発地ではなく、届いた GPS そのもの。
+    /// `@Observable` が追えるよう LocationService のコピーをここに持つ。
+    private(set) var gpsLatitude: Double?
+    private(set) var gpsLongitude: Double?
+    @ObservationIgnored private var locationCancellable: AnyCancellable?
     private(set) var manualOriginLatitude: Double?
     private(set) var manualOriginLongitude: Double?
     private(set) var manualOriginName: String?
     var enteredBusNumber = ""
     var resultState: ResultDisplayState = .idle
-    private(set) var otherBoardableVariants: [String] = []
     private let ridingTracker = RidingTracker()
 
     var ridingState: RidingState? { ridingTracker.ridingState }
@@ -42,10 +51,6 @@ final class MainViewModel {
     var ridingNearestAlertReached: Bool { ridingTracker.nearestDistanceAlertReached }
     var activeRidingAlert: ActiveRidingAlert? { ridingTracker.activeAlert }
     var ridingAlightCoordinate: CLLocationCoordinate2D? { ridingTracker.alightCoordinate }
-
-    var destinationLabel: String {
-        destination?.name ?? AppLocaleString.currentText("目的地を設定")
-    }
 
     var hasDestination: Bool {
         destination != nil
@@ -60,12 +65,48 @@ final class MainViewModel {
         effectiveOriginLatitude != nil && effectiveOriginLongitude != nil
     }
 
-    var currentLocationCoordinateText: String? {
-        guard let lat = effectiveOriginLatitude, let lon = effectiveOriginLongitude else { return nil }
-        return AppLocaleString.currentFormatted(
-            "座標表示",
-            String(format: "%.5f", lat),
-            String(format: "%.5f", lon)
+    /// 乗車中に降車座標が瞬間的に欠けても、距離バッジを消さないための直前値。
+    private var lastRidingDistanceMeters: Double?
+
+    /// トップ画面の距離欄用。
+    /// - 目的地あり・未乗車: 現在地 → 目的地
+    /// - 目的地あり・乗車中: ライブ GPS → 今のバス区間の降車停（乗換地点。手動出発地では測らない）
+    /// - 目的地なし（乗車中含む）: nil。OSM 路線図から目的地未設定のまま乗車した場合、
+    ///   `RidingTracker.resolveOSMAlightCoordinate` は路線の終点を降車座標として使うが、
+    ///   それはユーザーの行き先ではなくナビとして意味が薄いため「あと」には出さない。
+    /// 現在地または基準地点が無ければ nil。
+    var topScreenDistanceMeters: Double? {
+        if ridingState != nil, destination == nil {
+            lastRidingDistanceMeters = nil
+            return nil
+        }
+        if ridingState != nil {
+            // 手動出発地のままだと、バスが動いても「あと」が乗った時点の距離で固まる。
+            // 乗換後に降車地点だけ差し替わると、そこで初めて別の数字へ跳ぶ。
+            let originLat = gpsLatitude ?? currentLatitude
+            let originLon = gpsLongitude ?? currentLongitude
+            guard let originLat, let originLon else { return lastRidingDistanceMeters }
+            guard let alight = ridingAlightCoordinate else { return lastRidingDistanceMeters }
+            let meters = GoogleRoutesAPIService.distanceMeters(
+                fromLatitude: originLat,
+                fromLongitude: originLon,
+                toLatitude: alight.latitude,
+                toLongitude: alight.longitude
+            )
+            lastRidingDistanceMeters = meters
+            return meters
+        }
+        guard let originLat = effectiveOriginLatitude, let originLon = effectiveOriginLongitude else {
+            lastRidingDistanceMeters = nil
+            return nil
+        }
+        lastRidingDistanceMeters = nil
+        guard let destination else { return nil }
+        return GoogleRoutesAPIService.distanceMeters(
+            fromLatitude: originLat,
+            fromLongitude: originLon,
+            toLatitude: destination.latitude,
+            toLongitude: destination.longitude
         )
     }
 
@@ -96,6 +137,15 @@ final class MainViewModel {
     private(set) var boardingRoute: ParsedTransitRoute?
 
     private(set) var isBoardingRouteCheapest: Bool = true
+    /// テンキー判定で「行き先案に無いが乗換地点まで行ける」と分かった系統。番号表には出さない。
+    private var alternateBoardingRoutes: [String: ParsedTransitRoute] = [:]
+    /// 同じ番号の再入力用。経路データベースの中身が変わったら無効化する。
+    private var busCheckCache: [String: BusCheckSnapshot] = [:]
+    private var busCheckCacheFingerprint = ""
+    /// 代替乗車の重い検索(乗換地点への再検索 / OSM)を番号ごとに一度だけにする。
+    private var alternateSearchCompletedFor: Set<String> = []
+    /// 目的地ごとの経路。ユーザー初期化までディスクに残す。
+    private var routeArchive: [String: TripRouteRecord] = [:]
 
     private var busCheckTask: Task<Void, Never>?
     private var transitRoutesTask: Task<Void, Never>?
@@ -107,46 +157,96 @@ final class MainViewModel {
     /// ハプティクの重複判定用。resultState は判定中に .checking を挟むため、これとは別に最後に確定した結果を追跡する。
     private var lastSettledResultState: ResultDisplayState?
 
-    init() {
+    init(locationService: LocationService) {
+        self.locationService = locationService
         destination = DestinationStore.load()
+        routeArchive = TransitRouteArchive.load()
+        activateBucketForCurrentDestination()
+        // 画面の onChange(緯度だけ) ではなく、測位のたびに距離とアラートを進める。
+        // 地図シート表示中や東西方向の移動でも、乗換地点までの距離が止まらないようにする。
+        locationCancellable = locationService.$currentLocation
+            .compactMap { $0 }
+            .sink { [weak self] coordinate in
+                Task { @MainActor [weak self] in
+                    self?.handleLocationFix(coordinate)
+                }
+            }
     }
 
-    func updateCurrentLocation(_ coordinate: CLLocationCoordinate2D?) {
-        currentLatitude = coordinate?.latitude
-        currentLongitude = coordinate?.longitude
+    private func handleLocationFix(_ coordinate: CLLocationCoordinate2D) {
+        gpsLatitude = coordinate.latitude
+        gpsLongitude = coordinate.longitude
+        if let busNumber = ridingState?.busNumber {
+            ridingTracker.realignAlightWithRoute(
+                boardingRoute,
+                busNumber: busNumber,
+                destination: destination
+            )
+        }
+        locationService.updateAccuracy(distanceToTargetMeters: distanceFromFixToTarget(coordinate))
+        ridingTracker.checkProgress(at: coordinate, destination: destination)
+    }
+
+    private func distanceFromFixToTarget(_ coordinate: CLLocationCoordinate2D) -> Double? {
+        let target: CLLocationCoordinate2D?
+        if let alight = ridingAlightCoordinate {
+            target = alight
+        } else if let destination {
+            target = CLLocationCoordinate2D(latitude: destination.latitude, longitude: destination.longitude)
+        } else {
+            target = nil
+        }
+        guard let target else { return nil }
+        return GoogleRoutesAPIService.distanceMeters(
+            fromLatitude: coordinate.latitude,
+            fromLongitude: coordinate.longitude,
+            toLatitude: target.latitude,
+            toLongitude: target.longitude
+        )
     }
 
     func setDestination(_ destination: Destination) {
+        persistCurrentBucket()
         self.destination = destination
         DestinationStore.save(destination)
         DestinationHistoryStore.add(destination)
         clearBusNumber()
-        resetTransitRoutes()
+        activateBucketForCurrentDestination()
+        refreshTransitRoutes(userInitiated: true)
     }
 
     func clearDestination() {
+        persistCurrentBucket()
         destination = nil
         DestinationStore.save(nil)
         clearBusNumber()
-        resetTransitRoutes()
+        activateBucketForCurrentDestination()
     }
 
     func setManualOrigin(latitude: Double, longitude: Double, name: String) {
+        persistCurrentBucket()
         manualOriginLatitude = latitude
         manualOriginLongitude = longitude
         manualOriginName = name
-        resetTransitRoutes()
-        refreshTransitRoutes()
+        refreshTransitRoutes(userInitiated: true)
         if !enteredBusNumber.isEmpty { refreshBusCheck() }
     }
 
     func clearManualOrigin() {
+        persistCurrentBucket()
         manualOriginLatitude = nil
         manualOriginLongitude = nil
         manualOriginName = nil
-        resetTransitRoutes()
-        refreshTransitRoutes()
+        refreshTransitRoutes(userInitiated: true)
         if !enteredBusNumber.isEmpty { refreshBusCheck() }
+    }
+
+    /// 乗車中の現在地更新 (↻) 用。手動出発地は外して GPS に戻すが、経路データベース・
+    /// 乗車状態・目的地は消さない (Step 6: 乗車中でも出発地を現在地に更新できる)。
+    func clearManualOriginWhileRiding() {
+        manualOriginLatitude = nil
+        manualOriginLongitude = nil
+        manualOriginName = nil
     }
 
     func refreshTransitRoutes(userInitiated: Bool = false) {
@@ -178,17 +278,16 @@ final class MainViewModel {
                     AppLocaleString.currentText("お試し枠_使い切り")
                 )
             default:
-                // 自動更新はトライアルを消費しない設計のため、まだ一度も手動で
-                // 経路一覧を開いていないとここに来ることがある。よくある一時的な
-                // 状態なので、表示だけ空にして蓄積データベースは保持する。
-                clearTransitRoutesDisplay()
+                transitRoutesLoadState = .failed(
+                    AppLocaleString.currentText("エラー_APIキー未設定")
+                )
             }
             return
         }
 
         transitRoutesLoadState = .loading
 
-        transitRoutesTask = Task {
+        transitRoutesTask = Task { @MainActor in
             let result = await GoogleRoutesAPIService.fetchTransitRoutes(
                 originLatitude: originLatitude,
                 originLongitude: originLongitude,
@@ -199,35 +298,71 @@ final class MainViewModel {
 
             guard !Task.isCancelled else { return }
 
-            await MainActor.run {
-                switch result {
-                case .success(let routes):
-                    mergeIntoAccumulatedRoutes(routes)
-                    // 今回の取得が空でも、蓄積データベースに何かあればそれを表示できる状態とみなす。
-                    transitRoutesLoadState = accumulatedTransitRoutes.isEmpty
-                        ? .failed(AppLocaleString.currentText("ルートなし"))
-                        : .loaded
-                case .failure(let error):
-                    transitRoutesLoadState = accumulatedTransitRoutes.isEmpty
-                        ? .failed(AppLocaleString.userFacingError(error))
-                        : .loaded
-                }
+            switch result {
+            case .success(let routes):
+                mergeIntoAccumulatedRoutes(routes)
+                transitRoutesLoadState = accumulatedTransitRoutes.isEmpty
+                    ? .failed(AppLocaleString.currentText("ルートなし"))
+                    : .loaded
+            case .failure(let error):
+                transitRoutesLoadState = accumulatedTransitRoutes.isEmpty
+                    ? .failed(AppLocaleString.userFacingError(error))
+                    : .loaded
             }
         }
     }
 
-    /// 新しい旅の開始(目的地・出発地の変更)以外では呼ばないこと。
-    /// 経路データベース(蓄積分)ごと消去する。
+    /// ユーザーが明示的に初期化したときだけ、保存済み経路をすべて捨てる。
     private func resetTransitRoutes() {
+        routeArchive = [:]
+        TransitRouteArchive.clear()
         accumulatedTransitRoutes = []
+        busCheckCache = [:]
+        busCheckCacheFingerprint = ""
+        alternateSearchCompletedFor = []
+        alternateBoardingRoutes = [:]
         clearTransitRoutesDisplay()
+    }
+
+    private var currentArchiveKey: String? {
+        destination?.id
+    }
+
+    private func persistCurrentBucket() {
+        guard let key = currentArchiveKey else { return }
+        routeArchive[key] = TripRouteRecord(
+            routes: accumulatedTransitRoutes,
+            alternateRoutes: alternateBoardingRoutes,
+            alternateSearchDone: Array(alternateSearchCompletedFor),
+            updatedAt: Date(),
+            destination: destination
+        )
+        TransitRouteArchive.save(routeArchive)
+    }
+
+    private func activateBucketForCurrentDestination() {
+        busCheckCache = [:]
+        busCheckCacheFingerprint = ""
+        if let key = currentArchiveKey, let record = routeArchive[key] {
+            accumulatedTransitRoutes = record.routes
+            alternateBoardingRoutes = record.alternateRoutes
+            alternateSearchCompletedFor = Set(record.alternateSearchDone)
+            transitRoutesLoadState = accumulatedTransitRoutes.isEmpty ? .idle : .loaded
+        } else {
+            accumulatedTransitRoutes = []
+            alternateBoardingRoutes = [:]
+            alternateSearchCompletedFor = []
+            transitRoutesLoadState = .idle
+        }
+        busCheckCacheFingerprint = accumulatedRoutesFingerprint
+        lastAutoTransitRoutesRefreshTime = nil
     }
 
     var hasAccumulatedTransitRoutes: Bool {
         !accumulatedTransitRoutes.isEmpty
     }
 
-    /// 現在地更新時にユーザーが明示的に選んだ場合に呼ぶ。経路データベースを消去する。
+    /// 現在地更新時にユーザーが明示的に初期化した場合。保存済み経路をすべて捨てる。
     func resetAccumulatedTransitRoutes() {
         resetTransitRoutes()
     }
@@ -238,8 +373,8 @@ final class MainViewModel {
     /// クリアされてしまう。
     private func clearTransitRoutesDisplay() {
         transitRoutesTask?.cancel()
+        transitRoutesTask = nil
         transitRoutesLoadState = accumulatedTransitRoutes.isEmpty ? .idle : .loaded
-        lastAutoTransitRoutesRefreshTime = nil
     }
 
     /// 新しく見つかった経路をデータベースに蓄積する。バスの並び(系統の組み合わせ)が
@@ -254,6 +389,25 @@ final class MainViewModel {
             }
             accumulatedTransitRoutes.append(route)
         }
+        let fingerprint = accumulatedRoutesFingerprint
+        if fingerprint != busCheckCacheFingerprint {
+            busCheckCache = [:]
+            busCheckCacheFingerprint = fingerprint
+        }
+        persistCurrentBucket()
+    }
+
+    private var accumulatedRoutesFingerprint: String {
+        accumulatedTransitRoutes
+            .map { GoogleRoutesAPIService.transitBusLineBadgeLabels(for: $0).joined(separator: "→") }
+            .joined(separator: "|")
+    }
+
+    private struct BusCheckSnapshot {
+        let resultState: ResultDisplayState
+        let boardingRouteIndex: Int?
+        let boardingRoute: ParsedTransitRoute?
+        let isBoardingRouteCheapest: Bool
     }
 
     func appendBusCharacter(_ raw: String) {
@@ -285,12 +439,6 @@ final class MainViewModel {
         }
     }
 
-    func deleteLastCharacter() {
-        guard !enteredBusNumber.isEmpty else { return }
-        enteredBusNumber.removeLast()
-        scheduleBusCheck()
-    }
-
     func clearBusNumber() {
         busCheckTask?.cancel()
         enteredBusNumber = ""
@@ -298,6 +446,7 @@ final class MainViewModel {
         isComposingNewBusNumber = false
         boardingRouteIndex = nil
         boardingRoute = nil
+        alternateBoardingRoutes = [:]
         clearRidingState()
     }
 
@@ -326,7 +475,9 @@ final class MainViewModel {
         }
 
         busCheckTask = Task {
-            if !immediate {
+            let canUseCache = busCheckCache[enteredBusNumber] != nil
+                && busCheckCacheFingerprint == accumulatedRoutesFingerprint
+            if !immediate, !canUseCache {
                 try? await Task.sleep(nanoseconds: busCheckDebounceNanoseconds(for: enteredBusNumber.count))
             }
             guard !Task.isCancelled else { return }
@@ -348,8 +499,6 @@ final class MainViewModel {
 
     @MainActor
     private func performBusCheck() async {
-        resultState = .checking
-
         guard let destination else {
             applyResultState(.error(AppLocaleString.currentText("エラー_目的地未設定")))
             return
@@ -362,19 +511,6 @@ final class MainViewModel {
         }
 
         let busNumber = enteredBusNumber
-        let resolution = RoutesAPIKeyResolver.resolve(
-            for: .busCheck(busNumber: busNumber, destinationID: destination.id)
-        )
-        guard let apiKey = resolution.apiKey else {
-            switch resolution.unavailableReason {
-            case .trialExhausted:
-                applyResultState(.trialExhausted)
-            default:
-                applyResultState(.error(AppLocaleString.currentText("エラー_APIキー未設定")))
-            }
-            return
-        }
-
         let distanceMeters = GoogleRoutesAPIService.distanceMeters(
             fromLatitude: originLatitude,
             fromLongitude: originLongitude,
@@ -388,9 +524,50 @@ final class MainViewModel {
             return
         }
 
-        // 経路データベースを最新化してから、蓄積された経路全体に対して番号を判定する。
-        // 直近1回のAPI応答だけを見ないことで、少し前まであった候補が今回だけたまたま
-        // 返ってこなかったせいで誤って「見送ってください」と判定するのを防ぐ。
+        // 同じ番号を打ち直したとき、保存済みの判定を先に出す。ルート再検索は待たない。
+        if applyCachedBusCheck(for: busNumber) {
+            await refreshDestinationRoutesInBackgroundIfStale(
+                busNumber: busNumber,
+                destination: destination,
+                originLatitude: originLatitude,
+                originLongitude: originLongitude
+            )
+            return
+        }
+
+        // トップ画面などで既に経路データベースがあるなら、それで即判定する。
+        if !accumulatedTransitRoutes.isEmpty {
+            await evaluateAgainstAccumulatedRoutes(
+                busNumber: busNumber,
+                originLatitude: originLatitude,
+                originLongitude: originLongitude,
+                destination: destination,
+                allowNetworkAlternate: true,
+                showCheckingWhileWaiting: true
+            )
+            await refreshDestinationRoutesInBackgroundIfStale(
+                busNumber: busNumber,
+                destination: destination,
+                originLatitude: originLatitude,
+                originLongitude: originLongitude
+            )
+            return
+        }
+
+        resultState = .checking
+        let resolution = RoutesAPIKeyResolver.resolve(
+            for: .busCheck(busNumber: busNumber, destinationID: destination.id)
+        )
+        guard let apiKey = resolution.apiKey else {
+            switch resolution.unavailableReason {
+            case .trialExhausted:
+                applyResultState(.trialExhausted)
+            default:
+                applyResultState(.error(AppLocaleString.currentText("エラー_APIキー未設定")))
+            }
+            return
+        }
+
         let result = await GoogleRoutesAPIService.fetchTransitRoutes(
             originLatitude: originLatitude,
             originLongitude: originLongitude,
@@ -409,13 +586,134 @@ final class MainViewModel {
             mergeIntoAccumulatedRoutes(routes)
         }
 
+        await evaluateAgainstAccumulatedRoutes(
+            busNumber: busNumber,
+            originLatitude: originLatitude,
+            originLongitude: originLongitude,
+            destination: destination,
+            allowNetworkAlternate: true,
+            showCheckingWhileWaiting: true
+        )
+    }
+
+    private func applyCachedBusCheck(for busNumber: String) -> Bool {
+        guard busCheckCacheFingerprint == accumulatedRoutesFingerprint,
+              let snapshot = busCheckCache[busNumber] else { return false }
+        applyResultState(
+            snapshot.resultState,
+            boardingRouteIndex: snapshot.boardingRouteIndex,
+            boardingRoute: snapshot.boardingRoute,
+            isBoardingRouteCheapest: snapshot.isBoardingRouteCheapest
+        )
+        return true
+    }
+
+    private func evaluateAgainstAccumulatedRoutes(
+        busNumber: String,
+        originLatitude: Double,
+        originLongitude: Double,
+        destination: Destination,
+        allowNetworkAlternate: Bool,
+        showCheckingWhileWaiting: Bool
+    ) async {
         guard !accumulatedTransitRoutes.isEmpty else {
             applyResultState(.noTransitRoutes)
             return
         }
 
-        let response = GoogleRoutesAPIService.evaluateBusQuery(busNumber, routes: accumulatedTransitRoutes)
+        var response = GoogleRoutesAPIService.evaluateBusQuery(busNumber, routes: accumulatedTransitRoutes)
+        if case .doNotBoard = response.outcome, allowNetworkAlternate {
+            if let fromStoredMaps = GoogleRoutesAPIService.matchViaStoredLineMaps(
+                busNumber: busNumber,
+                destinationRoutes: accumulatedTransitRoutes,
+                originLatitude: originLatitude,
+                originLongitude: originLongitude,
+                destinationLatitude: destination.latitude,
+                destinationLongitude: destination.longitude,
+                destinationName: destination.name
+            ) {
+                response = fromStoredMaps
+                rememberAlternateBoardingRoutes(from: fromStoredMaps)
+            } else if let remembered = rememberedAlternateResponse(busNumber: busNumber) {
+                response = remembered
+            } else if !alternateSearchCompletedFor.contains(busNumber) {
+                if showCheckingWhileWaiting, resultState != .checking {
+                    resultState = .checking
+                }
+                let resolution = RoutesAPIKeyResolver.resolve(
+                    for: .busCheck(busNumber: busNumber, destinationID: destination.id)
+                )
+                if let apiKey = resolution.apiKey {
+                    if let alternate = await GoogleRoutesAPIService.evaluateAlternateTransferBoarding(
+                        busNumber: busNumber,
+                        destinationRoutes: accumulatedTransitRoutes,
+                        originLatitude: originLatitude,
+                        originLongitude: originLongitude,
+                        destinationLatitude: destination.latitude,
+                        destinationLongitude: destination.longitude,
+                        destinationName: destination.name,
+                        apiKey: apiKey
+                    ) {
+                        response = alternate
+                        rememberAlternateBoardingRoutes(from: alternate)
+                    }
+                }
+                alternateSearchCompletedFor.insert(busNumber)
+                guard !Task.isCancelled, enteredBusNumber == busNumber else { return }
+            }
+        }
 
+        applyBusCheckResponse(response, busNumber: busNumber)
+    }
+
+    private func rememberedAlternateResponse(busNumber: String) -> BusCheckResponse? {
+        guard let route = alternateBoardingRoutes[busNumber]
+            ?? alternateBoardingRoutes.first(where: { $0.key.caseInsensitiveCompare(busNumber) == .orderedSame })?.value
+        else { return nil }
+        return GoogleRoutesAPIService.evaluateBusQuery(busNumber, routes: [route])
+    }
+
+    private func refreshDestinationRoutesInBackgroundIfStale(
+        busNumber: String,
+        destination: Destination,
+        originLatitude: Double,
+        originLongitude: Double
+    ) async {
+        let now = Date()
+        if let last = lastAutoTransitRoutesRefreshTime, now.timeIntervalSince(last) < 60 {
+            return
+        }
+        lastAutoTransitRoutesRefreshTime = now
+
+        let resolution = RoutesAPIKeyResolver.resolve(
+            for: .transitRoutes(destinationID: destination.id),
+            consumeTrial: false
+        )
+        guard let apiKey = resolution.apiKey else { return }
+
+        let result = await GoogleRoutesAPIService.fetchTransitRoutes(
+            originLatitude: originLatitude,
+            originLongitude: originLongitude,
+            destinationLatitude: destination.latitude,
+            destinationLongitude: destination.longitude,
+            apiKey: apiKey
+        )
+        guard !Task.isCancelled, enteredBusNumber == busNumber else { return }
+        if case .success(let routes) = result {
+            mergeIntoAccumulatedRoutes(routes)
+        }
+        guard !accumulatedTransitRoutes.isEmpty else { return }
+        await evaluateAgainstAccumulatedRoutes(
+            busNumber: busNumber,
+            originLatitude: originLatitude,
+            originLongitude: originLongitude,
+            destination: destination,
+            allowNetworkAlternate: false,
+            showCheckingWhileWaiting: false
+        )
+    }
+
+    private func applyBusCheckResponse(_ response: BusCheckResponse, busNumber: String) {
         switch response.outcome {
         case .boardAll(let arrivalText, let alightStopText):
             applyResultState(
@@ -436,7 +734,6 @@ final class MainViewModel {
                 boardingRoute: response.matchingRoute,
                 isBoardingRouteCheapest: response.isBoardingRouteCheapest
             )
-            checkOtherVariantsInOSM(busNumber: busNumber, knownVariants: names)
         case .doNotBoard:
             applyResultState(.cannotBoard)
         case .noTransitRoutes:
@@ -444,6 +741,23 @@ final class MainViewModel {
         case .configurationError(let message), .apiError(let message):
             applyResultState(.error(message))
         }
+        cacheCurrentBusCheck(for: busNumber)
+    }
+
+    private func cacheCurrentBusCheck(for busNumber: String) {
+        switch resultState {
+        case .idle, .checking:
+            return
+        default:
+            break
+        }
+        busCheckCacheFingerprint = accumulatedRoutesFingerprint
+        busCheckCache[busNumber] = BusCheckSnapshot(
+            resultState: resultState,
+            boardingRouteIndex: boardingRouteIndex,
+            boardingRoute: boardingRoute,
+            isBoardingRouteCheapest: isBoardingRouteCheapest
+        )
     }
 
     private func applyResultState(
@@ -454,9 +768,6 @@ final class MainViewModel {
     ) {
         let previous = lastSettledResultState
         resultState = state
-        if case .canBoardIfVariant = state {} else {
-            otherBoardableVariants = []
-        }
         switch state {
         case .canBoard, .canBoardIfVariant:
             self.boardingRouteIndex = boardingRouteIndex
@@ -479,28 +790,30 @@ final class MainViewModel {
         registerCompletedBusCheck()
     }
 
-    private func checkOtherVariantsInOSM(busNumber: String, knownVariants: [String]) {
-        otherBoardableVariants = []
-        guard let lat = effectiveOriginLatitude,
-              let lon = effectiveOriginLongitude else { return }
-        let coord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-        let knownSet = Set(knownVariants)
-        Task { @MainActor in
-            guard let candidates = try? await OverpassAPIService.searchCandidates(
-                ref: busNumber, near: coord, radiusMeters: 30_000
-            ) else { return }
-            let others = candidates.map { $0.ref }.filter { !knownSet.contains($0) }
-            guard !others.isEmpty else { return }
-            guard case .canBoardIfVariant = resultState, enteredBusNumber == busNumber else { return }
-            otherBoardableVariants = others
-        }
-    }
-
     func prepareBoardingRouteForVariant(_ variantName: String) {
+        if let alternate = alternateBoardingRoutes[variantName]
+            ?? alternateBoardingRoutes.first(where: { $0.key.caseInsensitiveCompare(variantName) == .orderedSame })?.value {
+            boardingRoute = alternate
+            return
+        }
         if let match = GoogleRoutesAPIService.findMatchingRouteWithIndex(routes: accumulatedTransitRoutes, busNumber: variantName) {
             boardingRouteIndex = match.index
             boardingRoute = match.route
         }
+    }
+
+    private func rememberAlternateBoardingRoutes(from response: BusCheckResponse) {
+        guard let route = response.matchingRoute else { return }
+        if case .boardIfVariant(let names, _, _) = response.outcome {
+            for name in names {
+                alternateBoardingRoutes[name] = route
+            }
+        }
+        if let index = response.matchingRouteIndex {
+            boardingRouteIndex = index
+        }
+        alternateBoardingRoutes[enteredBusNumber] = route
+        persistCurrentBucket()
     }
 
     func resolvedBoardingBusRef(overrideVariant: String? = nil) -> String {
@@ -587,6 +900,24 @@ final class MainViewModel {
     /// 距離アラート状態を再構築する(そうしないと降車済みの停留所を基準に距離が
     /// 計算され続け、乗り換え後に距離がどんどん広がって見える不具合になる)。
     func overrideRidingBusNumber(_ busNumber: String) {
+        if let alternate = alternateBoardingRoutes[busNumber]
+            ?? alternateBoardingRoutes.first(where: { $0.key.caseInsensitiveCompare(busNumber) == .orderedSame })?.value {
+            boardingRoute = alternate
+            let boardingLocationOverride: RouteCoordinate? = {
+                guard let lat = currentLatitude, let lon = currentLongitude else { return nil }
+                return RouteCoordinate(latitude: lat, longitude: lon)
+            }()
+            ridingTracker.buildRidingState(
+                route: alternate,
+                busNumber: busNumber,
+                destination: destination,
+                startTracking: ridingTracker.shouldTrackRiding,
+                boardingLocationOverride: boardingLocationOverride
+            )
+            ridingTracker.enableLocationTrackingIfNeeded()
+            syncEnteredBusNumber()
+            return
+        }
         guard let match = GoogleRoutesAPIService.findMatchingRouteWithIndex(
             routes: accumulatedTransitRoutes,
             busNumber: busNumber
@@ -630,12 +961,15 @@ final class MainViewModel {
         ridingTracker.dismissActiveAlert()
     }
 
-    func checkRidingProgress(at coordinate: CLLocationCoordinate2D) {
-        ridingTracker.checkProgress(at: coordinate, destination: destination)
-    }
-
     private func clearRidingState() {
         ridingTracker.clear()
+    }
+
+    /// 降車のみを行う。clearBusNumber() と違い、バス番号入力欄・boardingRoute・
+    /// 経路データベース・目的地には触れない。降り続けて別のバスへ乗り換える操作
+    /// (長押しトグル・メイン画面の降車ボタン)から呼ぶ。
+    func endRiding() {
+        ridingTracker.endRiding()
     }
 
     private func registerCompletedBusCheck() {

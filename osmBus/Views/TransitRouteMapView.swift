@@ -29,6 +29,7 @@ private struct _GoogleMSMapWrapper: UIViewRepresentable {
     let markers: [GMapMarkerData]
     var shouldFollowUser: Bool = false
     var fitBoundsOnAppear: GMSCoordinateBounds? = nil
+    var myLocationIsRiding: Bool = false
     var onSetup: ((GMSMapView) -> Void)? = nil
     var onTap: ((CLLocationCoordinate2D) -> Void)? = nil
 
@@ -108,18 +109,28 @@ private struct _GoogleMSMapWrapper: UIViewRepresentable {
         if let userCoordinate {
             if let marker = c.myLocationMarker {
                 marker.position = userCoordinate
+                if c.myLocationMarkerIsRiding != myLocationIsRiding {
+                    marker.icon = TransitMapMarkerIcons.myLocationDot(
+                        fill: myLocationIsRiding ? .systemOrange : AppTheme.brandBlueUIColor
+                    )
+                    c.myLocationMarkerIsRiding = myLocationIsRiding
+                }
             } else {
                 let marker = GMSMarker(position: userCoordinate)
-                marker.icon = TransitMapMarkerIcons.myLocationDot()
+                marker.icon = TransitMapMarkerIcons.myLocationDot(
+                    fill: myLocationIsRiding ? .systemOrange : AppTheme.brandBlueUIColor
+                )
                 marker.groundAnchor = CGPoint(x: 0.5, y: 0.5)
                 marker.zIndex = 20
                 marker.isTappable = false
                 marker.map = mapView
                 c.myLocationMarker = marker
+                c.myLocationMarkerIsRiding = myLocationIsRiding
             }
         } else if let marker = c.myLocationMarker {
             marker.map = nil
             c.myLocationMarker = nil
+            c.myLocationMarkerIsRiding = nil
         }
 
         if shouldFollowUser, let coord = userCoordinate {
@@ -147,6 +158,7 @@ private struct _GoogleMSMapWrapper: UIViewRepresentable {
         var pendingPolylines: [GMapPolylineData] = []
         var isSchedulingPolylines = false
         var myLocationMarker: GMSMarker?
+        var myLocationMarkerIsRiding: Bool?
 
         init(_ parent: _GoogleMSMapWrapper) { self.parent = parent }
 
@@ -209,6 +221,7 @@ struct GoogleMapView: View {
     var locationButtonFallback: CLLocationCoordinate2D? = nil
     var shouldFollowUser: Bool = false
     var fitBoundsOnAppear: GMSCoordinateBounds? = nil
+    var myLocationIsRiding: Bool = false
     var onSetup: ((GMSMapView) -> Void)? = nil
     var onTap: ((CLLocationCoordinate2D) -> Void)? = nil
     var trialSignature: String = "maps"
@@ -216,7 +229,6 @@ struct GoogleMapView: View {
     @Environment(SharedMapsTrialStore.self) private var mapsTrialStore
     @Environment(\.locale) private var locale
     @State private var showsPrivacySheet = false
-    @State private var showsAPISettings = false
     @State private var mapBox = GMSMapViewBox()
 
     var body: some View {
@@ -229,6 +241,7 @@ struct GoogleMapView: View {
                 markers: markers,
                 shouldFollowUser: shouldFollowUser,
                 fitBoundsOnAppear: fitBoundsOnAppear,
+                myLocationIsRiding: myLocationIsRiding,
                 onSetup: { mapView in
                     mapBox.view = mapView
                     onSetup?(mapView)
@@ -289,17 +302,13 @@ struct GoogleMapView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Button(AppLocaleString.text("Maps_設定に進む", locale: locale)) {
-                showsAPISettings = true
+                NotificationCenter.default.post(name: .osmBusOpenAPISettings, object: nil)
             }
             .buttonStyle(.borderedProminent)
         }
         .padding(32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(uiColor: .systemGroupedBackground))
-        .sheet(isPresented: $showsAPISettings) {
-            AppSettingsView(opensAPISettingsOnAppear: true)
-                .environment(\.locale, locale)
-        }
     }
 }
 
@@ -348,14 +357,14 @@ struct TransitRouteMapSelection: Identifiable {
 }
 
 /// 乗車中の経路地図シート用。表示時点のスナップショットを保持し、親の再描画ループを防ぐ。
+/// ridingBusNumber・ridingAlightCoordinate はここに含めない
+/// (乗降のたびにスナップショットを取り直す必要が出て更新漏れの元になるため、呼び出し側で常に viewModel から直読みする)。
 struct BoardingRouteMapSheetModel: Identifiable {
     let id: Int
     let route: ParsedTransitRoute
     let origin: RouteCoordinate
     let destination: Destination
     let routeOptionCount: Int
-    var ridingBusNumber: String? = nil
-    var ridingAlightCoordinate: RouteCoordinate? = nil
 }
 
 // MARK: - TransitRouteMapView
@@ -383,7 +392,9 @@ struct TransitRouteMapView: View {
     @State private var cachedPolylines: [GMapPolylineData] = []
     @State private var cachedMarkers: [GMapMarkerData] = []
     @State private var isMapEngineReady = false
-    @State private var lastKnownUserCoordinate: CLLocationCoordinate2D? = nil
+    /// シート表示中は EnvironmentObject の再描画が止まり、開いた瞬間の距離のままになることがある。
+    /// 測位の Publisher で明示的に取り直す。
+    @State private var liveUserCoordinate: CLLocationCoordinate2D?
 
     @EnvironmentObject private var locationService: LocationService
 
@@ -412,30 +423,53 @@ struct TransitRouteMapView: View {
     }
 
     private var currentLegAlightingCoordinate: CLLocationCoordinate2D {
+        let step: ParsedTransitStep? = {
+            if let ridingLegStepIndex {
+                return displayedRoute.steps[ridingLegStepIndex]
+            }
+            return displayedRoute.steps.first {
+                $0.travelMode == "TRANSIT" && $0.vehicleType == "BUS"
+            }
+        }()
+        if let step,
+           let coordinate = GoogleRoutesAPIService.legAlightCoordinate(
+               arrival: step.arrivalStopLocation,
+               polyline: step.polylineCoordinates,
+               fallbackLatitude: destination.latitude,
+               fallbackLongitude: destination.longitude
+           ) {
+            return coordinate
+        }
         if let coord = ridingAlightCoordinate {
             return CLLocationCoordinate2D(latitude: coord.latitude, longitude: coord.longitude)
-        }
-        let busStep = displayedRoute.steps.first(where: {
-            $0.travelMode == "TRANSIT" && $0.vehicleType == "BUS"
-        })
-        if let loc = busStep?.arrivalStopLocation {
-            return CLLocationCoordinate2D(latitude: loc.latitude, longitude: loc.longitude)
         }
         return CLLocationCoordinate2D(latitude: destination.latitude, longitude: destination.longitude)
     }
 
-    private var effectiveUserCoordinate: CLLocationCoordinate2D? {
-        locationService.currentLocation ?? lastKnownUserCoordinate
+    /// 距離計算用の出発地。シートが再描画されなくても `liveUserCoordinate` は測位のたびに更新する。
+    private var effectiveOriginForDistance: CLLocationCoordinate2D {
+        liveUserCoordinate
+            ?? locationService.currentLocation
+            ?? origin.clLocationCoordinate2D
     }
 
-    private var distanceToDestination: Double? {
-        guard let coord = effectiveUserCoordinate else { return nil }
-        let alight = currentLegAlightingCoordinate
+    private var topBadgeDistanceMeters: Double? {
+        let originCoordinate = effectiveOriginForDistance
+        if ridingBusNumber != nil {
+            guard displayedRouteContainsRidingBus else { return nil }
+            let alight = currentLegAlightingCoordinate
+            return GoogleRoutesAPIService.distanceMeters(
+                fromLatitude: originCoordinate.latitude,
+                fromLongitude: originCoordinate.longitude,
+                toLatitude: alight.latitude,
+                toLongitude: alight.longitude
+            )
+        }
         return GoogleRoutesAPIService.distanceMeters(
-            fromLatitude: coord.latitude,
-            fromLongitude: coord.longitude,
-            toLatitude: alight.latitude,
-            toLongitude: alight.longitude
+            fromLatitude: originCoordinate.latitude,
+            fromLongitude: originCoordinate.longitude,
+            toLatitude: destination.latitude,
+            toLongitude: destination.longitude
         )
     }
 
@@ -456,12 +490,11 @@ struct TransitRouteMapView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationBarTitleDisplayMode(.inline)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                routeHeaderBar
+            }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    routeHeaderBusLines
-                }
-                .hideSharedBackgroundIfAvailable()
-                ToolbarItemGroup(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
                     if displayedRouteOptionCount > 1 {
                         Button { openRouteSwitcher() } label: {
                             HStack(spacing: 3) {
@@ -483,7 +516,10 @@ struct TransitRouteMapView: View {
                 routeSwitcherSheet
             }
             .task { await bootMapEngine() }
-            .syncMapLiveLocation(lastKnown: $lastKnownUserCoordinate)
+            .onAppear { locationService.refreshCurrentFromCache() }
+            .onReceive(locationService.$currentLocation) { coordinate in
+                liveUserCoordinate = coordinate
+            }
         }
     }
 
@@ -493,6 +529,7 @@ struct TransitRouteMapView: View {
             markers: cachedMarkers,
             shouldFollowUser: false,
             fitBoundsOnAppear: nil,
+            myLocationIsRiding: ridingBusNumber != nil,
             onSetup: { mapView in
                 mapBox.view = mapView
                 mapView.camera = GMSCameraPosition(
@@ -503,18 +540,20 @@ struct TransitRouteMapView: View {
             trialSignature: "maps-transit"
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .overlay(alignment: .bottom) {
-            VStack(spacing: 8) {
-                HStack {
-                    Spacer()
-                    MapLocationButton(
-                        mapBox: mapBox,
-                        fallbackCoordinate: origin.clLocationCoordinate2D
-                    )
-                    .padding(.trailing, 12)
-                }
-                routeSummaryBar
+        .overlay(alignment: .topLeading) {
+            if let meters = topBadgeDistanceMeters {
+                TopDistanceBadge(distanceMeters: meters, onTap: { dismiss() })
+                    .padding(.leading, 12)
+                    .padding(.top, 12)
             }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            MapLocationButton(
+                mapBox: mapBox,
+                fallbackCoordinate: origin.clLocationCoordinate2D
+            )
+            .padding(.trailing, 12)
+            .padding(.bottom, 12)
         }
         .ignoresSafeArea(edges: .bottom)
     }
@@ -594,37 +633,34 @@ struct TransitRouteMapView: View {
         onSwitchRoute?(index)
     }
 
-    // MARK: - Route summary bar
-
-    private var routeSummaryBar: some View {
-        RouteMapSummaryBar(
-            durationText: GoogleRoutesAPIService.displayDuration(for: displayedRoute, locale: locale),
-            distanceMeters: distanceToDestination,
-            showsDistance: displayedRouteContainsRidingBus,
-            fareText: GoogleRoutesAPIService.displayFare(for: displayedRoute),
-            locale: locale
-        )
-    }
-
     @ViewBuilder
-    private var routeHeaderBusLines: some View {
+    private var routeHeaderBar: some View {
         let busLines = GoogleRoutesAPIService.transitBusLineBadgeLabels(for: displayedRoute)
-        Group {
-            if busLines.isEmpty {
-                Text(GoogleRoutesAPIService.transitLineSummary(for: displayedRoute))
-                    .font(.subheadline.weight(.semibold))
-                    .lineLimit(1)
-                    .fixedSize(horizontal: true, vertical: false)
-            } else {
-                TransitBusLineBadgesRow(
-                    lines: busLines,
-                    ridingBusNumber: ridingBusNumber,
-                    onLongPress: onSelectRidingBus.map { callback in
-                        { line in callback(displayedRouteIndex, line) }
-                    }
-                )
+        ScrollView(.horizontal, showsIndicators: false) {
+            Group {
+                if busLines.isEmpty {
+                    Text(GoogleRoutesAPIService.transitLineSummary(for: displayedRoute))
+                        .font(.subheadline.weight(.semibold))
+                        .lineLimit(1)
+                } else {
+                    TransitBusLineBadgesRow(
+                        lines: busLines,
+                        ridingBusNumber: ridingBusNumber,
+                        font: .caption.weight(.bold),
+                        badgeHorizontalPadding: 7,
+                        badgeVerticalPadding: 3,
+                        onLongPress: onSelectRidingBus.map { callback in
+                            { line in callback(displayedRouteIndex, line) }
+                        }
+                    )
+                }
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
         }
+        .scrollBounceBehavior(.basedOnSize)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.bar)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isStaticText)
     }
@@ -843,17 +879,17 @@ private enum TransitMapMarkerIcons {
         }
     }
 
-    /// 自前追跡の現在地マーカー。Google Maps 純正の青い現在地ドットの簡易版。
-    static func myLocationDot() -> UIImage {
-        let diameter: CGFloat = 22
+    /// 自前追跡の現在地マーカー。乗車中は橙、降車中（未乗車含む）はブランド青で塗り分ける。
+    static func myLocationDot(fill: UIColor = AppTheme.brandBlueUIColor) -> UIImage {
+        let diameter: CGFloat = 26
         return UIGraphicsImageRenderer(size: CGSize(width: diameter, height: diameter)).image { _ in
             let outerRect = CGRect(x: 1, y: 1, width: diameter - 2, height: diameter - 2)
             UIColor.white.setFill()
             UIBezierPath(ovalIn: outerRect).fill()
 
-            let innerInset: CGFloat = 3
+            let innerInset: CGFloat = 5
             let innerRect = outerRect.insetBy(dx: innerInset, dy: innerInset)
-            UIColor.systemBlue.setFill()
+            fill.setFill()
             UIBezierPath(ovalIn: innerRect).fill()
         }
     }
@@ -875,7 +911,6 @@ struct RouteMapSummaryBar: View {
     let durationText: String
     let distanceMeters: Double?
     var showsDistance: Bool = true
-    let fareText: String?
     let locale: Locale
 
     var body: some View {
@@ -889,8 +924,6 @@ struct RouteMapSummaryBar: View {
                 distanceLabel
                     .frame(maxWidth: .infinity, alignment: .center)
             }
-
-            fareLabel
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
@@ -902,9 +935,7 @@ struct RouteMapSummaryBar: View {
     private var distanceLabel: some View {
         let prefix = AppLocaleString.text("直線距離", locale: locale)
         if let meters = distanceMeters {
-            let formatted = meters < 1000
-                ? String(format: "%.0f m", meters)
-                : String(format: "%.1f km", meters / 1000)
+            let formatted = DistanceColorBand.formattedDistanceText(meters: meters)
             Label(
                 "\(prefix) \(formatted)",
                 systemImage: "location.fill"
@@ -923,24 +954,6 @@ struct RouteMapSummaryBar: View {
         }
     }
 
-    @ViewBuilder
-    private var fareLabel: some View {
-        if let fare = fareText {
-            Text(fare)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-                .fixedSize(horizontal: true, vertical: false)
-        } else {
-            Text(AppLocaleString.text("運賃不明", locale: locale))
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.tertiary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-                .fixedSize(horizontal: true, vertical: false)
-        }
-    }
 }
 
 // MARK: - Bus line badges
@@ -974,6 +987,7 @@ struct TransitBusLineBadgesRow: View {
     var font: Font = .subheadline.weight(.bold)
     var badgeHorizontalPadding: CGFloat = 8
     var badgeVerticalPadding: CGFloat = 4
+    var onTap: ((String) -> Void)? = nil
     var onLongPress: ((String) -> Void)? = nil
 
     var body: some View {
@@ -992,6 +1006,9 @@ struct TransitBusLineBadgesRow: View {
                     horizontalPadding: badgeHorizontalPadding,
                     verticalPadding: badgeVerticalPadding
                 )
+                .onTapGesture {
+                    onTap?(line)
+                }
                 .onLongPressGesture {
                     guard let onLongPress else { return }
                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -1087,31 +1104,3 @@ private extension RouteCoordinate {
     }
 }
 
-// MARK: - Live location sync for map footers
-
-private struct MapLiveLocationSyncModifier: ViewModifier {
-    @EnvironmentObject private var locationService: LocationService
-    @Binding var lastKnownCoordinate: CLLocationCoordinate2D?
-
-    func body(content: Content) -> some View {
-        content
-            .onAppear {
-                locationService.refreshCurrentFromCache()
-                ingest(locationService.currentLocation)
-            }
-            .onReceive(locationService.$currentLocation) { coordinate in
-                ingest(coordinate)
-            }
-    }
-
-    private func ingest(_ coordinate: CLLocationCoordinate2D?) {
-        guard let coordinate else { return }
-        lastKnownCoordinate = coordinate
-    }
-}
-
-extension View {
-    func syncMapLiveLocation(lastKnown: Binding<CLLocationCoordinate2D?>) -> some View {
-        modifier(MapLiveLocationSyncModifier(lastKnownCoordinate: lastKnown))
-    }
-}

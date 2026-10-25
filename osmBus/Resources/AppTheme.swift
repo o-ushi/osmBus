@@ -1,8 +1,11 @@
 import SwiftUI
+import UIKit
 
 enum AppTheme {
     /// メイン背景色 RGB(61, 89, 147)
     static let brandBlue = Color(red: 61 / 255, green: 89 / 255, blue: 147 / 255)
+    /// `brandBlue` と同値の UIColor 版（UIKit / Core Graphics 描画用）
+    static let brandBlueUIColor = UIColor(red: 61 / 255, green: 89 / 255, blue: 147 / 255, alpha: 1)
 
     /// アプリ画面の下地色（ライト / ダーク）
     static let sceneColorLight = Color(red: 253 / 255, green: 252 / 255, blue: 240 / 255)

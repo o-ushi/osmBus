@@ -13,11 +13,19 @@ struct AppSettingsView: View {
     @AppStorage(AppLanguage.storageKey) private var appLanguageCode = AppLanguage.english.rawValue
     @AppStorage(BusKeypadInputMode.storageKey) private var busKeypadInputModeRaw =
         BusKeypadInputMode.appendToExisting.rawValue
+    @AppStorage(BusNumberTableSortMode.storageKey) private var busNumberTableSortModeRaw =
+        BusNumberTableSortMode.byDirection.rawValue
+    @AppStorage(BusNumberTableDistanceMetric.storageKey) private var busNumberTableDistanceMetricRaw =
+        BusNumberTableDistanceMetric.walkPriority.rawValue
     @AppStorage(KeypadHapticManager.hapticEnabledKey)   private var hapticEnabled   = true
     @AppStorage(KeypadHapticManager.hapticIntensityKey) private var hapticIntensityRaw = "medium"
     @AppStorage(KeypadHapticManager.soundEnabledKey)    private var soundEnabled    = false
     @AppStorage(KeypadHapticManager.soundVolumeKey)     private var soundVolume     = 0.5
     @State private var path = NavigationPath()
+    @EnvironmentObject private var locationService: LocationService
+    @ObservedObject private var catalogDownloader = BusRouteCatalogDownloader.shared
+    @State private var catalogSummary = BusRouteCatalogStore.summary()
+    @State private var catalogNote: String?
 
     var opensAPISettingsOnAppear = false
 
@@ -27,6 +35,14 @@ struct AppSettingsView: View {
 
     private var currentBusKeypadInputMode: BusKeypadInputMode {
         BusKeypadInputMode(rawValue: busKeypadInputModeRaw) ?? .appendToExisting
+    }
+
+    private var currentBusNumberTableSortMode: BusNumberTableSortMode {
+        BusNumberTableSortMode(rawValue: busNumberTableSortModeRaw) ?? .byDirection
+    }
+
+    private var currentBusNumberTableDistanceMetric: BusNumberTableDistanceMetric {
+        BusNumberTableDistanceMetric(rawValue: busNumberTableDistanceMetricRaw) ?? .walkPriority
     }
 
     var body: some View {
@@ -93,6 +109,54 @@ struct AppSettingsView: View {
                 }
 
                 Section {
+                    ForEach(BusNumberTableSortMode.allCases) { mode in
+                        Button {
+                            busNumberTableSortModeRaw = mode.rawValue
+                        } label: {
+                            HStack {
+                                Text(AppLocaleString.text(mode.settingsTitleKey, locale: locale))
+                                    .foregroundStyle(.primary)
+                                    .fontWeight(currentBusNumberTableSortMode == mode ? .semibold : .regular)
+                                Spacer()
+                                if currentBusNumberTableSortMode == mode {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(.blue)
+                                        .fontWeight(.semibold)
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    Text(AppLocaleString.text("バス番号表の並び順", locale: locale))
+                } footer: {
+                    Text(AppLocaleString.text("バス番号表の並び順_フッター", locale: locale))
+                }
+
+                if currentBusNumberTableSortMode == .byDistance {
+                    Section {
+                        ForEach(BusNumberTableDistanceMetric.allCases) { metric in
+                            Button {
+                                busNumberTableDistanceMetricRaw = metric.rawValue
+                            } label: {
+                                HStack {
+                                    Text(AppLocaleString.text(metric.settingsTitleKey, locale: locale))
+                                        .foregroundStyle(.primary)
+                                        .fontWeight(currentBusNumberTableDistanceMetric == metric ? .semibold : .regular)
+                                    Spacer()
+                                    if currentBusNumberTableDistanceMetric == metric {
+                                        Image(systemName: "checkmark")
+                                            .foregroundStyle(.blue)
+                                            .fontWeight(.semibold)
+                                    }
+                                }
+                            }
+                        }
+                    } footer: {
+                        Text(AppLocaleString.text("距離基準_測り方_フッター", locale: locale))
+                    }
+                }
+
+                Section {
                     if UIDevice.current.userInterfaceIdiom != .pad {
                         Toggle(
                             AppLocaleString.text("キーフィードバック_バイブ", locale: locale),
@@ -149,24 +213,24 @@ struct AppSettingsView: View {
                     Text(AppLocaleString.text("キーフィードバック_フッター", locale: locale))
                 }
 
-                if PlanStore.shared.isPaid {
-                    Section {
-                        NavigationLink(value: AppSettingsRoute.apiSettings) {
-                            HStack {
-                                Label(AppLocaleString.text("Google API", locale: locale), systemImage: "key.horizontal.fill")
-                                Spacer()
-                                if GoogleRoutesAPIKeyStore.hasUserConfiguredKey {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundStyle(.green)
-                                        .font(.caption)
-                                }
+                routeCatalogSection
+
+                Section {
+                    NavigationLink(value: AppSettingsRoute.apiSettings) {
+                        HStack {
+                            Label(AppLocaleString.text("Google API", locale: locale), systemImage: "key.horizontal.fill")
+                            Spacer()
+                            if GoogleRoutesAPIKeyStore.hasUserConfiguredKey {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.green)
+                                    .font(.caption)
                             }
                         }
-                    } header: {
-                        Text(AppLocaleString.text("API 連携", locale: locale))
-                    } footer: {
-                        Text(AppLocaleString.text("API連携フッター", locale: locale))
                     }
+                } header: {
+                    Text(AppLocaleString.text("API 連携", locale: locale))
+                } footer: {
+                    Text(AppLocaleString.text("API連携フッター", locale: locale))
                 }
 
                 Section {
@@ -198,11 +262,85 @@ struct AppSettingsView: View {
                 }
             }
             .onAppear {
+                catalogSummary = BusRouteCatalogStore.summary()
                 guard opensAPISettingsOnAppear, path.isEmpty else { return }
                 path.append(AppSettingsRoute.apiSettings)
+            }
+            .onChange(of: catalogDownloader.activity) { _, _ in
+                catalogSummary = BusRouteCatalogStore.summary()
+                if case .idle = catalogDownloader.activity { return }
+                catalogNote = nil
             }
             .id(locale.identifier)
         }
         .environment(\.locale, locale)
+    }
+
+    private var catalogBusy: Bool {
+        if case .working = catalogDownloader.activity { return true }
+        return false
+    }
+
+    private var catalogStatusText: String {
+        if let catalogNote { return catalogNote }
+        switch catalogDownloader.activity {
+        case .working(let done, let total):
+            return AppLocaleString.formatted("設定_路線_進捗_%d_%d", locale: locale, done, total)
+        case .message(let text), .failed(let text):
+            return text
+        case .idle:
+            if catalogSummary.routeCount == 0 {
+                return AppLocaleString.text("設定_路線_未取得", locale: locale)
+            }
+            return AppLocaleString.formatted(
+                "設定_路線_件数_%d_%d",
+                locale: locale,
+                catalogSummary.routeCount,
+                catalogSummary.geometryCount
+            )
+        }
+    }
+
+    private var routeCatalogSection: some View {
+        Section {
+            Text(catalogStatusText)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Button {
+                startCatalog(.download)
+            } label: {
+                Label(AppLocaleString.text("設定_路線_全件ダウンロード", locale: locale), systemImage: "arrow.down.circle")
+            }
+            .disabled(catalogBusy || !ThirdPartyDataConsent.isGranted)
+            Button {
+                startCatalog(.update)
+            } label: {
+                Label(AppLocaleString.text("設定_路線_更新", locale: locale), systemImage: "arrow.triangle.2.circlepath")
+            }
+            .disabled(catalogBusy || !ThirdPartyDataConsent.isGranted)
+        } header: {
+            Text(AppLocaleString.text("設定_路線データベース", locale: locale))
+        } footer: {
+            Text(AppLocaleString.text("設定_路線_フッター", locale: locale))
+        }
+    }
+
+    private enum CatalogAction {
+        case download
+        case update
+    }
+
+    private func startCatalog(_ action: CatalogAction) {
+        guard let coordinate = locationService.currentLocation else {
+            catalogNote = AppLocaleString.text("設定_路線_現在地なし", locale: locale)
+            return
+        }
+        catalogNote = nil
+        switch action {
+        case .download:
+            catalogDownloader.downloadAll(near: coordinate)
+        case .update:
+            catalogDownloader.update(near: coordinate)
+        }
     }
 }

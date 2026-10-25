@@ -5,10 +5,17 @@ private enum DestinationInputRoute: Hashable {
     case savedPlaces
 }
 
+/// 検索・履歴・登録地から選ぶ対象。目的地/出発地で文言だけ変える (Step 10)。
+enum DestinationInputRole {
+    case destination
+    case origin
+}
+
 struct DestinationInputView: View {
     let currentDestination: Destination?
     let onSelect: (Destination) -> Void
     let onClear: () -> Void
+    var role: DestinationInputRole = .destination
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
@@ -31,7 +38,7 @@ struct DestinationInputView: View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.visible)
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle(AppLocaleString.text("目的地", locale: locale))
+            .navigationTitle(AppLocaleString.text(role == .destination ? "目的地" : "地図_出発地", locale: locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
@@ -51,6 +58,7 @@ struct DestinationInputView: View {
                     DestinationHistoryView(
                         currentDestination: currentDestination,
                         isEmbedded: true,
+                        showsSavedRouteTrips: role == .destination,
                         onSelectDestination: finishSelection
                     )
                     .environment(\.locale, locale)
@@ -90,15 +98,23 @@ struct DestinationInputView: View {
                     onClear()
                     dismiss()
                 } label: {
-                    Image(systemName: "trash")
+                    Image(systemName: role == .destination ? "trash" : "location.fill")
                 }
-                .accessibilityLabel(AppLocaleString.text("目的地をクリア", locale: locale))
+                .accessibilityLabel(
+                    AppLocaleString.text(
+                        role == .destination ? "目的地をクリア" : "地図_手動出発地クリア",
+                        locale: locale
+                    )
+                )
+            } else if role == .origin {
+                Text(AppLocaleString.text("現在地を使用中", locale: locale))
+                    .foregroundStyle(.secondary)
             } else {
                 Text(AppLocaleString.text("目的地を設定", locale: locale))
                     .foregroundStyle(.secondary)
             }
         } header: {
-            Text(AppLocaleString.text("現在の目的地", locale: locale))
+            Text(AppLocaleString.text(role == .destination ? "現在の目的地" : "現在の出発地", locale: locale))
         }
     }
 

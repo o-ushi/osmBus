@@ -9,7 +9,8 @@ struct ResultBannerView: View {
     var isBoardingRouteCheapest: Bool = true
     var isRiding: Bool = false
     var onStopRiding: (() -> Void)? = nil
-    var otherBoardableVariants: [String] = []
+    /// ScrollView 内では false。親の高さいっぱいに伸ばさない。
+    var fillsAvailableHeight: Bool = true
 
     @Environment(\.mainScreenCompactLayout) private var compactLayout
     @Environment(\.busCardStyle) private var cardStyle
@@ -40,19 +41,21 @@ struct ResultBannerView: View {
                 idleContent
             case .checking:
                 checkingContent
-            case .canBoard(_, _, let directionHint):
+            case .canBoard(_, let alightStopText, let directionHint):
+                // 「乗車開始」ボタン自体が乗ってよいことを示すため、冗長な「乗ってください！」は表示しない。
                 boardingVerdict(
-                    AppLocaleString.text("乗ってください！", locale: locale),
+                    nil,
                     color: Color.green.readable(against: cardBg),
-                    directionHint: directionHint
+                    directionHint: directionHint,
+                    alightStopText: alightStopText
                 )
-            case .canBoardIfVariant(let variantNames, _, _, let directionHint):
+            case .canBoardIfVariant(let variantNames, _, let alightStopText, let directionHint):
                 boardingVerdict(
                     variantBoardMessage(for: variantNames),
                     color: verdictYellow.readable(against: cardBg),
                     directionHint: directionHint,
                     variantNames: variantNames,
-                    otherVariants: otherBoardableVariants
+                    alightStopText: alightStopText
                 )
             case .cannotBoard:
                 centeredVerdict(
@@ -69,7 +72,7 @@ struct ResultBannerView: View {
         }
         .padding(.horizontal, compactLayout ? 12 : 16)
         .padding(.vertical, compactLayout ? 10 : 14)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: contentAlignment)
+        .frame(maxWidth: .infinity, maxHeight: fillsAvailableHeight ? .infinity : nil, alignment: contentAlignment)
         .background(BusCardBackground(style: cardStyle))
         .animation(.easeInOut(duration: 0.2), value: state)
         .confirmationDialog(
@@ -110,28 +113,38 @@ struct ResultBannerView: View {
     }
 
     @ViewBuilder
-    private func boardingVerdict(_ text: String, color: Color, directionHint: String? = nil, variantNames: [String]? = nil, otherVariants: [String] = []) -> some View {
+    private func boardingVerdict(
+        _ text: String?,
+        color: Color,
+        directionHint: String? = nil,
+        variantNames: [String]? = nil,
+        alightStopText: String? = nil
+    ) -> some View {
         VStack(spacing: compactLayout ? 5 : 8) {
-            Text(text)
-                .font(.system(size: verdictFontSize, weight: .heavy, design: .rounded))
-                .foregroundStyle(color)
-                .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.55)
-                .lineLimit(3)
-
-            if let directionHint {
-                Label(directionHint, systemImage: "location.north.fill")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
+            if let text {
+                Text(text)
+                    .font(.system(size: verdictFontSize, weight: .heavy, design: .rounded))
+                    .foregroundStyle(color)
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.55)
+                    .lineLimit(3)
             }
 
-            if !otherVariants.isEmpty {
-                Label(
-                    AppLocaleString.text("他の系統も乗れるかも", locale: locale),
-                    systemImage: "questionmark.circle"
-                )
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(verdictYellow.readable(against: cardBg))
+            if let alightStopText, !alightStopText.isEmpty {
+                Text(alightStopText)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+
+            if let directionHint {
+                let mixed = directionHint == AppLocaleString.text("方向ヒント_どちらでも", locale: locale)
+                Label(directionHint, systemImage: mixed ? "arrow.left.arrow.right" : "location.north.fill")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.8)
+                    .lineLimit(3)
             }
 
             if isRiding {

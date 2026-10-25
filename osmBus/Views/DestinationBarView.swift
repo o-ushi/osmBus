@@ -79,6 +79,8 @@ struct CurrentLocationBarView: View {
     let onOpenSettings: () -> Void
     var onClearManualOrigin: (() -> Void)? = nil
     var onMapPick: (() -> Void)? = nil
+    /// 本体タップで出発地の地名検索シートを出す (Step 10)。nil ならタップ無効。
+    var onTap: (() -> Void)? = nil
 
     @Environment(\.mainScreenCompactLayout) private var compactLayout
     @Environment(\.busCardStyle) private var cardStyle
@@ -95,18 +97,28 @@ struct CurrentLocationBarView: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: iconName)
-                .font(iconFont)
-                .foregroundStyle(isDisabled ? Color.secondary : iconColor)
+        HStack(spacing: 0) {
+            Button {
+                onTap?()
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: iconName)
+                        .font(iconFont)
+                        .foregroundStyle(isDisabled ? Color.secondary : iconColor)
 
-            Text(barLabel)
-                .font(.system(size: titleSize, weight: .medium))
-                .foregroundStyle(isDisabled ? Color.secondary : Color.primary)
-                .lineLimit(2)
-                .minimumScaleFactor(0.85)
+                    Text(barLabel)
+                        .font(.system(size: titleSize, weight: .medium))
+                        .foregroundStyle(isDisabled ? Color.secondary : Color.primary)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
 
-            Spacer(minLength: 0)
+                    Spacer(minLength: 0)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(onTap == nil)
+            .accessibilityLabel(barLabel)
 
             HStack(spacing: 12) {
                 if hasManualOrigin, let onClearManualOrigin {
@@ -148,9 +160,10 @@ struct CurrentLocationBarView: View {
                     .accessibilityLabel(AppLocaleString.text("地図から選択", locale: locale))
                 }
             }
+            .padding(.trailing, AppTheme.cardPaddingH)
             .allowsHitTesting(!isDisabled)
         }
-        .padding(.horizontal, AppTheme.cardPaddingH)
+        .padding(.leading, AppTheme.cardPaddingH)
         .padding(.vertical, compactLayout ? 10 : 14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .background(BusCardBackground(style: cardStyle))

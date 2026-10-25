@@ -88,6 +88,12 @@
 
 "タップすると、その目的地を設定します。" = "Chạm để đặt điểm đến đó.";
 
+"検索したルート" = "Tuyến đã tìm";
+
+"検索したルート_フッター" = "Chạm để xem tuyến đã lưu và mở trên bản đồ.";
+
+"この目的地を設定" = "Đặt điểm đến này";
+
 "履歴を消去" = "Xóa lịch sử";
 
 "履歴をすべて消去しますか？" = "Xóa toàn bộ lịch sử?";
@@ -109,18 +115,38 @@
 
 "履歴" = "Lịch sử";
 
+"メイン画面" = "Nhập số";
+
+"トップ画面" = "Ma trận";
+
+
+"あと" = "Còn";
+
+"バス番号表" = "Bảng số xe buýt";
+
+"方向" = "Hướng";
+
+"直通" = "Trực tiếp";
+
+"乗換1" = "Đổi 1 lần";
+
+"乗換2+" = "Đổi 2+ lần";
+
+"バス番号表_操作ヒント" = "Chạm để xem bản đồ tuyến, giữ để lên hoặc xuống xe";
 
 
 
 "目的地" = "Điểm đến";
+
+"ナビを中止" = "Hủy điều hướng";
+
+"ナビ中止_確認" = "Hủy chuyến đi này? Nếu đang đi xe, thao tác này coi như xuống xe.";
 
 
 
 "ルートを確認中…" = "Đang kiểm tra tuyến…";
 
 "ルートを確認しています…" = "Đang kiểm tra tuyến…";
-
-"乗ってください！" = "Lên xe!";
 
 "もう一度試す" = "Thử lại";
 
@@ -141,6 +167,10 @@
 
 
 "現在の目的地" = "Điểm đến hiện tại";
+
+"現在の出発地" = "Điểm đi hiện tại";
+
+"現在地を使用中" = "Đang dùng vị trí hiện tại";
 
 "履歴から探す" = "Tìm từ lịch sử";
 
@@ -170,7 +200,6 @@
 
 
 
-"Google Routes API" = "Google Routes API";
 
 "APIキー未設定" = "Hãy đặt khóa API trước";
 
@@ -184,7 +213,6 @@
 
 "エラー_現在地未取得" = "Không lấy được vị trí. Hãy cho phép truy cập vị trí.";
 
-"座標表示" = "Vĩ %@ / Kinh %@";
 
 "RoutesAPIキー保存完了" = "Đã lưu khóa Google Routes API. Dùng để kiểm tra tuyến xe buýt.";
 
@@ -228,23 +256,23 @@
 
 "バージョン" = "Phiên bản %@ (%@)";
 
-"ヘルプ紹介文" = "Ở trạm xe buýt, nhập số xe trước mặt để biết ngay xe có đến điểm đến của bạn không. Bạn cũng có thể xem tuyến đi và theo dõi khi đang đi.";
+"ヘルプ紹介文" = "Ứng dụng mở ở Ma trận. Đặt điểm đến rồi chọn xe từ bảng số. Bàn phím kiểm tra số ở … → Nhập số, hoặc vuốt sang phải từ mép trái.";
 
 "help_場所を登録_title" = "Địa điểm đã lưu";
 
-"help_場所を登録_body" = "Từ … → Địa điểm đã lưu, đăng ký nhà và nơi thường đến. Chạm để đặt làm điểm đến.";
+"help_場所を登録_body" = "Chạm thanh điểm đến, rồi Địa điểm đã lưu, để đăng ký nhà và nơi thường đến. Chạm để đặt làm điểm đến.";
 
 "help_目的地_title" = "Đặt điểm đến";
 
-"help_目的地_body" = "Chạm thanh điểm đến ở trên để chọn từ địa điểm đã lưu, lịch sử hoặc kết quả tìm kiếm.";
+"help_目的地_body" = "Chạm thanh điểm đến để chọn từ tìm kiếm, lịch sử hoặc địa điểm đã lưu. Cũng có thể chọn trên bản đồ bằng biểu tượng bản đồ. Lịch sử và địa điểm đã lưu nằm trong sheet điểm đến.";
 
 "help_現在地_title" = "Lấy vị trí hiện tại";
 
-"help_現在地_body" = "Ứng dụng xin quyền vị trí khi mở. Ở trạm xe buýt, chạm làm mới (↻) trên thanh vị trí trước khi nhập số xe.";
+"help_現在地_body" = "Ứng dụng xin quyền vị trí khi mở. Làm mới (↻) hoặc chọn trên bản đồ từ thanh vị trí. Khi đang đi, chỉ khóa thanh điểm đến; vẫn cập nhật được điểm xuất phát.";
 
 "help_バス番号_title" = "Nhập số xe buýt";
 
-"help_バス番号_body" = "Chỉ nhập số (vd: 35). Ứng dụng tự tìm 35A, 35B… trong tuyến đến điểm đến và báo có nên lên xe hay không.";
+"help_バス番号_body" = "Chỉ khi số không có trên bảng, mở … → Nhập số (hoặc vuốt từ mép trái) rồi chỉ nhập số (vd: 35). Ứng dụng đối chiếu tuyến; nếu xe tới điểm trung chuyển thì vẫn có thể lên xe.";
 
 "help_APIキー_とは_title" = "Khóa API là gì?";
 
@@ -252,19 +280,19 @@
 
 "help_APIキー_設定_title" = "Cách cài đặt";
 
-"help_APIキー_設定_body" = "Mở … → Cài đặt → Google Routes API và làm theo hướng dẫn trên màn hình để tạo khóa trên Google Cloud Console, dán và lưu. Có thể chạy Kiểm tra kết nối.";
+"help_APIキー_設定_body" = "Mở … → Cài đặt → Google API và làm theo hướng dẫn trên màn hình để tạo khóa trên Google Cloud Console, dán và lưu. Có thể chạy Kiểm tra kết nối. Lưu khóa cần PREMIUM.";
 
 "help_APIキー_安心_title" = "Khóa có an toàn không?";
 
 "help_APIキー_安心_body" = "Khóa được lưu trong Keychain và gửi cho Google để xác thực API. Khóa không được gửi đến máy chủ riêng của nhà phát triển.";
 
-"help_乗車_title" = "Lên xe!";
+"help_乗車_title" = "Bắt đầu đi";
 
-"help_乗車_body" = "Khi tuyến khớp rõ ràng với điểm đến (vd: cả 35A và 35B, hoặc khớp chính xác), màn hình hiển thị lớn màu xanh \"Lên xe!\". Nếu chỉ một số biến thể đi được, thông báo màu vàng như \"Nếu là 35A thì lên xe!\" sẽ xuất hiện.";
+"help_乗車_body" = "Trên Nhập số, khi tuyến bạn nhập khớp rõ ràng với điểm đến (khớp chính xác, hoặc mọi biến thể như cả 35A và 35B), nút màu xanh \"Bắt đầu đi\" sẽ hiện ra — chính nút đó là dấu hiệu bạn có thể lên xe. Nếu chỉ một số biến thể đi được, thông báo màu vàng như \"Nếu là 35A thì lên xe!\" sẽ xuất hiện, và bạn vẫn có thể chạm Bắt đầu đi cho biến thể đó.";
 
 "help_不可_title" = "Bỏ qua xe này!";
 
-"help_不可_body" = "Không có biến thể phù hợp trên tuyến đến điểm đến — màn hình hiển thị đỏ \"Bỏ qua xe này!\".";
+"help_不可_body" = "Không có biến thể phù hợp trên tuyến đến điểm đến — màn hình hiển thị đỏ \"Bỏ qua xe này!\". Nếu sơ đồ tuyến đã lưu vẫn chạy từ trạm hiện tại đến điểm đến (hoặc điểm trung chuyển), nhập số trên bàn phím vẫn có thể được lên xe.";
 
 "help_ルートなし_title" = "Không tìm thấy tuyến";
 
@@ -328,6 +356,10 @@
 "降車_%@" = "Xuống tại %@";
 
 "降車_目的地方面" = "Xuống tại trạm về phía điểm đến";
+
+"代替乗車_乗換まで" = "Xe này đi được đến điểm trung chuyển trên gợi ý của Google";
+
+"代替乗車_乗換_%@" = "Đi được đến điểm trung chuyển (%@)";
 
 "RoutesAPI_接続成功_公共交通" = "Kết nối thành công. Đã lấy tuyến công cộng.";
 
@@ -402,17 +434,9 @@
 
 "経路番号_%d" = "Tuyến %d";
 
-"運賃不明" = "Không có thông tin cước";
-
 "経路を見る" = "Xem tuyến gợi ý";
 
 "経路件数_%d" = "%d tuyến";
-
-"経路取得失敗" = "Không tải được tuyến";
-
-"経路一覧フッター" = "Tuyến công cộng từ Google Routes API. Cước phí có thể không hiển thị tùy khu vực hoặc tuyến.";
-
-"経路一覧フッター_地図" = "Chạm một tuyến để xem trên bản đồ cùng các điểm chuyển tuyến.";
 
 "バス停" = "Trạm xe buýt";
 
@@ -428,6 +452,26 @@
 "テンキー_継ぎ足し" = "Nối thêm số sau khi có kết quả";
 
 "テンキー入力_フッター" = "Chọn cách nhập số sau khi đã hiển thị kết quả kiểm tra xe buýt.";
+
+"バス番号表の並び順" = "Thứ tự bảng số xe buýt";
+
+"表の並び_方向基準" = "Theo hướng";
+
+"表の並び_距離基準" = "Theo khoảng cách";
+
+"表の並び_乗換回数基準" = "Theo số lần chuyển";
+
+"バス番号表の並び順_フッター" = "Theo hướng: mỗi hàng là một hướng, các cột là số lần chuyển. Theo khoảng cách / Theo số lần chuyển: bỏ nhóm theo hướng, liệt kê phẳng theo khoảng cách đi bộ ngắn nhất trước (rồi đến khoảng cách đi xe buýt ngắn nhất).";
+
+"距離基準_歩行距離優先" = "Ưu tiên khoảng cách đi bộ";
+
+"距離基準_合計距離" = "Khoảng cách xe buýt + đi bộ";
+
+"距離基準_測り方_フッター" = "Ưu tiên khoảng cách đi bộ: xếp hạng theo tổng khoảng cách đi bộ (lên xe + chuyển xe + xuống xe) trước, rồi đến khoảng cách đi xe buýt nếu bằng nhau. Khoảng cách xe buýt + đi bộ: xếp hạng theo tổng đơn giản của khoảng cách đi xe buýt và tổng khoảng cách đi bộ.";
+
+"乗換回数" = "Số lần chuyển";
+
+"バス番号" = "Số xe buýt";
 
 "お試し残り_%d" = "Lượt còn lại tháng này: %d";
 
@@ -452,20 +496,28 @@
 "方向_W" = "T";
 "方向_NW" = "TB";
 "help_お試し_title" = "Lượt dùng miễn phí hàng tháng";
-"help_お試し_body" = "Không cần khóa riêng: gói FREE được 30 lần kiểm tra/tháng (khóa dùng chung). Gói PREMIUM được 60 lần/tháng. Đặt lại ngày 1 hàng tháng. Số lần còn lại hiển thị ở giữa thanh công cụ trên. Cài khóa riêng (PREMIUM) để dùng không giới hạn.";
+"help_お試し_body" = "Không cần khóa riêng: gói FREE được 30 lần kiểm tra/tháng (khóa dùng chung). Gói PREMIUM được 60 lần/tháng. Đặt lại ngày 1 hàng tháng. Số lần còn lại hiện dưới bảng số xe trên Ma trận (hoặc cuối Nhập số). Cài khóa riêng (PREMIUM) để dùng không giới hạn.";
+"help_トップ_title" = "Ma trận";
+"help_トップ_body" = "Đây là màn hình khi mở ứng dụng: điểm đến, vị trí, khoảng cách và bảng số xe. Để kiểm tra số trên bàn phím, mở … → Nhập số. Cũng có thể vuốt sang phải từ mép trái. Quay lại bằng … → Ma trận, hoặc vuốt từ mép trái lần nữa.";
+"help_距離_title" = "Màu khoảng cách";
+"help_距離_body" = "Khi chưa lên xe, huy hiệu là khoảng cách thẳng đến điểm đến. Khi đang đi, là khoảng cách đến trạm xuống của xe hiện tại. Từ 3 km xanh dương, từ 1 km xanh lá, từ 500 m vàng, từ 200 m cam, dưới 200 m đỏ. Khi đang đi, chạm huy hiệu để mở bản đồ tuyến (chưa lên xe thì chỉ hiển thị). Giữ huy hiệu để hủy điều hướng (cũng xóa điểm đến). Để xuống xe chuyển tuyến, giữ số xe trên bảng. Nếu lên xe từ bản đồ tuyến mà chưa đặt điểm đến, huy hiệu sẽ hiện \"—\" và không hiển thị khoảng cách.";
+"help_バス番号表_title" = "Bảng số xe buýt";
+"help_バス番号表_body" = "Số xe được nhóm theo hướng và số lần chuyển. Chạm để mở bản đồ tuyến, giữ để lên hoặc xuống xe. Xe đang đi được tô nổi.";
 "help_経路_title" = "Tuyến đi";
-"help_経路_body" = "Chạm nút tuyến trên màn hình chính (hoặc lắc thiết bị) để xem các phương án đi công cộng đến điểm đến. Chạm một tuyến để xem trên bản đồ, hoặc chạm giữ vào số xe buýt để bắt đầu chế độ đang đi ngay.";
+"help_経路_body" = "Chạm số xe trên bảng để mở bản đồ tuyến Google tương ứng. Giữ số xe để lên hoặc xuống.";
+"help_路線図_title" = "Sơ đồ tuyến (OSM)";
+"help_路線図_body" = "Khi chưa lên xe, … → Sơ đồ tuyến mở bản đồ OpenStreetMap toàn tuyến — không phải chuyến Google. Nếu lên xe từ bản đồ OSM, lúc đang đi vẫn là OSM. Khi đang đi xe Google, Sơ đồ tuyến và huy hiệu khoảng cách đều mở bản đồ tuyến Google hiện tại.";
 "help_乗車中_title" = "Chế độ đang đi";
-"help_乗車中_body" = "Sau kết quả xanh hoặc vàng \"Lên xe!\", chạm Bắt đầu đi (hoặc chạm giữ số xe buýt trong danh sách tuyến) để vào chế độ đang đi. Ứng dụng sẽ theo dõi khoảng cách thẳng đến trạm xuống xe hiện tại và báo bằng cảnh báo bạn đã cài đặt. Khi chuyển tuyến, khoảng cách tự chuyển sang trạm xuống xe tiếp theo. Chạm biểu tượng \"Đang đi\" ở góc trên bên trái để mở bản đồ tuyến. Dùng nút Xuống xe trên thẻ để kết thúc.";
+"help_乗車中_body" = "Giữ số xe trên bảng để bắt đầu đi. Giữ cùng số lần nữa để xuống (chuyển tuyến), rồi giữ xe tiếp theo. Khi đang đi, khoảng cách là đường thẳng đến trạm xuống của xe hiện tại và đổi sau khi chuyển. Chạm huy hiệu khoảng cách và … → Sơ đồ tuyến mở cùng một bản đồ tuyến. Trên … → Nhập số có thể dùng Bắt đầu đi và Xuống xe trên thẻ.";
 "help_設定_title" = "Cài đặt & cảnh báo";
-"help_設定_body" = "Từ … → Cài đặt bạn có thể đổi ngôn ngữ, âm thanh bàn phím và cảnh báo đến nơi. Cảnh báo đến nơi dựa trên khoảng cách đến trạm xuống xe, hỗ trợ tối đa 3 mức — chuông reo 1–3 lần từ xa đến gần. Chuông và cảnh báo hoạt động ngay cả khi ứng dụng ở nền hoặc màn hình tắt. Khóa Maps API và Routes API cũng cài ở đây (PREMIUM).";
+"help_設定_body" = "Từ … → Cài đặt bạn có thể đổi ngôn ngữ, âm thanh bàn phím và cảnh báo đến nơi. Cảnh báo đến nơi dựa trên khoảng cách đến trạm xuống xe, hỗ trợ tối đa 3 mức — chuông reo 1–3 lần từ xa đến gần. Chuông và cảnh báo hoạt động ngay cả khi ứng dụng ở nền hoặc màn hình tắt. Khóa Google API (dùng chung Routes và bản đồ) cũng cài ở đây. Lưu khóa cần PREMIUM.";
 
-"方向ヒント_%@" = "Hướng %@";
+"方向ヒント_%@" = "Thường hướng %@ — không bắt buộc";
+"方向ヒント_どちらでも" = "Cả hai hướng đều được nếu đi về phía điểm đến";
 "方向バッジ_%@" = "%@";
 
 "APIキー_Premium限定_タイトル" = "Tinh nang PREMIUM";
 "APIキー_Premium限定_説明" = "Cai khóa Google API riêng có trong gói PREMIUM.";
-"Google Maps API" = "Google Maps API";
 "IAP_再読み込み" = "Tai lai san pham";
 "IAP_商品が見つかりません" = "Khong tim thay san pham";
 "IAP_商品読み込み中" = "Dang tai san pham…";
@@ -473,13 +525,6 @@
 "IAP_復元失敗" = "Khoi phuc that bai";
 "IAP_購入保留" = "Giao dich dang cho duyet";
 "IAP_購入失敗" = "Mua hang that bai";
-"MapsAPI_エラー_400" = "Yeu cau loi. Hay bat Maps API tren Google Cloud.";
-"MapsAPI_エラー_401" = "Loi xac thuc. Kiem tra khóa API va Maps API.";
-"MapsAPI_エラー_429" = "Qua nhieu yeu cau. Vui long doi va thu lai.";
-"MapsAPI_エラー_500" = "May chu Google tam thoi khong kha dung.";
-"MapsAPI_エラー_不明_%@" = "Loi Maps API: %@";
-"MapsAPI_エラー_拒否_%@" = "Yeu cau bi tu choi: %@";
-"MapsAPI_接続成功" = "Ket noi thanh cong. Khóa Maps API hop le.";
 
 "プライバシーとデータ" = "Quyền riêng tư";
 "プライバシー_設定フッター" = "Xem cách dữ liệu được gửi, lưu và xóa.";
@@ -524,7 +569,6 @@
 "Overpass_解析失敗" = "Khong phan tich duoc du lieu tuyen.";
 "Overpass_路線なし" = "Khong tim thay tuyen xe phu hop.";
 "Overpass_通信エラー" = "Khong ket noi duoc may chu Overpass.";
-"PREMIUM_RoutesAPI_説明" = "PREMIUM: 60 lượt kiểm tra xe/tháng với khóa dùng chung. Hoặc cài khóa Routes API riêng để dùng không giới hạn.";
 "PREMIUM_API統合_説明" = "Kiểm tra xe buýt: 60 lượt/tháng với khóa dùng chung. Hiển thị bản đồ: 60 lượt/tháng (đếm riêng). Cài khóa API riêng để dùng không giới hạn cả hai.";
 "PREMIUM_利用中" = "Dang dung PREMIUM";
 "RoutesAPI_お試し状況_補足" = "Đặt lại ngày 1 hàng tháng. Gói PREMIUM được 60 lượt/tháng.";
@@ -558,11 +602,10 @@
 "テンキー_表示" = "Hiện bàn phím số";
 "テンキー_非表示" = "Ẩn bàn phím số";
 "乗車中" = "Dang di";
-"路線候補_初期化確認" = "Làm mới danh sách tuyến?";
+"路線候補_初期化確認" = "Xóa tất cả tuyến đã lưu? Cả những tuyến giữ lại khi đổi điểm đến.";
 "はい" = "Có";
 "いいえ" = "Không";
 "乗車開始" = "Bat dau di";
-"他の系統も乗れるかも" = "Bien the khac cung co the di duoc";
 "地図_タップヒント" = "Cham ban do de chon dia diem";
 "地図_住所取得中" = "Dang lay dia chi…";
 "地図_出発地" = "Diem di";
@@ -590,13 +633,31 @@
 "設定_距離アラート_距離" = "Khoang cach (m)";
 "距離アラート_%d" = "Canh bao o %d m";
 "距離アラート_タイトル" = "Canh bao khoang cach";
-"路線図" = "Ban do tuyen";
+"路線図" = "Sơ đồ tuyến";
 "路線図_OSM出典" = "Du lieu tuyen © OpenStreetMap contributors";
 "路線図_エラー_タイトル" = "Loi ban do tuyen";
 "路線図_クリア" = "Xoa";
 "路線図_候補" = "Tuyen ung vien";
 "路線図_候補_ヒント" = "Chon tuyen khop voi so xe buyt.";
 "路線図_現在地なし警告" = "Can vi tri hien tai de hien thi ban do tuyen.";
+"路線図_一覧" = "Danh sách tuyến";
+"路線図_一覧_空状態" = "Chưa có dữ liệu tuyến";
+"路線図_一覧_空状態_詳細" = "Tải dữ liệu tuyến trong Cài đặt để hiện danh sách ở đây.";
+"設定_路線データベース" = "Cơ sở dữ liệu tuyến";
+"設定_路線_全件ダウンロード" = "Tải toàn bộ dữ liệu tuyến";
+"設定_路線_更新" = "Cập nhật dữ liệu tuyến";
+"設定_路線_フッター" = "Lưu các tuyến buýt trong vòng 80 km quanh vị trí hiện tại. Nhập số và danh sách mở từ dữ liệu đã lưu. Cập nhật chỉ tải tuyến có thay đổi.";
+"設定_路線_未取得" = "Chưa tải";
+"設定_路線_件数_%d_%d" = "%d tuyến (%d có hình dạng)";
+"設定_路線_進捗_%d_%d" = "Đang tải %d / %d";
+"設定_路線_完了_%d" = "Đã lưu %d tuyến";
+"設定_路線_更新なし" = "Không có tuyến nào được cập nhật";
+"設定_路線_更新完了_%d" = "Đã cập nhật %d tuyến";
+"設定_路線_現在地なし" = "Cần vị trí hiện tại để tải.";
+"路線図_履歴" = "Lịch sử";
+"路線図_乗降ヒント" = "Giữ để lên hoặc xuống xe";
+"路線図_履歴_空状態" = "Chưa có lịch sử";
+"路線図_履歴_空状態_詳細" = "Các tuyến xe buýt bạn đã xem trên bản đồ tuyến sẽ hiện ở đây.";
 "路線図_空状態" = "Nhập số xe buýt để tìm tuyến";
 "路線図_空状態_コンテキスト" = "Nhập số xe buýt để tìm tuyến gần đây";
 "路線図_読込中_%@" = "Dang tai %@…";

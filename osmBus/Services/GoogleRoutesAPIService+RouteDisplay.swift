@@ -9,11 +9,6 @@ extension GoogleRoutesAPIService {
         return AppLocaleString.formatted("所要時間_%d分", locale: locale, minutes)
     }
 
-    static func displayFare(for route: ParsedTransitRoute) -> String? {
-        guard let fareText = route.fareText, !fareText.isEmpty else { return nil }
-        return fareText
-    }
-
     static func transitBusLineLabels(for route: ParsedTransitRoute) -> [String] {
         route.steps.compactMap { step in
             guard isBusStep(step) else { return nil }
@@ -86,10 +81,15 @@ extension GoogleRoutesAPIService {
         return tokens.first?.displayToken
     }
 
-    static func routeDirectionBadge(for route: ParsedTransitRoute, locale: Locale) -> String? {
+    /// ルートの走行方向を表す方位テキスト(「北西」等)。バッジ文言では包まない生の方位。
+    static func routeDirectionText(for route: ParsedTransitRoute, locale: Locale) -> String? {
         guard let step = route.steps.first(where: { isBusStep($0) }),
               let bearing = stepBearing(from: step) else { return nil }
-        let dirText = AppLocaleString.text(compassDirectionKeys[Int((bearing + 22.5) / 45) % 8], locale: locale)
+        return AppLocaleString.text(compassDirectionKeys[Int((bearing + 22.5) / 45) % 8], locale: locale)
+    }
+
+    static func routeDirectionBadge(for route: ParsedTransitRoute, locale: Locale) -> String? {
+        guard let dirText = routeDirectionText(for: route, locale: locale) else { return nil }
         return AppLocaleString.formatted("方向バッジ_%@", locale: locale, dirText)
     }
 }

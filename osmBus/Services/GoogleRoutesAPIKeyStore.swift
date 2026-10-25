@@ -5,9 +5,29 @@ enum GoogleRoutesAPIKeyStore {
     private static let keychainKey = "google.apiKey.userOverride"
     /// 旧バージョンからの移行専用。新規保存には使用しない。
     private static let legacyUserDefaultsKey = "GoogleRoutesAPIKey.userOverride"
+    private static let cacheLock = NSLock()
+    private static var cachedUserKey: String?
+    private static var hasMemoryCache = false
 
     /// 設定画面で保存したキー（未設定なら `nil`）。
     static func userConfiguredKey() -> String? {
+        cacheLock.lock()
+        if hasMemoryCache {
+            let cached = cachedUserKey
+            cacheLock.unlock()
+            return cached
+        }
+        cacheLock.unlock()
+
+        let loaded = loadUserConfiguredKeyFromStorage()
+        cacheLock.lock()
+        cachedUserKey = loaded
+        hasMemoryCache = true
+        cacheLock.unlock()
+        return loaded
+    }
+
+    private static func loadUserConfiguredKeyFromStorage() -> String? {
         if let data = KeychainStore.load(key: keychainKey),
            let value = String(data: data, encoding: .utf8)?
             .trimmingCharacters(in: .whitespacesAndNewlines),
@@ -29,6 +49,11 @@ enum GoogleRoutesAPIKeyStore {
     /// 空でない文字列を渡すと保存する。空にすると削除する。
     static func setUserConfiguredKey(_ raw: String?) {
         let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        cacheLock.lock()
+        hasMemoryCache = true
+        cachedUserKey = trimmed.isEmpty ? nil : trimmed
+        cacheLock.unlock()
+
         if trimmed.isEmpty {
             KeychainStore.delete(key: keychainKey)
             UserDefaults.standard.removeObject(forKey: legacyUserDefaultsKey)
@@ -36,15 +61,6 @@ enum GoogleRoutesAPIKeyStore {
             KeychainStore.save(key: keychainKey, data: Data(trimmed.utf8))
             UserDefaults.standard.removeObject(forKey: legacyUserDefaultsKey)
         }
-    }
-
-    /// ルート検索などで使うキー（ユーザー設定キー → PREMIUM共有キー → お試し共有キーの順）。
-    static func effectiveAPIKey() -> String? {
-        if let userKey = userConfiguredKey() { return userKey }
-        guard isPremiumStored || SharedRoutesTrialStore.canUseSharedKeyStored() else { return nil }
-        let sharedKey = Secrets.sharedGoogleRoutesAPIKey
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        return sharedKey.isEmpty ? nil : sharedKey
     }
 
     static var isConfigured: Bool {
@@ -58,12 +74,4 @@ enum GoogleRoutesAPIKeyStore {
     static var hasUserConfiguredKey: Bool {
         userConfiguredKey() != nil
     }
-}
-
-// MARK: - Google Maps API key store (Routes API・Maps SDK で同一キーを使うため委譲)
-
-enum GoogleMapsAPIKeyStore {
-    static func userConfiguredKey() -> String? { GoogleRoutesAPIKeyStore.userConfiguredKey() }
-    static func setUserConfiguredKey(_ raw: String?) { GoogleRoutesAPIKeyStore.setUserConfiguredKey(raw) }
-    static var hasUserConfiguredKey: Bool { GoogleRoutesAPIKeyStore.hasUserConfiguredKey }
 }

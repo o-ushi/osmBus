@@ -2,6 +2,7 @@ import Foundation
 
 extension Notification.Name {
     static let osmBusDataDeleted = Notification.Name("osmBus.dataDeleted")
+    static let osmBusOpenAPISettings = Notification.Name("osmBus.openAPISettings")
 }
 
 enum ThirdPartyDataConsent {
@@ -42,6 +43,9 @@ enum AppDataDeletion {
         DestinationHistoryStore.clearAll()
         SavedPlaceStore.clearAll()
         DestinationStore.save(nil)
+        TransitRouteArchive.clear()
+        BusLineMapStore.clear()
+        BusRouteCatalogStore.clear()
         GoogleRoutesAPIKeyStore.setUserConfiguredKey(nil)
         ThirdPartyDataConsent.deleteDecision()
         NotificationCenter.default.post(name: .osmBusDataDeleted, object: nil)
