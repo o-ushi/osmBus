@@ -81,7 +81,8 @@ class TripController extends ChangeNotifier {
   final PlannerCache _planner = PlannerCache();
 
   CatalogSnapshot _snapshot = CatalogSnapshot.empty;
-  GeoPoint? _origin;
+  GeoPoint? _gps;
+  Destination? _manualOrigin;
   LocationStatus _locationStatus = LocationStatus.unknown;
   Destination? _destination;
   String _input = '';
@@ -108,7 +109,11 @@ class TripController extends ChangeNotifier {
   /// 同意がオフなら空。ファイルは消さない。
   CatalogSnapshot get visibleCatalog => consentGranted ? _snapshot : CatalogSnapshot.empty;
 
-  GeoPoint? get origin => _origin;
+  /// 出発地。地図で選んだ地点があればそれ、なければ GPS（Swift の `effectiveOrigin`）。
+  GeoPoint? get origin => _manualOrigin?.point ?? _gps;
+
+  /// 地図で選んだ出発地。null なら現在地を使っている。保存はしない（Swift と同じ）。
+  Destination? get manualOrigin => _manualOrigin;
   LocationStatus get locationStatus => _locationStatus;
   Destination? get destination => _destination;
   String get input => _input;
@@ -121,8 +126,9 @@ class TripController extends ChangeNotifier {
   bool get locating => _locating;
 
   /// 「あと」バッジの距離。乗車中は降車停留所まで、そうでなければ目的地まで（直線）。
+  /// 乗車中は手動の出発地ではなく GPS で測る（バスが動いても距離が固まらないように）。
   double? get distanceLeftMeters {
-    final origin = _origin;
+    final origin = _ridingItinerary != null ? (_gps ?? this.origin) : this.origin;
     if (origin == null) return null;
     final target = _ridingItinerary?.firstLeg.alightStop.point ?? _destination?.point;
     return target == null ? null : Geo.distance(origin, target);
@@ -142,7 +148,7 @@ class TripController extends ChangeNotifier {
   TableState get tableState {
     if (!consentGranted) return TableState.consentRequired;
     if (_destination == null) return TableState.noDestination;
-    if (_origin == null) return TableState.noLocation;
+    if (origin == null) return TableState.noLocation;
     if (visibleCatalog.geometryCount == 0) return TableState.noRouteData;
     if (_itineraries == null) return TableState.calculating;
     if (_itineraries!.isEmpty) return TableState.noRoutes;
@@ -224,7 +230,7 @@ class TripController extends ChangeNotifier {
         _setLocationStatus(LocationStatus.denied);
         return;
       }
-      _locating = _origin == null;
+      _locating = _gps == null;
       _setLocationStatus(LocationStatus.ok);
       final last = await Geolocator.getLastKnownPosition();
       if (last != null) _updateOrigin(last);
@@ -244,7 +250,7 @@ class TripController extends ChangeNotifier {
   }
 
   void _updateOrigin(Position position) {
-    _origin = GeoPoint(position.latitude, position.longitude);
+    _gps = GeoPoint(position.latitude, position.longitude);
     _locating = false;
     notifyListeners();
     unawaited(_replan());
@@ -253,7 +259,23 @@ class TripController extends ChangeNotifier {
   /// UI テストで GPS の代わりに出発地を入れる。
   @visibleForTesting
   void debugSetOrigin(GeoPoint origin) {
-    _origin = origin;
+    _gps = origin;
+    unawaited(_replan());
+  }
+
+  // MARK: - 出発地
+
+  void setManualOrigin(Destination place) {
+    _manualOrigin = place;
+    notifyListeners();
+    unawaited(_replan());
+  }
+
+  /// 現在地（GPS）に戻す。
+  void clearManualOrigin() {
+    if (_manualOrigin == null) return;
+    _manualOrigin = null;
+    notifyListeners();
     unawaited(_replan());
   }
 
@@ -327,7 +349,7 @@ class TripController extends ChangeNotifier {
   BoardingDecision _computeDecision() {
     if (_input.isEmpty) return const BoardingIdle();
     if (!consentGranted) return const BoardingConsentRequired();
-    if (_origin == null) return const BoardingNoLocation();
+    if (origin == null) return const BoardingNoLocation();
     if (_destination == null) return const BoardingNoDestination();
     if (visibleCatalog.geometryCount == 0) return const BoardingNoRouteData();
     final itineraries = _itineraries;
@@ -344,7 +366,7 @@ class TripController extends ChangeNotifier {
   }
 
   Future<void> _replan() async {
-    final origin = _origin;
+    final origin = this.origin;
     final destination = _destination?.point;
     final routes = visibleCatalog.routes;
     final generation = ++_planGeneration;
@@ -465,13 +487,13 @@ class TripController extends ChangeNotifier {
   // MARK: - 取得
 
   Future<void> downloadAll() async {
-    final origin = _origin;
+    final origin = this.origin;
     if (origin == null || !consentGranted) return;
     await downloader.downloadAll(origin);
   }
 
   Future<void> updateCatalog() async {
-    final origin = _origin;
+    final origin = this.origin;
     if (origin == null || !consentGranted) return;
     await downloader.update(origin);
   }

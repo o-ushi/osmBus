@@ -38,12 +38,23 @@ class _TopScreenState extends State<TopScreen> {
 
   void _toggleScreen() => setState(() => _showsTopScreen = !_showsTopScreen);
 
-  Future<void> _pickDestination() async {
+  /// 地図シートを開く。シートの中でも出発地／目的地を切り替えられる（Swift と同じ）。
+  Future<void> _pickOnMap(PickRole role) async {
     final picked = await showDestinationPicker(
       context,
-      initialCenter: controller.destination?.point ?? controller.origin,
+      initialRole: role,
+      initialCenter: role == PickRole.origin
+          ? controller.origin
+          : controller.destination?.point ?? controller.origin,
+      searchCenter: controller.origin,
     );
-    if (picked != null) await controller.setDestination(picked);
+    if (picked == null) return;
+    switch (picked.role) {
+      case PickRole.origin:
+        controller.setManualOrigin(picked.place);
+      case PickRole.destination:
+        await controller.setDestination(picked.place);
+    }
   }
 
   void _openSettings() => showSettingsSheet(context, controller);
@@ -126,7 +137,8 @@ class _TopScreenState extends State<TopScreen> {
 
   Widget _originDestinationCard() => OriginDestinationCard(
         controller: controller,
-        onDestinationTap: _pickDestination,
+        onDestinationTap: () => _pickOnMap(PickRole.destination),
+        onOriginTap: () => _pickOnMap(PickRole.origin),
       );
 
   Widget _topContent(BuildContext context) {
@@ -195,10 +207,12 @@ class OriginDestinationCard extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onDestinationTap,
+    required this.onOriginTap,
   });
 
   final TripController controller;
   final VoidCallback onDestinationTap;
+  final VoidCallback onOriginTap;
 
   String _locationStatus(AppLocalizations l10n) {
     switch (controller.locationStatus) {
@@ -215,6 +229,7 @@ class OriginDestinationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final destination = controller.destination;
+    final manual = controller.manualOrigin;
     final denied = switch (controller.locationStatus) {
       LocationStatus.denied || LocationStatus.deniedForever || LocationStatus.serviceDisabled => true,
       _ => false,
@@ -289,43 +304,75 @@ class OriginDestinationCard extends StatelessWidget {
           const Divider(indent: AppTheme.cardPaddingH + 10, height: 0.5),
           SizedBox(
             height: AppTheme.locationRowHeight,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppTheme.cardPaddingH),
-              child: Row(
-                children: [
-                  Icon(
-                    denied ? CupertinoIcons.location_slash : CupertinoIcons.location_fill,
-                    size: iconSize,
-                    color: denied ? Colors.orange : AppTheme.accent,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      l10n.currentLocationLabel(_locationStatus(l10n)),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onOriginTap,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: AppTheme.cardPaddingH),
+                      child: Row(
+                        children: [
+                          Icon(
+                            manual != null
+                                ? CupertinoIcons.map_pin_ellipse
+                                : denied
+                                    ? CupertinoIcons.location_slash
+                                    : CupertinoIcons.location_fill,
+                            size: iconSize,
+                            color: manual != null
+                                ? AppTheme.verdictGreen
+                                : denied
+                                    ? Colors.orange
+                                    : AppTheme.accent,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              manual != null
+                                  ? l10n.manualOriginLabel(manual.name)
+                                  : l10n.currentLocationLabel(_locationStatus(l10n)),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  if (denied)
-                    IconButton(
-                      tooltip: l10n.settings,
-                      onPressed: Geolocator.openAppSettings,
-                      icon: const Icon(CupertinoIcons.gear_alt, size: iconSize, color: AppTheme.accent),
-                    )
-                  else if (controller.locating)
-                    const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: CupertinoActivityIndicator(),
-                    )
-                  else
-                    IconButton(
-                      tooltip: l10n.reload,
-                      onPressed: controller.requestLocation,
-                      icon: const Icon(CupertinoIcons.arrow_clockwise, size: iconSize, color: AppTheme.accent),
-                    ),
-                ],
-              ),
+                ),
+                if (manual != null)
+                  IconButton(
+                    tooltip: l10n.clearManualOrigin,
+                    onPressed: controller.clearManualOrigin,
+                    icon: const Icon(CupertinoIcons.xmark_circle, size: iconSize, color: Colors.orange),
+                  )
+                else if (denied)
+                  IconButton(
+                    tooltip: l10n.settings,
+                    onPressed: Geolocator.openAppSettings,
+                    icon: const Icon(CupertinoIcons.gear_alt, size: iconSize, color: AppTheme.accent),
+                  )
+                else if (controller.locating)
+                  const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: CupertinoActivityIndicator(),
+                  )
+                else
+                  IconButton(
+                    tooltip: l10n.reload,
+                    onPressed: controller.requestLocation,
+                    icon: const Icon(CupertinoIcons.arrow_clockwise, size: iconSize, color: AppTheme.accent),
+                  ),
+                IconButton(
+                  tooltip: l10n.pickOriginOnMap,
+                  onPressed: onOriginTap,
+                  icon: const Icon(CupertinoIcons.map, size: iconSize, color: AppTheme.accent),
+                ),
+                const SizedBox(width: 4),
+              ],
             ),
           ),
         ],
@@ -363,7 +410,16 @@ class _DistanceBadge extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textColor)),
-              Text(value, style: TextStyle(fontSize: 21, fontWeight: FontWeight.w700, color: textColor, height: 1.1)),
+              // 桁が多くても 1 行に収める（バッジの高さは固定）。
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: TextStyle(fontSize: 21, fontWeight: FontWeight.w700, color: textColor, height: 1.1),
+                ),
+              ),
             ],
           ),
         ),

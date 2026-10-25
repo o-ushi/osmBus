@@ -115,5 +115,12 @@
   "sectionArchive": "Kho lưu trữ",
   "archiveCount": "Tuyến đã lưu trữ: {count}",
   "archiveRestore": "Khôi phục từ kho",
-  "archiveExport": "Xuất kho lưu trữ"
+  "archiveExport": "Xuất kho lưu trữ",
+  "pickerTitleOrigin": "Chọn điểm đi",
+  "pickerLongPressHintOrigin": "Nhấn giữ bản đồ để đặt điểm đi",
+  "roleOrigin": "Điểm đi",
+  "roleDestination": "Điểm đến",
+  "manualOriginLabel": "Điểm đi: {name}",
+  "clearManualOrigin": "Xóa điểm đi thủ công",
+  "pickOriginOnMap": "Chọn điểm đi trên bản đồ"
 }

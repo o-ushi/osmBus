@@ -115,5 +115,12 @@
   "sectionArchive": "Archive",
   "archiveCount": "Archived routes: {count}",
   "archiveRestore": "Restore from archive",
-  "archiveExport": "Export archive"
+  "archiveExport": "Export archive",
+  "pickerTitleOrigin": "Choose origin",
+  "pickerLongPressHintOrigin": "Long-press the map to set the origin",
+  "roleOrigin": "Origin",
+  "roleDestination": "Destination",
+  "manualOriginLabel": "Origin: {name}",
+  "clearManualOrigin": "Clear manual origin",
+  "pickOriginOnMap": "Choose origin on map"
 }

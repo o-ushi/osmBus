@@ -400,4 +400,27 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get archiveExport => '保管庫を書き出し';
+
+  @override
+  String get pickerTitleOrigin => '出発地を選ぶ';
+
+  @override
+  String get pickerLongPressHintOrigin => '地図を長押しして出発地を決めます';
+
+  @override
+  String get roleOrigin => '出発地';
+
+  @override
+  String get roleDestination => '目的地';
+
+  @override
+  String manualOriginLabel(String name) {
+    return '出発地: $name';
+  }
+
+  @override
+  String get clearManualOrigin => '手動出発地をクリア';
+
+  @override
+  String get pickOriginOnMap => '出発地を地図から選択';
 }

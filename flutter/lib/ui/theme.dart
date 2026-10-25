@@ -218,6 +218,10 @@ abstract final class DistanceColorBand {
     return (Colors.red, Colors.white);
   }
 
-  static String format(double meters) =>
-      meters < 1000 ? '${meters.round()} m' : '${(meters / 1000).toStringAsFixed(1)} km';
+  /// 10 km 以上は小数を落とす。
+  static String format(double meters) {
+    if (meters < 1000) return '${meters.round()} m';
+    final km = meters / 1000;
+    return km < 10 ? '${km.toStringAsFixed(1)} km' : '${km.round()} km';
+  }
 }

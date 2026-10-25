@@ -275,5 +275,19 @@
     }
   },
   "archiveRestore": "保管庫から復元",
-  "archiveExport": "保管庫を書き出し"
+  "archiveExport": "保管庫を書き出し",
+  "pickerTitleOrigin": "出発地を選ぶ",
+  "pickerLongPressHintOrigin": "地図を長押しして出発地を決めます",
+  "roleOrigin": "出発地",
+  "roleDestination": "目的地",
+  "manualOriginLabel": "出発地: {name}",
+  "clearManualOrigin": "手動出発地をクリア",
+  "pickOriginOnMap": "出発地を地図から選択",
+  "@manualOriginLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

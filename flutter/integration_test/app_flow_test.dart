@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:osmbus/app.dart';
@@ -160,5 +161,21 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200));
     }
     await _stage(tester, 'picker');
+
+    // 出発地を地図で選ぶ（シートの切り替えで出発地にして長押し）。
+    await tester.tap(find.text('出発地'));
+    await tester.pumpAndSettle();
+    await _stage(tester, 'pickerorigin');
+    await tester.longPress(find.byType(FlutterMap));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('出発地: '), findsOneWidget);
+    await _stage(tester, 'manualorigin');
+
+    await tester.tap(find.byTooltip('手動出発地をクリア'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('現在地: '), findsOneWidget);
+    await tester.tap(find.byTooltip('出発地を地図から選択'));
+    await tester.pumpAndSettle();
+    expect(find.text('出発地を選ぶ'), findsOneWidget);
   });
 }

@@ -795,6 +795,48 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'保管庫を書き出し'**
   String get archiveExport;
+
+  /// No description provided for @pickerTitleOrigin.
+  ///
+  /// In ja, this message translates to:
+  /// **'出発地を選ぶ'**
+  String get pickerTitleOrigin;
+
+  /// No description provided for @pickerLongPressHintOrigin.
+  ///
+  /// In ja, this message translates to:
+  /// **'地図を長押しして出発地を決めます'**
+  String get pickerLongPressHintOrigin;
+
+  /// No description provided for @roleOrigin.
+  ///
+  /// In ja, this message translates to:
+  /// **'出発地'**
+  String get roleOrigin;
+
+  /// No description provided for @roleDestination.
+  ///
+  /// In ja, this message translates to:
+  /// **'目的地'**
+  String get roleDestination;
+
+  /// No description provided for @manualOriginLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'出発地: {name}'**
+  String manualOriginLabel(String name);
+
+  /// No description provided for @clearManualOrigin.
+  ///
+  /// In ja, this message translates to:
+  /// **'手動出発地をクリア'**
+  String get clearManualOrigin;
+
+  /// No description provided for @pickOriginOnMap.
+  ///
+  /// In ja, this message translates to:
+  /// **'出発地を地図から選択'**
+  String get pickOriginOnMap;
 }
 
 class _AppLocalizationsDelegate

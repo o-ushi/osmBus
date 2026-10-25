@@ -408,4 +408,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get archiveExport => 'Export archive';
+
+  @override
+  String get pickerTitleOrigin => 'Choose origin';
+
+  @override
+  String get pickerLongPressHintOrigin =>
+      'Long-press the map to set the origin';
+
+  @override
+  String get roleOrigin => 'Origin';
+
+  @override
+  String get roleDestination => 'Destination';
+
+  @override
+  String manualOriginLabel(String name) {
+    return 'Origin: $name';
+  }
+
+  @override
+  String get clearManualOrigin => 'Clear manual origin';
+
+  @override
+  String get pickOriginOnMap => 'Choose origin on map';
 }

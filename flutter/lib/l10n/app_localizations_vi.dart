@@ -407,4 +407,27 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get archiveExport => 'Xuất kho lưu trữ';
+
+  @override
+  String get pickerTitleOrigin => 'Chọn điểm đi';
+
+  @override
+  String get pickerLongPressHintOrigin => 'Nhấn giữ bản đồ để đặt điểm đi';
+
+  @override
+  String get roleOrigin => 'Điểm đi';
+
+  @override
+  String get roleDestination => 'Điểm đến';
+
+  @override
+  String manualOriginLabel(String name) {
+    return 'Điểm đi: $name';
+  }
+
+  @override
+  String get clearManualOrigin => 'Xóa điểm đi thủ công';
+
+  @override
+  String get pickOriginOnMap => 'Chọn điểm đi trên bản đồ';
 }

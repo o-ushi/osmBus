@@ -8,6 +8,10 @@ import '../models/route_catalog.dart';
 
 const String osmTileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
+/// OSM のタイルが取れないとき（回線の DNS が tile.openstreetmap.org を引けない場合など）の予備。
+/// 中身は同じ OSM データ。
+const String fallbackTileUrl = 'https://a.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png';
+
 /// flutter_map は User-Agent を `flutter_map (<この値>)` にする。
 const String osmUserAgentPackage = 'com.osamushikubo.osmBus';
 
@@ -16,12 +20,13 @@ LatLng toLatLng(GeoPoint p) => LatLng(p.latitude, p.longitude);
 /// オフラインでは取得に失敗したタイルを空白のままにする（例外として扱わない）。
 Widget osmTileLayer() => TileLayer(
       urlTemplate: osmTileUrl,
+      fallbackUrl: fallbackTileUrl,
       userAgentPackageName: osmUserAgentPackage,
       tileProvider: NetworkTileProvider(silenceExceptions: true),
     );
 
 Widget osmAttribution() => const SimpleAttributionWidget(
-      source: Text('OpenStreetMap contributors'),
+      source: Text('OpenStreetMap contributors, OSM France'),
     );
 
 /// 番号表のタップ先。第 1 レグのポリライン、乗車停留所、降車停留所。
