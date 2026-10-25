@@ -1,0 +1,279 @@
+{
+  "@@locale": "ja",
+  "appTitle": "osmBus",
+  "settings": "設定",
+  "reload": "再読み込み",
+  "cancel": "キャンセル",
+  "ok": "OK",
+  "never": "なし",
+  "destinationUnset": "目的地を設定",
+  "destinationLabel": "目的地",
+  "destinationPickedPoint": "地図で選んだ地点",
+  "tableConsentRequired": "OSM データの利用に同意すると表示されます",
+  "noLocation": "現在地がありません",
+  "tableCalculating": "経路を読み込み中…",
+  "tableNoRoutes": "この条件ではルートが見つかりませんでした。現在地・目的地・路線データを確認してください。",
+  "noRouteData": "路線データがありません",
+  "headerDirection": "方向",
+  "headerDirect": "直通",
+  "headerTransfer1": "乗換1",
+  "headerTransfer2": "乗換2+",
+  "transferCount": "乗換 {count}",
+  "@transferCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "compassN": "北",
+  "compassNE": "北東",
+  "compassE": "東",
+  "compassSE": "南東",
+  "compassS": "南",
+  "compassSW": "南西",
+  "compassW": "西",
+  "compassNW": "北西",
+  "enterBusNumber": "バス番号を入力",
+  "boardVariant": "{names}だったら乗ってください！",
+  "@boardVariant": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "doNotBoard": "見送ってください！",
+  "alightAt": "{stop} で降車",
+  "@alightAt": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "estimatedArrival": "到着目安 {time}（概算 約{minutes}分）",
+  "@estimatedArrival": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "directionAny": "向きはどちらでも可。行き先方面なら大丈夫",
+  "directionToward": "参考：{direction}向き",
+  "@directionToward": {
+    "placeholders": {
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
+  "keypadDelete": "消去",
+  "keypadSubmit": "判定",
+  "ridingNow": "乗車中: {ref}",
+  "@ridingNow": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "endRiding": "乗車終了",
+  "sectionData": "路線データ",
+  "consentTitle": "OpenStreetMap データの利用",
+  "consentDescription": "Overpass API から周辺のバス路線を取得し、端末に保存します。",
+  "withdrawConsent": "同意を撤回してデータを削除",
+  "withdrawConfirm": "保存した路線ファイルを削除します。よろしいですか？",
+  "routeCount": "路線 {count} 件",
+  "@routeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "geometryCount": "形状 {count} 件",
+  "@geometryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lastSaved": "最終保存 {time}",
+  "@lastSaved": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadAll": "全件ダウンロード",
+  "updateRoutes": "更新",
+  "progress": "取得中 {done}/{total}",
+  "@progress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadFinished": "形状付き {count} 件を保存しました",
+  "@downloadFinished": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "updateFinished": "更新しました（形状付き {count} 件）",
+  "@updateFinished": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadNoRoutes": "周辺に路線がありません",
+  "downloadConsentRequired": "OSM データの利用への同意が必要です",
+  "downloadFailed": "取得に失敗しました: {detail}",
+  "@downloadFailed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "needsLocation": "ダウンロードには現在地が必要です",
+  "sectionBackup": "バックアップ",
+  "exportBackup": "書き出し",
+  "importBackup": "読み込み",
+  "importChooseMode": "読み込み方法",
+  "importReplace": "置き換え",
+  "importMerge": "統合",
+  "importDone": "{count} 件の路線を保存しました",
+  "@importDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importFailed": "読み込めませんでした: {reason}",
+  "@importFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionSync": "同期",
+  "iCloudSync": "iCloud 同期",
+  "iCloudOnlyIOS": "iCloud は iOS のみ",
+  "iCloudUnavailable": "iCloud を使えません（未サインイン、またはコンテナが未設定）",
+  "syncNow": "今すぐ同期",
+  "syncing": "同期中…",
+  "lastSynced": "最終同期 {time}",
+  "@lastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "syncError": "同期エラー: {detail}",
+  "@syncError": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionTable": "番号表の並び",
+  "sortDirection": "方向",
+  "sortDistance": "距離",
+  "sortTransfers": "乗換回数",
+  "metricLabel": "距離の測り方",
+  "metricWalk": "徒歩優先",
+  "metricTotal": "合計距離",
+  "sectionLocation": "現在地",
+  "locationOk": "取得できます",
+  "locationUnknown": "未確認",
+  "locationDenied": "位置情報が許可されていません",
+  "locationDeniedForever": "位置情報が拒否されています。設定アプリから許可してください",
+  "locationServiceDisabled": "位置情報サービスがオフです",
+  "openSettings": "設定を開く",
+  "retry": "再試行",
+  "pickerTitle": "目的地を選ぶ",
+  "searchHint": "地名を検索",
+  "pickerLongPressHint": "地図を長押しして目的地を決めます",
+  "searchFailed": "検索できませんでした",
+  "routeMapTitle": "{ref} の路線図",
+  "@routeMapTitle": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "boardAt": "乗車: {stop}",
+  "@boardAt": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "walkMeters": "徒歩 {meters}m",
+  "@walkMeters": {
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "busNumberTable": "バス番号表",
+  "currentLocationLabel": "現在地: {status}",
+  "@currentLocationLabel": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "locationAcquired": "取得済み",
+  "locationFetching": "取得中…",
+  "locationNotAcquired": "未取得",
+  "locationNotAllowed": "位置情報の利用が許可されていません。設定から許可してください。",
+  "menuMainScreen": "番号入力",
+  "menuTopScreen": "マトリクス",
+  "more": "その他",
+  "busNumberHint": "数字だけ入力（例: 35）。35A なども自動で判定します。",
+  "ridingLabel": "乗車中",
+  "startRiding": "乗車開始",
+  "getOff": "降車",
+  "distanceLeft": "あと",
+  "tableTapHint": "タップで地図、長押しで乗車または降車",
+  "pickOnMap": "地図から選択",
+  "chooseVariant": "系統を選択",
+  "busNumberHeader": "バス番号",
+  "transfersHeader": "乗換回数",
+  "sectionArchive": "保管庫",
+  "archiveCount": "保管庫の路線: {count} 件",
+  "@archiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "archiveRestore": "保管庫から復元",
+  "archiveExport": "保管庫を書き出し"
+}
