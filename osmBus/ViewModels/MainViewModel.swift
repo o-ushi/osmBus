@@ -30,6 +30,11 @@ final class MainViewModel {
     /// 固まったまま動かなくなる不具合の原因になっていた。
     var currentLatitude: Double? { locationService.currentLocation?.latitude }
     var currentLongitude: Double? { locationService.currentLocation?.longitude }
+    /// 乗車中の残り距離用。手動出発地ではなく、届いた GPS そのもの。
+    /// `@Observable` が追えるよう LocationService のコピーをここに持つ。
+    private(set) var gpsLatitude: Double?
+    private(set) var gpsLongitude: Double?
+    @ObservationIgnored private var locationCancellable: AnyCancellable?
     private(set) var manualOriginLatitude: Double?
     private(set) var manualOriginLongitude: Double?
     private(set) var manualOriginName: String?
@@ -65,7 +70,7 @@ final class MainViewModel {
 
     /// トップ画面の距離欄用。
     /// - 目的地あり・未乗車: 現在地 → 目的地
-    /// - 目的地あり・乗車中: 現在地 → 今の降車停（Google レグ、または OSM 側の解決結果）
+    /// - 目的地あり・乗車中: ライブ GPS → 今のバス区間の降車停（乗換地点。手動出発地では測らない）
     /// - 目的地なし（乗車中含む）: nil。OSM 路線図から目的地未設定のまま乗車した場合、
     ///   `RidingTracker.resolveOSMAlightCoordinate` は路線の終点を降車座標として使うが、
     ///   それはユーザーの行き先ではなくナビとして意味が薄いため「あと」には出さない。
@@ -75,11 +80,12 @@ final class MainViewModel {
             lastRidingDistanceMeters = nil
             return nil
         }
-        guard let originLat = effectiveOriginLatitude, let originLon = effectiveOriginLongitude else {
-            if ridingState == nil { lastRidingDistanceMeters = nil }
-            return ridingState == nil ? nil : lastRidingDistanceMeters
-        }
         if ridingState != nil {
+            // 手動出発地のままだと、バスが動いても「あと」が乗った時点の距離で固まる。
+            // 乗換後に降車地点だけ差し替わると、そこで初めて別の数字へ跳ぶ。
+            let originLat = gpsLatitude ?? currentLatitude
+            let originLon = gpsLongitude ?? currentLongitude
+            guard let originLat, let originLon else { return lastRidingDistanceMeters }
             guard let alight = ridingAlightCoordinate else { return lastRidingDistanceMeters }
             let meters = GoogleRoutesAPIService.distanceMeters(
                 fromLatitude: originLat,
@@ -89,6 +95,10 @@ final class MainViewModel {
             )
             lastRidingDistanceMeters = meters
             return meters
+        }
+        guard let originLat = effectiveOriginLatitude, let originLon = effectiveOriginLongitude else {
+            lastRidingDistanceMeters = nil
+            return nil
         }
         lastRidingDistanceMeters = nil
         guard let destination else { return nil }
@@ -152,6 +162,47 @@ final class MainViewModel {
         destination = DestinationStore.load()
         routeArchive = TransitRouteArchive.load()
         activateBucketForCurrentDestination()
+        // 画面の onChange(緯度だけ) ではなく、測位のたびに距離とアラートを進める。
+        // 地図シート表示中や東西方向の移動でも、乗換地点までの距離が止まらないようにする。
+        locationCancellable = locationService.$currentLocation
+            .compactMap { $0 }
+            .sink { [weak self] coordinate in
+                Task { @MainActor [weak self] in
+                    self?.handleLocationFix(coordinate)
+                }
+            }
+    }
+
+    private func handleLocationFix(_ coordinate: CLLocationCoordinate2D) {
+        gpsLatitude = coordinate.latitude
+        gpsLongitude = coordinate.longitude
+        if let busNumber = ridingState?.busNumber {
+            ridingTracker.realignAlightWithRoute(
+                boardingRoute,
+                busNumber: busNumber,
+                destination: destination
+            )
+        }
+        locationService.updateAccuracy(distanceToTargetMeters: distanceFromFixToTarget(coordinate))
+        ridingTracker.checkProgress(at: coordinate, destination: destination)
+    }
+
+    private func distanceFromFixToTarget(_ coordinate: CLLocationCoordinate2D) -> Double? {
+        let target: CLLocationCoordinate2D?
+        if let alight = ridingAlightCoordinate {
+            target = alight
+        } else if let destination {
+            target = CLLocationCoordinate2D(latitude: destination.latitude, longitude: destination.longitude)
+        } else {
+            target = nil
+        }
+        guard let target else { return nil }
+        return GoogleRoutesAPIService.distanceMeters(
+            fromLatitude: coordinate.latitude,
+            fromLongitude: coordinate.longitude,
+            toLatitude: target.latitude,
+            toLongitude: target.longitude
+        )
     }
 
     func setDestination(_ destination: Destination) {
@@ -908,10 +959,6 @@ final class MainViewModel {
 
     func dismissActiveRidingAlert() {
         ridingTracker.dismissActiveAlert()
-    }
-
-    func checkRidingProgress(at coordinate: CLLocationCoordinate2D) {
-        ridingTracker.checkProgress(at: coordinate, destination: destination)
     }
 
     private func clearRidingState() {

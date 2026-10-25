@@ -22,6 +22,15 @@ struct BusStop: Identifiable {
     let coordinate: CLLocationCoordinate2D
 }
 
+struct BusRouteCatalogTag: Hashable {
+    let id: Int
+    let ref: String
+    let name: String
+    let from: String?
+    let to: String?
+    let timestamp: String?
+}
+
 struct BusRouteDetail {
     let candidate: BusRouteCandidate
     let polylineSegments: [[CLLocationCoordinate2D]]
@@ -89,6 +98,41 @@ enum OverpassAPIService {
         """
         let data = try await post(query, timeoutSeconds: timeoutSeconds, maxEndpoints: maxEndpoints)
         return try parseCandidates(from: data)
+    }
+
+    /// 現在地の周辺にあるバス路線の見出しだけを取る。形状は含まない。
+    static func fetchBusRouteCatalog(
+        near coord: CLLocationCoordinate2D,
+        radiusMeters: Int = 80_000
+    ) async throws -> [BusRouteCatalogTag] {
+        guard ThirdPartyDataConsent.isGranted else { throw OverpassError.consentRequired }
+        let query = """
+        [out:json][timeout:90];
+        relation["type"="route"]["route"~"bus|trolleybus"](around:\(radiusMeters),\(coord.latitude),\(coord.longitude));
+        out tags meta;
+        """
+        let data = try await post(query, timeoutSeconds: 100, maxEndpoints: 3)
+        return try parseCatalogTags(from: data)
+    }
+
+    /// 複数路線の形状と停留所を一度に取る。
+    static func fetchRouteDetails(
+        _ candidates: [BusRouteCandidate],
+        timeoutSeconds: TimeInterval = 90
+    ) async throws -> [BusRouteDetail] {
+        guard ThirdPartyDataConsent.isGranted else { throw OverpassError.consentRequired }
+        guard !candidates.isEmpty else { return [] }
+        let ids = candidates.map { String($0.id) }.joined(separator: ",")
+        let queryTimeout = max(5, Int(timeoutSeconds.rounded(.down)))
+        let query = """
+        [out:json][timeout:\(queryTimeout)];
+        relation(id:\(ids));
+        out body;
+        >;
+        out body;
+        """
+        let data = try await post(query, timeoutSeconds: timeoutSeconds + 10, maxEndpoints: 3)
+        return try parseDetails(from: data, candidates: candidates)
     }
 
     /// 路線IDからポリライン＋バス停の完全データを取得。
@@ -220,10 +264,45 @@ enum OverpassAPIService {
         }
     }
 
+    private static func parseCatalogTags(from data: Data) throws -> [BusRouteCatalogTag] {
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else { throw OverpassError.parse }
+        try checkOverpassRemark(json)
+        guard let elements = json["elements"] as? [[String: Any]]
+        else { throw OverpassError.parse }
+
+        return elements.compactMap { el -> BusRouteCatalogTag? in
+            guard
+                el["type"] as? String == "relation",
+                let id = el["id"] as? Int,
+                let tags = el["tags"] as? [String: String],
+                let ref = tags["ref"]?.trimmingCharacters(in: .whitespacesAndNewlines),
+                !ref.isEmpty
+            else { return nil }
+            return BusRouteCatalogTag(
+                id: id,
+                ref: ref,
+                name: tags["name"] ?? ref,
+                from: tags["from"],
+                to: tags["to"],
+                timestamp: el["timestamp"] as? String
+            )
+        }
+    }
+
     private static func parseDetail(
         from data: Data,
         candidate: BusRouteCandidate
     ) throws -> BusRouteDetail {
+        let details = try parseDetails(from: data, candidates: [candidate])
+        guard let detail = details.first else { throw OverpassError.parse }
+        return detail
+    }
+
+    private static func parseDetails(
+        from data: Data,
+        candidates: [BusRouteCandidate]
+    ) throws -> [BusRouteDetail] {
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
         else { throw OverpassError.parse }
         try checkOverpassRemark(json)
@@ -233,7 +312,7 @@ enum OverpassAPIService {
         var nodeCoords: [Int: CLLocationCoordinate2D] = [:]
         var nodeNames: [Int: String] = [:]
         var wayNodes: [Int: [Int]] = [:]
-        var relation: [String: Any]?
+        var relations: [Int: [String: Any]] = [:]
 
         for el in elements {
             guard let type = el["type"] as? String, let id = el["id"] as? Int else { continue }
@@ -250,16 +329,32 @@ enum OverpassAPIService {
                     wayNodes[id] = nodes
                 }
             case "relation":
-                if relation == nil { relation = el }
+                relations[id] = el
             default:
                 break
             }
         }
 
-        guard
-            let rel = relation,
-            let members = rel["members"] as? [[String: Any]]
-        else { throw OverpassError.parse }
+        return candidates.compactMap { candidate in
+            guard let relation = relations[candidate.id] else { return nil }
+            return detail(
+                candidate: candidate,
+                relation: relation,
+                nodeCoords: nodeCoords,
+                nodeNames: nodeNames,
+                wayNodes: wayNodes
+            )
+        }
+    }
+
+    private static func detail(
+        candidate: BusRouteCandidate,
+        relation: [String: Any],
+        nodeCoords: [Int: CLLocationCoordinate2D],
+        nodeNames: [Int: String],
+        wayNodes: [Int: [Int]]
+    ) -> BusRouteDetail? {
+        guard let members = relation["members"] as? [[String: Any]] else { return nil }
 
         let roadStopRoles: Set<String> = ["stop", "stop_entry_only", "stop_exit_only"]
         var orderedWayIDs: [Int] = []

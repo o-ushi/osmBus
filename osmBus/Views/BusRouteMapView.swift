@@ -55,7 +55,8 @@ struct BusRouteMapView: View {
     @State private var isKeypadVisible: Bool
     @State private var clearsOnNextInput = false
     @State private var ridingActive: Bool
-    @State private var showsHistorySheet = false
+    @State private var showsRouteListSheet = false
+    @State private var keypadMatches: [BusRouteListItem] = []
     @State private var cachedPolylines: [GMapPolylineData] = []
     @State private var cachedMarkers: [GMapMarkerData] = []
 
@@ -142,39 +143,19 @@ struct BusRouteMapView: View {
                                 ridingSummaryBar(detail: detail)
                             }
                         }
-                        .padding(.bottom, isKeypadVisible ? geo.size.height * 0.45 + 8 : 0)
+                        .padding(.bottom, keypadBottomInset(in: geo.size.height))
                     }
                     .ignoresSafeArea(edges: .bottom)
 
                     if isKeypadVisible {
-                        BusKeypadView(
-                            busNumber: routeNumberInput,
-                            canSubmit: !routeNumberInput.isEmpty && !searchState.isLoading,
-                            onCharacter: {
-                                if clearsOnNextInput {
-                                    routeNumberInput = ""
-                                    clearsOnNextInput = false
-                                }
-                                routeNumberInput += $0
-                            },
-                            onSubmit: {
-                                startSearch()
-                                clearsOnNextInput = true
-                            },
-                            onClear: {
-                                clearsOnNextInput = false
-                                if searchState.loadedDetail != nil || searchState.isLoading {
-                                    endRiding()
-                                    clearRoute()
-                                } else {
-                                    routeNumberInput = ""
-                                }
+                        VStack(spacing: 8) {
+                            if !keypadMatches.isEmpty {
+                                keypadMatchList
                             }
-                        )
-                        .busMainScreenStyled()
+                            keypad(height: geo.size.height)
+                        }
                         .padding(.horizontal, AppTheme.screenPadding)
                         .padding(.bottom, 8)
-                        .frame(height: geo.size.height * 0.45)
                     }
                 }
             }
@@ -186,6 +167,10 @@ struct BusRouteMapView: View {
                 }
                 loadInitialRidingRouteIfNeeded()
                 locationService.refreshCurrentFromCache()
+                refreshKeypadMatches()
+            }
+            .onChange(of: routeNumberInput) { _, _ in
+                refreshKeypadMatches()
             }
             .onDisappear(perform: releaseMapResources)
             .toolbar { toolbarContent }
@@ -194,8 +179,8 @@ struct BusRouteMapView: View {
             }) {
                 candidateSheet
             }
-            .sheet(isPresented: $showsHistorySheet) {
-                BusRouteMapHistoryView(onSelect: loadFromHistory)
+            .sheet(isPresented: $showsRouteListSheet) {
+                BusRouteMapHistoryView(onSelect: openListedRoute)
             }
             .alert(
                 AppLocaleString.text("路線図_エラー_タイトル", locale: locale),
@@ -465,11 +450,11 @@ struct BusRouteMapView: View {
                 }
                 if ThirdPartyDataConsent.isGranted {
                     Button {
-                        showsHistorySheet = true
+                        showsRouteListSheet = true
                     } label: {
-                        Image(systemName: "clock.arrow.circlepath")
+                        Image(systemName: "list.bullet")
                     }
-                    .accessibilityLabel(AppLocaleString.text("路線図_履歴", locale: locale))
+                    .accessibilityLabel(AppLocaleString.text("路線図_一覧", locale: locale))
                 }
 
                 Button {
@@ -515,6 +500,81 @@ struct BusRouteMapView: View {
         loadRoute(candidate)
     }
 
+    private func keypad(height: CGFloat) -> some View {
+        BusKeypadView(
+            busNumber: routeNumberInput,
+            canSubmit: !routeNumberInput.isEmpty && !searchState.isLoading,
+            onCharacter: {
+                if clearsOnNextInput {
+                    routeNumberInput = ""
+                    clearsOnNextInput = false
+                }
+                routeNumberInput += $0
+            },
+            onSubmit: {
+                startSearch()
+                clearsOnNextInput = true
+            },
+            onClear: {
+                clearsOnNextInput = false
+                if searchState.loadedDetail != nil || searchState.isLoading {
+                    endRiding()
+                    clearRoute()
+                } else {
+                    routeNumberInput = ""
+                }
+            }
+        )
+        .busMainScreenStyled()
+        .frame(height: height * 0.42)
+    }
+
+    private var keypadMatchList: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                ForEach(keypadMatches.prefix(12)) { item in
+                    Button {
+                        openListedRoute(item)
+                    } label: {
+                        BusRouteCatalogRow(item: item)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.plain)
+                    Divider()
+                }
+            }
+        }
+        .frame(maxHeight: 180)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    private func keypadBottomInset(in height: CGFloat) -> CGFloat {
+        guard isKeypadVisible else { return 0 }
+        let listHeight: CGFloat = keypadMatches.isEmpty ? 0 : 188
+        return height * 0.42 + listHeight + 16
+    }
+
+    private func refreshKeypadMatches() {
+        keypadMatches = BusRouteCatalogStore.matching(routeNumberInput)
+    }
+
+    private func openListedRoute(_ item: BusRouteListItem) {
+        endRiding()
+        searchTask?.cancel()
+        routeNumberInput = ""
+        clearsOnNextInput = false
+        keypadMatches = []
+        if let detail = BusRouteCatalogStore.detail(forRelationId: item.relationId)
+            ?? BusLineMapStore.detail(forRelationId: item.relationId) {
+            BusLineMapStore.touch(relationId: item.relationId)
+            applyLoadedRoute(detail, collapseKeypad: true)
+            return
+        }
+        guard let candidate = BusRouteCatalogStore.candidate(forRelationId: item.relationId) else { return }
+        loadRoute(candidate, collapseKeypad: true)
+    }
+
     private func startSearch() {
         let ref = routeNumberInput.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !ref.isEmpty else { return }
@@ -523,6 +583,16 @@ struct BusRouteMapView: View {
         endRiding()
 
         searchTask?.cancel()
+
+        let localMatches = BusRouteCatalogStore.matching(ref)
+        if localMatches.count == 1 {
+            openListedRoute(localMatches[0])
+            return
+        }
+        if localMatches.count > 1 {
+            keypadMatches = localMatches
+            return
+        }
 
         // すでに履歴一覧（BusLineMapStore）に同じ番号の路線があれば、Overpass への再検索なしでそれを表示する。
         if ThirdPartyDataConsent.isGranted {
@@ -595,19 +665,7 @@ struct BusRouteMapView: View {
         }
     }
 
-    /// 履歴一覧からの選択。キャッシュ済みの `BusRouteDetail` をそのまま地図に載せる（再取得なし）。
-    private func loadFromHistory(_ detail: BusRouteDetail) {
-        // 乗車中に履歴から別の路線を選んだら、自動的に降車してから切り替える。
-        endRiding()
-        searchTask?.cancel()
-        searchTask = nil
-        routeNumberInput = ""
-        clearsOnNextInput = false
-        BusLineMapStore.touch(relationId: detail.candidate.id)
-        applyLoadedRoute(detail, collapseKeypad: true)
-    }
-
-    /// 検索結果・履歴・キャッシュのいずれから来ても、地図への反映はここに統一する。
+    /// 検索結果・一覧・キャッシュのいずれから来ても、地図への反映はここに統一する。
     private func applyLoadedRoute(_ detail: BusRouteDetail, collapseKeypad: Bool) {
         searchState = .loaded(detail)
         rebuildMapLayers(from: detail)

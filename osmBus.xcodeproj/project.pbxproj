@@ -74,6 +74,7 @@
 		B01D080 /* GoogleRoutesAPIService+AlternateBoarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02D080 /* GoogleRoutesAPIService+AlternateBoarding.swift */; };
 		B10D002 /* BusNumberTableSortMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10D001 /* BusNumberTableSortMode.swift */; };
 		B11D001 /* BusLineMapStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B11D002 /* BusLineMapStore.swift */; };
+		B13D001 /* BusRouteCatalogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B13D002 /* BusRouteCatalogStore.swift */; };
 		B12D001 /* BusRouteMapHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12D002 /* BusRouteMapHistoryView.swift */; };
 		EA15861A27C6E4A6A312B1F7 /* RidingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98480A3BA1B534FB5BAAB123 /* RidingState.swift */; };
 /* End PBXBuildFile section */
@@ -152,6 +153,7 @@
 		B02D080 /* GoogleRoutesAPIService+AlternateBoarding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GoogleRoutesAPIService+AlternateBoarding.swift"; sourceTree = "<group>"; };
 		B10D001 /* BusNumberTableSortMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusNumberTableSortMode.swift; sourceTree = "<group>"; };
 		B11D002 /* BusLineMapStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusLineMapStore.swift; sourceTree = "<group>"; };
+		B13D002 /* BusRouteCatalogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusRouteCatalogStore.swift; sourceTree = "<group>"; };
 		B12D002 /* BusRouteMapHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusRouteMapHistoryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -268,6 +270,7 @@
 				B02D069 /* GoogleRoutesAPIService+BusMatching.swift */,
 				B02D080 /* GoogleRoutesAPIService+AlternateBoarding.swift */,
 				B11D002 /* BusLineMapStore.swift */,
+				B13D002 /* BusRouteCatalogStore.swift */,
 				B02D070 /* GoogleRoutesAPIService+PolylineGeometry.swift */,
 				B02D071 /* GoogleRoutesAPIService+RouteDisplay.swift */,
 				B02D073 /* RidingTracker.swift */,
@@ -433,6 +436,7 @@
 				B01D069 /* GoogleRoutesAPIService+BusMatching.swift in Sources */,
 				B01D080 /* GoogleRoutesAPIService+AlternateBoarding.swift in Sources */,
 				B11D001 /* BusLineMapStore.swift in Sources */,
+				B13D001 /* BusRouteCatalogStore.swift in Sources */,
 				B01D070 /* GoogleRoutesAPIService+PolylineGeometry.swift in Sources */,
 				B01D071 /* GoogleRoutesAPIService+RouteDisplay.swift in Sources */,
 				B01D072 /* GoogleAPISettingsView.swift in Sources */,
@@ -620,7 +624,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.52;
+				MARKETING_VERSION = 1.54;
 				PRODUCT_BUNDLE_IDENTIFIER = com.osamushikubo.osmBus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -645,7 +649,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.52;
+				MARKETING_VERSION = 1.54;
 				PRODUCT_BUNDLE_IDENTIFIER = com.osamushikubo.osmBus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

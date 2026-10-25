@@ -1,22 +1,21 @@
 import SwiftUI
 
-/// `BusLineMapStore` にキャッシュ済みの路線図を一覧表示し、選んだ路線をキャッシュから即復元する。
-/// Overpass への再取得はしない。
+/// 保存済みの路線データベースを一覧し、選んだ路線を地図に出す。
 struct BusRouteMapHistoryView: View {
     var isEmbedded = false
-    var onSelect: (BusRouteDetail) -> Void
+    var onSelect: (BusRouteListItem) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
-    @State private var records: [BusLineMapStore.Record] = []
+    @State private var items: [BusRouteListItem] = []
 
     var body: some View {
         Group {
             if isEmbedded {
-                historyList
+                routeList
             } else {
                 NavigationStack {
-                    historyList
+                    routeList
                 }
             }
         }
@@ -25,77 +24,61 @@ struct BusRouteMapHistoryView: View {
         .onAppear { reload() }
     }
 
-    private var historyList: some View {
+    private var routeList: some View {
         List {
-            if records.isEmpty {
+            if items.isEmpty {
                 Section {
                     ContentUnavailableView(
-                        AppLocaleString.text("路線図_履歴_空状態", locale: locale),
-                        systemImage: "clock.arrow.circlepath",
-                        description: Text(AppLocaleString.text("路線図_履歴_空状態_詳細", locale: locale))
+                        AppLocaleString.text("路線図_一覧_空状態", locale: locale),
+                        systemImage: "list.bullet",
+                        description: Text(AppLocaleString.text("路線図_一覧_空状態_詳細", locale: locale))
                     )
                     .listRowBackground(Color.clear)
                 }
             } else {
                 Section {
-                    ForEach(records, id: \.relationId) { record in
+                    ForEach(items) { item in
                         Button {
-                            select(record)
+                            onSelect(item)
+                            if !isEmbedded { dismiss() }
                         } label: {
-                            BusRouteMapHistoryRow(record: record)
+                            BusRouteCatalogRow(item: item)
                         }
                         .buttonStyle(.plain)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) {
-                                forget(record)
-                            } label: {
-                                Label(AppLocaleString.text("削除", locale: locale), systemImage: "trash")
-                            }
-                        }
                     }
-                    .onDelete(perform: deleteRecords)
                 }
             }
         }
         .listStyle(.insetGrouped)
-        .navigationTitle(AppLocaleString.text("路線図_履歴", locale: locale))
+        .navigationTitle(AppLocaleString.text("路線図_一覧", locale: locale))
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private func reload() {
-        records = BusLineMapStore.recentRecords()
-            .sorted { $0.ref.localizedStandardCompare($1.ref) == .orderedAscending }
-    }
-
-    private func select(_ record: BusLineMapStore.Record) {
-        guard let detail = BusLineMapStore.detail(forRelationId: record.relationId) else { return }
-        onSelect(detail)
-        if !isEmbedded {
-            dismiss()
+        var merged = BusRouteCatalogStore.listItems()
+        let known = Set(merged.map(\.relationId))
+        for record in BusLineMapStore.recentRecords() where !known.contains(record.relationId) {
+            merged.append(
+                BusRouteListItem(
+                    relationId: record.relationId,
+                    ref: record.ref,
+                    name: record.name,
+                    from: record.from,
+                    to: record.to,
+                    hasGeometry: true
+                )
+            )
         }
-    }
-
-    private func forget(_ record: BusLineMapStore.Record) {
-        BusLineMapStore.forget(relationId: record.relationId)
-        reload()
-    }
-
-    private func deleteRecords(at offsets: IndexSet) {
-        for index in offsets {
-            BusLineMapStore.forget(relationId: records[index].relationId)
+        items = merged.sorted { lhs, rhs in
+            let order = lhs.ref.localizedStandardCompare(rhs.ref)
+            if order != .orderedSame { return order == .orderedAscending }
+            return (lhs.from ?? "") < (rhs.from ?? "")
         }
-        reload()
     }
 }
 
-private struct BusRouteMapHistoryRow: View {
-    let record: BusLineMapStore.Record
-
-    private static let relativeFormatter: RelativeDateTimeFormatter = {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .short
-        return formatter
-    }()
+struct BusRouteCatalogRow: View {
+    let item: BusRouteListItem
 
     var body: some View {
         HStack(spacing: 12) {
@@ -105,21 +88,17 @@ private struct BusRouteMapHistoryRow: View {
                 .frame(width: 28)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(record.ref)
+                Text(item.ref)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
 
-                if let subtitle {
+                if let subtitle = item.directionText {
                     Text(subtitle)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                 }
-
-                Text(Self.relativeFormatter.localizedString(for: record.lastUsedAt, relativeTo: Date()))
-                    .font(.caption)
-                    .foregroundStyle(Color(UIColor.tertiaryLabel))
             }
 
             Spacer(minLength: 8)
@@ -129,13 +108,6 @@ private struct BusRouteMapHistoryRow: View {
                 .foregroundStyle(Color(UIColor.tertiaryLabel))
         }
         .padding(.vertical, 2)
-    }
-
-    private var subtitle: String? {
-        if let from = record.from, let to = record.to, !from.isEmpty, !to.isEmpty {
-            return "\(from) → \(to)"
-        }
-        return record.name != record.ref ? record.name : nil
     }
 }
 

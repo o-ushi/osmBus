@@ -435,13 +435,9 @@ struct MainView: View {
             .onChange(of: pendingDeepLinkDestination) { _, _ in
                 applyPendingDeepLinkIfNeeded()
             }
-            .onChange(of: locationService.currentLocation?.latitude) { _, _ in
-                guard let coordinate = locationService.currentLocation else { return }
-                updateAdaptiveLocationAccuracy(current: coordinate)
-                // 乗車進捗チェックはシートの有無に関わらず常に実行
-                viewModel.checkRidingProgress(at: coordinate)
-                // 現在地(viewModel.currentLatitude/Longitude)は LocationService を直接読むので
-                // シート表示中でも止まらない。ここで止めるのは重いネットワーク再判定だけ。
+            .onChange(of: locationFixToken) { _, _ in
+                // 距離アラートは MainViewModel が測位のたびに実行する。
+                // ここではシートを開いていないときの経路再検索だけ行う。
                 guard busRouteMapPresentation == nil,
                       boardingRouteMapSheet == nil else { return }
 
@@ -567,45 +563,35 @@ struct MainView: View {
     }
 
     private func syncContinuousLocationTracking() {
-        let needsTracking = viewModel.shouldTrackRiding
+        let isRiding = viewModel.ridingState != nil
+        let needsTracking = isRiding
+            || viewModel.shouldTrackRiding
             || boardingRouteMapSheet != nil
             || busRouteMapPresentation != nil
             || topBusRouteMapSelection != nil
         if needsTracking {
-            // 乗車中は画面を見ていなくても距離アラートを続ける必要があるためバックグラウンド追跡を許可する。
+            // 乗車中はポリラインの有無にかかわらず測位を止めない。
+            // 止めると乗換地点に近づいても残り距離が固まり、到着アラートが鳴らない。
             // 地図を眺めているだけの間は前面のみで十分なので iOS の自動休止に任せる。
             // ただし一番近い到着アラートが鳴った後は、降車ボタンの押し忘れで
             // バックグラウンド測位が延々と続き端末が発熱するのを避けるため、
             // 常時ONを自動的に解除する(乗車状態自体は降車ボタンを押すまで継続)。
-            let allowsBackground = viewModel.shouldTrackRiding && !viewModel.ridingNearestAlertReached
+            let allowsBackground = isRiding && !viewModel.ridingNearestAlertReached
             locationService.startContinuousTracking(allowsBackground: allowsBackground)
-        } else if viewModel.ridingState == nil {
+        } else if !isRiding {
             locationService.stopContinuousTrackingAndDisableBackground()
         }
     }
 
-    private func updateAdaptiveLocationAccuracy(current: CLLocationCoordinate2D) {
-        let target: (latitude: Double, longitude: Double)?
-        if let alight = viewModel.ridingAlightCoordinate {
-            target = (alight.latitude, alight.longitude)
-        } else if let destination = viewModel.destination {
-            target = (destination.latitude, destination.longitude)
-        } else {
-            target = nil
-        }
-        let distance = target.map {
-            GoogleRoutesAPIService.distanceMeters(
-                fromLatitude: current.latitude,
-                fromLongitude: current.longitude,
-                toLatitude: $0.latitude,
-                toLongitude: $0.longitude
-            )
-        }
-        locationService.updateAccuracy(distanceToTargetMeters: distance)
+    /// 緯度だけを見ると、東西に走るバスでは位置が動いても再検索も距離更新のきっかけも起きない。
+    private var locationFixToken: String {
+        guard let coordinate = locationService.currentLocation else { return "" }
+        return "\(coordinate.latitude),\(coordinate.longitude)"
     }
 
     private var continuousLocationTrackingKey: String {
         [
+            viewModel.ridingState == nil ? "0" : "1",
             viewModel.shouldTrackRiding ? "1" : "0",
             viewModel.ridingNearestAlertReached ? "1" : "0",
             boardingRouteMapSheet.map { String($0.id) } ?? "",

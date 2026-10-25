@@ -392,6 +392,9 @@ struct TransitRouteMapView: View {
     @State private var cachedPolylines: [GMapPolylineData] = []
     @State private var cachedMarkers: [GMapMarkerData] = []
     @State private var isMapEngineReady = false
+    /// シート表示中は EnvironmentObject の再描画が止まり、開いた瞬間の距離のままになることがある。
+    /// 測位の Publisher で明示的に取り直す。
+    @State private var liveUserCoordinate: CLLocationCoordinate2D?
 
     @EnvironmentObject private var locationService: LocationService
 
@@ -420,23 +423,34 @@ struct TransitRouteMapView: View {
     }
 
     private var currentLegAlightingCoordinate: CLLocationCoordinate2D {
+        let step: ParsedTransitStep? = {
+            if let ridingLegStepIndex {
+                return displayedRoute.steps[ridingLegStepIndex]
+            }
+            return displayedRoute.steps.first {
+                $0.travelMode == "TRANSIT" && $0.vehicleType == "BUS"
+            }
+        }()
+        if let step,
+           let coordinate = GoogleRoutesAPIService.legAlightCoordinate(
+               arrival: step.arrivalStopLocation,
+               polyline: step.polylineCoordinates,
+               fallbackLatitude: destination.latitude,
+               fallbackLongitude: destination.longitude
+           ) {
+            return coordinate
+        }
         if let coord = ridingAlightCoordinate {
             return CLLocationCoordinate2D(latitude: coord.latitude, longitude: coord.longitude)
-        }
-        let busStep = displayedRoute.steps.first(where: {
-            $0.travelMode == "TRANSIT" && $0.vehicleType == "BUS"
-        })
-        if let loc = busStep?.arrivalStopLocation {
-            return CLLocationCoordinate2D(latitude: loc.latitude, longitude: loc.longitude)
         }
         return CLLocationCoordinate2D(latitude: destination.latitude, longitude: destination.longitude)
     }
 
-    /// 距離計算用の出発地。`LocationService.currentLocation` は測位済みなら常に最新値を
-    /// 保持するので、これをそのまま使う。まだ一度も測位できていない最初の一瞬だけ、この地図を
-    /// 開いた時点の `origin` にフォールバックする。
+    /// 距離計算用の出発地。シートが再描画されなくても `liveUserCoordinate` は測位のたびに更新する。
     private var effectiveOriginForDistance: CLLocationCoordinate2D {
-        locationService.currentLocation ?? origin.clLocationCoordinate2D
+        liveUserCoordinate
+            ?? locationService.currentLocation
+            ?? origin.clLocationCoordinate2D
     }
 
     private var topBadgeDistanceMeters: Double? {
@@ -503,6 +517,9 @@ struct TransitRouteMapView: View {
             }
             .task { await bootMapEngine() }
             .onAppear { locationService.refreshCurrentFromCache() }
+            .onReceive(locationService.$currentLocation) { coordinate in
+                liveUserCoordinate = coordinate
+            }
         }
     }
 

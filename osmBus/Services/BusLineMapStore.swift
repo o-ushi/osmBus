@@ -28,7 +28,6 @@ enum BusLineMapStore {
 
     static func remember(_ detail: BusRouteDetail) {
         lock.lock()
-        defer { lock.unlock() }
         var records = load()
         let record = Record(
             relationId: detail.candidate.id,
@@ -52,6 +51,8 @@ enum BusLineMapStore {
         records.removeAll { $0.relationId == record.relationId }
         records.append(record)
         save(records)
+        lock.unlock()
+        BusRouteCatalogStore.saveDetail(detail, timestamp: nil)
     }
 
     static func details(matching busNumber: String) -> [BusRouteDetail] {

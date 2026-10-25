@@ -1,3 +1,4 @@
+import CoreLocation
 import Foundation
 
 extension GoogleRoutesAPIService {
@@ -188,5 +189,79 @@ extension GoogleRoutesAPIService {
         let y = sin(dLon) * cos(lat2)
         let x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
         return ((atan2(y, x) * 180 / .pi) + 360).truncatingRemainder(dividingBy: 360)
+    }
+
+    /// 今乗っているバス区間の降車地点。
+    /// 停留所座標が区間の線上にあればそれを使う。線から大きく外れている場合
+    /// （目的地や次のバスの終点が混ざっている）は、この区間の線の終わりを使う。
+    /// 外れた点を降車地点にすると、乗換場所に近づいても残り距離が減らず、到着アラートも鳴らない。
+    static func legAlightCoordinate(
+        arrival: RouteCoordinate?,
+        polyline: [RouteCoordinate],
+        fallbackLatitude: Double?,
+        fallbackLongitude: Double?
+    ) -> CLLocationCoordinate2D? {
+        let arrivalCoordinate = arrival.map {
+            CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
+        }
+        let polylineEnd = polyline.last.map {
+            CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
+        }
+
+        if let arrivalCoordinate {
+            if polyline.count < 2 || distanceToPolylineMeters(arrivalCoordinate, polyline) <= 400 {
+                return arrivalCoordinate
+            }
+            if let polylineEnd { return polylineEnd }
+            return arrivalCoordinate
+        }
+        if let polylineEnd { return polylineEnd }
+        if let fallbackLatitude, let fallbackLongitude {
+            return CLLocationCoordinate2D(latitude: fallbackLatitude, longitude: fallbackLongitude)
+        }
+        return nil
+    }
+
+    /// 点からポリラインまでの最短距離（メートル）。頂点だけでなく線分上も見る。
+    static func distanceToPolylineMeters(
+        _ point: CLLocationCoordinate2D,
+        _ polyline: [RouteCoordinate]
+    ) -> Double {
+        guard let first = polyline.first else { return .infinity }
+        if polyline.count == 1 {
+            return distanceMeters(
+                fromLatitude: point.latitude,
+                fromLongitude: point.longitude,
+                toLatitude: first.latitude,
+                toLongitude: first.longitude
+            )
+        }
+
+        let latScale = 111_320.0
+        let lonScale = 111_320.0 * cos(point.latitude * .pi / 180)
+        let px = point.longitude * lonScale
+        let py = point.latitude * latScale
+        var best = Double.greatestFiniteMagnitude
+
+        for index in 0..<(polyline.count - 1) {
+            let start = polyline[index]
+            let end = polyline[index + 1]
+            let ax = start.longitude * lonScale
+            let ay = start.latitude * latScale
+            let bx = end.longitude * lonScale
+            let by = end.latitude * latScale
+            let dx = bx - ax
+            let dy = by - ay
+            let lengthSquared = dx * dx + dy * dy
+            let t: Double
+            if lengthSquared < 1 {
+                t = 0
+            } else {
+                t = max(0, min(1, ((px - ax) * dx + (py - ay) * dy) / lengthSquared))
+            }
+            let distance = hypot(px - (ax + t * dx), py - (ay + t * dy))
+            if distance < best { best = distance }
+        }
+        return best
     }
 }
