@@ -41,6 +41,34 @@ abstract final class Geo {
     return total;
   }
 
+  /// 線上で [point] に一番近い位置が、始点から何割のところか（0〜1）。Swift の `progressAlongPolyline`。
+  static double progressAlongPolyline(GeoPoint point, List<GeoPoint> polyline) {
+    if (polyline.length < 2) return 0;
+    final lengths = [for (var i = 1; i < polyline.length; i++) distance(polyline[i - 1], polyline[i])];
+    final total = lengths.fold(0.0, (sum, l) => sum + l);
+    if (total <= 0) return 0;
+    var best = double.infinity;
+    var progress = 0.0;
+    var cumulative = 0.0;
+    for (var i = 0; i < lengths.length; i++) {
+      final a = polyline[i];
+      final b = polyline[i + 1];
+      final dx = b.longitude - a.longitude;
+      final dy = b.latitude - a.latitude;
+      final lenSq = dx * dx + dy * dy;
+      final t = lenSq < 1e-20
+          ? 0.0
+          : (((point.longitude - a.longitude) * dx + (point.latitude - a.latitude) * dy) / lenSq).clamp(0.0, 1.0);
+      final d = distance(point, GeoPoint(a.latitude + t * dy, a.longitude + t * dx));
+      if (d < best) {
+        best = d;
+        progress = (cumulative + t * lengths[i]) / total;
+      }
+      cumulative += lengths[i];
+    }
+    return progress;
+  }
+
   /// 8 方位の添字。N, NE, E, SE, S, SW, W, NW の順。
   static int compassIndex(double bearing) =>
       ((bearing + 22.5) / 45).floor() % 8;

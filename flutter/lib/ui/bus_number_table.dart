@@ -26,7 +26,7 @@ class BusNumberTable extends StatelessWidget {
     required this.sortMode,
     required this.rows,
     required this.flatEntries,
-    required this.ridingRef,
+    required this.isRidingLeg,
     required this.onReload,
     required this.onTap,
     required this.onLongPress,
@@ -36,10 +36,12 @@ class BusNumberTable extends StatelessWidget {
   final TableSortMode sortMode;
   final List<MatrixRow> rows;
   final List<MatrixEntry> flatEntries;
-  final String? ridingRef;
+  /// そのレグのバッジを乗車中（橙）にするか。
+  final bool Function(MatrixEntry entry, int legIndex) isRidingLeg;
   final VoidCallback onReload;
   final ValueChanged<MatrixEntry> onTap;
-  final ValueChanged<MatrixEntry> onLongPress;
+  /// 長押ししたバッジが何番目のバスか（乗換の行は 2 本目以降もある）。
+  final void Function(MatrixEntry entry, int legIndex) onLongPress;
 
   static const _cellStyle = TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black);
 
@@ -132,11 +134,11 @@ class BusNumberTable extends StatelessWidget {
         _ => l10n.headerTransfer2,
       };
 
-  Widget _badge(AppLocalizations l10n, MatrixEntry entry, String text) => BusBadge(
+  Widget _badge(AppLocalizations l10n, MatrixEntry entry, String text, [int legIndex = 0]) => BusBadge(
         text: text,
-        riding: ridingRef != null && ridingRef!.toUpperCase() == entry.firstRef.toUpperCase(),
+        riding: isRidingLeg(entry, legIndex),
         onTap: () => onTap(entry),
-        onLongPress: () => onLongPress(entry),
+        onLongPress: () => onLongPress(entry, legIndex),
         semanticsLabel: '${_categoryLabel(l10n, entry.column)} $text. ${l10n.tableTapHint}',
       );
 
@@ -200,7 +202,7 @@ class BusNumberTable extends StatelessWidget {
         children: [
           for (final (i, token) in tokens.indexed) ...[
             if (i > 0) const Icon(CupertinoIcons.arrow_right, size: 11, color: AppTheme.tertiaryText),
-            _badge(l10n, e, token),
+            _badge(l10n, e, token, i),
           ],
         ],
       );

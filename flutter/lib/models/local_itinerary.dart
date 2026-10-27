@@ -54,6 +54,15 @@ class LocalItinerary {
 
   int get transferCount => legs.length - 1;
 
+  /// 同じ路線を同じ順に乗る旅程か。番号表は位置が変わるたびに作り直されるので、同一性ではこれで比べる。
+  bool sameLegs(LocalItinerary other) {
+    if (legs.length != other.legs.length) return false;
+    for (var i = 0; i < legs.length; i++) {
+      if (legs[i].relationId != other.legs[i].relationId) return false;
+    }
+    return true;
+  }
+
   /// 番号表の列。0 = 直通、1 = 乗換 1、2 = 乗換 2+。
   int get column => math.min(2, transferCount);
 

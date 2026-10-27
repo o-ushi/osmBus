@@ -1,2 +1,4 @@
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"
 #include "Generated.xcconfig"
+// Google Maps SDK のキー（GOOGLE_MAPS_API_KEY = ...）。Git に載せないファイル。
+#include? "Secrets.xcconfig"

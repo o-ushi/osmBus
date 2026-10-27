@@ -10,22 +10,25 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/boarding_decision.dart';
+import '../models/destination.dart';
 import '../models/bus_identifier.dart';
 import '../models/bus_matrix.dart';
 import '../models/local_itinerary.dart';
+import '../models/riding_session.dart';
 import '../models/route_catalog.dart';
+import '../services/alert_notifier.dart';
+import '../services/app_log.dart';
 import '../services/catalog_sync.dart';
 import '../services/geo.dart';
 import '../services/local_planner.dart';
+import '../services/purchase_service.dart';
 import '../services/route_catalog_downloader.dart';
 import '../services/route_catalog_store.dart';
+import '../services/sound_player.dart';
+import 'app_settings.dart';
+import 'places_store.dart';
 
-class Destination {
-  const Destination({required this.name, required this.point});
-
-  final String name;
-  final GeoPoint point;
-}
+export '../models/destination.dart';
 
 enum LocationStatus { unknown, ok, denied, deniedForever, serviceDisabled }
 
@@ -48,14 +51,58 @@ class ImportResult {
   bool get isCancelled => routeCount < 0 && error == null;
 }
 
+/// 乗車中に画面へ出すアラート（Swift の `ActiveRidingAlert` と逆方向の警告）。
+sealed class RidingAlert {
+  const RidingAlert();
+}
+
+class DistanceRidingAlert extends RidingAlert {
+  const DistanceRidingAlert(this.meters);
+  final int meters;
+}
+
+class WrongDirectionRidingAlert extends RidingAlert {
+  const WrongDirectionRidingAlert({required this.fromRouteMap});
+  final bool fromRouteMap;
+}
+
+/// 画面の外でも出す文言。UI 側が言語に合わせて入れる。
+class RidingTexts {
+  const RidingTexts({
+    this.distanceTitle = 'Arrival alert',
+    this.distanceBody = _defaultDistanceBody,
+    this.wrongDirectionTitle = 'Wrong direction?',
+    this.wrongDirectionBody = 'You may be heading away from your destination.',
+    this.trackingTitle = 'osmBus',
+    this.trackingBody = 'Tracking your ride for arrival alerts.',
+  });
+
+  static String _defaultDistanceBody(int meters) => '$meters m to your stop.';
+
+  final String distanceTitle;
+  final String Function(int meters) distanceBody;
+  final String wrongDirectionTitle;
+  final String wrongDirectionBody;
+  final String trackingTitle;
+  final String trackingBody;
+}
+
 /// トップと設定の状態をまとめる。
 class TripController extends ChangeNotifier {
   TripController({
     required this.prefs,
     RouteCatalogStore? store,
     CatalogSync? sync,
+    AppSettings? settings,
+    this.sound,
+    this.notifier,
+    PlacesStore? places,
+    PurchaseService? purchases,
     this.requestsLocationOnLaunch = true,
-  }) : store = store ?? RouteCatalogStore() {
+  })  : store = store ?? RouteCatalogStore(),
+        settings = settings ?? AppSettings(prefs),
+        places = places ?? PlacesStore(prefs: prefs, plan: PlanStore(prefs)) {
+    this.purchases = purchases ?? PurchaseService(plan: this.places.plan);
     this.sync = sync ?? CatalogSync.forPlatform(this.store);
     downloader = RouteCatalogDownloader(store: this.store, consentGranted: () => consentGranted)
       ..addListener(notifyListeners);
@@ -76,6 +123,15 @@ class TripController extends ChangeNotifier {
   /// 画面表示時に位置の許可を求めるか。UI テストでは false にして GPS の代わりを入れる。
   final bool requestsLocationOnLaunch;
   final RouteCatalogStore store;
+  final AppSettings settings;
+  final SoundPlayer? sound;
+  final AlertNotifier? notifier;
+  final PlacesStore places;
+  late final PurchaseService purchases;
+  PlanStore get plan => places.plan;
+
+  /// 通知などに使う文言。言語が変わるたびに UI から入れ直す。
+  RidingTexts texts = const RidingTexts();
   late final CatalogSync sync;
   late final RouteCatalogDownloader downloader;
   final PlannerCache _planner = PlannerCache();
@@ -89,8 +145,13 @@ class TripController extends ChangeNotifier {
   List<LocalItinerary>? _itineraries;
   bool _planning = false;
   BoardingDecision _decision = const BoardingIdle();
-  String? _ridingRef;
-  LocalItinerary? _ridingItinerary;
+  RidingSession? _riding;
+  final DistanceAlertTracker _alertTracker = DistanceAlertTracker();
+  final List<RidingAlert> _alerts = [];
+  bool _wrongDirectionShown = false;
+  bool _foreground = true;
+  bool _backgroundTracking = false;
+  bool _clearOnNextDigit = false;
   bool _locating = false;
   bool _syncing = false;
   String? _syncError;
@@ -118,19 +179,26 @@ class TripController extends ChangeNotifier {
   Destination? get destination => _destination;
   String get input => _input;
   BoardingDecision get decision => _decision;
-  String? get ridingRef => _ridingRef;
-  LocalItinerary? get ridingItinerary => _ridingItinerary;
-  String? get ridingAlightStop => _ridingItinerary?.firstLeg.alightStop.name;
+  RidingSession? get riding => _riding;
+  String? get ridingRef => _riding?.ref;
+  LocalItinerary? get ridingItinerary => _riding?.itinerary;
+  String? get ridingAlightStop => _riding?.alightStop.name;
+
+  /// 画面に出す順番待ちのアラート。先頭を出し、閉じたら [dismissAlert]。
+  RidingAlert? get pendingAlert => _alerts.firstOrNull;
 
   /// 現在地の取得を始めてから最初の位置が届くまで true。
   bool get locating => _locating;
 
   /// 「あと」バッジの距離。乗車中は降車停留所まで、そうでなければ目的地まで（直線）。
   /// 乗車中は手動の出発地ではなく GPS で測る（バスが動いても距離が固まらないように）。
+  /// 路線図から目的地なしで乗ったときは出さない（終点は行き先ではないため。Swift と同じ）。
   double? get distanceLeftMeters {
-    final origin = _ridingItinerary != null ? (_gps ?? this.origin) : this.origin;
+    final riding = _riding;
+    if (riding != null && riding.fromRouteMap && _destination == null) return null;
+    final origin = riding != null ? (_gps ?? this.origin) : this.origin;
     if (origin == null) return null;
-    final target = _ridingItinerary?.firstLeg.alightStop.point ?? _destination?.point;
+    final target = riding?.alightStop.point ?? _destination?.point;
     return target == null ? null : Geo.distance(origin, target);
   }
   List<LocalItinerary> get itineraries => _itineraries ?? const [];
@@ -206,7 +274,16 @@ class TripController extends ChangeNotifier {
 
   /// アプリが前面に戻った。
   void onResumed() {
+    _foreground = true;
+    AppLog.i('app', 'resumed');
     if (iCloudEnabled) unawaited(syncNow());
+  }
+
+  /// アプリが裏に回った。乗車中のアラートは通知で出す。
+  void onPaused() {
+    _foreground = false;
+    AppLog.i('app', 'paused riding=${_riding?.ref ?? '-'} backgroundTracking=$_backgroundTracking');
+    unawaited(AppLog.instance.flush());
   }
 
   // MARK: - 現在地
@@ -234,32 +311,77 @@ class TripController extends ChangeNotifier {
       _setLocationStatus(LocationStatus.ok);
       final last = await Geolocator.getLastKnownPosition();
       if (last != null) _updateOrigin(last);
-      await _positionSub?.cancel();
-      _positionSub = Geolocator.getPositionStream(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 20),
-      ).listen(_updateOrigin, onError: (_) {});
-    } catch (_) {
+      await _listenPositions();
+    } catch (e, st) {
+      AppLog.e('location', 'request failed', e, st);
       _locating = false;
       _setLocationStatus(LocationStatus.denied);
     }
   }
 
   void _setLocationStatus(LocationStatus status) {
+    if (status != _locationStatus) AppLog.i('location', 'status ${status.name}');
     _locationStatus = status;
     notifyListeners();
   }
 
+  /// 乗車中はバックグラウンドでも測位を続ける（Swift の `startContinuousTracking(allowsBackground:)`）。
+  /// iOS は画面上部の青い表示、Android は常駐通知が出る。
+  Future<void> _listenPositions() async {
+    await _positionSub?.cancel();
+    final background = _backgroundTracking;
+    final LocationSettings locationSettings;
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      locationSettings = AppleSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: background ? 10 : 20,
+        activityType: ActivityType.otherNavigation,
+        pauseLocationUpdatesAutomatically: !background,
+        allowBackgroundLocationUpdates: background,
+        showBackgroundLocationIndicator: background,
+      );
+    } else if (defaultTargetPlatform == TargetPlatform.android) {
+      locationSettings = AndroidSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: background ? 10 : 20,
+        foregroundNotificationConfig: background
+            ? ForegroundNotificationConfig(
+                notificationTitle: texts.trackingTitle,
+                notificationText: texts.trackingBody,
+                enableWakeLock: true,
+              )
+            : null,
+      );
+    } else {
+      locationSettings = const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 20);
+    }
+    AppLog.i('location', 'stream background=$background');
+    _positionSub = Geolocator.getPositionStream(locationSettings: locationSettings)
+        .listen(_updateOrigin, onError: (Object e) => AppLog.w('location', 'stream error $e'));
+  }
+
+  Future<void> _setBackgroundTracking(bool enabled) async {
+    if (_backgroundTracking == enabled) return;
+    AppLog.i('location', 'background tracking $enabled');
+    _backgroundTracking = enabled;
+    if (_positionSub != null) await _listenPositions();
+  }
+
   void _updateOrigin(Position position) {
     _gps = GeoPoint(position.latitude, position.longitude);
+    AppLog.d('location', 'fix ${AppLog.coord(_gps)} acc=${position.accuracy.round()}m');
     _locating = false;
+    _checkRiding(_gps!);
     notifyListeners();
     unawaited(_replan());
   }
 
   /// UI テストで GPS の代わりに出発地を入れる。
   @visibleForTesting
-  void debugSetOrigin(GeoPoint origin) {
+  void debugSetOrigin(GeoPoint origin, {DateTime? now}) {
     _gps = origin;
+    _checkRiding(origin, now: now);
+    notifyListeners();
     unawaited(_replan());
   }
 
@@ -285,11 +407,7 @@ class TripController extends ChangeNotifier {
     final raw = prefs.getString(_destinationKey);
     if (raw == null) return null;
     try {
-      final json = jsonDecode(raw) as Map<String, dynamic>;
-      return Destination(
-        name: json['name'] as String,
-        point: GeoPoint((json['latitude'] as num).toDouble(), (json['longitude'] as num).toDouble()),
-      );
+      return Destination.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     } catch (_) {
       return null;
     }
@@ -297,14 +415,22 @@ class TripController extends ChangeNotifier {
 
   Future<void> setDestination(Destination destination) async {
     _destination = destination;
-    await prefs.setString(
-      _destinationKey,
-      jsonEncode({
-        'name': destination.name,
-        'latitude': destination.point.latitude,
-        'longitude': destination.point.longitude,
-      }),
-    );
+    await prefs.setString(_destinationKey, jsonEncode(destination.toJson()));
+    AppLog.i('trip', 'destination ${AppLog.coord(destination.point)}');
+    await places.addHistory(destination);
+    _wrongDirectionShown = false;
+    notifyListeners();
+    await _replan();
+  }
+
+  /// ナビ中止。乗車を終え、目的地と入力を消す（Swift の `cancelNavigation`）。
+  Future<void> cancelNavigation() async {
+    AppLog.i('trip', 'cancel navigation');
+    endRiding();
+    _destination = null;
+    _input = '';
+    _decision = const BoardingIdle();
+    await prefs.remove(_destinationKey);
     notifyListeners();
     await _replan();
   }
@@ -312,6 +438,10 @@ class TripController extends ChangeNotifier {
   // MARK: - テンキー
 
   void appendDigit(String digit) {
+    if (_clearOnNextDigit) {
+      _clearOnNextDigit = false;
+      _input = '';
+    }
     if (!BusNumberInput.canAppend(digit, _input)) return;
     _input += digit;
     _onInputChanged();
@@ -324,6 +454,7 @@ class TripController extends ChangeNotifier {
   }
 
   void clearInput() {
+    _clearOnNextDigit = false;
     if (_input.isEmpty) return;
     _input = '';
     _onInputChanged();
@@ -332,6 +463,7 @@ class TripController extends ChangeNotifier {
   /// 決定。待たずに判定する。
   void submitInput() {
     _inputTimer?.cancel();
+    _clearOnNextDigit = settings.keypadInputMode == KeypadInputMode.clearBeforeNewInput && _input.isNotEmpty;
     _judge();
   }
 
@@ -414,15 +546,56 @@ class TripController extends ChangeNotifier {
 
   // MARK: - 乗車
 
-  bool isRiding(String ref) => _ridingRef == ref;
+  bool isRiding(String ref) => _riding?.ref == ref;
 
-  /// 長押し。その番号の乗車開始／終了。
-  void toggleRiding(MatrixEntry entry) {
-    if (_ridingRef == entry.firstRef) {
+  /// 番号表から乗っている旅程のうち、今乗っているレグ。乗っていなければ null。
+  int? ridingLegIndexIn(LocalItinerary itinerary) {
+    final riding = _riding?.itinerary;
+    return riding != null && riding.sameLegs(itinerary) ? _riding!.legIndex : null;
+  }
+
+  /// 番号表のバッジを乗車中（橙）にするか。乗っている旅程の行ならそのレグ、
+  /// ほかの行は第 1 レグの番号が乗っている番号と同じとき。
+  bool isRidingLeg(LocalItinerary itinerary, int legIndex) {
+    final riding = _riding;
+    if (riding == null) return false;
+    final inRiding = ridingLegIndexIn(itinerary);
+    if (inRiding != null) return inRiding == legIndex;
+    return legIndex == 0 && riding.ref.toUpperCase() == itinerary.firstLeg.ref.toUpperCase();
+  }
+
+  /// 長押し。[legIndex] 番目のバスの乗車開始／終了。
+  /// 乗っている旅程の先のレグと同じ番号なら、乗り換えたとみなして同じ旅程のまま次のレグへ進む
+  /// （番号表は動くたびに作り直されるので、押した行の旅程ではなく乗っている旅程を使う）。
+  void toggleRiding(MatrixEntry entry, {int legIndex = 0}) => toggleRidingLeg(entry.itinerary, legIndex);
+
+  /// 番号表・ルート図の長押し。[itinerary] の [legIndex] 番目のバスについて [toggleRiding] と同じ。
+  void toggleRidingLeg(LocalItinerary itinerary, int legIndex) {
+    final ref = itinerary.legs[legIndex].ref;
+    final riding = _riding;
+    if (riding?.ref == ref) {
       endRiding();
       return;
     }
-    _startRiding(entry.firstRef, entry.itinerary);
+    final current = riding?.itinerary;
+    if (riding != null && current != null) {
+      final next = current.legs.indexWhere((leg) => leg.ref == ref, riding.legIndex + 1);
+      if (next >= 0) {
+        _startRiding(RidingSession.fromItinerary(
+          current,
+          legIndex: next,
+          destination: _destination?.point,
+          now: DateTime.now(),
+        ));
+        return;
+      }
+    }
+    _startRiding(RidingSession.fromItinerary(
+      itinerary,
+      legIndex: legIndex,
+      destination: _destination?.point,
+      now: DateTime.now(),
+    ));
   }
 
   /// 判定の「乗車開始」。その系統の旅程のうち直通を優先し、徒歩が短いもの。
@@ -433,19 +606,95 @@ class TripController extends ChangeNotifier {
         return transfers != 0 ? transfers : LocalItinerary.compareByWalk(a, b);
       });
     if (candidates.isEmpty) return;
-    _startRiding(ref, candidates.first);
+    _startRiding(RidingSession.fromItinerary(
+      candidates.first,
+      destination: _destination?.point,
+      now: DateTime.now(),
+    ));
   }
 
-  void _startRiding(String ref, LocalItinerary itinerary) {
-    _ridingRef = ref;
-    _ridingItinerary = itinerary;
+  /// 路線図から乗る。降車は終点（Swift の `startFromOSMMap`）。
+  void startRidingRoute(RouteRecord route, {DateTime? now}) {
+    if (route.stops.isEmpty) return;
+    _startRiding(RidingSession.fromRoute(route, destination: _destination?.point, now: now ?? DateTime.now()));
+  }
+
+  void _startRiding(RidingSession session) {
+    AppLog.i(
+      'riding',
+      'start ${session.ref} leg=${session.legIndex} fromRouteMap=${session.fromRouteMap} alight=${AppLog.coord(session.alightStop.point)} '
+          'rings=${settings.activeThresholds} alarm=${settings.isAlertEnabled(StopAlertMode.alarm)} '
+          'vibration=${settings.isAlertEnabled(StopAlertMode.vibration)} alert=${settings.isAlertEnabled(StopAlertMode.alert)}',
+    );
+    _riding = session;
+    _alertTracker.reset();
+    _wrongDirectionShown = false;
     notifyListeners();
+    unawaited(notifier?.requestPermission());
+    unawaited(_setBackgroundTracking(true));
+    final gps = _gps;
+    if (gps != null) _checkRiding(gps);
   }
 
   void endRiding() {
-    _ridingRef = null;
-    _ridingItinerary = null;
+    if (_riding == null) return;
+    AppLog.i('riding', 'end ${_riding!.ref}');
+    _riding = null;
+    _alertTracker.reset();
+    _alerts.clear();
     notifyListeners();
+    unawaited(_setBackgroundTracking(false));
+  }
+
+  void dismissAlert() {
+    if (_alerts.isEmpty) return;
+    _alerts.removeAt(0);
+    notifyListeners();
+  }
+
+  /// 位置が届くたびに、距離アラートと逆方向を確かめる（Swift の `checkProgress`）。
+  void _checkRiding(GeoPoint position, {DateTime? now}) {
+    final riding = _riding;
+    if (riding == null) return;
+    now ??= DateTime.now();
+
+    if (!_wrongDirectionShown &&
+        WrongDirection.detect(session: riding, position: position, destination: _destination?.point, now: now)) {
+      _wrongDirectionShown = true;
+      AppLog.w('riding', 'wrong direction at ${AppLog.coord(position)}');
+      _raise(
+        WrongDirectionRidingAlert(fromRouteMap: riding.fromRouteMap),
+        texts.wrongDirectionTitle,
+        texts.wrongDirectionBody,
+      );
+    }
+
+    final distance = Geo.distance(position, riding.alightStop.point);
+    AppLog.d('riding', 'distance ${distance.round()}m');
+    final fire = _alertTracker.update(distance, settings.activeThresholds);
+    if (fire == null) return;
+    AppLog.i(
+      'alert',
+      'fire ${fire.meters}m x${fire.repeatCount} at ${distance.round()}m foreground=$_foreground nearest=${fire.isNearest}',
+    );
+    final alarm = settings.isAlertEnabled(StopAlertMode.alarm);
+    final vibration = settings.isAlertEnabled(StopAlertMode.vibration);
+    if (alarm) unawaited(sound?.playAlarm(fire.repeatCount));
+    if (vibration) sound?.vibrateAlert();
+    if (alarm || vibration || settings.isAlertEnabled(StopAlertMode.alert)) {
+      _raise(DistanceRidingAlert(fire.meters), texts.distanceTitle, texts.distanceBody(fire.meters));
+    }
+    // 一番近いリングまで来たら、降車の押し忘れで測位が続かないよう裏での追跡をやめる。
+    if (fire.isNearest) unawaited(_setBackgroundTracking(false));
+  }
+
+  void _raise(RidingAlert alert, String title, String body) {
+    if (_foreground) {
+      _alerts.add(alert);
+      notifyListeners();
+    } else {
+      unawaited(notifier?.show(title, body));
+    }
   }
 
   // MARK: - 表の並び
@@ -463,6 +712,7 @@ class TripController extends ChangeNotifier {
   // MARK: - 同意
 
   Future<void> setConsent(bool granted) async {
+    AppLog.i('privacy', 'consent $granted');
     final value = granted ? _consentVersion : -_consentVersion;
     await prefs.setInt(_consentKey, value);
     await _writeSwiftConsent(value);
@@ -474,6 +724,7 @@ class TripController extends ChangeNotifier {
 
   /// 同意撤回。このときだけ正本を削除する。
   Future<void> withdrawConsent() async {
+    AppLog.i('privacy', 'withdraw consent');
     downloader.cancel();
     await prefs.remove(_consentKey);
     await _writeSwiftConsent(null);
@@ -482,6 +733,15 @@ class TripController extends ChangeNotifier {
     _planner.invalidate();
     endRiding();
     await _replan();
+  }
+
+  /// すべてのデータを削除（Swift の `PrivacyDataView`）。目的地・履歴・登録地・同意と路線データを消す。
+  /// 購入状態・一般設定・路線の保管庫は残す。
+  Future<void> deleteAllData() async {
+    await cancelNavigation();
+    clearManualOrigin();
+    await places.clearAll();
+    await withdrawConsent();
   }
 
   // MARK: - 取得
@@ -593,6 +853,7 @@ class TripController extends ChangeNotifier {
       await prefs.setString(_lastSyncKey, DateTime.now().toUtc().toIso8601String());
     } catch (e) {
       _syncError = '$e';
+      AppLog.w('sync', 'failed $e');
     } finally {
       _syncing = false;
       notifyListeners();

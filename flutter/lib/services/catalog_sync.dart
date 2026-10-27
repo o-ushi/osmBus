@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../models/route_catalog.dart';
 import 'route_catalog_store.dart';
+import 'app_log.dart';
 
 enum SyncUnavailableReason { notIOS, iCloudUnavailable }
 
@@ -87,7 +88,8 @@ class ICloudCatalogSync implements CatalogSync {
     try {
       await ICloudStorage.gather(containerId: CatalogSync.containerId);
       _available = true;
-    } catch (_) {
+    } catch (e) {
+      AppLog.i('sync', 'iCloud unavailable $e');
       // コンテナが無い、未サインイン、権限なし。どれでも起動は続ける。
       _available = false;
     }

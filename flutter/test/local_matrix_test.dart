@@ -64,6 +64,28 @@ void main() {
     expect(BusMatrix.flat(itineraries, mode: TableSortMode.transfers).map((e) => e.token), ['23', '31']);
   });
 
+  test('フラット距離順: 徒歩の差が 100m 未満なら乗換の少ない方が上', () {
+    const stop = RouteStop(id: 1, name: 's', latitude: 21.0, longitude: lon);
+    ItineraryLeg leg(int id, String ref) => ItineraryLeg(
+          relationId: id,
+          ref: ref,
+          routeName: ref,
+          boardIndex: 0,
+          alightIndex: 1,
+          boardStop: stop,
+          alightStop: stop,
+          path: const [],
+          rideMeters: 1000,
+        );
+    final itineraries = [
+      LocalItinerary(legs: [leg(1, '11'), leg(2, '159'), leg(3, '32')], walkMeters: 410, bearing: 180),
+      LocalItinerary(legs: [leg(4, '34')], walkMeters: 450, bearing: 270),
+      LocalItinerary(legs: [leg(5, '50')], walkMeters: 700, bearing: 270),
+    ];
+    final order = BusMatrix.flat(itineraries, mode: TableSortMode.distance).map((e) => e.token);
+    expect(order, ['34', '11', '50']);
+  });
+
   test('行は relationId 昇順で方位が最初に現れた順', () {
     final east = [for (var i = 0; i < 2; i++) GeoPoint(21.0, lon + i * 0.0096)];
     final eastDest = GeoPoint(21.0, east.last.longitude + 0.0005);

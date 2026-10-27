@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/boarding_decision.dart';
@@ -54,6 +55,20 @@ class ResultBanner extends StatelessWidget {
         style: TextStyle(fontSize: _verdictSize, fontWeight: FontWeight.w900, color: color, height: 1.15),
       );
 
+  /// 判定の大きな文字。長押しで乗車・降車する（ボタンだとスクロールの下に隠れて押しにくいため）。
+  Widget _pressableVerdict(String text, Color color, {required String hint, required VoidCallback onLongPress}) =>
+      Semantics(
+        onLongPressHint: hint,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onLongPress: () {
+            HapticFeedback.mediumImpact();
+            onLongPress();
+          },
+          child: _verdictText(text, color),
+        ),
+      );
+
   Widget _caption(String text, {IconData? icon}) {
     const style = TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.secondaryText);
     final label = Text(text, textAlign: TextAlign.center, style: style);
@@ -75,16 +90,6 @@ class ResultBanner extends StatelessWidget {
             for (final (i, c) in children.indexed) ...[if (i > 0) const SizedBox(height: 8), c],
           ],
         ),
-      );
-
-  Widget _pillButton(String label, IconData icon, Color color, VoidCallback onPressed) => FilledButton.icon(
-        style: FilledButton.styleFrom(
-          backgroundColor: color,
-          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-        ),
-        onPressed: onPressed,
-        icon: Icon(icon, size: 16),
-        label: Text(label),
       );
 
   Widget _notice(String text, {IconData icon = CupertinoIcons.exclamationmark_triangle_fill}) => Align(
@@ -130,9 +135,9 @@ class ResultBanner extends StatelessWidget {
     final alight = ridingAlightStop;
     if (alight != null) {
       return _centered([
-        _verdictText(l10n.ridingLabel, AppTheme.verdictGreen),
+        _pressableVerdict(l10n.ridingLabel, AppTheme.verdictGreen, hint: l10n.getOff, onLongPress: onStopRiding),
         _caption(l10n.alightAt(alight)),
-        _pillButton(l10n.getOff, CupertinoIcons.hand_raised_fill, Colors.orange, onStopRiding),
+        _caption(l10n.longPressToGetOff, icon: CupertinoIcons.hand_point_right),
       ]);
     }
 
@@ -151,7 +156,12 @@ class ResultBanner extends StatelessWidget {
         ),
       DoNotBoard() => Center(child: _verdictText(l10n.doNotBoard, AppTheme.verdictRed)),
       BoardIfVariant(:final names, :final itinerary, :final direction) => _centered([
-          _verdictText(l10n.boardVariant(names.join('・')), AppTheme.verdictYellow),
+          _pressableVerdict(
+            l10n.boardVariant(names.join('・')),
+            AppTheme.verdictYellow,
+            hint: l10n.startRiding,
+            onLongPress: () => _chooseVariant(context, names),
+          ),
           _caption(l10n.alightAt(itinerary.firstLeg.alightStop.name)),
           _caption(
             direction.isAny
@@ -160,7 +170,7 @@ class ResultBanner extends StatelessWidget {
             icon: direction.isAny ? CupertinoIcons.arrow_right_arrow_left : CupertinoIcons.location_north_fill,
           ),
           _caption(l10n.estimatedArrival(_time(context, itinerary.estimatedMinutes), itinerary.estimatedMinutes)),
-          _pillButton(l10n.startRiding, CupertinoIcons.map, AppTheme.accent, () => _chooseVariant(context, names)),
+          _caption(l10n.longPressToBoard, icon: CupertinoIcons.hand_point_right),
         ]),
     };
   }

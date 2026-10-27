@@ -6,8 +6,11 @@ import '../l10n/app_localizations.dart';
 import '../models/local_itinerary.dart';
 import '../state/trip_controller.dart';
 import 'bus_number_table.dart';
+import 'bus_route_browser_screen.dart';
 import 'destination_picker_screen.dart';
+import 'help_screen.dart';
 import 'keypad.dart';
+import 'plan_screen.dart';
 import 'result_banner.dart';
 import 'route_map_screen.dart';
 import 'settings_screen.dart';
@@ -38,6 +41,84 @@ class _TopScreenState extends State<TopScreen> {
 
   void _toggleScreen() => setState(() => _showsTopScreen = !_showsTopScreen);
 
+  bool _showingAlert = false;
+
+  /// 乗車中のアラートを 1 件ずつ出す（Swift の `.alert(item:)` と逆方向の警告）。
+  void _showPendingAlert() {
+    final alert = controller.pendingAlert;
+    if (alert == null || _showingAlert || !mounted) return;
+    _showingAlert = true;
+    final l10n = AppLocalizations.of(context);
+    final (title, body) = switch (alert) {
+      DistanceRidingAlert(:final meters) => (l10n.distanceAlertTitle, l10n.distanceAlertBody(meters)),
+      WrongDirectionRidingAlert(:final fromRouteMap) =>
+        (l10n.wrongDirectionTitle, fromRouteMap ? l10n.wrongDirectionBodyRouteMap : l10n.wrongDirectionBody),
+    };
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          CupertinoDialogAction(isDefaultAction: true, onPressed: () => Navigator.pop(context), child: Text(l10n.ok)),
+        ],
+      ),
+    ).whenComplete(() {
+      _showingAlert = false;
+      controller.dismissAlert();
+      // 前のアラートが閉じ切ってから次を出す。
+      Future<void>.delayed(const Duration(milliseconds: 300), _showPendingAlert);
+    });
+  }
+
+  /// 距離バッジの長押し。ナビ中止（目的地も消える）。
+  Future<void> _confirmCancelNavigation() async {
+    if (controller.destination == null && controller.riding == null) return;
+    final l10n = AppLocalizations.of(context);
+    final ok = await showCupertinoModalPopup<bool>(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        title: Text(l10n.cancelNavigationConfirm),
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.cancelNavigation),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(l10n.cancel),
+        ),
+      ),
+    );
+    if (ok == true) await controller.cancelNavigation();
+  }
+
+  /// 乗車中に距離バッジをタップ。今のルート図を開く。
+  void _openRidingMap() {
+    final riding = controller.riding;
+    if (riding == null) return;
+    final itinerary = riding.itinerary;
+    if (itinerary != null) {
+      _openMap(itinerary);
+      return;
+    }
+    _openRouteBrowser();
+  }
+
+  /// メニューの「路線図」。乗車中でも番号で探せる路線図を開く（Swift と同じ）。
+  /// 路線図から乗車中なら、その路線を開いた状態にする。
+  void _openRouteBrowser() {
+    final routeId = controller.riding?.routeId;
+    final route = routeId == null
+        ? null
+        : controller.visibleCatalog.routes.where((r) => r.relationId == routeId).firstOrNull;
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => BusRouteBrowserScreen(controller: controller, initialRoute: route)),
+    );
+  }
+
   /// 地図シートを開く。シートの中でも出発地／目的地を切り替えられる（Swift と同じ）。
   Future<void> _pickOnMap(PickRole role) async {
     final picked = await showDestinationPicker(
@@ -47,6 +128,7 @@ class _TopScreenState extends State<TopScreen> {
           ? controller.origin
           : controller.destination?.point ?? controller.origin,
       searchCenter: controller.origin,
+      controller: controller,
     );
     if (picked == null) return;
     switch (picked.role) {
@@ -61,7 +143,7 @@ class _TopScreenState extends State<TopScreen> {
 
   void _openMap(LocalItinerary itinerary) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => RouteMapScreen(itinerary: itinerary)),
+      MaterialPageRoute(builder: (_) => RouteMapScreen(itinerary: itinerary, controller: controller)),
     );
   }
 
@@ -71,8 +153,9 @@ class _TopScreenState extends State<TopScreen> {
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
+        if (controller.pendingAlert != null) WidgetsBinding.instance.addPostFrameCallback((_) => _showPendingAlert());
         final distance = controller.distanceLeftMeters;
-        final riding = controller.ridingItinerary;
+        final riding = controller.riding;
         return Scaffold(
           extendBodyBehindAppBar: true,
           appBar: AppBar(
@@ -86,7 +169,8 @@ class _TopScreenState extends State<TopScreen> {
                       child: _DistanceBadge(
                         meters: distance,
                         label: l10n.distanceLeft,
-                        onTap: riding == null ? null : () => _openMap(riding),
+                        onTap: riding == null ? null : _openRidingMap,
+                        onLongPress: _confirmCancelNavigation,
                       ),
                     ),
                   )
@@ -97,6 +181,9 @@ class _TopScreenState extends State<TopScreen> {
                 showsTopScreen: _showsTopScreen,
                 onToggleScreen: _toggleScreen,
                 onSettings: _openSettings,
+                onRouteMap: _openRouteBrowser,
+                onPlan: () => showPlanSheet(context, controller),
+                onHelp: () => showHelpSheet(context, controller.plan),
               ),
               const SizedBox(width: 8),
             ],
@@ -153,10 +240,10 @@ class _TopScreenState extends State<TopScreen> {
             rows: controller.tableState == TableState.ready ? controller.matrixRows : const [],
             flatEntries:
                 controller.tableState == TableState.ready ? controller.flatEntries : const [],
-            ridingRef: controller.ridingRef,
+            isRidingLeg: (entry, legIndex) => controller.isRidingLeg(entry.itinerary, legIndex),
             onReload: controller.reload,
             onTap: (entry) => _openMap(entry.itinerary),
-            onLongPress: controller.toggleRiding,
+            onLongPress: (entry, legIndex) => controller.toggleRiding(entry, legIndex: legIndex),
           ),
         ),
       ],
@@ -178,7 +265,7 @@ class _TopScreenState extends State<TopScreen> {
                 child: ResultBanner(
                   decision: controller.decision,
                   input: controller.input,
-                  ridingAlightStop: controller.ridingItinerary == null ? null : controller.ridingAlightStop,
+                  ridingAlightStop: controller.ridingAlightStop,
                   onStartRiding: controller.startRiding,
                   onStopRiding: controller.endRiding,
                 ),
@@ -192,6 +279,8 @@ class _TopScreenState extends State<TopScreen> {
                 onDigit: controller.appendDigit,
                 onClear: controller.clearInput,
                 onSubmit: controller.submitInput,
+                onKeyFeedback: controller.sound?.keyTap,
+                onEnterFeedback: controller.sound?.enterKey,
               ),
             ),
           ],
@@ -383,11 +472,12 @@ class OriginDestinationCard extends StatelessWidget {
 
 /// ナビゲーションバーの「あと」距離バッジ。
 class _DistanceBadge extends StatelessWidget {
-  const _DistanceBadge({required this.meters, required this.label, this.onTap});
+  const _DistanceBadge({required this.meters, required this.label, this.onTap, this.onLongPress});
 
   final double? meters;
   final String label;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -400,6 +490,7 @@ class _DistanceBadge extends StatelessWidget {
       button: onTap != null,
       child: GestureDetector(
         onTap: onTap,
+        onLongPress: onLongPress,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
           decoration: BoxDecoration(
@@ -434,11 +525,17 @@ class _MoreMenu extends StatelessWidget {
     required this.showsTopScreen,
     required this.onToggleScreen,
     required this.onSettings,
+    required this.onRouteMap,
+    required this.onPlan,
+    required this.onHelp,
   });
 
   final bool showsTopScreen;
   final VoidCallback onToggleScreen;
   final VoidCallback onSettings;
+  final VoidCallback onRouteMap;
+  final VoidCallback onPlan;
+  final VoidCallback onHelp;
 
   @override
   Widget build(BuildContext context) {
@@ -468,8 +565,11 @@ class _MoreMenu extends StatelessWidget {
           showsTopScreen ? l10n.menuMainScreen : l10n.menuTopScreen,
           onToggleScreen,
         ),
+        item(CupertinoIcons.map, l10n.lineMap, onRouteMap),
         const PopupMenuDivider(),
         item(CupertinoIcons.gear_alt, l10n.settings, onSettings),
+        item(Icons.workspace_premium_outlined, l10n.planManagement, onPlan),
+        item(CupertinoIcons.question_circle, l10n.help, onHelp),
       ],
     );
   }

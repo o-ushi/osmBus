@@ -17,6 +17,16 @@ abstract final class LocalPlanner {
   static const int secondHopSeeds = 5;
   static const int maxSecondHopComparisons = 2000;
 
+  /// 乗換 1 回あたりの時間の重み（秒）。乗換案は「徒歩・乗車・乗換」の概算時間が最小のものを選ぶ。
+  static const double transferPenaltySeconds = 300;
+
+  /// 寄り道の上限。徒歩と乗車の合計が「直線距離 × 2 + 2km」を超える案は出さない。
+  static const double detourFactor = 2;
+
+  /// 乗換 2 回以上の案を出すには、乗換 1 回以下の案よりこれだけ速いこと（秒）。
+  static const double multiTransferGainSeconds = 300;
+  static const double detourAllowanceMeters = 2000;
+
   static List<LocalItinerary> plan(
     List<RouteRecord> records,
     GeoPoint origin,
@@ -53,12 +63,50 @@ abstract final class LocalPlanner {
       if (transfer?.twoTransfers case final two?) results.add(two);
     }
 
+    final limit = Geo.distance(origin, destination) * detourFactor + detourAllowanceMeters;
+    results.removeWhere((i) => i.walkMeters + i.rideMeters > limit);
+    _dropDominated(results);
+    _dropSlowMultiTransfers(results);
     results.sort((x, y) {
       final id = x.firstLeg.relationId.compareTo(y.firstLeg.relationId);
       if (id != 0) return id;
       return x.legs.length.compareTo(y.legs.length);
     });
     return results;
+  }
+
+  static double _seconds(LocalItinerary i) =>
+      i.walkMeters / LocalItinerary.walkSpeed +
+      i.rideMeters / LocalItinerary.busSpeed +
+      i.transferCount * transferPenaltySeconds;
+
+  /// 「A に少し乗って B に乗り換え…」のうち、B 以降に出発地からそのまま乗れる案があり、
+  /// そちらが速いか同じなら、A を足した案は出さない（同じ道を走る路線の 1 停留所乗車が並ぶのを防ぐ）。
+  static void _dropDominated(List<LocalItinerary> results) {
+    String key(Iterable<ItineraryLeg> legs) => legs.map((l) => l.relationId).join('>');
+    final best = <String, double>{};
+    for (final i in results) {
+      final k = key(i.legs);
+      final s = _seconds(i);
+      if (s < (best[k] ?? double.infinity)) best[k] = s;
+    }
+    results.removeWhere((i) {
+      if (i.legs.length < 2) return false;
+      final s = _seconds(i);
+      for (var start = 1; start < i.legs.length; start++) {
+        final tail = best[key(i.legs.skip(start))];
+        if (tail != null && tail <= s) return true;
+      }
+      return false;
+    });
+  }
+
+  /// 乗換 2 回以上は、乗換 1 回以下の一番速い案より [multiTransferGainSeconds] 以上速いときだけ残す。
+  static void _dropSlowMultiTransfers(List<LocalItinerary> results) {
+    final simple = [for (final i in results) if (i.transferCount <= 1) _seconds(i)];
+    if (simple.isEmpty) return;
+    final best = simple.reduce(math.min);
+    results.removeWhere((i) => i.transferCount >= 2 && _seconds(i) > best - multiTransferGainSeconds);
   }
 
   /// 第 1 レグの乗車停留所から、ポリラインの 1/5 付近の点への方位（§8.5）。
@@ -142,11 +190,13 @@ abstract final class LocalPlanner {
     );
   }
 
+  /// 概算時間が短い方。同じなら徒歩が短い方。
   static _Candidate _better(_Candidate? current, _Candidate next, List<_Route> routes) {
     if (current == null) return next;
-    if (next.walk < current.walk) return next;
-    if (next.walk > current.walk) return current;
-    return next.ride(routes) < current.ride(routes) ? next : current;
+    final a = next.cost(routes);
+    final b = current.cost(routes);
+    if (a != b) return a < b ? next : current;
+    return next.walk < current.walk ? next : current;
   }
 
   /// 乗車停留所より後ろの添字。停留所が 80 を超える路線は均等に 80 点まで間引く。
@@ -201,6 +251,12 @@ class _Candidate {
         0,
         (sum, h) => sum + routes[h.route].rideMeters(h.board, h.alight),
       );
+
+  /// 概算の所要秒。
+  double cost(List<_Route> routes) =>
+      walk / LocalItinerary.walkSpeed +
+      ride(routes) / LocalItinerary.busSpeed +
+      (hops.length - 1) * LocalPlanner.transferPenaltySeconds;
 
   LocalItinerary build(List<_Route> routes) {
     final legs = [for (final h in hops) routes[h.route].leg(h.board, h.alight)];
@@ -277,7 +333,11 @@ class _Route {
     }
     return out;
   }();
-  final Map<int, int> _vertexForStop = {};
+  final Map<int, (int, double)> _vertexForStop = {};
+  final Map<int, _Span> _spans = {};
+
+  /// 停留所がこれより線から離れていたら、線に乗っていないとみなす。
+  static const double _onLineMeters = 120;
 
   static int? _nearest(List<double> distances, double radius) {
     int? best;
@@ -287,36 +347,66 @@ class _Route {
     return best;
   }
 
-  int _vertex(int stop) => _vertexForStop.putIfAbsent(stop, () {
+  /// 停留所に一番近い線の頂点と、その距離。探すときは軽い平面近似を使う。
+  (int, double) _vertex(int stop) => _vertexForStop.putIfAbsent(stop, () {
         final p = record.stops[stop].point;
+        final scale = math.cos(p.latitude * math.pi / 180);
         var best = 0;
-        var bestDistance = double.infinity;
+        var bestScore = double.infinity;
         for (var i = 0; i < _flat.length; i++) {
-          final d = Geo.distance(p, _flat[i]);
-          if (d < bestDistance) {
-            bestDistance = d;
+          final dy = _flat[i].latitude - p.latitude;
+          final dx = (_flat[i].longitude - p.longitude) * scale;
+          final score = dx * dx + dy * dy;
+          if (score < bestScore) {
+            bestScore = score;
             best = i;
           }
         }
-        return best;
+        return (best, _flat.isEmpty ? double.infinity : Geo.distance(p, _flat[best]));
+      });
+
+  /// 隣り合う停留所 k → k+1 の区間。線の向きと順番が合い、寄り道が過ぎなければ線をたどる。
+  /// そうでなければ（way の順番や向きが崩れている路線）停留所どうしを直接結ぶ。
+  _Span _span(int k) => _spans.putIfAbsent(k, () {
+        final a = record.stops[k].point;
+        final b = record.stops[k + 1].point;
+        final straight = Geo.distance(a, b);
+        if (_flat.length >= 2) {
+          final (va, da) = _vertex(k);
+          final (vb, db) = _vertex(k + 1);
+          if (da <= _onLineMeters && db <= _onLineMeters && vb > va) {
+            final along = _cumulative[vb] - _cumulative[va];
+            if (along <= straight * 3 + 300) return _Span(along, va, vb);
+          }
+        }
+        return _Span(straight, null, null);
       });
 
   double rideMeters(int board, int alight) {
-    if (_flat.length >= 2) {
-      final start = _vertex(board);
-      final end = _vertex(alight);
-      if (end > start) return _cumulative[end] - _cumulative[start];
+    var total = 0.0;
+    for (var k = board; k < alight; k++) {
+      total += _span(k).meters;
     }
-    return Geo.distance(record.stops[board].point, record.stops[alight].point);
+    return total;
   }
 
+  /// 停留所と線の頂点をつないだ道のり。同じ場所の点は続けて入れない（方位がずれないように）。
   List<GeoPoint> path(int board, int alight) {
-    if (_flat.length >= 2) {
-      final start = _vertex(board);
-      final end = _vertex(alight);
-      if (end > start) return _flat.sublist(start, end + 1);
+    final out = <GeoPoint>[record.stops[board].point];
+    void add(GeoPoint p) {
+      if (Geo.distance(out.last, p) >= 1) out.add(p);
     }
-    return [record.stops[board].point, record.stops[alight].point];
+
+    for (var k = board; k < alight; k++) {
+      final span = _span(k);
+      if (span.from != null) {
+        for (var v = span.from!; v <= span.to!; v++) {
+          add(_flat[v]);
+        }
+      }
+      add(record.stops[k + 1].point);
+    }
+    return out;
   }
 
   ItineraryLeg leg(int board, int alight) => ItineraryLeg(
@@ -330,6 +420,13 @@ class _Route {
         path: path(board, alight),
         rideMeters: rideMeters(board, alight),
       );
+}
+
+class _Span {
+  const _Span(this.meters, this.from, this.to);
+  final double meters;
+  final int? from;
+  final int? to;
 }
 
 /// 出発地と目的地が同じあいだ結果を持つ。計算は別 isolate で行う。

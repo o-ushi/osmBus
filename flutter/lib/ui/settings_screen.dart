@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -5,25 +7,21 @@ import 'package:geolocator/geolocator.dart';
 import '../l10n/app_localizations.dart';
 import '../models/bus_matrix.dart';
 import '../services/catalog_sync.dart';
+import '../services/google_maps_config.dart';
 import '../services/route_catalog_downloader.dart';
+import '../services/sound_player.dart';
+import '../state/app_settings.dart';
 import '../state/trip_controller.dart';
+import 'alert_settings_screen.dart';
+import 'developer_screen.dart';
+import 'grouped_list.dart';
+import 'privacy_screen.dart';
+import 'sheet_page.dart';
 import 'theme.dart';
 
-/// Swift 版と同じく、設定はシートで出す。
-Future<void> showSettingsSheet(BuildContext context, TripController controller) {
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    showDragHandle: true,
-    backgroundColor: AppTheme.groupedBackground,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-    builder: (_) => FractionallySizedBox(
-      heightFactor: 0.94,
-      child: SettingsScreen(controller: controller),
-    ),
-  );
-}
+/// Swift 版と同じく、設定はシートで出す。到着アラートなどはシートの中で進む。
+Future<void> showSettingsSheet(BuildContext context, TripController controller) =>
+    showSheetNavigator<void>(context, (_) => SettingsScreen(controller: controller));
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key, required this.controller});
@@ -133,8 +131,9 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return ListenableBuilder(
-      listenable: controller,
+      listenable: Listenable.merge([controller, controller.settings]),
       builder: (context, _) {
+        final settings = controller.settings;
         final consent = controller.consentGranted;
         final catalog = controller.visibleCatalog;
         final downloader = controller.downloader;
@@ -142,130 +141,38 @@ class SettingsScreen extends StatelessWidget {
         final canDownload = consent && !downloader.isWorking && controller.origin != null;
         final syncSupported = controller.sync.isSupported;
 
-        return ListView(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+        return SheetPage(
+          title: l10n.settings,
+          closesSheet: true,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                l10n.settings,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-              ),
-            ),
-            _Section(
-              title: l10n.sectionData,
+            GroupedSection(
+              title: l10n.language,
+              footer: l10n.languageFooter,
               children: [
-                _Row(
-                  title: l10n.consentTitle,
-                  subtitle: l10n.consentDescription,
-                  trailing: CupertinoSwitch(value: consent, onChanged: controller.setConsent),
+                GroupedChoiceRow(
+                  title: l10n.languageSystem,
+                  selected: settings.language == null,
+                  onTap: () => settings.setLanguage(null),
                 ),
-                _Row(
-                  title: l10n.routeCount(catalog.routes.length),
-                  subtitle: '${l10n.geometryCount(catalog.geometryCount)}\n'
-                      '${l10n.lastSaved(_time(context, catalog.syncedAt))}',
-                ),
-                if (downloader.activity case DownloadWorking(:final done, :final total))
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                    child: LinearProgressIndicator(value: total == 0 ? null : done / total),
-                  ),
-                if (activity != null) _Row(title: activity, muted: true),
-                if (consent && controller.origin == null) _Row(title: l10n.needsLocation, destructive: true),
-                _Row(
-                  title: l10n.downloadAll,
-                  action: true,
-                  enabled: canDownload,
-                  onTap: controller.downloadAll,
-                  leading: CupertinoIcons.cloud_download,
-                ),
-                _Row(
-                  title: l10n.updateRoutes,
-                  action: true,
-                  enabled: canDownload,
-                  onTap: controller.updateCatalog,
-                  leading: CupertinoIcons.arrow_2_circlepath,
-                ),
-                if (controller.consentDecided)
-                  _Row(
-                    title: l10n.withdrawConsent,
-                    destructive: true,
-                    onTap: () => _withdraw(context),
-                    leading: CupertinoIcons.trash,
+                for (final language in AppLanguage.values)
+                  GroupedChoiceRow(
+                    title: language.fullLabel,
+                    selected: settings.language == language,
+                    onTap: () => settings.setLanguage(language),
                   ),
               ],
             ),
-            _Section(
-              title: l10n.sectionBackup,
+            GroupedSection(
+              title: l10n.arrivalAlerts,
               children: [
-                _Row(
-                  title: l10n.exportBackup,
-                  action: true,
-                  onTap: controller.exportBackup,
-                  leading: CupertinoIcons.square_arrow_up,
-                ),
-                _Row(
-                  title: l10n.importBackup,
-                  action: true,
-                  onTap: () => _import(context),
-                  leading: CupertinoIcons.square_arrow_down,
+                GroupedLinkRow(
+                  title: l10n.arrivalAlerts,
+                  leading: CupertinoIcons.bell,
+                  onTap: () => SheetPage.push<void>(context, (_) => AlertSettingsScreen(controller: controller)),
                 ),
               ],
             ),
-            _Section(
-              title: l10n.sectionArchive,
-              children: [
-                FutureBuilder<int>(
-                  // 保存のたびに数え直す。
-                  key: ValueKey(controller.store.version),
-                  future: controller.archivedRouteCount(),
-                  builder: (context, count) => _Row(title: l10n.archiveCount(count.data ?? 0), muted: true),
-                ),
-                _Row(
-                  title: l10n.archiveRestore,
-                  action: true,
-                  onTap: () => _restoreArchive(context),
-                  leading: CupertinoIcons.arrow_counterclockwise,
-                ),
-                _Row(
-                  title: l10n.archiveExport,
-                  action: true,
-                  onTap: controller.exportArchive,
-                  leading: CupertinoIcons.square_arrow_up,
-                ),
-              ],
-            ),
-            _Section(
-              title: l10n.sectionSync,
-              children: [
-                _Row(
-                  title: l10n.iCloudSync,
-                  subtitle: syncSupported
-                      ? null
-                      : controller.sync.unavailableReason == SyncUnavailableReason.notIOS
-                          ? l10n.iCloudOnlyIOS
-                          : l10n.iCloudUnavailable,
-                  trailing: CupertinoSwitch(
-                    value: controller.iCloudEnabled,
-                    onChanged: syncSupported ? controller.setICloudEnabled : null,
-                  ),
-                ),
-                if (syncSupported)
-                  _Row(
-                    title: controller.syncing
-                        ? l10n.syncing
-                        : l10n.lastSynced(_time(context, controller.lastSyncedAt)),
-                    subtitle: controller.syncError == null ? null : l10n.syncError(controller.syncError!),
-                    trailing: CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: controller.iCloudEnabled && !controller.syncing ? controller.syncNow : null,
-                      child: Text(l10n.syncNow),
-                    ),
-                  ),
-              ],
-            ),
-            _Section(
+            GroupedSection(
               title: l10n.sectionTable,
               children: [
                 Padding(
@@ -283,7 +190,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
                 if (controller.sortMode == TableSortMode.distance) ...[
-                  _Row(title: l10n.metricLabel, muted: true),
+                  GroupedRow(title: l10n.metricLabel, muted: true),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                     child: CupertinoSlidingSegmentedControl<DistanceMetric>(
@@ -300,31 +207,174 @@ class SettingsScreen extends StatelessWidget {
                 ],
               ],
             ),
-            _Section(
+            _KeyFeedbackSection(controller: controller),
+            GroupedSection(
+              title: l10n.keypadInput,
+              footer: l10n.keypadInputFooter,
+              children: [
+                GroupedChoiceRow(
+                  title: l10n.keypadClearBeforeNew,
+                  selected: settings.keypadInputMode == KeypadInputMode.clearBeforeNewInput,
+                  onTap: () => settings.setKeypadInputMode(KeypadInputMode.clearBeforeNewInput),
+                ),
+                GroupedChoiceRow(
+                  title: l10n.keypadAppend,
+                  selected: settings.keypadInputMode == KeypadInputMode.appendToExisting,
+                  onTap: () => settings.setKeypadInputMode(KeypadInputMode.appendToExisting),
+                ),
+              ],
+            ),
+            const _MapSection(),
+            GroupedSection(
+              title: l10n.sectionData,
+              children: [
+                GroupedRow(
+                  title: l10n.consentTitle,
+                  subtitle: l10n.consentDescription,
+                  trailing: CupertinoSwitch(value: consent, onChanged: controller.setConsent),
+                ),
+                GroupedRow(
+                  title: l10n.routeCount(catalog.routes.length),
+                  subtitle: '${l10n.geometryCount(catalog.geometryCount)}\n'
+                      '${l10n.lastSaved(_time(context, catalog.syncedAt))}',
+                ),
+                if (downloader.activity case DownloadWorking(:final done, :final total))
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                    child: LinearProgressIndicator(value: total == 0 ? null : done / total),
+                  ),
+                if (activity != null) GroupedRow(title: activity, muted: true),
+                if (consent && controller.origin == null) GroupedRow(title: l10n.needsLocation, destructive: true),
+                GroupedRow(
+                  title: l10n.downloadAll,
+                  action: true,
+                  enabled: canDownload,
+                  onTap: controller.downloadAll,
+                  leading: CupertinoIcons.cloud_download,
+                ),
+                GroupedRow(
+                  title: l10n.updateRoutes,
+                  action: true,
+                  enabled: canDownload,
+                  onTap: controller.updateCatalog,
+                  leading: CupertinoIcons.arrow_2_circlepath,
+                ),
+                if (controller.consentDecided)
+                  GroupedRow(
+                    title: l10n.withdrawConsent,
+                    destructive: true,
+                    onTap: () => _withdraw(context),
+                    leading: CupertinoIcons.trash,
+                  ),
+              ],
+            ),
+            GroupedSection(
+              title: l10n.sectionSync,
+              children: [
+                GroupedRow(
+                  title: l10n.iCloudSync,
+                  subtitle: syncSupported
+                      ? null
+                      : controller.sync.unavailableReason == SyncUnavailableReason.notIOS
+                          ? l10n.iCloudOnlyIOS
+                          : l10n.iCloudUnavailable,
+                  trailing: CupertinoSwitch(
+                    value: controller.iCloudEnabled,
+                    onChanged: syncSupported ? controller.setICloudEnabled : null,
+                  ),
+                ),
+                if (syncSupported)
+                  GroupedRow(
+                    title: controller.syncing
+                        ? l10n.syncing
+                        : l10n.lastSynced(_time(context, controller.lastSyncedAt)),
+                    subtitle: controller.syncError == null ? null : l10n.syncError(controller.syncError!),
+                    trailing: CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: controller.iCloudEnabled && !controller.syncing ? controller.syncNow : null,
+                      child: Semantics(label: l10n.syncNow, child: const Icon(CupertinoIcons.arrow_2_circlepath)),
+                    ),
+                  ),
+              ],
+            ),
+            GroupedSection(
+              title: l10n.sectionBackup,
+              children: [
+                GroupedRow(
+                  title: l10n.exportBackup,
+                  action: true,
+                  onTap: controller.exportBackup,
+                  leading: CupertinoIcons.square_arrow_up,
+                ),
+                GroupedRow(
+                  title: l10n.importBackup,
+                  action: true,
+                  onTap: () => _import(context),
+                  leading: CupertinoIcons.square_arrow_down,
+                ),
+              ],
+            ),
+            GroupedSection(
+              title: l10n.sectionArchive,
+              children: [
+                FutureBuilder<int>(
+                  // 保存のたびに数え直す。
+                  key: ValueKey(controller.store.version),
+                  future: controller.archivedRouteCount(),
+                  builder: (context, count) => GroupedRow(title: l10n.archiveCount(count.data ?? 0), muted: true),
+                ),
+                GroupedRow(
+                  title: l10n.archiveRestore,
+                  action: true,
+                  onTap: () => _restoreArchive(context),
+                  leading: CupertinoIcons.arrow_counterclockwise,
+                ),
+                GroupedRow(
+                  title: l10n.archiveExport,
+                  action: true,
+                  onTap: controller.exportArchive,
+                  leading: CupertinoIcons.square_arrow_up,
+                ),
+              ],
+            ),
+            GroupedSection(
               title: l10n.sectionLocation,
               children: [
-                _Row(
+                GroupedRow(
                   title: _locationText(l10n, controller.locationStatus),
                   trailing: switch (controller.locationStatus) {
                     LocationStatus.ok => null,
                     LocationStatus.deniedForever => CupertinoButton(
                         padding: EdgeInsets.zero,
                         onPressed: Geolocator.openAppSettings,
-                        child: Text(l10n.openSettings),
+                        child: Semantics(label: l10n.openSettings, child: const Icon(CupertinoIcons.gear)),
                       ),
                     LocationStatus.serviceDisabled => CupertinoButton(
                         padding: EdgeInsets.zero,
                         onPressed: Geolocator.openLocationSettings,
-                        child: Text(l10n.openSettings),
+                        child: Semantics(label: l10n.openSettings, child: const Icon(CupertinoIcons.gear)),
                       ),
                     _ => CupertinoButton(
                         padding: EdgeInsets.zero,
                         onPressed: controller.requestLocation,
-                        child: Text(l10n.retry),
+                        child: Semantics(label: l10n.retry, child: const Icon(CupertinoIcons.arrow_clockwise)),
                       ),
                   },
                 ),
               ],
+            ),
+            GroupedSection(
+              footer: l10n.privacyFooter,
+              children: [
+                GroupedLinkRow(
+                  title: l10n.privacyTitle,
+                  leading: CupertinoIcons.hand_raised_fill,
+                  onTap: () => SheetPage.push<void>(context, (_) => PrivacyScreen(controller: controller)),
+                ),
+              ],
+            ),
+            VersionFooter(
+              onUnlock: () => SheetPage.push<void>(context, (_) => DeveloperScreen(controller: controller)),
             ),
           ],
         );
@@ -333,106 +383,213 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-/// iOS の inset grouped セクション。
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.children});
+/// キーパッドのフィードバック（Swift の設定「キーパッドのフィードバック」）。
+class _KeyFeedbackSection extends StatelessWidget {
+  const _KeyFeedbackSection({required this.controller});
 
-  final String title;
-  final List<Widget> children;
+  final TripController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final l10n = AppLocalizations.of(context);
+    final settings = controller.settings;
+    return GroupedSection(
+      title: l10n.keyFeedback,
+      footer: l10n.keyFeedbackFooter,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 22, 16, 6),
-          child: Text(
-            title.toUpperCase(),
-            style: const TextStyle(fontSize: 13, color: AppTheme.secondaryText),
+        GroupedRow(
+          title: l10n.keyFeedbackHaptic,
+          trailing: CupertinoSwitch(
+            value: settings.hapticEnabled,
+            onChanged: (on) {
+              settings.setHapticEnabled(on);
+              if (on) SoundPlayer.haptic(settings.hapticStrength);
+            },
           ),
         ),
-        Container(
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: [
-              for (final (i, child) in children.indexed) ...[
-                if (i > 0) const Divider(indent: 16, height: 0.5),
-                child,
-              ],
-            ],
+        if (settings.hapticEnabled)
+          StrengthPicker(
+            title: l10n.keyFeedbackHapticStrength,
+            value: settings.hapticStrength,
+            onChanged: (strength) {
+              settings.setHapticStrength(strength);
+              SoundPlayer.haptic(strength);
+            },
+          ),
+        GroupedRow(
+          title: l10n.keyFeedbackClick,
+          trailing: CupertinoSwitch(
+            value: settings.clickEnabled,
+            onChanged: (on) {
+              settings.setClickEnabled(on);
+              if (on) controller.sound?.previewClick(settings.clickVolume);
+            },
           ),
         ),
+        if (settings.clickEnabled)
+          VolumeSlider(
+            title: l10n.volume,
+            value: settings.clickVolume,
+            min: 0,
+            onChanged: settings.setClickVolume,
+            onChangeEnd: (v) => controller.sound?.previewClick(v),
+          ),
       ],
     );
   }
 }
 
-class _Row extends StatelessWidget {
-  const _Row({
-    required this.title,
-    this.subtitle,
-    this.trailing,
-    this.leading,
-    this.onTap,
-    this.action = false,
-    this.destructive = false,
-    this.muted = false,
-    this.enabled = true,
-  });
+/// 弱め・普通・強め。
+class StrengthPicker extends StatelessWidget {
+  const StrengthPicker({super.key, required this.title, required this.value, required this.onChanged});
 
   final String title;
-  final String? subtitle;
-  final Widget? trailing;
-  final IconData? leading;
-  final VoidCallback? onTap;
-  final bool action;
-  final bool destructive;
-  final bool muted;
-  final bool enabled;
+  final FeedbackStrength value;
+  final ValueChanged<FeedbackStrength> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final color = !enabled
-        ? AppTheme.tertiaryText
-        : destructive
-            ? CupertinoColors.destructiveRed
-            : action
-                ? AppTheme.accent
-                : muted
-                    ? AppTheme.secondaryText
-                    : Colors.black;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: enabled ? onTap : null,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 44),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontSize: 17)),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: CupertinoSlidingSegmentedControl<FeedbackStrength>(
+              groupValue: value,
+              onValueChanged: (v) {
+                if (v != null) onChanged(v);
+              },
+              children: {
+                FeedbackStrength.light: Text(l10n.strengthLight),
+                FeedbackStrength.medium: Text(l10n.strengthMedium),
+                FeedbackStrength.heavy: Text(l10n.strengthHeavy),
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 音量（%表示つき）。
+class VolumeSlider extends StatelessWidget {
+  const VolumeSlider({
+    super.key,
+    required this.title,
+    required this.value,
+    required this.onChanged,
+    this.onChangeEnd,
+    this.min = 0.05,
+  });
+
+  final String title;
+  final double value;
+  final double min;
+  final ValueChanged<double> onChanged;
+  final ValueChanged<double>? onChangeEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+      child: Column(
+        children: [
+          Row(
             children: [
-              if (leading != null) ...[
-                Icon(leading, size: 20, color: color),
-                const SizedBox(width: 12),
-              ],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: TextStyle(fontSize: 17, color: color)),
-                    if (subtitle != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Text(subtitle!, style: const TextStyle(fontSize: 13, color: AppTheme.secondaryText)),
-                      ),
-                  ],
-                ),
-              ),
-              if (trailing != null) ...[const SizedBox(width: 8), trailing!],
+              Text(title, style: const TextStyle(fontSize: 17)),
+              const Spacer(),
+              Text('${(value * 100).round()}%', style: const TextStyle(fontSize: 17, color: AppTheme.secondaryText)),
             ],
           ),
+          CupertinoSlider(
+            value: value.clamp(min, 1.0),
+            min: min,
+            divisions: ((1 - min) / 0.05).round(),
+            onChanged: onChanged,
+            onChangeEnd: onChangeEnd,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 地図の背景を Google マップにするか。キーは iOS だけここで変えられる（Swift 版の API キー設定）。
+class _MapSection extends StatelessWidget {
+  const _MapSection();
+
+  GoogleMapsConfig get config => GoogleMapsConfig.instance;
+
+  String _keyText(AppLocalizations l10n) {
+    final user = config.userKey;
+    if (user != null) return l10n.mapsKeyUser(user.substring(user.length < 4 ? 0 : user.length - 4));
+    return config.hasBundledKey ? l10n.mapsKeyBundled : l10n.mapsKeyNone;
+  }
+
+  Future<void> _editKey(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final field = TextEditingController(text: config.userKey ?? '');
+    final key = await showCupertinoDialog<String>(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: Text(l10n.mapsApiKey),
+        content: Column(
+          children: [
+            Text(l10n.mapsKeyDialogMessage),
+            const SizedBox(height: 10),
+            CupertinoTextField(
+              controller: field,
+              placeholder: 'AIza…',
+              autocorrect: false,
+              enableSuggestions: false,
+              clearButtonMode: OverlayVisibilityMode.editing,
+            ),
+          ],
         ),
+        actions: [
+          CupertinoDialogAction(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(context, field.text),
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+    field.dispose();
+    if (key != null) await config.setUserKey(key);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return ListenableBuilder(
+      listenable: config,
+      builder: (context, _) => GroupedSection(
+        title: l10n.sectionMap,
+        footer: Platform.isAndroid ? '${l10n.mapsFooter}\n${l10n.mapsFooterAndroid}' : l10n.mapsFooter,
+        children: [
+          GroupedRow(
+            title: l10n.useGoogleMaps,
+            leading: CupertinoIcons.map,
+            trailing: CupertinoSwitch(
+              value: config.useGoogle,
+              onChanged: config.configuredKey == null ? null : config.setEnabled,
+            ),
+          ),
+          GroupedRow(
+            title: l10n.mapsApiKey,
+            subtitle: config.needsRestart ? '${_keyText(l10n)}\n${l10n.mapsKeyRestart}' : _keyText(l10n),
+            leading: CupertinoIcons.lock,
+            onTap: config.canEditKey ? () => _editKey(context) : null,
+          ),
+        ],
       ),
     );
   }

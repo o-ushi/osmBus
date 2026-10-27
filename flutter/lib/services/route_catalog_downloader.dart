@@ -6,6 +6,7 @@ import '../models/route_catalog.dart';
 import 'geo.dart';
 import 'overpass_api.dart';
 import 'route_catalog_store.dart';
+import 'app_log.dart';
 
 sealed class DownloadActivity {
   const DownloadActivity();
@@ -81,6 +82,7 @@ class RouteCatalogDownloader extends ChangeNotifier {
       return;
     }
     _set(const DownloadWorking(0, 0));
+    AppLog.i('download', '${dropMissing ? 'update' : 'download'} near ${AppLog.coord(near)}');
     try {
       final tags = await api.fetchCatalog(near);
       if (cancelled()) return;
@@ -107,9 +109,11 @@ class RouteCatalogDownloader extends ChangeNotifier {
       await _downloadGeometry(pending, near, cancelled);
       if (cancelled()) return;
       final snapshot = await store.load();
+      AppLog.i('download', 'finished routes=${snapshot.routes.length} geometry=${snapshot.geometryCount}');
       _set(DownloadFinished(snapshot.geometryCount, isUpdate: dropMissing));
     } catch (e) {
       if (cancelled()) return;
+      AppLog.w('download', 'failed $e');
       _set(DownloadFailed(DownloadFailure.network, '$e'));
     }
   }

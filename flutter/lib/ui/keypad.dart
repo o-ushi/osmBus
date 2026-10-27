@@ -13,12 +13,18 @@ class Keypad extends StatelessWidget {
     required this.onDigit,
     required this.onClear,
     required this.onSubmit,
+    this.onKeyFeedback,
+    this.onEnterFeedback,
   });
 
   final String input;
   final ValueChanged<String> onDigit;
   final VoidCallback onClear;
   final VoidCallback onSubmit;
+
+  /// キーを押したときの音・振動。null なら軽い振動だけ。
+  final VoidCallback? onKeyFeedback;
+  final VoidCallback? onEnterFeedback;
 
   static const double _gap = 6;
 
@@ -30,7 +36,7 @@ class Keypad extends StatelessWidget {
     Widget key(String title, {bool clear = false}) => Expanded(
           child: PressScale(
             onTap: () {
-              HapticFeedback.selectionClick();
+              (onKeyFeedback ?? HapticFeedback.selectionClick)();
               clear ? onClear() : onDigit(title);
             },
             child: Container(
@@ -58,7 +64,7 @@ class Keypad extends StatelessWidget {
             child: PressScale(
               onTap: canSubmit
                   ? () {
-                      HapticFeedback.mediumImpact();
+                      (onEnterFeedback ?? HapticFeedback.mediumImpact)();
                       onSubmit();
                     }
                   : null,

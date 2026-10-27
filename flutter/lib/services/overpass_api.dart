@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/route_catalog.dart';
+import 'app_log.dart';
 
 enum OverpassErrorKind { network, parse, serverTimeout, serverProcessing, serverHttp }
 
@@ -75,8 +76,10 @@ class OverpassApi {
         return text;
       } on OverpassException catch (e) {
         if (e.kind == OverpassErrorKind.parse) rethrow;
+        AppLog.w('overpass', '${endpoint.host} $e');
         lastError = e;
       } catch (e) {
+        AppLog.w('overpass', '${endpoint.host} $e');
         lastError = OverpassException(OverpassErrorKind.network, '$e');
       }
     }

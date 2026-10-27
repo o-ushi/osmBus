@@ -33,6 +33,9 @@ class MatrixRow {
 abstract final class BusMatrix {
   static const int columnCount = 3;
 
+  /// 距離順の表で同じとみなす幅。
+  static const double distanceBucketMeters = 100;
+
   static int _compareWalk(MatrixEntry a, MatrixEntry b) =>
       LocalItinerary.compareByWalk(a.itinerary, b.itinerary);
 
@@ -96,14 +99,23 @@ abstract final class BusMatrix {
           return column != 0 ? column : _compareWalk(a, b);
         });
       case TableSortMode.distance || TableSortMode.direction:
+        // 数十 m の差で乗換 2 回の案が直通より上に来ないよう、100m 単位で比べてから乗換の少ない順。
+        int bucket(double meters) => (meters / distanceBucketMeters).floor();
+        int byTransfersThenRide(MatrixEntry a, MatrixEntry b) {
+          final transfers = a.column.compareTo(b.column);
+          return transfers != 0 ? transfers : a.itinerary.rideMeters.compareTo(b.itinerary.rideMeters);
+        }
         if (metric == DistanceMetric.total) {
           entries.sort((a, b) {
-            final total = (a.itinerary.walkMeters + a.itinerary.rideMeters)
-                .compareTo(b.itinerary.walkMeters + b.itinerary.rideMeters);
-            return total != 0 ? total : _compareWalk(a, b);
+            final total = bucket(a.itinerary.walkMeters + a.itinerary.rideMeters)
+                .compareTo(bucket(b.itinerary.walkMeters + b.itinerary.rideMeters));
+            return total != 0 ? total : byTransfersThenRide(a, b);
           });
         } else {
-          entries.sort(_compareWalk);
+          entries.sort((a, b) {
+            final walk = bucket(a.itinerary.walkMeters).compareTo(bucket(b.itinerary.walkMeters));
+            return walk != 0 ? walk : byTransfersThenRide(a, b);
+          });
         }
     }
     return entries;

@@ -1,93 +1,112 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/local_itinerary.dart';
 import '../models/route_catalog.dart';
+import '../state/trip_controller.dart';
+import 'bus_map.dart';
+import 'theme.dart';
 
-const String osmTileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-/// OSM のタイルが取れないとき（回線の DNS が tile.openstreetmap.org を引けない場合など）の予備。
-/// 中身は同じ OSM データ。
-const String fallbackTileUrl = 'https://a.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png';
-
-/// flutter_map は User-Agent を `flutter_map (<この値>)` にする。
-const String osmUserAgentPackage = 'com.osamushikubo.osmBus';
-
-LatLng toLatLng(GeoPoint p) => LatLng(p.latitude, p.longitude);
-
-/// オフラインでは取得に失敗したタイルを空白のままにする（例外として扱わない）。
-Widget osmTileLayer() => TileLayer(
-      urlTemplate: osmTileUrl,
-      fallbackUrl: fallbackTileUrl,
-      userAgentPackageName: osmUserAgentPackage,
-      tileProvider: NetworkTileProvider(silenceExceptions: true),
-    );
-
-Widget osmAttribution() => const SimpleAttributionWidget(
-      source: Text('OpenStreetMap contributors, OSM France'),
-    );
-
-/// 番号表のタップ先。第 1 レグのポリライン、乗車停留所、降車停留所。
+/// 番号表のタップ先。乗るバスすべての区間と、乗車・乗換・降車の停留所（Swift の `TransitRouteMapView`）。
+/// この旅程に乗っている間は、今乗っているバスの区間だけを青にし、ほかの区間は目立たない色にする。
 class RouteMapScreen extends StatelessWidget {
-  const RouteMapScreen({super.key, required this.itinerary});
+  const RouteMapScreen({super.key, required this.itinerary, this.controller});
 
   final LocalItinerary itinerary;
 
+  /// あれば乗車中のレグを追う。
+  final TripController? controller;
+
+  static const Color _inactiveLeg = Color(0xFFB0BEC5);
+
+  /// 降りた停留所と次に乗る停留所が違えば、その間を歩く。
+  static bool _walksBetween(ItineraryLeg from, ItineraryLeg to) => from.alightStop.id != to.boardStop.id;
+
   @override
   Widget build(BuildContext context) {
+    final controller = this.controller;
+    if (controller == null) return _build(context, null);
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) => _build(context, controller.ridingLegIndexIn(itinerary)),
+    );
+  }
+
+  Widget _build(BuildContext context, int? ridingLeg) {
     final l10n = AppLocalizations.of(context);
-    final leg = itinerary.firstLeg;
-    final points = leg.path.map(toLatLng).toList();
-    final board = toLatLng(leg.boardStop.point);
-    final alight = toLatLng(leg.alightStop.point);
+    final legs = itinerary.legs;
+    final board = legs.first.boardStop.point;
+    final alight = legs.last.alightStop.point;
     final scheme = Theme.of(context).colorScheme;
 
-    Marker stopMarker(LatLng point, Color color, IconData icon) => Marker(
-          point: point,
-          width: 36,
-          height: 36,
-          child: Icon(icon, color: color, size: 34),
-        );
+    final lines = <MapLine>[
+      // 乗っていない区間を先に描き、乗っている区間を上に重ねる。
+      for (final (i, leg) in legs.indexed)
+        if (ridingLeg != null && i != ridingLeg) MapLine(leg.path, color: _inactiveLeg, width: 4),
+      for (final (i, leg) in legs.indexed)
+        if (ridingLeg == null || i == ridingLeg) MapLine(leg.path, color: scheme.primary, width: 6),
+      for (var i = 0; i + 1 < legs.length; i++)
+        if (_walksBetween(legs[i], legs[i + 1]))
+          MapLine(
+            [legs[i].alightStop.point, legs[i + 1].boardStop.point],
+            color: Colors.grey,
+            width: 4,
+            dashed: true,
+          ),
+    ];
+    final pins = <MapPin>[
+      for (var i = 0; i + 1 < legs.length; i++)
+        if (_walksBetween(legs[i], legs[i + 1])) MapPin(legs[i].alightStop.point, MapPinStyle.stop),
+      MapPin(board, MapPinStyle.board),
+      for (final leg in legs.skip(1)) MapPin(leg.boardStop.point, MapPinStyle.transfer),
+      MapPin(alight, MapPinStyle.alight),
+    ];
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.routeMapTitle(leg.ref))),
+      appBar: AppBar(title: Text(l10n.routeMapTitle(legs.map((l) => l.ref).join(' → ')))),
       body: Column(
         children: [
           Expanded(
-            child: FlutterMap(
-              options: MapOptions(
-                initialCameraFit: CameraFit.coordinates(
-                  coordinates: [board, alight, ...points],
-                  padding: const EdgeInsets.fromLTRB(48, 56, 48, 110),
-                  maxZoom: 17,
-                ),
-              ),
-              children: [
-                osmTileLayer(),
-                PolylineLayer(
-                  polylines: [Polyline(points: points, strokeWidth: 5, color: scheme.primary)],
-                ),
-                MarkerLayer(
-                  markers: [
-                    stopMarker(board, Colors.green.shade700, Icons.trip_origin),
-                    stopMarker(alight, Colors.red.shade700, Icons.place),
-                  ],
-                ),
-                osmAttribution(),
-              ],
+            child: BusMap(
+              initialCenter: board,
+              initialFit: <GeoPoint>[board, alight, for (final leg in legs) ...leg.path],
+              fitPadding: const EdgeInsets.fromLTRB(48, 56, 48, 110),
+              lines: lines,
+              pins: pins,
             ),
           ),
           SafeArea(
             top: false,
-            child: ListTile(
-              title: Text(l10n.boardAt(leg.boardStop.name)),
-              subtitle: Text(
-                '${l10n.alightAt(leg.alightStop.name)}\n'
-                '${l10n.walkMeters(itinerary.walkMeters.round())}',
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.35),
+              child: ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                children: [
+                  for (final (i, leg) in legs.indexed)
+                    ListTile(
+                      dense: true,
+                      // 番号表と同じく、長押しで乗車・乗換・降車。
+                      leading: BusBadge(
+                        text: leg.ref,
+                        riding: i == ridingLeg,
+                        onLongPress: controller == null ? null : () => controller!.toggleRidingLeg(itinerary, i),
+                        semanticsLabel: '${leg.ref}. ${l10n.routeBoardHint}',
+                      ),
+                      title: Text(i == 0 ? l10n.boardAt(leg.boardStop.name) : l10n.transferAt(leg.boardStop.name)),
+                      subtitle: Text(l10n.alightAt(leg.alightStop.name)),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
+                    child: Text(
+                      controller == null
+                          ? l10n.walkMeters(itinerary.walkMeters.round())
+                          : '${l10n.walkMeters(itinerary.walkMeters.round())}\n${l10n.routeBoardHint}',
+                      style: const TextStyle(color: AppTheme.secondaryText),
+                    ),
+                  ),
+                ],
               ),
-              isThreeLine: true,
             ),
           ),
         ],

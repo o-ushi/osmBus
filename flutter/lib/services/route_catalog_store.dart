@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/route_catalog.dart';
+import 'app_log.dart';
 
 /// 非同期処理を 1 本ずつ流す単純なロック。
 class Mutex {
@@ -84,7 +85,8 @@ class RouteCatalogStore {
     if (await f.exists()) {
       try {
         snapshot = CatalogSnapshot.fromJson(jsonDecode(await f.readAsString()));
-      } catch (_) {
+      } catch (e) {
+        AppLog.e('catalog', 'catalog unreadable, restoring from archive', e);
         // 壊れた正本は上書きせず脇へ移し、保管庫から立て直す。
         await _setAside(f);
         snapshot = await _loadArchiveUnlocked();
@@ -106,7 +108,8 @@ class RouteCatalogStore {
     if (await f.exists()) {
       try {
         archive = CatalogSnapshot.fromJson(jsonDecode(await f.readAsString()));
-      } catch (_) {
+      } catch (e) {
+        AppLog.e('catalog', 'archive unreadable, set aside', e);
         // 読めない保管庫を空で上書きしないよう、先に脇へ移す。
         await _setAside(f);
       }
