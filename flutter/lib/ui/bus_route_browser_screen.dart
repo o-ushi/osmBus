@@ -2,10 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../models/bus_identifier.dart';
 import '../models/route_catalog.dart';
 import '../models/route_search.dart';
+import '../services/geo.dart';
+import '../services/local_planner.dart';
 import '../state/trip_controller.dart';
 import 'bus_map.dart';
+import 'distance_badge.dart';
 import 'keypad.dart';
 import 'theme.dart';
 
@@ -39,7 +43,7 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
         _input = '';
         _clearsOnNextInput = false;
       }
-      if (_input.length < 4) _input += digit;
+      if (BusNumberInput.canAppend(digit, _input)) _input += digit;
     });
   }
 
@@ -80,6 +84,25 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
   }
 
   void _fit(RouteRecord route) => _map.fit(_routePoints(route));
+
+  /// 経路地図と同じく、出発地から乗る停留所までと、降りる停留所から目的地までを歩く。
+  /// 乗る・降りる停留所は番号表と同じ選び方（[LocalPlanner]）。この路線で着けなければ、
+  /// 出発地・目的地それぞれに一番近い停留所。乗ったあとは乗る停留所まで歩く線は出さない。
+  List<MapLine> _walkLines(RouteRecord route, GeoPoint? start, GeoPoint? goal) {
+    if (route.stops.isEmpty || (start == null && goal == null)) return const [];
+    final leg = start == null || goal == null ? null : LocalPlanner.plan([route], start, goal).firstOrNull?.firstLeg;
+    GeoPoint nearest(GeoPoint p) => route.stops
+        .map((s) => s.point)
+        .reduce((a, b) => Geo.distance(p, a) <= Geo.distance(p, b) ? a : b);
+    final board = start == null || _riding ? null : leg?.boardStop.point ?? nearest(start);
+    final alight = goal == null ? null : leg?.alightStop.point ?? nearest(goal);
+    return [
+      if (start != null && board != null && board != start)
+        MapLine([start, board], color: walkToFromStopsColor, width: 4, dashed: true),
+      if (goal != null && alight != null && alight != goal)
+        MapLine([alight, goal], color: walkToFromStopsColor, width: 4, dashed: true),
+    ];
+  }
 
   static List<GeoPoint> _routePoints(RouteRecord route) =>
       [for (final s in route.polylineSegments) ...s, ...route.stops.map((s) => s.point)];
@@ -138,7 +161,7 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
                 separatorBuilder: (_, _) => const SizedBox(height: 1),
                 itemBuilder: (context, index) {
                   final r = routes[index];
-                  final label = _directionLabel(r);
+                  final label = r.directionText;
                   return Material(
                     color: Colors.white,
                     child: ListTile(
@@ -154,11 +177,6 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
         ),
       ),
     );
-  }
-
-  static String? _directionLabel(RouteRecord r) {
-    if (r.from != null && r.to != null) return '${r.from} → ${r.to}';
-    return r.name.isNotEmpty && r.name != r.ref ? r.name : null;
   }
 
   Future<void> _openList() async {
@@ -180,6 +198,8 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
       builder: (context, _) {
         final route = _route;
         final origin = controller.origin;
+        final manualOrigin = controller.manualOrigin?.point;
+        final goal = controller.destination?.point;
         return Scaffold(
           backgroundColor: AppTheme.sceneLight,
           appBar: AppBar(
@@ -228,19 +248,24 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
                 initialFit: route == null ? null : _routePoints(route),
                 fitPadding: const EdgeInsets.fromLTRB(40, 40, 40, 120),
                 overlayInsets: EdgeInsets.only(bottom: _overlayBottom(context, route)),
+                myLocation: controller.gps,
                 lines: [
                   if (route != null)
                     for (final segment in route.polylineSegments)
                       MapLine(segment, color: _riding ? Colors.orange : AppTheme.accent),
+                  if (route != null) ..._walkLines(route, origin, goal),
                 ],
                 pins: [
                   if (route != null) ...[
                     for (final stop in route.stops) MapPin(stop.point, MapPinStyle.stop),
                     MapPin(route.stops.last.point, MapPinStyle.terminal),
                   ],
-                  if (origin != null) MapPin(origin, MapPinStyle.origin),
+                  if (goal != null) MapPin(goal, MapPinStyle.goal),
+                  // GPS は動く現在地の丸。手動の出発地だけ別のピンにする。
+                  if (manualOrigin != null) MapPin(manualOrigin, MapPinStyle.origin),
                 ],
               ),
+              MapDistanceBadge(controller: controller, onRidingMap: _riding),
               if (route == null && !_keypadVisible) _emptyState(l10n, origin == null),
               if (route != null && !_keypadVisible)
                 Positioned(left: 10, right: 10, bottom: 34, child: _routeInfo(l10n, route)),
@@ -297,8 +322,7 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
       );
 
   Widget _routeInfo(AppLocalizations l10n, RouteRecord route) {
-    final label = _directionLabel(route);
-    final distance = _riding ? controller.distanceLeftMeters : null;
+    final label = route.directionText;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.95), borderRadius: BorderRadius.circular(10)),
@@ -324,13 +348,6 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
               ],
             ),
           ),
-          if (distance != null) ...[
-            Text(
-              '${l10n.distanceLeft} ${DistanceColorBand.format(distance)}',
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(width: 10),
-          ],
           const Icon(CupertinoIcons.bus, size: 16, color: AppTheme.accent),
           const SizedBox(width: 2),
           Text('${route.stops.length}', style: const TextStyle(fontSize: 12, color: AppTheme.accent)),

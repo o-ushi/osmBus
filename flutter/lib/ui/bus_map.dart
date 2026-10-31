@@ -7,6 +7,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gm;
 import 'package:latlong2/latlong.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/route_catalog.dart';
 import '../services/google_maps_config.dart';
 import 'theme.dart';
@@ -91,8 +92,14 @@ enum MapPinStyle {
   /// 路線の終点。
   terminal(36, icon: Icons.flag_circle, iconSize: 34, color: Colors.red),
 
-  /// 出発地（現在地または手動の出発地）。
-  origin(22),
+  /// 手動で選んだ出発地。GPS の現在地は [myLocation]。
+  origin(22, color: AppTheme.verdictGreen),
+
+  /// 目的地そのもの（検索や長押しで保存した座標）。降車停留所の [alight] とは別。
+  goal(34, icon: Icons.sports_score, iconSize: 20, color: Color(0xFFD32F2F)),
+
+  /// GPS の現在地（Swift の `myLocationDot`。外が白、中がブランド青、直径 26）。
+  myLocation(26, color: AppTheme.brandBlue),
 
   /// 地図シートの中心にした地点。
   place(32, icon: CupertinoIcons.location_fill, iconSize: 24, color: AppTheme.accent);
@@ -111,6 +118,9 @@ class MapPin {
   final GeoPoint point;
   final MapPinStyle style;
 }
+
+/// 出発地→乗車停留所と、降車停留所→目的地の徒歩（点線）の色。乗換の徒歩（灰色）と分ける。
+const Color walkToFromStopsColor = AppTheme.accent;
 
 class MapLine {
   const MapLine(this.points, {required this.color, this.width = 5, this.dashed = false});
@@ -145,6 +155,9 @@ class BusMap extends StatefulWidget {
     this.lines = const [],
     this.pins = const [],
     this.onLongPress,
+    this.allowGoogle = true,
+    this.myLocation,
+    this.showsMyLocation = true,
   });
 
   final BusMapController? controller;
@@ -164,13 +177,37 @@ class BusMap extends StatefulWidget {
   final List<MapPin> pins;
   final ValueChanged<GeoPoint>? onLongPress;
 
+  /// false のときは設定が Google でも OSM で描く。
+  /// Google の地図はシートから外した瞬間に iOS が落ちる。
+  final bool allowGoogle;
+
+  /// GPS の現在地（手動の出発地ではない）。右下のボタンの寄せ先と、現在地の丸に使う。
+  final GeoPoint? myLocation;
+
+  /// 現在地の丸を描くか。線や停留所より手前に描き、位置が変わると滑らかに動かす。
+  final bool showsMyLocation;
+
+  /// 「現在地に移動」で寄せるズーム。
+  static const double locationZoom = 15;
+
   @override
   State<BusMap> createState() => _BusMapState();
 }
 
-class _BusMapState extends State<BusMap> {
+class _BusMapState extends State<BusMap> with TickerProviderStateMixin {
   final MapController _osm = MapController();
   gm.GoogleMapController? _google;
+
+  /// 現在地の丸の補間。前の位置から次の位置へ短く滑らせる。
+  late final AnimationController _dot = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+  late final Animation<double> _dotCurve = CurvedAnimation(parent: _dot, curve: Curves.easeInOut);
+  GeoPoint? _dotFrom;
+  late GeoPoint? _dotTo = widget.myLocation;
+
+  /// OSM のカメラ移動（flutter_map の move はアニメーションしない）。
+  late final AnimationController _camera = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+  late final Animation<double> _cameraCurve = CurvedAnimation(parent: _camera, curve: Curves.easeInOut);
+  (LatLng, double, LatLng, double)? _cameraMove;
 
   /// 画素密度ごとの Google 用の印の画像。
   static final Map<(MapPinStyle, double), gm.BitmapDescriptor> _icons = {};
@@ -182,6 +219,7 @@ class _BusMapState extends State<BusMap> {
     super.initState();
     widget.controller?._state = this;
     _config.addListener(_configChanged);
+    _camera.addListener(_stepCamera);
   }
 
   @override
@@ -191,6 +229,57 @@ class _BusMapState extends State<BusMap> {
       oldWidget.controller?._state = null;
       widget.controller?._state = this;
     }
+    final next = widget.myLocation;
+    if (next != oldWidget.myLocation) {
+      if (next == null || _dotTo == null) {
+        _dotFrom = null;
+        _dotTo = next;
+        _dot.value = 1;
+      } else {
+        _dotFrom = _dotPoint;
+        _dotTo = next;
+        _dot.forward(from: 0);
+      }
+    }
+  }
+
+  /// いま描く現在地の丸の位置。
+  GeoPoint? get _dotPoint {
+    final to = _dotTo;
+    final from = _dotFrom;
+    if (to == null || from == null || _dot.isCompleted) return to;
+    final t = _dotCurve.value;
+    return GeoPoint(
+      from.latitude + (to.latitude - from.latitude) * t,
+      from.longitude + (to.longitude - from.longitude) * t,
+    );
+  }
+
+  /// 右下のボタン。現在地へ寄せる（追従はしない）。現在地が無ければ地図の初期の中心へ。
+  void _moveToMyLocation() {
+    final target = widget.myLocation ?? widget.initialCenter;
+    if (_showGoogle) {
+      _google?.animateCamera(gm.CameraUpdate.newLatLngZoom(_toGoogle(target), BusMap.locationZoom)).catchError((_) {});
+      return;
+    }
+    try {
+      final camera = _osm.camera;
+      _cameraMove = (camera.center, camera.zoom, toLatLng(target), BusMap.locationZoom);
+      _camera.forward(from: 0);
+    } catch (_) {}
+  }
+
+  void _stepCamera() {
+    final move = _cameraMove;
+    if (move == null) return;
+    final (from, fromZoom, to, toZoom) = move;
+    final t = _cameraCurve.value;
+    try {
+      _osm.move(
+        LatLng(from.latitude + (to.latitude - from.latitude) * t, from.longitude + (to.longitude - from.longitude) * t),
+        fromZoom + (toZoom - fromZoom) * t,
+      );
+    } catch (_) {}
   }
 
   @override
@@ -203,6 +292,8 @@ class _BusMapState extends State<BusMap> {
   void dispose() {
     if (widget.controller?._state == this) widget.controller?._state = null;
     _config.removeListener(_configChanged);
+    _dot.dispose();
+    _camera.dispose();
     super.dispose();
   }
 
@@ -213,8 +304,10 @@ class _BusMapState extends State<BusMap> {
     _loadIcons();
   }
 
+  bool get _showGoogle => widget.allowGoogle && _config.useGoogle;
+
   Future<void> _loadIcons() async {
-    if (!_config.useGoogle) return;
+    if (!_showGoogle) return;
     final dpr = MediaQuery.devicePixelRatioOf(context);
     final missing = MapPinStyle.values.where((s) => !_icons.containsKey((s, dpr))).toList();
     if (missing.isEmpty) return;
@@ -280,11 +373,32 @@ class _BusMapState extends State<BusMap> {
   }
 
   @override
-  Widget build(BuildContext context) => _config.useGoogle ? _buildGoogle(context) : _buildOsm();
+  Widget build(BuildContext context) {
+    final google = _showGoogle;
+    // OSM は左下のクレジット（2 行まで）、Google は右下の出典の上に置く。
+    final buttonBottom = widget.overlayInsets.bottom +
+        (google ? 28 : MediaQuery.paddingOf(context).bottom + 46);
+    return Stack(
+      children: [
+        Positioned.fill(child: google ? _buildGoogle(context) : _buildOsm()),
+        Positioned(
+          right: 12 + widget.overlayInsets.right,
+          bottom: buttonBottom,
+          child: _LocationButton(onPressed: _moveToMyLocation),
+        ),
+      ],
+    );
+  }
 
-  Widget _buildGoogle(BuildContext context) {
+  Widget _buildGoogle(BuildContext context) => AnimatedBuilder(
+        animation: _dot,
+        builder: (context, _) => _buildGoogleFrame(context),
+      );
+
+  Widget _buildGoogleFrame(BuildContext context) {
     final dpr = MediaQuery.devicePixelRatioOf(context);
     final onLongPress = widget.onLongPress;
+    final dot = widget.showsMyLocation ? _dotPoint : null;
     return Stack(
       children: [
         gm.GoogleMap(
@@ -321,6 +435,16 @@ class _BusMapState extends State<BusMap> {
                   icon: icon,
                   anchor: const Offset(0.5, 0.5),
                   zIndexInt: i,
+                  consumeTapEvents: true,
+                ),
+            if (dot != null)
+              if (_icons[(MapPinStyle.myLocation, dpr)] case final icon?)
+                gm.Marker(
+                  markerId: const gm.MarkerId('my-location'),
+                  position: _toGoogle(dot),
+                  icon: icon,
+                  anchor: const Offset(0.5, 0.5),
+                  zIndexInt: widget.pins.length + 1,
                   consumeTapEvents: true,
                 ),
           },
@@ -384,6 +508,24 @@ class _BusMapState extends State<BusMap> {
                 ),
             ],
           ),
+        if (widget.showsMyLocation)
+          AnimatedBuilder(
+            animation: _dot,
+            builder: (context, _) {
+              final dot = _dotPoint;
+              if (dot == null) return const SizedBox.shrink();
+              return MarkerLayer(
+                markers: [
+                  Marker(
+                    point: toLatLng(dot),
+                    width: MapPinStyle.myLocation.size,
+                    height: MapPinStyle.myLocation.size,
+                    child: const CustomPaint(painter: _PinPainter(MapPinStyle.myLocation)),
+                  ),
+                ],
+              );
+            },
+          ),
         osmAttribution(),
       ],
     );
@@ -402,8 +544,20 @@ class _PinPainter extends CustomPainter {
       case MapPinStyle.stop:
         _ring(canvas, center, size.shortestSide / 2, fill: Colors.white, border: AppTheme.brandBlue, width: 2.5);
       case MapPinStyle.origin:
-        _ring(canvas, center, size.shortestSide / 2, fill: AppTheme.accent, border: Colors.white, width: 3);
-      case MapPinStyle.transfer:
+        _ring(canvas, center, size.shortestSide / 2, fill: style.color, border: Colors.white, width: 3);
+      case MapPinStyle.myLocation:
+        // 外が白（直径 24）、中が 5 内側のブランド青。
+        final outer = size.shortestSide / 2 - 1;
+        canvas.drawCircle(
+          center + const Offset(0, 1),
+          outer,
+          Paint()
+            ..color = Colors.black26
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+        );
+        canvas.drawCircle(center, outer, Paint()..color = Colors.white);
+        canvas.drawCircle(center, outer - 5, Paint()..color = style.color);
+      case MapPinStyle.transfer || MapPinStyle.goal:
         _ring(canvas, center, size.shortestSide / 2 - 1, fill: Colors.white, border: style.color, width: 2);
         _glyph(canvas, center, style);
       case MapPinStyle.board || MapPinStyle.alight || MapPinStyle.terminal || MapPinStyle.place:
@@ -444,4 +598,35 @@ class _PinPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_PinPainter oldDelegate) => oldDelegate.style != style;
+}
+
+/// 右下の「現在地に移動」（Swift の `MapLocationButton`）。直径 44 の白丸に北向きの位置アイコン。
+class _LocationButton extends StatelessWidget {
+  const _LocationButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  static const Color _googleBlue = Color.fromRGBO(66, 133, 244, 1);
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: AppLocalizations.of(context).moveToCurrentLocation,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onPressed,
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [BoxShadow(color: Color(0x33000000), blurRadius: 4, offset: Offset(0, 2))],
+          ),
+          child: const Icon(CupertinoIcons.location_north_line_fill, size: 20, color: _googleBlue),
+        ),
+      ),
+    );
+  }
 }

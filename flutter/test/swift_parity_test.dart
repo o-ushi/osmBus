@@ -123,27 +123,18 @@ void main() {
     });
   });
 
-  group('プランと登録地', () {
-    test('FREE は 3 件まで。FREE に戻ると切り詰める', () async {
+  group('登録地', () {
+    test('件数の上限なく保存できる', () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
-      final plan = PlanStore(prefs);
-      final places = PlacesStore(prefs: prefs, plan: plan);
+      final places = PlacesStore(prefs: prefs);
       SavedPlace place(int i) => SavedPlace(id: '$i', label: 'P$i', placeName: 'P$i', point: GeoPoint(21 + i / 100, 105));
-      for (var i = 0; i < 3; i++) {
-        expect(await places.addPlace(place(i)), isTrue);
-      }
-      expect(await places.addPlace(place(3)), isFalse);
-      await plan.setPlan(AppPlan.paid);
-      expect(await places.addPlace(place(3)), isTrue);
       for (var i = 0; i < 5; i++) {
+        await places.addPlace(place(i));
         await places.addHistory(place(i).toDestination());
       }
-      expect(places.history, hasLength(5));
-      await plan.setPlan(AppPlan.free);
-      await Future<void>.delayed(Duration.zero);
-      expect(places.places, hasLength(3));
-      expect(places.history.map((e) => e.destination.name), ['P4', 'P3', 'P2']);
+      expect(places.places, hasLength(5));
+      expect(places.history.map((e) => e.destination.name), ['P4', 'P3', 'P2', 'P1', 'P0']);
     });
   });
 

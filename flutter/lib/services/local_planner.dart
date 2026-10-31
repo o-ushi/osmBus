@@ -305,24 +305,52 @@ class _Route {
       : originDistance = [for (final s in record.stops) Geo.distance(origin, s.point)],
         destinationDistance = [for (final s in record.stops) Geo.distance(s.point, destination)] {
     boardIndex = _nearest(originDistance, LocalPlanner.boardRadiusMeters);
-    bestAlightAfter = List<int?>.filled(record.stops.length, null);
-    int? best;
-    for (var j = record.stops.length - 1; j >= 0; j--) {
-      bestAlightAfter[j] = best;
-      final d = destinationDistance[j];
-      if (d <= LocalPlanner.alightRadiusMeters &&
-          (best == null || d <= destinationDistance[best])) {
-        best = j;
+    final n = record.stops.length;
+    bestAlightAfter = List<int?>.filled(n, null);
+    // 後ろから見て、区間 k 以降で目的地に一番近づく区間（同距離なら手前の区間）。
+    int? closest;
+    var closestMeters = double.infinity;
+    for (var k = n - 2; k >= 0; k--) {
+      final d = _approachMeters(k, destination);
+      if (d <= closestMeters) {
+        closest = k;
+        closestMeters = d;
       }
+      bestAlightAfter[k] = _alightAround(closest!, after: k);
     }
   }
+
+  /// 最接近の区間 [segment] の前後の停留所のうち、目的地まで歩く距離が短い方（同距離なら手前）。
+  /// 乗車停留所 [after] より後ろだけ。歩く距離が [LocalPlanner.alightRadiusMeters] を超えたら降りない。
+  int? _alightAround(int segment, {required int after}) {
+    final before = segment;
+    final next = segment + 1;
+    final pick = before <= after || destinationDistance[next] < destinationDistance[before] ? next : before;
+    return destinationDistance[pick] <= LocalPlanner.alightRadiusMeters ? pick : null;
+  }
+
+  /// 目的地から区間 k → k+1 の線までの距離。目的地から遠い区間は停留所どうしの直線で見る
+  /// （線の頂点探しを近くの区間だけにする）。
+  double _approachMeters(int k, GeoPoint destination) {
+    final a = record.stops[k].point;
+    final b = record.stops[k + 1].point;
+    final near = math.min(destinationDistance[k], destinationDistance[k + 1]);
+    if (near > _detailedApproachMeters) return Geo.distanceToPolyline(destination, [a, b]);
+    final span = _span(k);
+    if (span.from == null) return Geo.distanceToPolyline(destination, [a, b]);
+    return Geo.distanceToPolyline(destination, [a, for (var v = span.from!; v <= span.to!; v++) _flat[v], b]);
+  }
+
+  /// これより目的地から遠い区間は、線の形を見ずに停留所どうしの直線で測る。
+  static const double _detailedApproachMeters = 3000;
 
   final RouteRecord record;
   final List<double> originDistance;
   final List<double> destinationDistance;
   late final int? boardIndex;
 
-  /// 添字 u より後ろで目的地に最も近い降車停留所（同距離なら添字が小さい方）。
+  /// 添字 u で乗ったときの降車停留所。u より後ろで路線が目的地に一番近づく点の、
+  /// 直前と直後の停留所のうち歩く距離が短い方（同距離なら手前）。
   late final List<int?> bestAlightAfter;
 
   late final List<GeoPoint> _flat = [for (final seg in record.polylineSegments) ...seg];

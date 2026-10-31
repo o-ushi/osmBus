@@ -50,7 +50,6 @@ Future<void> _run() async {
     sound: SoundPlayer(settings: settings),
     notifier: AlertNotifier(),
   );
-  controller.purchases.start();
   runApp(OsmBusApp(controller: controller));
   await controller.start();
 }

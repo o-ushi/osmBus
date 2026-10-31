@@ -74,7 +74,8 @@ class _OsmBusAppState extends State<OsmBusApp> with WidgetsBindingObserver {
         return MaterialApp(
           onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
           debugShowCheckedModeBanner: false,
-          // Swift 版と同じく、メイン画面はライト固定。
+          // カードとシートの文字色は Swift と同じくライトのまま。
+          // 方眼の地色だけ SceneBackground が端末のライト／ダークに合わせる。
           theme: AppTheme.light(),
           themeMode: ThemeMode.light,
           // 設定で選んだ言語。未選択なら端末の言語。

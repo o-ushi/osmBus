@@ -123,18 +123,7 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get keypadDelete => 'Xóa';
-
-  @override
   String get keypadSubmit => 'Kiểm tra';
-
-  @override
-  String ridingNow(String ref) {
-    return 'Đang đi: $ref';
-  }
-
-  @override
-  String get endRiding => 'Kết thúc chuyến';
 
   @override
   String get sectionData => 'Dữ liệu tuyến';
@@ -379,6 +368,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get distanceLeft => 'Còn';
 
   @override
+  String get moveToCurrentLocation => 'Di chuyển đến vị trí hiện tại';
+
+  @override
   String get tableTapHint =>
       'Chạm để xem bản đồ tuyến, giữ để lên hoặc xuống xe';
 
@@ -500,9 +492,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get destinationHistory => 'Lịch sử điểm đến';
 
   @override
-  String get developerMenu => '🛠 Menu nhà phát triển';
-
-  @override
   String distanceAlertBody(int meters) {
     return 'Cảnh báo ở $meters m';
   }
@@ -548,32 +537,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get historyTapFooter => 'Chạm để đặt điểm đến đó.';
-
-  @override
-  String get iapLoadFailed => 'Không tải được sản phẩm';
-
-  @override
-  String get iapLoading => 'Đang tải sản phẩm…';
-
-  @override
-  String get iapPending => 'Giao dịch đang chờ duyệt';
-
-  @override
-  String get iapProductMissing => 'Không tìm thấy sản phẩm';
-
-  @override
-  String get iapPurchaseFailed => 'Mua không thành công';
-
-  @override
-  String get iapReload => 'Tải lại sản phẩm';
-
-  @override
-  String get iapRestoreFailed => 'Khôi phục không thành công';
-
-  @override
-  String itemCount(int count) {
-    return '$count mục';
-  }
 
   @override
   String get keyFeedback => 'Phản hồi bàn phím';
@@ -649,54 +612,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get placeNamePlaceholder => 'Tên hiển thị (vd: Nhà)';
 
   @override
-  String get planCurrent => 'Gói hiện tại';
-
-  @override
-  String get planFree => 'FREE';
-
-  @override
-  String get planFreeDescription =>
-      'Bạn đang dùng gói FREE. Nâng cấp lên PREMIUM để lưu không giới hạn địa điểm và lịch sử.';
-
-  @override
-  String planFreeLimitFooter(int count) {
-    return 'Với gói FREE, bạn lưu được tối đa $count mục lịch sử và $count địa điểm. Nâng cấp lên PREMIUM để lưu không giới hạn.';
-  }
-
-  @override
-  String get planManagement => 'Quản lý gói';
-
-  @override
-  String get planNothingToRestore => 'Không tìm thấy giao dịch để khôi phục.';
-
-  @override
-  String get planPremium => 'PREMIUM';
-
-  @override
-  String get planPremiumLimitFooter =>
-      'Với gói PREMIUM, lịch sử và địa điểm đã lưu không giới hạn.';
-
-  @override
-  String get planRestore => 'Khôi phục giao dịch';
-
-  @override
-  String get planRestoreFooter =>
-      'Nếu bạn đã mua PREMIUM trên cửa hàng, hãy khôi phục tại đây.';
-
-  @override
-  String get planRestored => 'Đã khôi phục giao dịch.';
-
-  @override
-  String get planSwitchDescription =>
-      'Chỉ có trong bản debug. Không ảnh hưởng giao dịch trên cửa hàng.';
-
-  @override
-  String get planUpgrade => 'Nâng cấp lên PREMIUM';
-
-  @override
-  String get planUpgradeDone => 'Đã nâng cấp lên PREMIUM!';
-
-  @override
   String get preview => 'Nghe thử';
 
   @override
@@ -716,7 +631,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get privacyDeleteAllDetail =>
-      'Xóa điểm đến, lịch sử điểm đến, địa điểm đã lưu, sự đồng ý gửi dữ liệu ra ngoài và dữ liệu tuyến. Trạng thái mua, cài đặt chung và kho lưu trữ tuyến không bị xóa.';
+      'Xóa điểm đến, lịch sử điểm đến, địa điểm đã lưu, sự đồng ý gửi dữ liệu ra ngoài và dữ liệu tuyến. Cài đặt chung và kho lưu trữ tuyến không bị xóa.';
 
   @override
   String get privacyFooter => 'Xem cách dữ liệu được gửi, lưu và xóa.';
@@ -726,14 +641,14 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get privacyRecipientsBody =>
-      '• OpenStreetMap Overpass API (overpass-api.de, Kumi Systems, Mail.ru): vị trí, bán kính tìm và mã tuyến, để tải tuyến và trạm. Chỉ gửi khi bạn đồng ý.\n• Ô bản đồ (OpenStreetMap, OSM France): vùng bản đồ đang xem, để hiển thị bản đồ.\n• Google Maps (chỉ khi có khóa API và bật trong cài đặt): vùng bản đồ đang xem, để hiển thị bản đồ.\n• Tìm địa điểm (Nominatim, Photon): nội dung tìm kiếm và tọa độ gần đó để xếp kết quả.\n• App Store / Google Play: mua và khôi phục PREMIUM.\nKiểm tra xe buýt và bảng số xe chỉ được tính trên thiết bị. Không gửi gì cho Google.';
+      '• OpenStreetMap Overpass API (overpass-api.de, Kumi Systems, Mail.ru): vị trí, bán kính tìm và mã tuyến, để tải tuyến và trạm. Chỉ gửi khi bạn đồng ý.\n• Ô bản đồ (OpenStreetMap, OSM France): vùng bản đồ đang xem, để hiển thị bản đồ.\n• Google Maps (chỉ khi có khóa API và bật trong cài đặt): vùng bản đồ đang xem, để hiển thị bản đồ.\n• Tìm địa điểm (Nominatim, Photon): nội dung tìm kiếm và tọa độ gần đó để xếp kết quả.\n• Tìm địa điểm (Apple Maps, trên iOS khi từ khóa có tiếng Nhật): nội dung tìm kiếm, để tìm địa điểm theo tên tiếng Nhật. Có thêm tọa độ gần đó để ưu tiên kết quả gần hơn.\nKiểm tra xe buýt và bảng số xe chỉ được tính trên thiết bị. Không gửi gì cho Google.';
 
   @override
   String get privacyStorage => 'Lưu trên thiết bị';
 
   @override
   String get privacyStorageBody =>
-      'Dữ liệu tuyến, kho lưu trữ, điểm đến, lịch sử điểm đến, địa điểm đã lưu và cài đặt được lưu trên thiết bị này. Dữ liệu tuyến chỉ được lưu vào iCloud Drive của bạn khi bật đồng bộ iCloud.';
+      'Dữ liệu tuyến, kho lưu trữ, điểm đến, lịch sử điểm đến, địa điểm đã lưu và cài đặt được lưu trên thiết bị này. Dữ liệu tuyến, địa điểm đã lưu và lịch sử điểm đến chỉ được lưu vào iCloud Drive của bạn khi bật đồng bộ iCloud. Bản sao lưu xuất ra cũng chứa các dữ liệu này.';
 
   @override
   String get privacyTitle => 'Quyền riêng tư & dữ liệu';
@@ -795,11 +710,6 @@ class AppLocalizationsVi extends AppLocalizations {
       'Chạm để đặt làm điểm đến. Vuốt trái để xóa, chạm bút chì để sửa.';
 
   @override
-  String savedPlacesFreeLimit(int count) {
-    return 'Gói FREE chỉ cho phép $count địa điểm đã lưu.';
-  }
-
-  @override
   String get searchFromHistory => 'Lịch sử';
 
   @override
@@ -843,9 +753,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get trackingNotice => 'Đang theo dõi chuyến đi để cảnh báo đến nơi.';
-
-  @override
-  String get unlimited => 'Không giới hạn';
 
   @override
   String get volume => 'Âm lượng';
@@ -960,14 +867,6 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get helpSettingsBody =>
       'Từ … → Cài đặt bạn có thể đổi ngôn ngữ, cách nhập bàn phím, âm thanh và rung, cảnh báo đến nơi và dữ liệu tuyến. Cảnh báo đến nơi dựa trên khoảng cách đến trạm xuống, tối đa 3 mức — chuông reo 1–3 lần từ xa đến gần. Khi ứng dụng chạy nền, sẽ hiện thông báo.';
-
-  @override
-  String get helpPlanTitle => 'Quản lý gói';
-
-  @override
-  String helpPlanBody(int count) {
-    return 'Mở … → Quản lý gói để xem gói hiện tại, nâng cấp lên PREMIUM hoặc khôi phục giao dịch. Gói FREE: tối đa $count địa điểm đã lưu và $count mục lịch sử. PREMIUM: không giới hạn.';
-  }
 
   @override
   String get helpNoRouteTitle => 'Không tìm thấy tuyến';

@@ -122,18 +122,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get keypadDelete => '消去';
-
-  @override
   String get keypadSubmit => '判定';
-
-  @override
-  String ridingNow(String ref) {
-    return '乗車中: $ref';
-  }
-
-  @override
-  String get endRiding => '乗車終了';
 
   @override
   String get sectionData => '路線データ';
@@ -373,6 +362,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get distanceLeft => 'あと';
 
   @override
+  String get moveToCurrentLocation => '現在地に移動';
+
+  @override
   String get tableTapHint => 'タップで地図、長押しで乗車または降車';
 
   @override
@@ -492,9 +484,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get destinationHistory => '目的地の履歴';
 
   @override
-  String get developerMenu => '🛠 開発者メニュー';
-
-  @override
   String distanceAlertBody(int meters) {
     return '${meters}m でアラート';
   }
@@ -540,32 +529,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get historyTapFooter => 'タップすると、その目的地を設定します。';
-
-  @override
-  String get iapLoadFailed => '商品の読み込みに失敗しました';
-
-  @override
-  String get iapLoading => '商品を読み込み中…';
-
-  @override
-  String get iapPending => '購入が保留中です';
-
-  @override
-  String get iapProductMissing => '商品が見つかりません';
-
-  @override
-  String get iapPurchaseFailed => '購入に失敗しました';
-
-  @override
-  String get iapReload => '商品を再読み込み';
-
-  @override
-  String get iapRestoreFailed => '復元に失敗しました';
-
-  @override
-  String itemCount(int count) {
-    return '$count件';
-  }
 
   @override
   String get keyFeedback => 'キーパッドのフィードバック';
@@ -637,51 +600,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get placeNamePlaceholder => '表示名（例: 自宅）';
 
   @override
-  String get planCurrent => '現在のプラン';
-
-  @override
-  String get planFree => 'FREE';
-
-  @override
-  String get planFreeDescription =>
-      '現在は FREE プランです。PREMIUM にアップグレードすると、登録済みの場所と履歴が無制限になります。';
-
-  @override
-  String planFreeLimitFooter(int count) {
-    return 'FREEプランでは、履歴と登録済みの場所はそれぞれ$count件までです。PREMIUMにアップグレードすると無制限に保存できます。';
-  }
-
-  @override
-  String get planManagement => 'プラン管理';
-
-  @override
-  String get planNothingToRestore => '復元できる購入が見つかりませんでした。';
-
-  @override
-  String get planPremium => 'PREMIUM';
-
-  @override
-  String get planPremiumLimitFooter => 'PREMIUMプランでは、履歴と登録済みの場所を無制限に保存できます。';
-
-  @override
-  String get planRestore => '購入を復元';
-
-  @override
-  String get planRestoreFooter => 'ストアで PREMIUM を購入済みの場合は、ここから復元できます。';
-
-  @override
-  String get planRestored => '購入を復元しました。';
-
-  @override
-  String get planSwitchDescription => 'デバッグビルドだけの切り替えです。ストアの購入は変わりません。';
-
-  @override
-  String get planUpgrade => 'PREMIUMにアップグレード';
-
-  @override
-  String get planUpgradeDone => 'プレミアムプランへのアップグレードが完了しました！';
-
-  @override
   String get preview => 'プレビュー';
 
   @override
@@ -701,7 +619,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get privacyDeleteAllDetail =>
-      '目的地、目的地の履歴、登録済みの場所、外部送信への同意と路線データを削除します。購入状態・一般設定・路線の保管庫は削除されません。';
+      '目的地、目的地の履歴、登録済みの場所、外部送信への同意と路線データを削除します。一般設定と路線の保管庫は削除されません。';
 
   @override
   String get privacyFooter => 'データの送信・保存・削除について確認できます。';
@@ -711,14 +629,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get privacyRecipientsBody =>
-      '・OpenStreetMap の Overpass API（overpass-api.de、Kumi Systems、Mail.ru）: 現在地の座標と検索半径、路線 ID。路線と停留所の取得のため。同意したときだけ送ります。\n・地図タイル（OpenStreetMap、OSM France）: 表示中の地図の範囲。地図の表示のため。\n・Google マップ（API キーがあり、設定でオンのときだけ）: 表示中の地図の範囲。地図の表示のため。\n・地名検索（Nominatim、Photon）: 入力した地名と、近くを優先するための現在地付近の座標。目的地の検索のため。\n・App Store / Google Play: PREMIUM の購入と復元。\nバスの判定と番号表は端末の中だけで計算し、Google には何も送りません。';
+      '・OpenStreetMap の Overpass API（overpass-api.de、Kumi Systems、Mail.ru）: 現在地の座標と検索半径、路線 ID。路線と停留所の取得のため。同意したときだけ送ります。\n・地図タイル（OpenStreetMap、OSM France）: 表示中の地図の範囲。地図の表示のため。\n・Google マップ（API キーがあり、設定でオンのときだけ）: 表示中の地図の範囲。地図の表示のため。\n・地名検索（Nominatim、Photon）: 入力した地名と、近くを優先するための現在地付近の座標。目的地の検索のため。\n・地名検索（Apple の地図、iOS で検索語句に日本語が含まれるとき）: 入力した地名。日本語の呼び方で場所を探すため。近くを優先するときは現在地付近の座標も送ります。\nバスの判定と番号表は端末の中だけで計算し、Google には何も送りません。';
 
   @override
   String get privacyStorage => '端末での保存';
 
   @override
   String get privacyStorageBody =>
-      '路線データ、その保管庫、目的地、目的地の履歴、登録済みの場所、設定はこの端末に保存します。iCloud 同期をオンにしたときだけ、路線データを自分の iCloud Drive にも保存します。';
+      '路線データ、その保管庫、目的地、目的地の履歴、登録済みの場所、設定はこの端末に保存します。iCloud 同期をオンにしたときだけ、路線データ、登録済みの場所、目的地の履歴を自分の iCloud Drive にも保存します。バックアップの書き出しにも同じものが入ります。';
 
   @override
   String get privacyTitle => 'プライバシーとデータ';
@@ -775,11 +693,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get savedPlacesFooter => 'タップで目的地に設定。左スワイプで削除、鉛筆で編集できます。';
 
   @override
-  String savedPlacesFreeLimit(int count) {
-    return 'FREEプランでは登録できる場所は$count件までです。';
-  }
-
-  @override
   String get searchFromHistory => '履歴から探す';
 
   @override
@@ -823,9 +736,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get trackingNotice => '到着アラートのため乗車中の位置を追跡しています。';
-
-  @override
-  String get unlimited => '無制限';
 
   @override
   String get volume => '音量';
@@ -939,14 +849,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get helpSettingsBody =>
       '… → 設定 から、言語・テンキー入力・キーパッドの音と振動・到着アラート・路線データを変更できます。到着アラートは降車バス停までの距離で最大3段階設定でき、遠い順にアラームが1〜3回鳴ります。アプリが裏にあるときは通知で知らせます。';
-
-  @override
-  String get helpPlanTitle => 'プラン管理';
-
-  @override
-  String helpPlanBody(int count) {
-    return '… → プラン管理 から現在のプランを確認し、PREMIUM にアップグレードしたり、購入を復元できます。FREEプランは登録済みの場所$count件・履歴$count件まで。PREMIUMは無制限です。';
-  }
 
   @override
   String get helpNoRouteTitle => 'ルートが見つからない';

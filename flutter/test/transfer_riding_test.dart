@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:osmbus/models/bus_matrix.dart';
 import 'package:osmbus/models/local_itinerary.dart';
 import 'package:osmbus/models/route_catalog.dart';
 import 'package:osmbus/services/catalog_sync.dart';
 import 'package:osmbus/services/geo.dart';
+import 'package:osmbus/services/route_catalog_store.dart';
 import 'package:osmbus/state/trip_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -80,5 +83,38 @@ void main() {
     controller.toggleRiding(entry(), legIndex: 1);
     controller.toggleRiding(entry(), legIndex: 1);
     expect(controller.riding, isNull);
+  });
+
+  test('裏に回っても降車せず、プロセスが殺されても次の起動で同じ乗車に戻る', () async {
+    controller.toggleRiding(entry());
+    controller.toggleRiding(entry(), legIndex: 1);
+    controller.onPaused();
+    expect(controller.riding?.ref, '28');
+
+    final dir = await Directory.systemTemp.createTemp('riding');
+    addTearDown(() => dir.delete(recursive: true));
+    final relaunched = TripController(
+      prefs: controller.prefs,
+      store: RouteCatalogStore(baseDirectory: () async => dir),
+      sync: const UnsupportedCatalogSync(),
+      requestsLocationOnLaunch: false,
+    );
+    addTearDown(relaunched.dispose);
+    await relaunched.start();
+    expect(relaunched.riding?.ref, '28');
+    expect(relaunched.riding?.alightStop.id, alight28.id);
+    expect(relaunched.ridingLegIndexIn(trip()), 1);
+    expect(relaunched.riding?.fromRouteMap, isFalse);
+
+    relaunched.endRiding();
+    final again = TripController(
+      prefs: controller.prefs,
+      store: RouteCatalogStore(baseDirectory: () async => dir),
+      sync: const UnsupportedCatalogSync(),
+      requestsLocationOnLaunch: false,
+    );
+    addTearDown(again.dispose);
+    await again.start();
+    expect(again.riding, isNull);
   });
 }

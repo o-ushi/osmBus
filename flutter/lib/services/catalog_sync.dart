@@ -7,6 +7,7 @@ import 'package:icloud_storage/icloud_storage.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/route_catalog.dart';
+import '../state/places_store.dart';
 import 'route_catalog_store.dart';
 import 'app_log.dart';
 
@@ -16,6 +17,9 @@ enum SyncUnavailableReason { notIOS, iCloudUnavailable }
 abstract class CatalogSync {
   static const String containerId = 'iCloud.com.osamushikubo.osmBus';
   static const String relativePath = 'Documents/bus-route-catalog.json';
+
+  /// 登録済みの場所と目的地の履歴。路線の正本とは別のファイルにする。
+  static const String personalRelativePath = 'Documents/osmBus-places.json';
 
   /// iOS 以外では iCloud の実装を作らない。
   factory CatalogSync.forPlatform(RouteCatalogStore store) =>
@@ -33,6 +37,9 @@ abstract class CatalogSync {
   Future<CatalogSnapshot?> pullRemote();
 
   Future<CatalogSnapshot> mergeAndPush();
+
+  /// iCloud 側の場所・履歴と [local] を統合して書き戻し、統合結果を返す。
+  Future<PersonalData> mergePersonal(PersonalData local);
 }
 
 class SyncUnavailableException implements Exception {
@@ -64,6 +71,10 @@ class UnsupportedCatalogSync implements CatalogSync {
 
   @override
   Future<CatalogSnapshot> mergeAndPush() async =>
+      throw const SyncUnavailableException(SyncUnavailableReason.notIOS);
+
+  @override
+  Future<PersonalData> mergePersonal(PersonalData local) async =>
       throw const SyncUnavailableException(SyncUnavailableReason.notIOS);
 }
 
@@ -129,26 +140,28 @@ class ICloudCatalogSync implements CatalogSync {
     await _push(await store.load());
   }
 
-  Future<void> _push(CatalogSnapshot snapshot) async {
-    final tmp = await _tempFile('bus-route-catalog.upload.json');
-    await tmp.writeAsString(RouteCatalogStore.encode(snapshot), flush: true);
+  Future<void> _push(CatalogSnapshot snapshot) =>
+      _upload(CatalogSync.relativePath, 'bus-route-catalog.upload.json', RouteCatalogStore.encode(snapshot));
+
+  Future<void> _upload(String relativePath, String tempName, String text) async {
+    final tmp = await _tempFile(tempName);
+    await tmp.writeAsString(text, flush: true);
     await ICloudStorage.upload(
       containerId: CatalogSync.containerId,
       filePath: tmp.path,
-      destinationRelativePath: CatalogSync.relativePath,
+      destinationRelativePath: relativePath,
     );
   }
 
-  @override
-  Future<CatalogSnapshot?> pullRemote() async {
-    _requireAvailable();
+  /// まだ無ければ null。
+  Future<String?> _download(String relativePath, String tempName) async {
     final files = await ICloudStorage.gather(containerId: CatalogSync.containerId);
-    if (!files.any((f) => f.relativePath == CatalogSync.relativePath)) return null;
-    final tmp = await _tempFile('bus-route-catalog.download.json');
+    if (!files.any((f) => f.relativePath == relativePath)) return null;
+    final tmp = await _tempFile(tempName);
     try {
       await _waitFor((onProgress) => ICloudStorage.download(
             containerId: CatalogSync.containerId,
-            relativePath: CatalogSync.relativePath,
+            relativePath: relativePath,
             destinationFilePath: tmp.path,
             onProgress: onProgress,
           ));
@@ -156,7 +169,14 @@ class ICloudCatalogSync implements CatalogSync {
       if (e.code == PlatformExceptionCode.fileNotFound) return null;
       rethrow;
     }
-    return CatalogSnapshot.fromJson(jsonDecode(await tmp.readAsString()));
+    return tmp.readAsString();
+  }
+
+  @override
+  Future<CatalogSnapshot?> pullRemote() async {
+    _requireAvailable();
+    final text = await _download(CatalogSync.relativePath, 'bus-route-catalog.download.json');
+    return text == null ? null : CatalogSnapshot.fromJson(jsonDecode(text));
   }
 
   @override
@@ -171,6 +191,17 @@ class ICloudCatalogSync implements CatalogSync {
       source: CatalogSaveSource.sync,
     );
     await _push(merged);
+    return merged;
+  }
+
+  @override
+  Future<PersonalData> mergePersonal(PersonalData local) async {
+    _requireAvailable();
+    final text = await _download(CatalogSync.personalRelativePath, 'osmBus-places.download.json');
+    final merged = text == null
+        ? local
+        : PersonalData.merge(local, PersonalData.fromJson(jsonDecode(text)), now: DateTime.now().toUtc());
+    await _upload(CatalogSync.personalRelativePath, 'osmBus-places.upload.json', jsonEncode(merged.toJson()));
     return merged;
   }
 }

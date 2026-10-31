@@ -46,6 +46,40 @@ void main() {
       expect(both.single.firstLeg.relationId, 1);
     });
 
+    test('経路が目的地の横を通れば、直線で近いずっと手前の停留所ではなく最接近点の隣で降りる', () {
+      // 目的地の東 300m を北へ抜け、600m 先で西へ折り返し、目的地の東 50m を南へ戻る路線。
+      const eastLon = 0.0029; // 約 300m
+      const nearLon = 0.00048; // 約 50m
+      final goal = GeoPoint(21.02, lon);
+      final loop = [
+        GeoPoint(goal.latitude - kmLat, lon + eastLon),
+        GeoPoint(goal.latitude, lon + eastLon), // 直線で一番近い（300m）
+        GeoPoint(goal.latitude + 6 * hundredMetersLat, lon + eastLon),
+        GeoPoint(goal.latitude + 6 * hundredMetersLat, lon + nearLon),
+        GeoPoint(goal.latitude - 4 * hundredMetersLat, lon + nearLon), // 最接近点の直後（約 400m）
+      ];
+      final start = GeoPoint(loop.first.latitude - hundredMetersLat, loop.first.longitude);
+      final leg = LocalPlanner.plan([route(id: 1, ref: '35', stops: loop)], start, goal).single.firstLeg;
+      expect(Geo.distance(loop[1], goal), lessThan(Geo.distance(loop[4], goal)));
+      expect(leg.alightIndex, 4);
+    });
+
+    test('直線で近くても、最接近点を通り過ぎた先の停留所では降りない', () {
+      // 目的地の東 30m を北へ抜け、先で西へ曲がって目的地の北西に戻る路線。
+      const sideLon = 0.00029; // 約 30m
+      final goal = GeoPoint(21.02, lon);
+      final line = [
+        GeoPoint(goal.latitude - 14 * hundredMetersLat, lon + sideLon),
+        GeoPoint(goal.latitude - 4 * hundredMetersLat, lon + sideLon), // 最接近点の直前（約 400m）
+        GeoPoint(goal.latitude + 5 * hundredMetersLat, lon + sideLon), // 最接近点の直後（約 500m）
+        GeoPoint(goal.latitude + 0.0014, lon - 0.0014), // 通り過ぎた先（直線で約 210m）
+      ];
+      final start = GeoPoint(line.first.latitude - hundredMetersLat, line.first.longitude);
+      final leg = LocalPlanner.plan([route(id: 1, ref: '35', stops: line)], start, goal).single.firstLeg;
+      expect(Geo.distance(line[3], goal), lessThan(Geo.distance(line[1], goal)));
+      expect(leg.alightIndex, 1);
+    });
+
     test('形状が無ければ両停留所間の直線距離', () {
       final result = LocalPlanner.plan(
         [route(id: 1, ref: '35', stops: stops, withPolyline: false)],

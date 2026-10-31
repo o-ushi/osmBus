@@ -304,29 +304,11 @@ abstract class AppLocalizations {
   /// **'参考：{direction}向き'**
   String directionToward(String direction);
 
-  /// No description provided for @keypadDelete.
-  ///
-  /// In ja, this message translates to:
-  /// **'消去'**
-  String get keypadDelete;
-
   /// No description provided for @keypadSubmit.
   ///
   /// In ja, this message translates to:
   /// **'判定'**
   String get keypadSubmit;
-
-  /// No description provided for @ridingNow.
-  ///
-  /// In ja, this message translates to:
-  /// **'乗車中: {ref}'**
-  String ridingNow(String ref);
-
-  /// No description provided for @endRiding.
-  ///
-  /// In ja, this message translates to:
-  /// **'乗車終了'**
-  String get endRiding;
 
   /// No description provided for @sectionData.
   ///
@@ -742,6 +724,12 @@ abstract class AppLocalizations {
   /// **'あと'**
   String get distanceLeft;
 
+  /// No description provided for @moveToCurrentLocation.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在地に移動'**
+  String get moveToCurrentLocation;
+
   /// No description provided for @tableTapHint.
   ///
   /// In ja, this message translates to:
@@ -970,12 +958,6 @@ abstract class AppLocalizations {
   /// **'目的地の履歴'**
   String get destinationHistory;
 
-  /// No description provided for @developerMenu.
-  ///
-  /// In ja, this message translates to:
-  /// **'🛠 開発者メニュー'**
-  String get developerMenu;
-
   /// No description provided for @distanceAlertBody.
   ///
   /// In ja, this message translates to:
@@ -1059,54 +1041,6 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'タップすると、その目的地を設定します。'**
   String get historyTapFooter;
-
-  /// No description provided for @iapLoadFailed.
-  ///
-  /// In ja, this message translates to:
-  /// **'商品の読み込みに失敗しました'**
-  String get iapLoadFailed;
-
-  /// No description provided for @iapLoading.
-  ///
-  /// In ja, this message translates to:
-  /// **'商品を読み込み中…'**
-  String get iapLoading;
-
-  /// No description provided for @iapPending.
-  ///
-  /// In ja, this message translates to:
-  /// **'購入が保留中です'**
-  String get iapPending;
-
-  /// No description provided for @iapProductMissing.
-  ///
-  /// In ja, this message translates to:
-  /// **'商品が見つかりません'**
-  String get iapProductMissing;
-
-  /// No description provided for @iapPurchaseFailed.
-  ///
-  /// In ja, this message translates to:
-  /// **'購入に失敗しました'**
-  String get iapPurchaseFailed;
-
-  /// No description provided for @iapReload.
-  ///
-  /// In ja, this message translates to:
-  /// **'商品を再読み込み'**
-  String get iapReload;
-
-  /// No description provided for @iapRestoreFailed.
-  ///
-  /// In ja, this message translates to:
-  /// **'復元に失敗しました'**
-  String get iapRestoreFailed;
-
-  /// No description provided for @itemCount.
-  ///
-  /// In ja, this message translates to:
-  /// **'{count}件'**
-  String itemCount(int count);
 
   /// No description provided for @keyFeedback.
   ///
@@ -1246,90 +1180,6 @@ abstract class AppLocalizations {
   /// **'表示名（例: 自宅）'**
   String get placeNamePlaceholder;
 
-  /// No description provided for @planCurrent.
-  ///
-  /// In ja, this message translates to:
-  /// **'現在のプラン'**
-  String get planCurrent;
-
-  /// No description provided for @planFree.
-  ///
-  /// In ja, this message translates to:
-  /// **'FREE'**
-  String get planFree;
-
-  /// No description provided for @planFreeDescription.
-  ///
-  /// In ja, this message translates to:
-  /// **'現在は FREE プランです。PREMIUM にアップグレードすると、登録済みの場所と履歴が無制限になります。'**
-  String get planFreeDescription;
-
-  /// No description provided for @planFreeLimitFooter.
-  ///
-  /// In ja, this message translates to:
-  /// **'FREEプランでは、履歴と登録済みの場所はそれぞれ{count}件までです。PREMIUMにアップグレードすると無制限に保存できます。'**
-  String planFreeLimitFooter(int count);
-
-  /// No description provided for @planManagement.
-  ///
-  /// In ja, this message translates to:
-  /// **'プラン管理'**
-  String get planManagement;
-
-  /// No description provided for @planNothingToRestore.
-  ///
-  /// In ja, this message translates to:
-  /// **'復元できる購入が見つかりませんでした。'**
-  String get planNothingToRestore;
-
-  /// No description provided for @planPremium.
-  ///
-  /// In ja, this message translates to:
-  /// **'PREMIUM'**
-  String get planPremium;
-
-  /// No description provided for @planPremiumLimitFooter.
-  ///
-  /// In ja, this message translates to:
-  /// **'PREMIUMプランでは、履歴と登録済みの場所を無制限に保存できます。'**
-  String get planPremiumLimitFooter;
-
-  /// No description provided for @planRestore.
-  ///
-  /// In ja, this message translates to:
-  /// **'購入を復元'**
-  String get planRestore;
-
-  /// No description provided for @planRestoreFooter.
-  ///
-  /// In ja, this message translates to:
-  /// **'ストアで PREMIUM を購入済みの場合は、ここから復元できます。'**
-  String get planRestoreFooter;
-
-  /// No description provided for @planRestored.
-  ///
-  /// In ja, this message translates to:
-  /// **'購入を復元しました。'**
-  String get planRestored;
-
-  /// No description provided for @planSwitchDescription.
-  ///
-  /// In ja, this message translates to:
-  /// **'デバッグビルドだけの切り替えです。ストアの購入は変わりません。'**
-  String get planSwitchDescription;
-
-  /// No description provided for @planUpgrade.
-  ///
-  /// In ja, this message translates to:
-  /// **'PREMIUMにアップグレード'**
-  String get planUpgrade;
-
-  /// No description provided for @planUpgradeDone.
-  ///
-  /// In ja, this message translates to:
-  /// **'プレミアムプランへのアップグレードが完了しました！'**
-  String get planUpgradeDone;
-
   /// No description provided for @preview.
   ///
   /// In ja, this message translates to:
@@ -1369,7 +1219,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyDeleteAllDetail.
   ///
   /// In ja, this message translates to:
-  /// **'目的地、目的地の履歴、登録済みの場所、外部送信への同意と路線データを削除します。購入状態・一般設定・路線の保管庫は削除されません。'**
+  /// **'目的地、目的地の履歴、登録済みの場所、外部送信への同意と路線データを削除します。一般設定と路線の保管庫は削除されません。'**
   String get privacyDeleteAllDetail;
 
   /// No description provided for @privacyFooter.
@@ -1387,7 +1237,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyRecipientsBody.
   ///
   /// In ja, this message translates to:
-  /// **'・OpenStreetMap の Overpass API（overpass-api.de、Kumi Systems、Mail.ru）: 現在地の座標と検索半径、路線 ID。路線と停留所の取得のため。同意したときだけ送ります。\n・地図タイル（OpenStreetMap、OSM France）: 表示中の地図の範囲。地図の表示のため。\n・Google マップ（API キーがあり、設定でオンのときだけ）: 表示中の地図の範囲。地図の表示のため。\n・地名検索（Nominatim、Photon）: 入力した地名と、近くを優先するための現在地付近の座標。目的地の検索のため。\n・App Store / Google Play: PREMIUM の購入と復元。\nバスの判定と番号表は端末の中だけで計算し、Google には何も送りません。'**
+  /// **'・OpenStreetMap の Overpass API（overpass-api.de、Kumi Systems、Mail.ru）: 現在地の座標と検索半径、路線 ID。路線と停留所の取得のため。同意したときだけ送ります。\n・地図タイル（OpenStreetMap、OSM France）: 表示中の地図の範囲。地図の表示のため。\n・Google マップ（API キーがあり、設定でオンのときだけ）: 表示中の地図の範囲。地図の表示のため。\n・地名検索（Nominatim、Photon）: 入力した地名と、近くを優先するための現在地付近の座標。目的地の検索のため。\n・地名検索（Apple の地図、iOS で検索語句に日本語が含まれるとき）: 入力した地名。日本語の呼び方で場所を探すため。近くを優先するときは現在地付近の座標も送ります。\nバスの判定と番号表は端末の中だけで計算し、Google には何も送りません。'**
   String get privacyRecipientsBody;
 
   /// No description provided for @privacyStorage.
@@ -1399,7 +1249,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyStorageBody.
   ///
   /// In ja, this message translates to:
-  /// **'路線データ、その保管庫、目的地、目的地の履歴、登録済みの場所、設定はこの端末に保存します。iCloud 同期をオンにしたときだけ、路線データを自分の iCloud Drive にも保存します。'**
+  /// **'路線データ、その保管庫、目的地、目的地の履歴、登録済みの場所、設定はこの端末に保存します。iCloud 同期をオンにしたときだけ、路線データ、登録済みの場所、目的地の履歴を自分の iCloud Drive にも保存します。バックアップの書き出しにも同じものが入ります。'**
   String get privacyStorageBody;
 
   /// No description provided for @privacyTitle.
@@ -1504,12 +1354,6 @@ abstract class AppLocalizations {
   /// **'タップで目的地に設定。左スワイプで削除、鉛筆で編集できます。'**
   String get savedPlacesFooter;
 
-  /// No description provided for @savedPlacesFreeLimit.
-  ///
-  /// In ja, this message translates to:
-  /// **'FREEプランでは登録できる場所は{count}件までです。'**
-  String savedPlacesFreeLimit(int count);
-
   /// No description provided for @searchFromHistory.
   ///
   /// In ja, this message translates to:
@@ -1599,12 +1443,6 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'到着アラートのため乗車中の位置を追跡しています。'**
   String get trackingNotice;
-
-  /// No description provided for @unlimited.
-  ///
-  /// In ja, this message translates to:
-  /// **'無制限'**
-  String get unlimited;
 
   /// No description provided for @volume.
   ///
@@ -1803,18 +1641,6 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'… → 設定 から、言語・テンキー入力・キーパッドの音と振動・到着アラート・路線データを変更できます。到着アラートは降車バス停までの距離で最大3段階設定でき、遠い順にアラームが1〜3回鳴ります。アプリが裏にあるときは通知で知らせます。'**
   String get helpSettingsBody;
-
-  /// No description provided for @helpPlanTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'プラン管理'**
-  String get helpPlanTitle;
-
-  /// No description provided for @helpPlanBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'… → プラン管理 から現在のプランを確認し、PREMIUM にアップグレードしたり、購入を復元できます。FREEプランは登録済みの場所{count}件・履歴{count}件まで。PREMIUMは無制限です。'**
-  String helpPlanBody(int count);
 
   /// No description provided for @helpNoRouteTitle.
   ///

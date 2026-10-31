@@ -124,18 +124,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get keypadDelete => 'Delete';
-
-  @override
   String get keypadSubmit => 'Check';
-
-  @override
-  String ridingNow(String ref) {
-    return 'Riding: $ref';
-  }
-
-  @override
-  String get endRiding => 'End ride';
 
   @override
   String get sectionData => 'Route data';
@@ -380,6 +369,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get distanceLeft => 'Left';
 
   @override
+  String get moveToCurrentLocation => 'Move to current location';
+
+  @override
   String get tableTapHint =>
       'Tap to view the route map, long-press to board or alight';
 
@@ -502,9 +494,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get destinationHistory => 'Destination history';
 
   @override
-  String get developerMenu => '🛠 Developer Menu';
-
-  @override
   String distanceAlertBody(int meters) {
     return 'Alert at $meters m';
   }
@@ -551,32 +540,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get historyTapFooter => 'Tap to set that destination.';
-
-  @override
-  String get iapLoadFailed => 'Could not load products';
-
-  @override
-  String get iapLoading => 'Loading products…';
-
-  @override
-  String get iapPending => 'Purchase pending approval';
-
-  @override
-  String get iapProductMissing => 'Product not found';
-
-  @override
-  String get iapPurchaseFailed => 'Purchase failed';
-
-  @override
-  String get iapReload => 'Reload products';
-
-  @override
-  String get iapRestoreFailed => 'Restore failed';
-
-  @override
-  String itemCount(int count) {
-    return '$count items';
-  }
 
   @override
   String get keyFeedback => 'Keypad feedback';
@@ -653,54 +616,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get placeNamePlaceholder => 'Display name (e.g. Home)';
 
   @override
-  String get planCurrent => 'Current Plan';
-
-  @override
-  String get planFree => 'FREE';
-
-  @override
-  String get planFreeDescription =>
-      'You are on the FREE plan. Upgrade to PREMIUM for unlimited saved places and history.';
-
-  @override
-  String planFreeLimitFooter(int count) {
-    return 'On the FREE plan, you can save up to $count destinations in history and $count saved places. Upgrade to PREMIUM for unlimited storage.';
-  }
-
-  @override
-  String get planManagement => 'Plan';
-
-  @override
-  String get planNothingToRestore => 'No restorable purchases were found.';
-
-  @override
-  String get planPremium => 'PREMIUM';
-
-  @override
-  String get planPremiumLimitFooter =>
-      'On the PREMIUM plan, history and saved places are unlimited.';
-
-  @override
-  String get planRestore => 'Restore Purchases';
-
-  @override
-  String get planRestoreFooter =>
-      'If you already purchased PREMIUM in the store, restore it here.';
-
-  @override
-  String get planRestored => 'Purchases restored.';
-
-  @override
-  String get planSwitchDescription =>
-      'Debug builds only. Store purchases are not affected.';
-
-  @override
-  String get planUpgrade => 'Upgrade to PREMIUM';
-
-  @override
-  String get planUpgradeDone => 'Upgrade to PREMIUM completed!';
-
-  @override
   String get preview => 'Preview';
 
   @override
@@ -721,7 +636,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyDeleteAllDetail =>
-      'Deletes the destination, destination history, saved places, external-transmission consent, and route data. Purchase status, general preferences, and the route archive are not deleted.';
+      'Deletes the destination, destination history, saved places, external-transmission consent, and route data. General preferences and the route archive are not deleted.';
 
   @override
   String get privacyFooter => 'Review how data is sent, stored, and deleted.';
@@ -731,14 +646,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyRecipientsBody =>
-      '• OpenStreetMap Overpass API (overpass-api.de, Kumi Systems, Mail.ru): your location, search radius, and route IDs, to fetch routes and stops. Sent only with your consent.\n• Map tiles (OpenStreetMap, OSM France): the visible map area, to draw the map.\n• Google Maps (only with an API key and the setting on): the visible map area, to draw the map.\n• Place search (Nominatim, Photon): the text you search and a nearby coordinate to rank results, to find destinations.\n• App Store / Google Play: purchasing and restoring PREMIUM.\nBus checks and the number table are computed on your device only. Nothing is sent to Google.';
+      '• OpenStreetMap Overpass API (overpass-api.de, Kumi Systems, Mail.ru): your location, search radius, and route IDs, to fetch routes and stops. Sent only with your consent.\n• Map tiles (OpenStreetMap, OSM France): the visible map area, to draw the map.\n• Google Maps (only with an API key and the setting on): the visible map area, to draw the map.\n• Place search (Nominatim, Photon): the text you search and a nearby coordinate to rank results, to find destinations.\n• Place search (Apple Maps, on iOS when the query includes Japanese): the text you search, to find a place by its Japanese name. A nearby coordinate is included to prefer closer results.\nBus checks and the number table are computed on your device only. Nothing is sent to Google.';
 
   @override
   String get privacyStorage => 'Storage on your device';
 
   @override
   String get privacyStorageBody =>
-      'Route data, its archive, the destination, destination history, saved places, and settings are stored on this device. Route data is also saved to your own iCloud Drive only when iCloud sync is on.';
+      'Route data, its archive, the destination, destination history, saved places, and settings are stored on this device. Route data, saved places, and destination history are also saved to your own iCloud Drive only when iCloud sync is on. Exported backups contain the same.';
 
   @override
   String get privacyTitle => 'Privacy & data';
@@ -799,11 +714,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tap to set as destination. Swipe left to delete, tap the pencil to edit.';
 
   @override
-  String savedPlacesFreeLimit(int count) {
-    return 'The FREE plan allows only $count saved places.';
-  }
-
-  @override
   String get searchFromHistory => 'History';
 
   @override
@@ -847,9 +757,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trackingNotice => 'Tracking your ride for arrival alerts.';
-
-  @override
-  String get unlimited => 'Unlimited';
 
   @override
   String get volume => 'Volume';
@@ -964,14 +871,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get helpSettingsBody =>
       'From … → Settings you can change language, keypad input, keypad sound and vibration, arrival alerts, and route data. Arrival alerts are distance-based to the alighting stop, with up to 3 thresholds — alarms play 1–3 times from furthest to closest. When the app is in the background, a notification is shown.';
-
-  @override
-  String get helpPlanTitle => 'Plan management';
-
-  @override
-  String helpPlanBody(int count) {
-    return 'Open … → Plan to view your plan, upgrade to PREMIUM, or restore a previous purchase. FREE plan: up to $count saved places and $count history entries. PREMIUM: unlimited.';
-  }
 
   @override
   String get helpNoRouteTitle => 'No route found';

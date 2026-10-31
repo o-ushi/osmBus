@@ -3,20 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../l10n/app_localizations.dart';
-import '../state/places_store.dart';
 import 'grouped_list.dart';
-import 'plan_screen.dart';
 import 'sheet_page.dart';
 import 'theme.dart';
 
-Future<void> showHelpSheet(BuildContext context, PlanStore plan) =>
-    showSheetNavigator<void>(context, (_) => HelpScreen(plan: plan));
+Future<void> showHelpSheet(BuildContext context) => showSheetNavigator<void>(context, (_) => const HelpScreen());
 
 /// ヘルプ（Swift の `HelpView`）。Google に関する項目は、この版の動きに合わせて書き換えた。
 class HelpScreen extends StatelessWidget {
-  const HelpScreen({super.key, required this.plan});
-
-  final PlanStore plan;
+  const HelpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +45,7 @@ class HelpScreen extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(4, 12, 4, 4),
           child: Row(
             children: [
-              PlanIcon(paid: plan.isPaid, size: 72),
+              const _AppMark(size: 72),
               const SizedBox(width: 18),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,7 +98,6 @@ class HelpScreen extends StatelessWidget {
           title: l10n.settings,
           children: [
             item(CupertinoIcons.gear_alt_fill, l10n.helpSettingsTitle, l10n.helpSettingsBody),
-            item(Icons.workspace_premium, l10n.helpPlanTitle, l10n.helpPlanBody(PlanStore.freeItemLimit)),
           ],
         ),
         GroupedSection(
@@ -116,4 +110,24 @@ class HelpScreen extends StatelessWidget {
       ],
     );
   }
+}
+
+class _AppMark extends StatelessWidget {
+  const _AppMark({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(size * 0.22),
+          boxShadow: const [BoxShadow(color: Color(0x26000000), blurRadius: 4, offset: Offset(0, 2))],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(size * 0.22),
+          child: Image.asset('assets/images/app_icon.png', fit: BoxFit.cover),
+        ),
+      );
 }

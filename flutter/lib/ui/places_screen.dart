@@ -2,11 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../models/route_catalog.dart';
 import '../state/places_store.dart';
 import '../state/trip_controller.dart';
 import 'destination_picker_screen.dart';
 import 'grouped_list.dart';
-import 'plan_screen.dart';
 import 'sheet_page.dart';
 import 'theme.dart';
 
@@ -18,46 +18,42 @@ Future<Destination?> showSavedPlaces(BuildContext context, TripController contro
 Future<Destination?> showHistory(BuildContext context, TripController controller) =>
     showSheetNavigator<Destination>(context, (_) => HistoryScreen(controller: controller));
 
-void _choose(BuildContext context, Destination destination) =>
-    Navigator.of(context, rootNavigator: true).pop(destination);
+/// 目的地が無いときは座標を読まない。
+/// 一覧の構築に混ぜると、未設定のまま先に緯度を読んで iOS が落ちる。
+@pragma('vm:never-inline')
+bool _marksActive(GeoPoint? active, GeoPoint point) {
+  if (active == null) return false;
+  return Destination.samePoint(active, point);
+}
+
+void _choose(BuildContext context, Destination destination) {
+  final navigator = Navigator.of(context);
+  if (navigator.canPop()) {
+    navigator.pop(destination);
+    return;
+  }
+  Navigator.of(context, rootNavigator: true).pop(destination);
+}
 
 /// 登録済みの場所（Swift の `SavedPlacesView`）。タップで目的地に、長押しで今の目的地を登録。
 class SavedPlacesScreen extends StatelessWidget {
-  const SavedPlacesScreen({super.key, required this.controller});
+  const SavedPlacesScreen({super.key, required this.controller, this.onBack, this.onSelected});
 
   final TripController controller;
 
+  /// 行き先シートの中で開いているとき、地図へ戻す。
+  final VoidCallback? onBack;
+
+  /// 指定したときは、シートを閉じずにこの場所を選んだことにする。
+  final ValueChanged<Destination>? onSelected;
+
   PlacesStore get _places => controller.places;
 
-  /// FREE の上限に達していたら知らせて、プラン管理へ案内する。
-  Future<bool> _ensureCanAdd(BuildContext context) async {
-    if (_places.canAddPlace) return true;
-    final l10n = AppLocalizations.of(context);
-    final openPlan = await showCupertinoDialog<bool>(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        content: Text(l10n.savedPlacesFreeLimit(PlanStore.freeItemLimit)),
-        actions: [
-          CupertinoDialogAction(onPressed: () => Navigator.pop(context, false), child: Text(l10n.ok)),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.planManagement),
-          ),
-        ],
-      ),
-    );
-    if (openPlan == true && context.mounted) await showPlanSheet(context, controller);
-    return false;
-  }
-
   Future<void> _add(BuildContext context) async {
-    if (!await _ensureCanAdd(context) || !context.mounted) return;
     await SheetPage.push<void>(context, (_) => _PlaceEditor(controller: controller));
   }
 
   Future<void> _registerCurrent(BuildContext context, Destination destination) async {
-    if (!await _ensureCanAdd(context)) return;
     await _places.addPlace(SavedPlace.from(destination, label: destination.name));
   }
 
@@ -67,10 +63,13 @@ class SavedPlacesScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: Listenable.merge([_places, controller]),
       builder: (context, _) {
-        final places = _places.places;
+        // 描画中に同期で中身が差し替わっても、このフレームは同じ一覧を使う。
+        final places = List<SavedPlace>.of(_places.places);
         final current = controller.destination;
+        final active = current?.point;
         return SheetPage(
           title: l10n.savedPlaces,
+          onBack: onBack,
           trailing: CupertinoButton(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             onPressed: () => _add(context),
@@ -86,10 +85,7 @@ class SavedPlacesScreen extends StatelessWidget {
             else
               GroupedSection(
                 title: l10n.savedPlaces,
-                footer: [
-                  l10n.savedPlacesFooter,
-                  if (!controller.plan.isPaid) l10n.savedPlacesFreeLimit(PlanStore.freeItemLimit),
-                ].join('\n'),
+                footer: l10n.savedPlacesFooter,
                 children: [
                   for (final place in places)
                     Dismissible(
@@ -105,12 +101,11 @@ class SavedPlacesScreen extends StatelessWidget {
                       child: GroupedRow(
                         title: place.label,
                         subtitle: place.detailLine,
-                        onTap: () => _choose(context, place.toDestination()),
+                        onTap: () => onSelected != null ? onSelected!(place.toDestination()) : _choose(context, place.toDestination()),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (current != null && Destination.samePoint(place.point, current.point))
-                              _ActiveBadge(l10n.active),
+                            if (_marksActive(active, place.point)) _ActiveBadge(l10n.active),
                             CupertinoButton(
                               padding: EdgeInsets.zero,
                               minimumSize: const Size(36, 36),
@@ -270,9 +265,15 @@ class _PlaceEditorState extends State<_PlaceEditor> {
 
 /// 目的地の履歴（Swift の `DestinationHistoryView`）。
 class HistoryScreen extends StatelessWidget {
-  const HistoryScreen({super.key, required this.controller});
+  const HistoryScreen({super.key, required this.controller, this.onBack, this.onSelected});
 
   final TripController controller;
+
+  /// 行き先シートの中で開いているとき、地図へ戻す。
+  final VoidCallback? onBack;
+
+  /// 指定したときは、シートを閉じずにこの場所を選んだことにする。
+  final ValueChanged<Destination>? onSelected;
 
   Future<void> _clear(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
@@ -301,10 +302,11 @@ class HistoryScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: Listenable.merge([controller.places, controller]),
       builder: (context, _) {
-        final entries = controller.places.history;
-        final current = controller.destination;
+        final entries = List<HistoryEntry>.of(controller.places.history);
+        final active = controller.destination?.point;
         return SheetPage(
           title: l10n.history,
+          onBack: onBack,
           children: [
             if (entries.isEmpty)
               _EmptyState(icon: CupertinoIcons.clock, title: l10n.historyEmpty, detail: l10n.historyEmptyDetail)
@@ -321,8 +323,8 @@ class HistoryScreen extends StatelessWidget {
                         '${m.formatShortDate(entry.setAt.toLocal())} '
                             '${m.formatTimeOfDay(TimeOfDay.fromDateTime(entry.setAt.toLocal()), alwaysUse24HourFormat: true)}',
                       ].join('\n'),
-                      onTap: () => _choose(context, entry.destination),
-                      trailing: current != null && entry.destination.samePlace(current)
+                      onTap: () => onSelected != null ? onSelected!(entry.destination) : _choose(context, entry.destination),
+                      trailing: _marksActive(active, entry.destination.point)
                           ? _ActiveBadge(l10n.active)
                           : null,
                     ),

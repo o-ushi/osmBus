@@ -1,16 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/local_itinerary.dart';
 import '../state/trip_controller.dart';
 import 'bus_number_table.dart';
-import 'bus_route_browser_screen.dart';
 import 'destination_picker_screen.dart';
+import 'distance_badge.dart';
 import 'help_screen.dart';
 import 'keypad.dart';
-import 'plan_screen.dart';
 import 'result_banner.dart';
 import 'route_map_screen.dart';
 import 'settings_screen.dart';
@@ -51,8 +51,10 @@ class _TopScreenState extends State<TopScreen> {
     final l10n = AppLocalizations.of(context);
     final (title, body) = switch (alert) {
       DistanceRidingAlert(:final meters) => (l10n.distanceAlertTitle, l10n.distanceAlertBody(meters)),
-      WrongDirectionRidingAlert(:final fromRouteMap) =>
-        (l10n.wrongDirectionTitle, fromRouteMap ? l10n.wrongDirectionBodyRouteMap : l10n.wrongDirectionBody),
+      WrongDirectionRidingAlert(:final fromRouteMap) => (
+        l10n.wrongDirectionTitle,
+        fromRouteMap ? l10n.wrongDirectionBodyRouteMap : l10n.wrongDirectionBody,
+      ),
     };
     showCupertinoDialog<void>(
       context: context,
@@ -71,62 +73,12 @@ class _TopScreenState extends State<TopScreen> {
     });
   }
 
-  /// 距離バッジの長押し。ナビ中止（目的地も消える）。
-  Future<void> _confirmCancelNavigation() async {
-    if (controller.destination == null && controller.riding == null) return;
-    final l10n = AppLocalizations.of(context);
-    final ok = await showCupertinoModalPopup<bool>(
-      context: context,
-      builder: (context) => CupertinoActionSheet(
-        title: Text(l10n.cancelNavigationConfirm),
-        actions: [
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.cancelNavigation),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(context, false),
-          child: Text(l10n.cancel),
-        ),
-      ),
-    );
-    if (ok == true) await controller.cancelNavigation();
-  }
-
-  /// 乗車中に距離バッジをタップ。今のルート図を開く。
-  void _openRidingMap() {
-    final riding = controller.riding;
-    if (riding == null) return;
-    final itinerary = riding.itinerary;
-    if (itinerary != null) {
-      _openMap(itinerary);
-      return;
-    }
-    _openRouteBrowser();
-  }
-
-  /// メニューの「路線図」。乗車中でも番号で探せる路線図を開く（Swift と同じ）。
-  /// 路線図から乗車中なら、その路線を開いた状態にする。
-  void _openRouteBrowser() {
-    final routeId = controller.riding?.routeId;
-    final route = routeId == null
-        ? null
-        : controller.visibleCatalog.routes.where((r) => r.relationId == routeId).firstOrNull;
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => BusRouteBrowserScreen(controller: controller, initialRoute: route)),
-    );
-  }
-
   /// 地図シートを開く。シートの中でも出発地／目的地を切り替えられる（Swift と同じ）。
   Future<void> _pickOnMap(PickRole role) async {
     final picked = await showDestinationPicker(
       context,
       initialRole: role,
-      initialCenter: role == PickRole.origin
-          ? controller.origin
-          : controller.destination?.point ?? controller.origin,
+      initialCenter: role == PickRole.origin ? controller.origin : controller.destination?.point ?? controller.origin,
       searchCenter: controller.origin,
       controller: controller,
     );
@@ -143,35 +95,34 @@ class _TopScreenState extends State<TopScreen> {
 
   void _openMap(LocalItinerary itinerary) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => RouteMapScreen(itinerary: itinerary, controller: controller)),
+      MaterialPageRoute(
+        builder: (_) => RouteMapScreen(itinerary: itinerary, controller: controller),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
         if (controller.pendingAlert != null) WidgetsBinding.instance.addPostFrameCallback((_) => _showPendingAlert());
-        final distance = controller.distanceLeftMeters;
-        final riding = controller.riding;
+        final hasBadge = controller.distanceLeftMeters != null || controller.riding != null;
+        final darkScene = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
         return Scaffold(
+          backgroundColor: darkScene ? AppTheme.sceneDark : AppTheme.sceneLight,
           extendBodyBehindAppBar: true,
           appBar: AppBar(
+            // 方眼が暗いときはステータスバーの文字を明るくする。
+            systemOverlayStyle: darkScene ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
             automaticallyImplyLeading: false,
             leadingWidth: 140,
-            leading: distance != null || riding != null
+            leading: hasBadge
                 ? Padding(
                     padding: const EdgeInsets.only(left: 14),
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: _DistanceBadge(
-                        meters: distance,
-                        label: l10n.distanceLeft,
-                        onTap: riding == null ? null : _openRidingMap,
-                        onLongPress: _confirmCancelNavigation,
-                      ),
+                      child: TripDistanceBadge(controller: controller),
                     ),
                   )
                 : null,
@@ -181,9 +132,8 @@ class _TopScreenState extends State<TopScreen> {
                 showsTopScreen: _showsTopScreen,
                 onToggleScreen: _toggleScreen,
                 onSettings: _openSettings,
-                onRouteMap: _openRouteBrowser,
-                onPlan: () => showPlanSheet(context, controller),
-                onHelp: () => showHelpSheet(context, controller.plan),
+                onRouteMap: () => openRouteBrowser(context, controller),
+                onHelp: () => showHelpSheet(context),
               ),
               const SizedBox(width: 8),
             ],
@@ -193,12 +143,7 @@ class _TopScreenState extends State<TopScreen> {
               const Positioned.fill(child: SceneBackground()),
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppTheme.screenPadding,
-                    12,
-                    AppTheme.screenPadding,
-                    8,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(AppTheme.screenPadding, 12, AppTheme.screenPadding, 8),
                   child: _showsTopScreen ? _topContent(context) : _mainContent(context),
                 ),
               ),
@@ -223,10 +168,10 @@ class _TopScreenState extends State<TopScreen> {
   }
 
   Widget _originDestinationCard() => OriginDestinationCard(
-        controller: controller,
-        onDestinationTap: () => _pickOnMap(PickRole.destination),
-        onOriginTap: () => _pickOnMap(PickRole.origin),
-      );
+    controller: controller,
+    onDestinationTap: () => _pickOnMap(PickRole.destination),
+    onOriginTap: () => _pickOnMap(PickRole.origin),
+  );
 
   Widget _topContent(BuildContext context) {
     return Column(
@@ -238,8 +183,7 @@ class _TopScreenState extends State<TopScreen> {
             state: controller.tableState,
             sortMode: controller.sortMode,
             rows: controller.tableState == TableState.ready ? controller.matrixRows : const [],
-            flatEntries:
-                controller.tableState == TableState.ready ? controller.flatEntries : const [],
+            flatEntries: controller.tableState == TableState.ready ? controller.flatEntries : const [],
             isRidingLeg: (entry, legIndex) => controller.isRidingLeg(entry.itinerary, legIndex),
             onReload: controller.reload,
             onTap: (entry) => _openMap(entry.itinerary),
@@ -318,6 +262,7 @@ class OriginDestinationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final destination = controller.destination;
+    final detail = (destination?.subtitle?.isNotEmpty ?? false) ? destination!.subtitle : null;
     final manual = controller.manualOrigin;
     final denied = switch (controller.locationStatus) {
       LocationStatus.denied || LocationStatus.deniedForever || LocationStatus.serviceDisabled => true,
@@ -328,15 +273,15 @@ class OriginDestinationCard extends StatelessWidget {
     return BusCard(
       child: Column(
         children: [
-          SizedBox(
-            height: AppTheme.locationRowHeight,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: AppTheme.locationRowHeight),
             child: Row(
               children: [
                 Expanded(
                   child: Semantics(
                     button: true,
                     label: l10n.destinationLabel,
-                    value: destination?.name ?? l10n.destinationUnset,
+                    value: [destination?.name ?? l10n.destinationUnset, ?detail].join('\n'),
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: onDestinationTap,
@@ -353,14 +298,32 @@ class OriginDestinationCard extends StatelessWidget {
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: Text(
-                                destination?.name ?? l10n.destinationUnset,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: destination != null ? Colors.black : AppTheme.secondaryText,
+                              child: Padding(
+                                // 文字が大きい設定でも行が伸びて、2 行目が下の行に重ならないようにする。
+                                padding: const EdgeInsets.symmetric(vertical: 6),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      destination?.name ?? l10n.destinationUnset,
+                                      maxLines: detail == null ? 2 : 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        color: destination != null ? Colors.black : AppTheme.secondaryText,
+                                      ),
+                                    ),
+                                    // 登録地の名前だけでは中身の場所が分からないので、場所名と住所も出す。
+                                    if (detail != null)
+                                      Text(
+                                        detail,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontSize: 13, color: AppTheme.secondaryText),
+                                      ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -370,11 +333,7 @@ class OriginDestinationCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Container(
-                  width: 1,
-                  margin: const EdgeInsets.symmetric(vertical: 10),
-                  color: const Color(0x40808080),
-                ),
+                Container(width: 1, height: AppTheme.locationRowHeight - 20, color: const Color(0x40808080)),
                 Semantics(
                   button: true,
                   label: l10n.pickOnMap,
@@ -391,8 +350,8 @@ class OriginDestinationCard extends StatelessWidget {
             ),
           ),
           const Divider(indent: AppTheme.cardPaddingH + 10, height: 0.5),
-          SizedBox(
-            height: AppTheme.locationRowHeight,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: AppTheme.locationRowHeight),
             child: Row(
               children: [
                 Expanded(
@@ -407,24 +366,27 @@ class OriginDestinationCard extends StatelessWidget {
                             manual != null
                                 ? CupertinoIcons.map_pin_ellipse
                                 : denied
-                                    ? CupertinoIcons.location_slash
-                                    : CupertinoIcons.location_fill,
+                                ? CupertinoIcons.location_slash
+                                : CupertinoIcons.location_fill,
                             size: iconSize,
                             color: manual != null
                                 ? AppTheme.verdictGreen
                                 : denied
-                                    ? Colors.orange
-                                    : AppTheme.accent,
+                                ? Colors.orange
+                                : AppTheme.accent,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: Text(
-                              manual != null
-                                  ? l10n.manualOriginLabel(manual.name)
-                                  : l10n.currentLocationLabel(_locationStatus(l10n)),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                            // 手動の出発地は名前だけ出す（緑のピンで出発地と分かる）。読み上げは「出発地: 名前」。
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              child: Text(
+                                manual != null ? manual.name : l10n.currentLocationLabel(_locationStatus(l10n)),
+                                semanticsLabel: manual != null ? l10n.manualOriginLabel(manual.name) : null,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                              ),
                             ),
                           ),
                         ],
@@ -445,10 +407,7 @@ class OriginDestinationCard extends StatelessWidget {
                     icon: const Icon(CupertinoIcons.gear_alt, size: iconSize, color: AppTheme.accent),
                   )
                 else if (controller.locating)
-                  const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: CupertinoActivityIndicator(),
-                  )
+                  const Padding(padding: EdgeInsets.all(12), child: CupertinoActivityIndicator())
                 else
                   IconButton(
                     tooltip: l10n.reload,
@@ -470,63 +429,13 @@ class OriginDestinationCard extends StatelessWidget {
   }
 }
 
-/// ナビゲーションバーの「あと」距離バッジ。
-class _DistanceBadge extends StatelessWidget {
-  const _DistanceBadge({required this.meters, required this.label, this.onTap, this.onLongPress});
-
-  final double? meters;
-  final String label;
-  final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = meters == null ? null : DistanceColorBand.colors(meters!);
-    final textColor = colors?.$2 ?? AppTheme.secondaryText;
-    final value = meters == null ? '—' : DistanceColorBand.format(meters!);
-    return Semantics(
-      label: label,
-      value: value,
-      button: onTap != null,
-      child: GestureDetector(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-          decoration: BoxDecoration(
-            color: colors?.$1 ?? const Color(0xFFE5E5EA),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textColor)),
-              // 桁が多くても 1 行に収める（バッジの高さは固定）。
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  value,
-                  maxLines: 1,
-                  softWrap: false,
-                  style: TextStyle(fontSize: 21, fontWeight: FontWeight.w700, color: textColor, height: 1.1),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 右上の「…」メニュー。
-class _MoreMenu extends StatelessWidget {
+/// 右上の「…」。中身は osmGradus と同じくアイコンだけを横に並べる。
+class _MoreMenu extends StatefulWidget {
   const _MoreMenu({
     required this.showsTopScreen,
     required this.onToggleScreen,
     required this.onSettings,
     required this.onRouteMap,
-    required this.onPlan,
     required this.onHelp,
   });
 
@@ -534,43 +443,150 @@ class _MoreMenu extends StatelessWidget {
   final VoidCallback onToggleScreen;
   final VoidCallback onSettings;
   final VoidCallback onRouteMap;
-  final VoidCallback onPlan;
   final VoidCallback onHelp;
+
+  @override
+  State<_MoreMenu> createState() => _MoreMenuState();
+}
+
+class _MoreMenuState extends State<_MoreMenu> {
+  final _buttonKey = GlobalKey();
+
+  void _open() {
+    final box = _buttonKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize || !context.mounted) return;
+    final origin = box.localToGlobal(Offset.zero);
+    final screen = MediaQuery.sizeOf(context);
+    const margin = 8.0;
+    final width = _MoreIconMenu.width;
+    var left = origin.dx + box.size.width - width;
+    if (left < margin) left = margin;
+    if (left + width > screen.width - margin) left = screen.width - margin - width;
+    final top = origin.dy + box.size.height + 6;
+
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black26,
+      builder: (dialogContext) {
+        void go(VoidCallback action) {
+          Navigator.pop(dialogContext);
+          action();
+        }
+
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () => Navigator.pop(dialogContext),
+                behavior: HitTestBehavior.opaque,
+                child: const SizedBox.expand(),
+              ),
+            ),
+            Positioned(
+              left: left,
+              top: top,
+              child: _MoreIconMenu(
+                showsTopScreen: widget.showsTopScreen,
+                onToggleScreen: () => go(widget.onToggleScreen),
+                onRouteMap: () => go(widget.onRouteMap),
+                onSettings: () => go(widget.onSettings),
+                onHelp: () => go(widget.onHelp),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      key: _buttonKey,
+      tooltip: AppLocalizations.of(context).more,
+      onPressed: _open,
+      icon: const Icon(CupertinoIcons.ellipsis_circle, color: AppTheme.accent, size: 26),
+    );
+  }
+}
+
+/// 「…」の中。文字は出さず、長押しと読み上げで名前が分かる。
+class _MoreIconMenu extends StatelessWidget {
+  const _MoreIconMenu({
+    required this.showsTopScreen,
+    required this.onToggleScreen,
+    required this.onRouteMap,
+    required this.onSettings,
+    required this.onHelp,
+  });
+
+  final bool showsTopScreen;
+  final VoidCallback onToggleScreen;
+  final VoidCallback onRouteMap;
+  final VoidCallback onSettings;
+  final VoidCallback onHelp;
+
+  static const _count = 4;
+  static const _buttonSize = 40.0;
+  static const _glyphSize = 26.0;
+  static const _gap = 6.0;
+  static const _horizontalPadding = 10.0;
+  static const _verticalPadding = 8.0;
+  static const width = _horizontalPadding * 2 + _count * _buttonSize + (_count - 1) * _gap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    PopupMenuItem<VoidCallback> item(IconData icon, String text, VoidCallback action) => PopupMenuItem(
-          value: action,
-          height: 54,
-          child: Row(
-            children: [
-              Icon(icon, color: AppTheme.accent, size: 22),
-              const SizedBox(width: 14),
-              Text(text, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
-            ],
-          ),
-        );
-    return PopupMenuButton<VoidCallback>(
-      tooltip: l10n.more,
-      icon: const Icon(CupertinoIcons.ellipsis_circle, color: AppTheme.accent, size: 26),
+    final entries = [
+      (
+        CupertinoIcons.rectangle_on_rectangle,
+        showsTopScreen ? l10n.menuMainScreen : l10n.menuTopScreen,
+        onToggleScreen,
+      ),
+      (CupertinoIcons.map, l10n.lineMap, onRouteMap),
+      (CupertinoIcons.gear_alt, l10n.settings, onSettings),
+      (CupertinoIcons.question_circle, l10n.help, onHelp),
+    ];
+    return Material(
       color: AppTheme.cardFill,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      position: PopupMenuPosition.under,
-      constraints: const BoxConstraints(minWidth: 240),
-      onSelected: (action) => action(),
-      itemBuilder: (context) => [
-        item(
-          CupertinoIcons.rectangle_on_rectangle,
-          showsTopScreen ? l10n.menuMainScreen : l10n.menuTopScreen,
-          onToggleScreen,
+      elevation: 6,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding, vertical: _verticalPadding),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < entries.length; i++) ...[
+              if (i > 0) const SizedBox(width: _gap),
+              _button(entries[i].$1, entries[i].$2, entries[i].$3),
+            ],
+          ],
         ),
-        item(CupertinoIcons.map, l10n.lineMap, onRouteMap),
-        const PopupMenuDivider(),
-        item(CupertinoIcons.gear_alt, l10n.settings, onSettings),
-        item(Icons.workspace_premium_outlined, l10n.planManagement, onPlan),
-        item(CupertinoIcons.question_circle, l10n.help, onHelp),
-      ],
+      ),
+    );
+  }
+
+  Widget _button(IconData icon, String label, VoidCallback onTap) {
+    return Tooltip(
+      message: label,
+      child: Semantics(
+        button: true,
+        label: label,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Ink(
+            width: _buttonSize,
+            height: _buttonSize,
+            decoration: BoxDecoration(
+              color: AppTheme.accent.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppTheme.cardBorder),
+            ),
+            child: Icon(icon, color: AppTheme.accent, size: _glyphSize),
+          ),
+        ),
+      ),
     );
   }
 }

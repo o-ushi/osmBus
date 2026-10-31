@@ -5,6 +5,8 @@
     <!-- 乗車中、画面オフでも到着アラートのために測位を続ける（常駐通知つき）。 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <!-- Android 10 以降、裏に回っても位置を受け取り続けるため（geolocator の README）。 -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -42,6 +44,13 @@
                 <data android:scheme="osmbus" />
             </intent-filter>
         </activity>
+        <!-- 乗車中の測位を続けるフォアグラウンドサービス（geolocator_android 5.2.1 同梱のマニフェストと同じ宣言）。
+             乗車開始時（前面）に始めるので、画面オフ・裏に回っても止まらない。 -->
+        <service
+            android:name="com.baseflow.geolocator.GeolocatorLocationService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
         <!-- Google Maps SDK のキー。android/local.properties の MAPS_API_KEY から入れる（無ければ OSM の地図）。 -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"

@@ -85,11 +85,13 @@ class RouteRecord {
       ? GeoPoint(anchorLatitude!, anchorLongitude!)
       : null;
 
+  /// 方面。始点と終点があれば「A → B」、なければ路線名（番号と同じ、または空なら出さない）。
   String? get directionText {
     if (from != null && to != null && from!.isNotEmpty && to!.isNotEmpty) {
       return '$from → $to';
     }
-    return name != ref ? name : null;
+    if (name.isNotEmpty && name != ref) return name;
+    return null;
   }
 
   static const _unset = Object();

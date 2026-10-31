@@ -27,7 +27,37 @@ class ItineraryLeg {
   /// 乗車停留所から降車停留所までのポリライン。
   final List<GeoPoint> path;
   final double rideMeters;
+
+  Map<String, dynamic> toJson() => {
+        'relationId': relationId,
+        'ref': ref,
+        'routeName': routeName,
+        'boardIndex': boardIndex,
+        'alightIndex': alightIndex,
+        'boardStop': boardStop.toJson(),
+        'alightStop': alightStop.toJson(),
+        'path': [for (final p in path) [p.latitude, p.longitude]],
+        'rideMeters': rideMeters,
+      };
+
+  factory ItineraryLeg.fromJson(Map<String, dynamic> json) => ItineraryLeg(
+        relationId: (json['relationId'] as num).toInt(),
+        ref: json['ref'] as String,
+        routeName: json['routeName'] as String? ?? '',
+        boardIndex: (json['boardIndex'] as num).toInt(),
+        alightIndex: (json['alightIndex'] as num).toInt(),
+        boardStop: RouteStop.fromJson(json['boardStop'] as Map<String, dynamic>),
+        alightStop: RouteStop.fromJson(json['alightStop'] as Map<String, dynamic>),
+        path: pointsFromJson(json['path']),
+        rideMeters: (json['rideMeters'] as num).toDouble(),
+      );
 }
+
+/// `[[緯度, 経度], …]`。
+List<GeoPoint> pointsFromJson(Object? raw) => [
+      for (final p in (raw as List? ?? const []).cast<List>())
+        GeoPoint((p[0] as num).toDouble(), (p[1] as num).toDouble()),
+    ];
 
 /// 出発地から目的地までのローカル旅程（§8）。
 class LocalItinerary {
@@ -49,6 +79,18 @@ class LocalItinerary {
   final double bearing;
 
   ItineraryLeg get firstLeg => legs.first;
+
+  Map<String, dynamic> toJson() => {
+        'legs': [for (final leg in legs) leg.toJson()],
+        'walkMeters': walkMeters,
+        'bearing': bearing,
+      };
+
+  factory LocalItinerary.fromJson(Map<String, dynamic> json) => LocalItinerary(
+        legs: [for (final leg in (json['legs'] as List).cast<Map<String, dynamic>>()) ItineraryLeg.fromJson(leg)],
+        walkMeters: (json['walkMeters'] as num).toDouble(),
+        bearing: (json['bearing'] as num).toDouble(),
+      );
 
   double get rideMeters => legs.fold(0.0, (sum, leg) => sum + leg.rideMeters);
 

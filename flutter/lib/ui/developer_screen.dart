@@ -36,7 +36,6 @@ class DeveloperScreen extends StatefulWidget {
       ..writeln('locale: ${Platform.localeName} app=${settings.language?.code ?? 'system'}')
       ..writeln('time: ${DateTime.now().toIso8601String()} (UTC${DateTime.now().timeZoneOffset.isNegative ? '' : '+'}'
           '${DateTime.now().timeZoneOffset.inMinutes / 60})')
-      ..writeln('plan: ${controller.plan.plan.name}')
       ..writeln('consent: ${controller.consentGranted}')
       ..writeln('routes: ${controller.visibleCatalog.routes.length} geometry=${controller.visibleCatalog.geometryCount} '
           'archive=$archive')

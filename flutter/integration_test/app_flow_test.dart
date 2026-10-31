@@ -182,13 +182,7 @@ void main() {
     await tester.tap(find.bySemanticsLabel('完了'));
     await tester.pumpAndSettle();
 
-    // プラン管理とヘルプ。
-    await tester.tap(find.byTooltip('その他'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('プラン管理'));
-    await _stage(tester, 'plan');
-    await tester.tap(find.bySemanticsLabel('完了'));
-    await tester.pumpAndSettle();
+    // ヘルプ。
     await tester.tap(find.byTooltip('その他'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('ヘルプ'));

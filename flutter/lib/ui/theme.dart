@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 abstract final class AppTheme {
   static const brandBlue = Color.fromRGBO(61, 89, 147, 1);
   static const sceneLight = Color.fromRGBO(253, 252, 240, 1);
+
+  /// Swift の `sceneColorDark`（RGB 0.10, 0.10, 0.12）。
+  static const sceneDark = Color.fromRGBO(26, 26, 31, 1);
   static const accent = Color(0xFF007AFF);
   static const cardFill = Color.fromRGBO(255, 250, 242, 1);
   static const cardBorder = Color.fromRGBO(245, 199, 153, 1);
@@ -82,28 +85,33 @@ class BusCard extends StatelessWidget {
   }
 }
 
-/// シーン色＋方眼ドット。
+/// シーン色＋方眼ドット。地色と線の濃さは端末のライト／ダークに合わせる。
+/// カードとシートは Swift と同じく明るい色のまま（`busMainScreenStyled`）。
 class SceneBackground extends StatelessWidget {
   const SceneBackground({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const ColoredBox(
-      color: AppTheme.sceneLight,
-      child: CustomPaint(painter: _PaperGridPainter(), size: Size.infinite),
+    final dark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+    return ColoredBox(
+      color: dark ? AppTheme.sceneDark : AppTheme.sceneLight,
+      child: CustomPaint(painter: _PaperGridPainter(dark: dark), size: Size.infinite),
     );
   }
 }
 
 class _PaperGridPainter extends CustomPainter {
-  const _PaperGridPainter();
+  const _PaperGridPainter({required this.dark});
+
+  final bool dark;
 
   static const double step = 28;
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Swift の `PaperGridDotCanvas`。ダークは線 0.18・点 0.12、ライトは 0.12・0.09。
     final line = Paint()
-      ..color = const Color.fromRGBO(140, 115, 71, 0.12)
+      ..color = Color.fromRGBO(140, 115, 71, dark ? 0.18 : 0.12)
       ..strokeWidth = 0.45;
     for (var x = 0.0; x <= size.width + step; x += step) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), line);
@@ -111,7 +119,7 @@ class _PaperGridPainter extends CustomPainter {
     for (var y = 0.0; y <= size.height + step; y += step) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), line);
     }
-    final dot = Paint()..color = const Color.fromRGBO(51, 140, 89, 0.09);
+    final dot = Paint()..color = Color.fromRGBO(51, 140, 89, dark ? 0.12 : 0.09);
     for (var y = 0.0; y <= size.height + step; y += step) {
       for (var x = 0.0; x <= size.width + step; x += step) {
         canvas.drawCircle(Offset(x, y), 0.6, dot);
@@ -120,7 +128,7 @@ class _PaperGridPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _PaperGridPainter oldDelegate) => oldDelegate.dark != dark;
 }
 
 /// バス番号のバッジ。乗車中の番号はオレンジ。

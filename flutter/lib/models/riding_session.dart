@@ -67,6 +67,32 @@ class RidingSession {
   final double boardingDistanceToDestination;
 
   bool get fromRouteMap => itinerary == null;
+
+  /// プロセスが殺されても同じ乗車に戻れるよう保存する形。
+  Map<String, dynamic> toJson() => {
+        'ref': ref,
+        'alightStop': alightStop.toJson(),
+        'path': [for (final p in path) [p.latitude, p.longitude]],
+        'startedAt': startedAt.toUtc().toIso8601String(),
+        if (itinerary != null) 'itinerary': itinerary!.toJson(),
+        'legIndex': legIndex,
+        if (routeId != null) 'routeId': routeId,
+        'boardingDistanceToDestination': boardingDistanceToDestination,
+      };
+
+  factory RidingSession.fromJson(Map<String, dynamic> json) {
+    final itinerary = json['itinerary'] as Map<String, dynamic>?;
+    return RidingSession(
+      ref: json['ref'] as String,
+      alightStop: RouteStop.fromJson(json['alightStop'] as Map<String, dynamic>),
+      path: pointsFromJson(json['path']),
+      startedAt: DateTime.parse(json['startedAt'] as String).toLocal(),
+      itinerary: itinerary == null ? null : LocalItinerary.fromJson(itinerary),
+      legIndex: (json['legIndex'] as num?)?.toInt() ?? 0,
+      routeId: (json['routeId'] as num?)?.toInt(),
+      boardingDistanceToDestination: (json['boardingDistanceToDestination'] as num?)?.toDouble() ?? 0,
+    );
+  }
 }
 
 /// 距離アラートの発火（何 m のリングを越えたか、アラームを何回鳴らすか）。
@@ -89,6 +115,20 @@ class DistanceAlertTracker {
   bool _nearestReached = false;
 
   bool get nearestReached => _nearestReached;
+
+  /// 乗車と一緒に保存し、復元後に同じリングを鳴らし直さない。
+  Map<String, dynamic> toJson() => {
+        'triggered': _triggered.toList()..sort(),
+        if (_lastDistance != null) 'lastDistance': _lastDistance,
+        'nearestReached': _nearestReached,
+      };
+
+  void restore(Map<String, dynamic> json) {
+    reset();
+    _triggered.addAll([for (final t in json['triggered'] as List? ?? const []) (t as num).toInt()]);
+    _lastDistance = (json['lastDistance'] as num?)?.toDouble();
+    _nearestReached = json['nearestReached'] as bool? ?? false;
+  }
 
   void reset() {
     _triggered.clear();

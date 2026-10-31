@@ -6,9 +6,11 @@ import 'package:http/http.dart' as http;
 
 import '../l10n/app_localizations.dart';
 import '../models/route_catalog.dart';
+import '../services/apple_place_search.dart';
 import '../services/geo.dart';
 import '../state/trip_controller.dart';
 import 'bus_map.dart';
+import 'distance_badge.dart';
 import 'places_screen.dart';
 import 'theme.dart';
 
@@ -21,6 +23,9 @@ class _Place {
 
 /// 地図で選ぶ地点の役割（Swift の `MapPickRole`）。
 enum PickRole { origin, destination }
+
+/// 行き先シートの中で、地図の代わりに出す一覧。
+enum _PickerList { history, saved }
 
 /// 選んだ地点と、その役割。
 class PickedPlace {
@@ -48,18 +53,23 @@ Future<PickedPlace?> showDestinationPicker(
     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
     builder: (_) => FractionallySizedBox(
       heightFactor: 0.94,
-      child: DestinationPickerScreen(
-        initialRole: initialRole,
-        initialCenter: initialCenter,
-        searchCenter: searchCenter,
-        showsRoleToggle: showsRoleToggle,
-        controller: controller,
+      child: Navigator(
+        onGenerateRoute: (_) => MaterialPageRoute<void>(
+          builder: (_) => DestinationPickerScreen(
+            initialRole: initialRole,
+            initialCenter: initialCenter,
+            searchCenter: searchCenter,
+            showsRoleToggle: showsRoleToggle,
+            controller: controller,
+          ),
+        ),
       ),
     ),
   );
 }
 
 /// 地図の長押しで座標を確定。オンラインなら Nominatim で地名検索もできる。
+/// 検索語句に日本語が含まれるときは、iOS では Apple の地図検索を先に使う。
 class DestinationPickerScreen extends StatefulWidget {
   const DestinationPickerScreen({
     super.key,
@@ -94,6 +104,10 @@ class _DestinationPickerScreenState extends State<DestinationPickerScreen> {
 
   final _query = TextEditingController();
   late PickRole _role = widget.initialRole;
+
+  /// 履歴と登録地。地図はこの画面から外さず、上に重ねる。
+  /// 外したフレームで一覧を描くと iOS が落ちる。
+  _PickerList? _list;
   List<_Place> _results = const [];
   bool _searching = false;
   String? _error;
@@ -115,10 +129,15 @@ class _DestinationPickerScreenState extends State<DestinationPickerScreen> {
     });
     try {
       List<_Place> places;
-      try {
-        places = await _searchNominatim(q, language);
-      } catch (_) {
-        places = await _searchPhoton(q, language);
+      final apple = await ApplePlaceSearch.search(q, center: widget.searchCenter ?? widget.initialCenter);
+      if (apple != null && apple.isNotEmpty) {
+        places = [for (final hit in apple) _Place(hit.name, hit.point, hit.subtitle)];
+      } else {
+        try {
+          places = await _searchNominatim(q, language);
+        } catch (_) {
+          places = await _searchPhoton(q, language);
+        }
       }
       setState(() => _results = places);
     } catch (_) {
@@ -198,18 +217,36 @@ class _DestinationPickerScreenState extends State<DestinationPickerScreen> {
   }
 
   void _choose(String name, GeoPoint point, [String? subtitle]) {
-    Navigator.of(context).pop(PickedPlace(_role, Destination(name: name, point: point, subtitle: subtitle)));
+    Navigator.of(context, rootNavigator: true).pop(
+      PickedPlace(_role, Destination(name: name, point: point, subtitle: subtitle)),
+    );
   }
 
-  Future<void> _fromList(Future<Destination?> Function(BuildContext, TripController) open) async {
-    final controller = widget.controller;
-    if (controller == null) return;
-    final picked = await open(context, controller);
-    if (picked != null && mounted) Navigator.of(context).pop(PickedPlace(_role, picked));
-  }
+  void _chooseDestination(Destination place) => _choose(place.name, place.point, place.subtitle);
+
+  void _backToMap() => setState(() => _list = null);
 
   @override
   Widget build(BuildContext context) {
+    final controller = widget.controller;
+    final list = _list;
+    return Stack(
+      children: [
+        Positioned.fill(child: _mapPicker(context)),
+        if (list != null && controller != null)
+          Positioned.fill(
+            child: switch (list) {
+              _PickerList.history =>
+                HistoryScreen(controller: controller, onBack: _backToMap, onSelected: _chooseDestination),
+              _PickerList.saved =>
+                SavedPlacesScreen(controller: controller, onBack: _backToMap, onSelected: _chooseDestination),
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _mapPicker(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final center = widget.initialCenter ?? _fallbackCenter;
     return Material(
@@ -235,7 +272,7 @@ class _DestinationPickerScreenState extends State<DestinationPickerScreen> {
                   right: 8,
                   child: CupertinoButton(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
                     child: Semantics(label: l10n.cancel, child: const Icon(CupertinoIcons.xmark, size: 24)),
                   ),
                 ),
@@ -281,7 +318,7 @@ class _DestinationPickerScreenState extends State<DestinationPickerScreen> {
                     child: _ListButton(
                       icon: CupertinoIcons.clock,
                       label: l10n.searchFromHistory,
-                      onTap: () => _fromList(showHistory),
+                      onTap: () => setState(() => _list = _PickerList.history),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -289,7 +326,7 @@ class _DestinationPickerScreenState extends State<DestinationPickerScreen> {
                     child: _ListButton(
                       icon: CupertinoIcons.map_pin_ellipse,
                       label: l10n.searchFromSavedPlaces,
-                      onTap: () => _fromList(showSavedPlaces),
+                      onTap: () => setState(() => _list = _PickerList.saved),
                     ),
                   ),
                 ],
@@ -325,15 +362,26 @@ class _DestinationPickerScreenState extends State<DestinationPickerScreen> {
             ),
           ),
           Expanded(
-            child: BusMap(
-              initialCenter: center,
-              initialZoom: widget.initialCenter == null ? 12 : 15,
-              onLongPress: (point) => _choose(
-                '${l10n.destinationPickedPoint} '
-                '(${point.latitude.toStringAsFixed(5)}, ${point.longitude.toStringAsFixed(5)})',
-                point,
-              ),
-              pins: [if (widget.initialCenter != null) MapPin(center, MapPinStyle.place)],
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: BusMap(
+                    initialCenter: center,
+                    initialZoom: widget.initialCenter == null ? 12 : 15,
+                    allowGoogle: false,
+                    // 地点を選ぶ地図なので、現在地は右下のボタンで寄せるだけにする。
+                    myLocation: widget.controller?.gps,
+                    showsMyLocation: false,
+                    onLongPress: (point) => _choose(
+                      '${l10n.destinationPickedPoint} '
+                      '(${point.latitude.toStringAsFixed(5)}, ${point.longitude.toStringAsFixed(5)})',
+                      point,
+                    ),
+                    pins: [if (widget.initialCenter != null) MapPin(center, MapPinStyle.place)],
+                  ),
+                ),
+                if (widget.controller != null) MapDistanceBadge(controller: widget.controller!),
+              ],
             ),
           ),
         ],

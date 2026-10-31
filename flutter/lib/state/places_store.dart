@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -15,6 +16,7 @@ class SavedPlace {
     required this.placeName,
     required this.point,
     this.subtitle,
+    this.updatedAt,
   });
 
   factory SavedPlace.from(Destination destination, {required String label}) => SavedPlace(
@@ -23,6 +25,7 @@ class SavedPlace {
         placeName: destination.name,
         subtitle: destination.subtitle,
         point: destination.point,
+        updatedAt: DateTime.now().toUtc(),
       );
 
   final String id;
@@ -30,6 +33,9 @@ class SavedPlace {
   final String placeName;
   final String? subtitle;
   final GeoPoint point;
+
+  /// 最後に追加・編集した時刻。同期でどちらを残すかに使う。古いデータには無い。
+  final DateTime? updatedAt;
 
   static String newId() =>
       '${DateTime.now().microsecondsSinceEpoch}-${math.Random().nextInt(1 << 32).toRadixString(16)}';
@@ -47,12 +53,14 @@ class SavedPlace {
         point: point,
       );
 
-  SavedPlace copyWith({String? label, String? placeName, String? subtitle, GeoPoint? point}) => SavedPlace(
+  SavedPlace copyWith({String? label, String? placeName, String? subtitle, GeoPoint? point, DateTime? updatedAt}) =>
+      SavedPlace(
         id: id,
         label: label ?? this.label,
         placeName: placeName ?? this.placeName,
         subtitle: subtitle ?? this.subtitle,
         point: point ?? this.point,
+        updatedAt: updatedAt ?? this.updatedAt,
       );
 
   Map<String, dynamic> toJson() => {
@@ -62,6 +70,7 @@ class SavedPlace {
         if (subtitle != null) 'subtitle': subtitle,
         'latitude': point.latitude,
         'longitude': point.longitude,
+        if (updatedAt != null) 'updatedAt': updatedAt!.toUtc().toIso8601String(),
       };
 
   static SavedPlace fromJson(Map<String, dynamic> json) => SavedPlace(
@@ -70,6 +79,7 @@ class SavedPlace {
         placeName: json['placeName'] as String,
         subtitle: json['subtitle'] as String?,
         point: GeoPoint((json['latitude'] as num).toDouble(), (json['longitude'] as num).toDouble()),
+        updatedAt: json['updatedAt'] == null ? null : DateTime.parse(json['updatedAt'] as String).toUtc(),
       );
 }
 
@@ -88,77 +98,190 @@ class HistoryEntry {
       );
 }
 
-enum AppPlan { free, paid }
+/// iCloud とバックアップでやり取りする、登録済みの場所と目的地の履歴。
+/// [deletedPlaces] と [historyClearedAt] は、消したものが他の端末から戻ってこないための印。
+class PersonalData {
+  const PersonalData({
+    this.places = const [],
+    this.history = const [],
+    this.deletedPlaces = const {},
+    this.historyClearedAt,
+  });
 
-/// FREE / PREMIUM と、それに応じた件数上限（Swift の `PlanStore`）。
-class PlanStore extends ChangeNotifier {
-  PlanStore(this.prefs);
+  static const int schemaVersion = 1;
 
-  final SharedPreferences prefs;
+  /// これより古い削除の印は捨てる（溜まり続けないように）。
+  static const Duration tombstoneLifetime = Duration(days: 180);
 
-  static const int freeItemLimit = 3;
-  static const _planKey = 'plan.current';
+  final List<SavedPlace> places;
+  final List<HistoryEntry> history;
 
-  AppPlan get plan => AppPlan.values.asNameMap()[prefs.getString(_planKey)] ?? AppPlan.free;
-  bool get isPaid => plan == AppPlan.paid;
+  /// 消した場所の id と消した時刻。
+  final Map<String, DateTime> deletedPlaces;
 
-  /// null は無制限。
-  int? get itemLimit => isPaid ? null : freeItemLimit;
+  /// 履歴を消した時刻。これ以前の履歴は戻さない。
+  final DateTime? historyClearedAt;
 
-  Future<void> setPlan(AppPlan plan) async {
-    if (plan == this.plan) return;
-    await prefs.setString(_planKey, plan.name);
-    notifyListeners();
+  Map<String, dynamic> toJson() => {
+        'schemaVersion': schemaVersion,
+        'places': [for (final p in places) p.toJson()],
+        'history': [for (final e in history) e.toJson()],
+        'deletedPlaces': {for (final e in deletedPlaces.entries) e.key: e.value.toUtc().toIso8601String()},
+        if (historyClearedAt != null) 'historyClearedAt': historyClearedAt!.toUtc().toIso8601String(),
+      };
+
+  /// 形が違えば [FormatException]。
+  factory PersonalData.fromJson(Object? decoded) {
+    if (decoded is! Map) throw const FormatException('personal data is not a JSON object');
+    final version = decoded['schemaVersion'];
+    if (version != null && version != schemaVersion) {
+      throw FormatException('unsupported personal schemaVersion: $version');
+    }
+    try {
+      final deleted = decoded['deletedPlaces'] as Map? ?? const {};
+      final cleared = decoded['historyClearedAt'] as String?;
+      return PersonalData(
+        places: [
+          for (final p in decoded['places'] as List? ?? const [])
+            SavedPlace.fromJson(Map<String, dynamic>.from(p as Map)),
+        ],
+        history: [
+          for (final e in decoded['history'] as List? ?? const [])
+            HistoryEntry.fromJson(Map<String, dynamic>.from(e as Map)),
+        ],
+        deletedPlaces: {
+          for (final e in deleted.entries) e.key as String: DateTime.parse(e.value as String).toUtc(),
+        },
+        historyClearedAt: cleared == null ? null : DateTime.parse(cleared).toUtc(),
+      );
+    } catch (e) {
+      throw e is FormatException ? e : FormatException('invalid personal data: $e');
+    }
+  }
+
+  /// 和集合。同じ id の場所は新しい方、消した印より古い場所は落とす。
+  /// 履歴は新しい順に並べ、同じ地点は新しい 1 件にまとめる。件数の上限はかけない。
+  static PersonalData merge(PersonalData local, PersonalData remote, {required DateTime now}) {
+    final epoch = DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
+    final deleted = <String, DateTime>{...local.deletedPlaces};
+    remote.deletedPlaces.forEach((id, at) {
+      final mine = deleted[id];
+      if (mine == null || at.isAfter(mine)) deleted[id] = at;
+    });
+    deleted.removeWhere((_, at) => now.difference(at) > tombstoneLifetime);
+
+    // 手元の並びを保ち、相手にしか無いものを後ろへ足す。
+    final byId = <String, SavedPlace>{for (final p in local.places) p.id: p};
+    for (final theirs in remote.places) {
+      final mine = byId[theirs.id];
+      if (mine == null || (theirs.updatedAt ?? epoch).isAfter(mine.updatedAt ?? epoch)) byId[theirs.id] = theirs;
+    }
+    final places = [
+      for (final p in byId.values)
+        if (deleted[p.id] == null || (p.updatedAt ?? epoch).isAfter(deleted[p.id]!)) p,
+    ];
+
+    final a = local.historyClearedAt;
+    final b = remote.historyClearedAt;
+    final cleared = a == null ? b : (b == null || a.isAfter(b) ? a : b);
+    final entries = [
+      for (final e in [...local.history, ...remote.history])
+        if (cleared == null || e.setAt.isAfter(cleared)) e,
+    ]..sort((x, y) => y.setAt.compareTo(x.setAt));
+    final history = <HistoryEntry>[];
+    for (final e in entries) {
+      if (!history.any((kept) => kept.destination.samePlace(e.destination))) history.add(e);
+    }
+
+    return PersonalData(places: places, history: history, deletedPlaces: deleted, historyClearedAt: cleared);
   }
 }
 
-/// 登録済みの場所と目的地の履歴。FREE は各 3 件まで（PREMIUM は無制限）。
+/// 登録済みの場所と目的地の履歴。件数の上限は無い。
 class PlacesStore extends ChangeNotifier {
-  PlacesStore({required this.prefs, required this.plan}) {
-    plan.addListener(_onPlanChanged);
-  }
+  PlacesStore({required this.prefs});
 
   final SharedPreferences prefs;
-  final PlanStore plan;
 
   static const _placesKey = 'savedPlaces.list';
   static const _historyKey = 'destination.history';
+  static const _deletedKey = 'savedPlaces.deleted';
+  static const _historyClearedKey = 'destination.history.clearedAt';
+
+  final StreamController<void> _localChanges = StreamController<void>.broadcast();
+
+  /// 端末で追加・編集・削除したとき（同期やバックアップの反映では流さない）。
+  Stream<void> get localChanges => _localChanges.stream;
 
   List<T> _read<T>(String key, T Function(Map<String, dynamic>) decode) {
-    final raw = prefs.getString(key);
-    if (raw == null) return [];
     try {
-      return [for (final item in jsonDecode(raw) as List) decode(item as Map<String, dynamic>)];
+      final raw = prefs.getString(key);
+      if (raw == null) return [];
+      final decoded = <T>[];
+      final seen = <String>{};
+      for (final item in jsonDecode(raw) as List) {
+        final value = decode(item as Map<String, dynamic>);
+        final id = item['id'];
+        if (id is String && !seen.add(id)) continue;
+        decoded.add(value);
+      }
+      return decoded;
     } catch (_) {
       return [];
     }
   }
 
-  Future<void> _write(String key, List<Object> items) async {
+  Future<void> _write(String key, List<Object> items, {bool local = true}) async {
     await prefs.setString(key, jsonEncode(items));
     notifyListeners();
+    if (local) _localChanges.add(null);
   }
 
   List<SavedPlace> get places => _read(_placesKey, SavedPlace.fromJson);
   List<HistoryEntry> get history => _read(_historyKey, HistoryEntry.fromJson);
 
-  bool get canAddPlace {
-    final limit = plan.itemLimit;
-    return limit == null || places.length < limit;
+  Map<String, DateTime> get _deletedPlaces {
+    try {
+      final raw = jsonDecode(prefs.getString(_deletedKey) ?? '{}') as Map;
+      return {for (final e in raw.entries) e.key as String: DateTime.parse(e.value as String).toUtc()};
+    } catch (_) {
+      return {};
+    }
   }
 
-  /// 上限に達していれば false（保存しない）。
-  Future<bool> addPlace(SavedPlace place) async {
-    if (!canAddPlace) return false;
+  Future<void> _writeDeleted(Map<String, DateTime> deleted) =>
+      prefs.setString(_deletedKey, jsonEncode({for (final e in deleted.entries) e.key: e.value.toIso8601String()}));
+
+  DateTime? get _historyClearedAt => DateTime.tryParse(prefs.getString(_historyClearedKey) ?? '')?.toUtc();
+
+  /// 同期とバックアップに渡す中身。
+  PersonalData get data => PersonalData(
+        places: places,
+        history: history,
+        deletedPlaces: _deletedPlaces,
+        historyClearedAt: _historyClearedAt,
+      );
+
+  /// 同期・統合の結果を入れる。
+  Future<void> apply(PersonalData data) async {
+    await _writeDeleted(data.deletedPlaces);
+    final cleared = data.historyClearedAt;
+    if (cleared != null) await prefs.setString(_historyClearedKey, cleared.toUtc().toIso8601String());
+    await _write(_placesKey, data.places, local: false);
+    await _write(_historyKey, data.history, local: false);
+  }
+
+  Future<void> addPlace(SavedPlace place) async {
     await _write(_placesKey, [...places, place]);
-    return true;
   }
 
   Future<void> updatePlace(SavedPlace place) async {
-    await _write(_placesKey, [for (final p in places) p.id == place.id ? place : p]);
+    final edited = place.copyWith(updatedAt: DateTime.now().toUtc());
+    await _write(_placesKey, [for (final p in places) p.id == place.id ? edited : p]);
   }
 
   Future<void> deletePlace(String id) async {
+    await _writeDeleted({..._deletedPlaces, id: DateTime.now().toUtc()});
     await _write(_placesKey, [for (final p in places) if (p.id != id) p]);
   }
 
@@ -169,32 +292,28 @@ class PlacesStore extends ChangeNotifier {
       for (final e in history)
         if (!e.destination.samePlace(destination)) e,
     ];
-    final limit = plan.itemLimit;
-    await _write(_historyKey, limit == null ? entries : entries.take(limit).toList());
+    await _write(_historyKey, entries);
   }
 
   Future<void> clearHistory() async {
+    await prefs.setString(_historyClearedKey, DateTime.now().toUtc().toIso8601String());
     await prefs.remove(_historyKey);
     notifyListeners();
+    _localChanges.add(null);
   }
 
+  /// 端末の中だけ消す（路線データと同じく iCloud 側は残す）。
   Future<void> clearAll() async {
     await prefs.remove(_placesKey);
     await prefs.remove(_historyKey);
+    await prefs.remove(_deletedKey);
+    await prefs.remove(_historyClearedKey);
     notifyListeners();
-  }
-
-  /// FREE に戻ったら上限まで切り詰める（Swift の `enforceLimitsForCurrentPlan`）。
-  Future<void> _onPlanChanged() async {
-    final limit = plan.itemLimit;
-    if (limit == null) return;
-    if (places.length > limit) await _write(_placesKey, places.take(limit).toList());
-    if (history.length > limit) await _write(_historyKey, history.take(limit).toList());
   }
 
   @override
   void dispose() {
-    plan.removeListener(_onPlanChanged);
+    _localChanges.close();
     super.dispose();
   }
 }

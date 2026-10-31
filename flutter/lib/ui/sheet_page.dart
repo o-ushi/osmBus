@@ -24,7 +24,14 @@ Future<T?> showSheetNavigator<T>(BuildContext context, WidgetBuilder root) {
 
 /// シート内の 1 画面。戻れるときは左上に「‹」、右上に任意のボタン。
 class SheetPage extends StatelessWidget {
-  const SheetPage({super.key, required this.title, required this.children, this.trailing, this.closesSheet = false});
+  const SheetPage({
+    super.key,
+    required this.title,
+    required this.children,
+    this.trailing,
+    this.closesSheet = false,
+    this.onBack,
+  });
 
   final String title;
   final List<Widget> children;
@@ -33,6 +40,9 @@ class SheetPage extends StatelessWidget {
   /// 一番上の画面に「完了」を出してシートを閉じる。
   final bool closesSheet;
 
+  /// 指定したときは、ナビゲータの戻る代わりにこれを呼ぶ。
+  final VoidCallback? onBack;
+
   /// シートの中で次の画面へ進む。
   static Future<T?> push<T>(BuildContext context, WidgetBuilder builder) =>
       Navigator.of(context).push<T>(MaterialPageRoute(builder: builder));
@@ -40,7 +50,7 @@ class SheetPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final canPop = Navigator.of(context).canPop();
+    final canPop = onBack != null || Navigator.of(context).canPop();
     return Material(
       color: AppTheme.groupedBackground,
       child: Column(
@@ -65,7 +75,7 @@ class SheetPage extends StatelessWidget {
                     left: 0,
                     child: CupertinoButton(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () => onBack != null ? onBack!() : Navigator.of(context).pop(),
                       child: const Icon(CupertinoIcons.chevron_back, size: 26),
                     ),
                   ),

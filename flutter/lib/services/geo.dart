@@ -69,6 +69,32 @@ abstract final class Geo {
     return progress;
   }
 
+  /// [point] から線までの最短距離（メートル）。点が 1 つならその点までの距離。
+  /// 線分への射影は経度を cos(緯度) で縮めた平面で求める。
+  static double distanceToPolyline(GeoPoint point, List<GeoPoint> polyline) {
+    if (polyline.isEmpty) return double.infinity;
+    if (polyline.length == 1) return distance(point, polyline.first);
+    final scale = math.cos(_rad(point.latitude));
+    var best = double.infinity;
+    for (var i = 0; i + 1 < polyline.length; i++) {
+      final a = polyline[i];
+      final b = polyline[i + 1];
+      final dx = (b.longitude - a.longitude) * scale;
+      final dy = b.latitude - a.latitude;
+      final lenSq = dx * dx + dy * dy;
+      final t = lenSq < 1e-20
+          ? 0.0
+          : ((((point.longitude - a.longitude) * scale) * dx + (point.latitude - a.latitude) * dy) / lenSq)
+              .clamp(0.0, 1.0);
+      final d = distance(
+        point,
+        GeoPoint(a.latitude + t * (b.latitude - a.latitude), a.longitude + t * (b.longitude - a.longitude)),
+      );
+      if (d < best) best = d;
+    }
+    return best;
+  }
+
   /// 8 方位の添字。N, NE, E, SE, S, SW, W, NW の順。
   static int compassIndex(double bearing) =>
       ((bearing + 22.5) / 45).floor() % 8;
