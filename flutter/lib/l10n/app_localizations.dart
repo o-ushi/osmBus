@@ -1893,6 +1893,126 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'長押しで降車'**
   String get longPressToGetOff;
+
+  /// No description provided for @stopOrderUpdate.
+  ///
+  /// In ja, this message translates to:
+  /// **'停留所順を更新'**
+  String get stopOrderUpdate;
+
+  /// No description provided for @stopOrderSourceBundled.
+  ///
+  /// In ja, this message translates to:
+  /// **'{date}・同梱・{count} 系統'**
+  String stopOrderSourceBundled(String date, int count);
+
+  /// No description provided for @stopOrderSourceFetched.
+  ///
+  /// In ja, this message translates to:
+  /// **'{date}・取得・{count} 系統'**
+  String stopOrderSourceFetched(String date, int count);
+
+  /// No description provided for @stopOrderUpdated.
+  ///
+  /// In ja, this message translates to:
+  /// **'{date} の停留所順に更新しました'**
+  String stopOrderUpdated(String date);
+
+  /// No description provided for @stopOrderNotNewer.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しい停留所順はありません（{date} のまま）'**
+  String stopOrderNotNewer(String date);
+
+  /// No description provided for @stopOrderUpdateFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'取得できませんでした。今の停留所順をそのまま使います'**
+  String get stopOrderUpdateFailed;
+
+  /// No description provided for @stopOrderInspect.
+  ///
+  /// In ja, this message translates to:
+  /// **'停留所順を点検'**
+  String get stopOrderInspect;
+
+  /// No description provided for @stopOrderDiffers.
+  ///
+  /// In ja, this message translates to:
+  /// **'公式の停留所順と違います'**
+  String get stopOrderDiffers;
+
+  /// No description provided for @stopOrderUsingOfficial.
+  ///
+  /// In ja, this message translates to:
+  /// **'公式の順を使っています'**
+  String get stopOrderUsingOfficial;
+
+  /// No description provided for @stopOrderApply.
+  ///
+  /// In ja, this message translates to:
+  /// **'この路線を公式の順にする'**
+  String get stopOrderApply;
+
+  /// No description provided for @stopOrderRevert.
+  ///
+  /// In ja, this message translates to:
+  /// **'元に戻す'**
+  String get stopOrderRevert;
+
+  /// No description provided for @orderHintBefore.
+  ///
+  /// In ja, this message translates to:
+  /// **'{anchor} の手前は、今は {current}。公式では {official}。'**
+  String orderHintBefore(String anchor, String current, String official);
+
+  /// No description provided for @orderHintAfter.
+  ///
+  /// In ja, this message translates to:
+  /// **'{anchor} の次は、今は {current}。公式では {official}。'**
+  String orderHintAfter(String anchor, String current, String official);
+
+  /// No description provided for @orderHintAppliedBefore.
+  ///
+  /// In ja, this message translates to:
+  /// **'{anchor} の手前は、公式の順では {official}（元の順では {current}）。'**
+  String orderHintAppliedBefore(String anchor, String current, String official);
+
+  /// No description provided for @orderHintAppliedAfter.
+  ///
+  /// In ja, this message translates to:
+  /// **'{anchor} の次は、公式の順では {official}（元の順では {current}）。'**
+  String orderHintAppliedAfter(String anchor, String current, String official);
+
+  /// No description provided for @orderHintNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'なし'**
+  String get orderHintNone;
+
+  /// No description provided for @inspectFixable.
+  ///
+  /// In ja, this message translates to:
+  /// **'直せる路線: {count}'**
+  String inspectFixable(int count);
+
+  /// No description provided for @inspectUnsure.
+  ///
+  /// In ja, this message translates to:
+  /// **'そのままにする路線: {count}'**
+  String inspectUnsure(int count);
+
+  /// No description provided for @inspectApply.
+  ///
+  /// In ja, this message translates to:
+  /// **'直せる路線を公式の順にする'**
+  String get inspectApply;
+
+  /// No description provided for @inspectNoData.
+  ///
+  /// In ja, this message translates to:
+  /// **'停留所順のファイルに系統がありません'**
+  String get inspectNoData;
 }
 
 class _AppLocalizationsDelegate

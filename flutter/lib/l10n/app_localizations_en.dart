@@ -1017,4 +1017,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get longPressToGetOff => 'Long-press to get off';
+
+  @override
+  String get stopOrderUpdate => 'Update stop order';
+
+  @override
+  String stopOrderSourceBundled(String date, int count) {
+    return '$date · bundled · $count routes';
+  }
+
+  @override
+  String stopOrderSourceFetched(String date, int count) {
+    return '$date · downloaded · $count routes';
+  }
+
+  @override
+  String stopOrderUpdated(String date) {
+    return 'Updated to the stop order of $date';
+  }
+
+  @override
+  String stopOrderNotNewer(String date) {
+    return 'No newer stop order (still $date)';
+  }
+
+  @override
+  String get stopOrderUpdateFailed =>
+      'Could not download. The current stop order is kept.';
+
+  @override
+  String get stopOrderInspect => 'Check stop order';
+
+  @override
+  String get stopOrderDiffers => 'Differs from the official stop order';
+
+  @override
+  String get stopOrderUsingOfficial => 'Using the official order';
+
+  @override
+  String get stopOrderApply => 'Use the official order for this route';
+
+  @override
+  String get stopOrderRevert => 'Revert';
+
+  @override
+  String orderHintBefore(String anchor, String current, String official) {
+    return 'Before $anchor: now $current. Officially $official.';
+  }
+
+  @override
+  String orderHintAfter(String anchor, String current, String official) {
+    return 'After $anchor: now $current. Officially $official.';
+  }
+
+  @override
+  String orderHintAppliedBefore(
+    String anchor,
+    String current,
+    String official,
+  ) {
+    return 'Before $anchor: $official in the official order ($current in the original order).';
+  }
+
+  @override
+  String orderHintAppliedAfter(String anchor, String current, String official) {
+    return 'After $anchor: $official in the official order ($current in the original order).';
+  }
+
+  @override
+  String get orderHintNone => 'none';
+
+  @override
+  String inspectFixable(int count) {
+    return 'Routes that can be fixed: $count';
+  }
+
+  @override
+  String inspectUnsure(int count) {
+    return 'Routes left as they are: $count';
+  }
+
+  @override
+  String get inspectApply => 'Use the official order for fixable routes';
+
+  @override
+  String get inspectNoData => 'The stop order file has no routes';
 }

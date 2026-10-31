@@ -7,6 +7,7 @@ import '../state/trip_controller.dart';
 import 'alight_stepper.dart';
 import 'bus_map.dart';
 import 'distance_badge.dart';
+import 'official_order_hint.dart';
 import 'theme.dart';
 
 /// 番号表のタップ先。乗るバスすべての区間と、乗車・乗換・降車の停留所（Swift の `TransitRouteMapView`）。
@@ -25,11 +26,18 @@ class RouteMapScreen extends StatelessWidget {
   /// 降りた停留所と次に乗る停留所が違えば、その間を歩く。
   static bool _walksBetween(ItineraryLeg from, ItineraryLeg to) => from.alightStop.id != to.boardStop.id;
 
-  /// 各区間で通る停留所。カタログの路線の [ItineraryLeg.boardIndex] から [ItineraryLeg.alightIndex] まで。
+  /// 各区間で通る停留所。カタログの今の並び（公式の順を適用していればその順）で、乗車停留所から降車停留所まで。
   List<GeoPoint> _legStops(ItineraryLeg leg) {
     final route = controller?.visibleCatalog.routes.where((r) => r.relationId == leg.relationId).firstOrNull;
-    if (route == null || leg.alightIndex >= route.stops.length || leg.boardIndex > leg.alightIndex) return const [];
-    return [for (final stop in route.stops.sublist(leg.boardIndex, leg.alightIndex + 1)) stop.point];
+    if (route == null) return const [];
+    var board = route.stops.indexWhere((s) => s.id == leg.boardStop.id);
+    var alight = board < 0 ? -1 : route.stops.indexWhere((s) => s.id == leg.alightStop.id, board);
+    if (board < 0 || alight < 0) {
+      board = leg.boardIndex;
+      alight = leg.alightIndex;
+    }
+    if (alight >= route.stops.length || board > alight) return const [];
+    return [for (final stop in route.stops.sublist(board, alight + 1)) stop.point];
   }
 
   @override
@@ -128,7 +136,18 @@ class RouteMapScreen extends StatelessWidget {
                       ),
                       title: Text(i == 0 ? l10n.boardAt(leg.boardStop.name) : l10n.transferAt(leg.boardStop.name)),
                       subtitle: i == ridingLeg
-                          ? AlightStepper(controller: controller!, fallbackStopName: leg.alightStop.name)
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                AlightStepper(controller: controller!, fallbackStopName: leg.alightStop.name),
+                                OfficialOrderHintRow(
+                                  controller: controller!,
+                                  relationId: leg.relationId,
+                                  anchorStopId: controller!.riding?.alightStop.id,
+                                ),
+                              ],
+                            )
                           : Text(l10n.alightAt(leg.alightStop.name)),
                     ),
                   Padding(

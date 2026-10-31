@@ -12,6 +12,7 @@ import 'alight_stepper.dart';
 import 'bus_map.dart';
 import 'distance_badge.dart';
 import 'keypad.dart';
+import 'official_order_hint.dart';
 import 'theme.dart';
 
 /// メニューの「路線図」（Swift の `BusRouteMapView`）。番号で路線を探して地図に出し、
@@ -117,8 +118,11 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
   }
 
   void _toggleRiding() {
-    final route = _route;
-    if (route == null) return;
+    final opened = _route;
+    if (opened == null) return;
+    // 公式の順を適用していれば、その並びで乗る。
+    final route =
+        controller.visibleCatalog.routes.where((r) => r.relationId == opened.relationId).firstOrNull ?? opened;
     if (_riding) {
       controller.endRiding();
     } else {
@@ -200,7 +204,11 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
-        final route = _route;
+        // 公式の順を適用・元に戻したら、同じ路線の今の並びを使う。
+        final opened = _route;
+        final route = opened == null
+            ? null
+            : controller.visibleCatalog.routes.where((r) => r.relationId == opened.relationId).firstOrNull ?? opened;
         final origin = controller.origin;
         final originPin = controller.originPin;
         final ridingPath = _riding && controller.riding!.alightAdjusted ? controller.riding!.path : null;
@@ -304,7 +312,8 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
   double _overlayBottom(BuildContext context, RouteRecord? route) {
     if (_keypadVisible) return MediaQuery.sizeOf(context).height * 0.42 + 24;
     if (route == null) return 0;
-    return _riding ? 150 : 100;
+    final hint = controller.officialOrderStatus(route.relationId) == null ? 0 : 28;
+    return (_riding ? 150 : 100) + hint.toDouble();
   }
 
   Widget _emptyState(AppLocalizations l10n, bool noLocation) => Center(
@@ -356,6 +365,11 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
                   style: TextStyle(fontSize: 12, color: _riding ? Colors.orange : AppTheme.tertiaryText),
                 ),
                 if (_riding) AlightStepper(controller: controller, style: const TextStyle(fontSize: 13)),
+                OfficialOrderHintRow(
+                  controller: controller,
+                  relationId: route.relationId,
+                  anchorStopId: _riding ? controller.riding?.alightStop.id : null,
+                ),
               ],
             ),
           ),

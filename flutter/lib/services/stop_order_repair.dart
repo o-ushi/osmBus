@@ -34,7 +34,7 @@ abstract final class StopOrderRepair {
   static RouteRecord repair(RouteRecord route) {
     final stops = route.stops;
     if (stops.length < 3) return route;
-    final line = _Line.of(route.polylineSegments);
+    final line = RouteLine.of(route.polylineSegments);
     if (line == null) return route;
 
     final projections = [for (final stop in stops) line.project(stop.point)];
@@ -54,7 +54,7 @@ abstract final class StopOrderRepair {
   }
 
   /// 線から近い停留所のうち、前の停留所より線上で [backtrackMeters] 以上戻っているものがあるか。
-  static bool _backtracks(List<_Projection> projections) {
+  static bool _backtracks(List<LineProjection> projections) {
     var furthest = double.negativeInfinity;
     for (final p in projections) {
       if (!p.onLine) continue;
@@ -65,8 +65,9 @@ abstract final class StopOrderRepair {
   }
 }
 
-class _Projection {
-  const _Projection({required this.along, required this.distance, required this.revisits});
+/// 停留所を線へ落とした結果。
+class LineProjection {
+  const LineProjection({required this.along, required this.distance, required this.revisits});
 
   /// 線の始まりから、停留所を落とした点までの線上の距離。
   final double along;
@@ -81,8 +82,9 @@ class _Projection {
 }
 
 /// メンバー順に繋いだ線。平面（その路線の始まりを原点にしたメートル）で測る。
-class _Line {
-  _Line._(this._x, this._y, this._along, this._joins, this._lat0, this._lon0, this._lonScale);
+/// 切れた way のあいだも長さは数えるが、停留所はそこへ落とさない。公式の停留所順の照合でも使う。
+class RouteLine {
+  RouteLine._(this._x, this._y, this._along, this._joins, this._lat0, this._lon0, this._lonScale);
 
   static const double _metersPerDegreeLat = 110574;
   static const double _metersPerDegreeLon = 111320;
@@ -97,7 +99,7 @@ class _Line {
   final double _lon0;
   final double _lonScale;
 
-  static _Line? of(List<List<GeoPoint>> segments) {
+  static RouteLine? of(List<List<GeoPoint>> segments) {
     final points = <GeoPoint>[];
     final joins = <bool>[];
     for (final segment in segments) {
@@ -116,10 +118,10 @@ class _Line {
     for (var i = 1; i < points.length; i++) {
       along[i] = along[i - 1] + math.sqrt(math.pow(x[i] - x[i - 1], 2) + math.pow(y[i] - y[i - 1], 2));
     }
-    return _Line._(x, y, along, joins, lat0, lon0, lonScale);
+    return RouteLine._(x, y, along, joins, lat0, lon0, lonScale);
   }
 
-  _Projection project(GeoPoint point) {
+  LineProjection project(GeoPoint point) {
     final px = (point.longitude - _lon0) * _lonScale;
     final py = (point.latitude - _lat0) * _metersPerDegreeLat;
     var bestDistance = double.infinity;
@@ -146,6 +148,6 @@ class _Line {
     for (var k = 1; k < near.length; k++) {
       if (near[k] - near[k - 1] > StopOrderRepair.revisitGapMeters) revisits = true;
     }
-    return _Projection(along: bestAlong, distance: bestDistance, revisits: revisits);
+    return LineProjection(along: bestAlong, distance: bestDistance, revisits: revisits);
   }
 }

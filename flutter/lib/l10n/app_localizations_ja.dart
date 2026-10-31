@@ -993,4 +993,88 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get longPressToGetOff => '長押しで降車';
+
+  @override
+  String get stopOrderUpdate => '停留所順を更新';
+
+  @override
+  String stopOrderSourceBundled(String date, int count) {
+    return '$date・同梱・$count 系統';
+  }
+
+  @override
+  String stopOrderSourceFetched(String date, int count) {
+    return '$date・取得・$count 系統';
+  }
+
+  @override
+  String stopOrderUpdated(String date) {
+    return '$date の停留所順に更新しました';
+  }
+
+  @override
+  String stopOrderNotNewer(String date) {
+    return '新しい停留所順はありません（$date のまま）';
+  }
+
+  @override
+  String get stopOrderUpdateFailed => '取得できませんでした。今の停留所順をそのまま使います';
+
+  @override
+  String get stopOrderInspect => '停留所順を点検';
+
+  @override
+  String get stopOrderDiffers => '公式の停留所順と違います';
+
+  @override
+  String get stopOrderUsingOfficial => '公式の順を使っています';
+
+  @override
+  String get stopOrderApply => 'この路線を公式の順にする';
+
+  @override
+  String get stopOrderRevert => '元に戻す';
+
+  @override
+  String orderHintBefore(String anchor, String current, String official) {
+    return '$anchor の手前は、今は $current。公式では $official。';
+  }
+
+  @override
+  String orderHintAfter(String anchor, String current, String official) {
+    return '$anchor の次は、今は $current。公式では $official。';
+  }
+
+  @override
+  String orderHintAppliedBefore(
+    String anchor,
+    String current,
+    String official,
+  ) {
+    return '$anchor の手前は、公式の順では $official（元の順では $current）。';
+  }
+
+  @override
+  String orderHintAppliedAfter(String anchor, String current, String official) {
+    return '$anchor の次は、公式の順では $official（元の順では $current）。';
+  }
+
+  @override
+  String get orderHintNone => 'なし';
+
+  @override
+  String inspectFixable(int count) {
+    return '直せる路線: $count';
+  }
+
+  @override
+  String inspectUnsure(int count) {
+    return 'そのままにする路線: $count';
+  }
+
+  @override
+  String get inspectApply => '直せる路線を公式の順にする';
+
+  @override
+  String get inspectNoData => '停留所順のファイルに系統がありません';
 }

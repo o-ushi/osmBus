@@ -1013,4 +1013,89 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get longPressToGetOff => 'Nhấn giữ để xuống xe';
+
+  @override
+  String get stopOrderUpdate => 'Cập nhật thứ tự trạm';
+
+  @override
+  String stopOrderSourceBundled(String date, int count) {
+    return '$date · có sẵn · $count tuyến';
+  }
+
+  @override
+  String stopOrderSourceFetched(String date, int count) {
+    return '$date · đã tải · $count tuyến';
+  }
+
+  @override
+  String stopOrderUpdated(String date) {
+    return 'Đã cập nhật thứ tự trạm ngày $date';
+  }
+
+  @override
+  String stopOrderNotNewer(String date) {
+    return 'Không có thứ tự trạm mới hơn (vẫn là $date)';
+  }
+
+  @override
+  String get stopOrderUpdateFailed =>
+      'Không tải được. Vẫn dùng thứ tự trạm hiện tại.';
+
+  @override
+  String get stopOrderInspect => 'Kiểm tra thứ tự trạm';
+
+  @override
+  String get stopOrderDiffers => 'Khác thứ tự trạm chính thức';
+
+  @override
+  String get stopOrderUsingOfficial => 'Đang dùng thứ tự chính thức';
+
+  @override
+  String get stopOrderApply => 'Dùng thứ tự chính thức cho tuyến này';
+
+  @override
+  String get stopOrderRevert => 'Hoàn tác';
+
+  @override
+  String orderHintBefore(String anchor, String current, String official) {
+    return 'Trước $anchor: hiện là $current. Chính thức là $official.';
+  }
+
+  @override
+  String orderHintAfter(String anchor, String current, String official) {
+    return 'Sau $anchor: hiện là $current. Chính thức là $official.';
+  }
+
+  @override
+  String orderHintAppliedBefore(
+    String anchor,
+    String current,
+    String official,
+  ) {
+    return 'Trước $anchor: $official theo thứ tự chính thức ($current theo thứ tự gốc).';
+  }
+
+  @override
+  String orderHintAppliedAfter(String anchor, String current, String official) {
+    return 'Sau $anchor: $official theo thứ tự chính thức ($current theo thứ tự gốc).';
+  }
+
+  @override
+  String get orderHintNone => 'không có';
+
+  @override
+  String inspectFixable(int count) {
+    return 'Tuyến có thể sửa: $count';
+  }
+
+  @override
+  String inspectUnsure(int count) {
+    return 'Tuyến giữ nguyên: $count';
+  }
+
+  @override
+  String get inspectApply => 'Dùng thứ tự chính thức cho các tuyến có thể sửa';
+
+  @override
+  String get inspectNoData => 'Tệp thứ tự trạm không có tuyến nào';
 }
