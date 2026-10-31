@@ -110,6 +110,12 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String get alightNextStop => 'Xuống muộn hơn một trạm';
+
+  @override
+  String get alightPreviousStop => 'Xuống sớm hơn một trạm';
+
+  @override
   String estimatedArrival(String time, int minutes) {
     return 'Đến khoảng $time (ước tính, ~$minutes phút)';
   }
@@ -803,7 +809,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get helpLocationBody =>
-      'Ứng dụng xin quyền vị trí khi mở. Làm mới bằng ↻ trên thanh vị trí, hoặc chọn điểm đi trên bản đồ bằng biểu tượng bản đồ. Chạm × để quay lại vị trí hiện tại. Khi đang đi, khoảng cách luôn đo từ GPS.';
+      'Ứng dụng xin quyền vị trí khi mở. Làm mới bằng ↻ trên thanh vị trí, hoặc chọn điểm đi trên bản đồ bằng biểu tượng bản đồ. Chạm × để quay lại vị trí hiện tại. Khi đang điều hướng (đã đặt điểm đến), điểm đi của lộ trình giữ nguyên cho đến khi bạn chạm ↻ (chấm vị trí màu xanh vẫn di chuyển). Khi đang đi, khoảng cách luôn đo từ GPS.';
 
   @override
   String get helpSavedPlacesTitle => 'Địa điểm đã lưu';
@@ -845,7 +851,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get helpDistanceBody =>
-      'Khi chưa lên xe, huy hiệu là khoảng cách thẳng đến điểm đến. Khi đang đi, là khoảng cách đến trạm xuống của xe hiện tại. Từ 3 km xanh dương, từ 1 km xanh lá, từ 500 m vàng, từ 200 m cam, dưới 200 m đỏ. Khi đang đi, chạm huy hiệu để mở bản đồ tuyến. Giữ huy hiệu để hủy điều hướng (cũng xóa điểm đến). Nếu lên xe từ sơ đồ tuyến mà chưa đặt điểm đến, huy hiệu hiện \"—\".';
+      'Khi chưa lên xe, huy hiệu là khoảng cách thẳng đến điểm đến. Khi đang đi, là khoảng cách đến trạm xuống của xe hiện tại. Màu đổi theo khoảng cách của Cảnh báo khoảng cách 1–3 trong Cảnh báo đến nơi (kể cả khi cảnh báo tắt): dưới Cảnh báo khoảng cách 3 đỏ, dưới Cảnh báo khoảng cách 2 vàng, dưới Cảnh báo khoảng cách 1 cam, dưới 3 km xanh lá, từ 3 km xanh dương (mặc định dưới 100 m đỏ, dưới 400 m vàng, dưới 1 km cam). Khi đang đi, chạm huy hiệu để mở bản đồ tuyến. Giữ huy hiệu để hủy điều hướng (cũng xóa điểm đến). Nếu lên xe từ sơ đồ tuyến mà chưa đặt điểm đến, huy hiệu hiện \"—\".';
 
   @override
   String get helpRidingTitle => 'Chế độ đang đi';

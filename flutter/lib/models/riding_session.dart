@@ -12,6 +12,8 @@ class RidingSession {
     this.itinerary,
     this.legIndex = 0,
     this.routeId,
+    this.boardStopId,
+    this.alightAdjusted = false,
     this.boardingDistanceToDestination = 0,
   });
 
@@ -30,13 +32,20 @@ class RidingSession {
       startedAt: now,
       itinerary: itinerary,
       legIndex: legIndex,
+      boardStopId: leg.boardStop.id,
       boardingDistanceToDestination:
           destination == null ? 0 : Geo.distance(leg.boardStop.point, destination),
     );
   }
 
   /// 路線図から乗った（Swift の `startFromOSMMap`）。降車は終点。
-  factory RidingSession.fromRoute(RouteRecord route, {required GeoPoint? destination, required DateTime now}) {
+  /// 乗車停留所は、乗った時点の現在地 [position] に一番近い停留所（無ければ始発）。
+  factory RidingSession.fromRoute(
+    RouteRecord route, {
+    required GeoPoint? destination,
+    required DateTime now,
+    GeoPoint? position,
+  }) {
     final path = [for (final segment in route.polylineSegments) ...segment];
     final first = path.isNotEmpty ? path.first : route.stops.first.point;
     return RidingSession(
@@ -45,9 +54,34 @@ class RidingSession {
       path: path.isNotEmpty ? path : [for (final s in route.stops) s.point],
       startedAt: now,
       routeId: route.relationId,
+      boardStopId: route.stops[nearestBoardIndex(route.stops, position)].id,
       boardingDistanceToDestination: destination == null ? 0 : Geo.distance(first, destination),
     );
   }
+
+  /// [position] に一番近い停留所の添字。終点では乗らないので、終点の 1 つ手前まで。
+  static int nearestBoardIndex(List<RouteStop> stops, GeoPoint? position) {
+    if (position == null || stops.length < 2) return 0;
+    var best = 0;
+    for (var i = 1; i < stops.length - 1; i++) {
+      if (Geo.distance(position, stops[i].point) < Geo.distance(position, stops[best].point)) best = i;
+    }
+    return best;
+  }
+
+  /// 降車停留所だけを [stop] に変えた乗車。乗車中の線は [path] にする。
+  RidingSession withAlight(RouteStop stop, {required List<GeoPoint> path}) => RidingSession(
+        ref: ref,
+        alightStop: stop,
+        path: path,
+        startedAt: startedAt,
+        itinerary: itinerary,
+        legIndex: legIndex,
+        routeId: routeId,
+        boardStopId: boardStopId,
+        alightAdjusted: true,
+        boardingDistanceToDestination: boardingDistanceToDestination,
+      );
 
   final String ref;
   final RouteStop alightStop;
@@ -63,6 +97,12 @@ class RidingSession {
   /// 路線図から乗ったときの relation ID。
   final int? routeId;
 
+  /// 乗車停留所の ID。降車停を ＋／− でずらすとき、これより手前には行かない。
+  final int? boardStopId;
+
+  /// 降車停を ＋／− で選び直したか。路線図から目的地なしで乗っても距離を出す。
+  final bool alightAdjusted;
+
   /// 乗車地点から目的地までの直線距離。逆方向の検知に使う。0 なら検知しない。
   final double boardingDistanceToDestination;
 
@@ -77,6 +117,8 @@ class RidingSession {
         if (itinerary != null) 'itinerary': itinerary!.toJson(),
         'legIndex': legIndex,
         if (routeId != null) 'routeId': routeId,
+        if (boardStopId != null) 'boardStopId': boardStopId,
+        'alightAdjusted': alightAdjusted,
         'boardingDistanceToDestination': boardingDistanceToDestination,
       };
 
@@ -90,6 +132,8 @@ class RidingSession {
       itinerary: itinerary == null ? null : LocalItinerary.fromJson(itinerary),
       legIndex: (json['legIndex'] as num?)?.toInt() ?? 0,
       routeId: (json['routeId'] as num?)?.toInt(),
+      boardStopId: (json['boardStopId'] as num?)?.toInt(),
+      alightAdjusted: json['alightAdjusted'] as bool? ?? false,
       boardingDistanceToDestination: (json['boardingDistanceToDestination'] as num?)?.toDouble() ?? 0,
     );
   }

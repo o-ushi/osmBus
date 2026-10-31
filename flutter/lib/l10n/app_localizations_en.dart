@@ -110,6 +110,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get alightNextStop => 'Get off one stop later';
+
+  @override
+  String get alightPreviousStop => 'Get off one stop earlier';
+
+  @override
   String estimatedArrival(String time, int minutes) {
     return 'Arrive around $time (estimate, ~$minutes min)';
   }
@@ -807,7 +813,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpLocationBody =>
-      'Location permission is requested at launch. Refresh with ↻ in the location bar, or choose an origin on the map with the map icon. Tap × to go back to your current location. While riding, distance is always measured from GPS.';
+      'Location permission is requested at launch. Refresh with ↻ in the location bar, or choose an origin on the map with the map icon. Tap × to go back to your current location. While navigating (a destination is set), the route\'s origin stays put until you tap ↻ (the blue location dot keeps moving). While riding, distance is always measured from GPS.';
 
   @override
   String get helpSavedPlacesTitle => 'Saved places';
@@ -849,7 +855,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpDistanceBody =>
-      'When you are not riding, the badge is the straight-line distance to your destination. While riding, it is the distance to the current bus\'s alighting stop. Blue from 3 km, green from 1 km, yellow from 500 m, orange from 200 m, red under 200 m. Tap the badge while riding to open the route map. Long-press the badge to cancel navigation (this also clears the destination). If you start riding from the line map without a destination, the badge shows \"—\".';
+      'When you are not riding, the badge is the straight-line distance to your destination. While riding, it is the distance to the current bus\'s alighting stop. The color changes at the distances of Distance alerts 1–3 in Arrival alerts (even when those alerts are off): red under Distance alert 3, yellow under Distance alert 2, orange under Distance alert 1, green under 3 km, blue from 3 km (by default red under 100 m, yellow under 400 m, orange under 1 km). Tap the badge while riding to open the route map. Long-press the badge to cancel navigation (this also clears the destination). If you start riding from the line map without a destination, the badge shows \"—\".';
 
   @override
   String get helpRidingTitle => 'Riding mode';

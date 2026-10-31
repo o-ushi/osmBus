@@ -25,6 +25,7 @@ import '../services/location_authorization.dart';
 import '../services/route_catalog_downloader.dart';
 import '../services/route_catalog_store.dart';
 import '../services/sound_player.dart';
+import '../services/stop_order_repair.dart';
 import 'app_settings.dart';
 import 'places_store.dart';
 
@@ -64,6 +65,24 @@ class DistanceRidingAlert extends RidingAlert {
 class WrongDirectionRidingAlert extends RidingAlert {
   const WrongDirectionRidingAlert({required this.fromRouteMap});
   final bool fromRouteMap;
+}
+
+/// 乗車中に降車停を ＋／− でずらすための停留所列（今乗っている路線のカタログ上の停留所）。
+class AlightChoice {
+  const AlightChoice({required this.route, required this.boardIndex, required this.alightIndex});
+
+  final RouteRecord route;
+  final int boardIndex;
+  final int alightIndex;
+
+  List<RouteStop> get stops => route.stops;
+  RouteStop get alightStop => stops[alightIndex];
+
+  /// 乗車停留所の次より手前には行かない。
+  bool get canPrevious => alightIndex - 1 > boardIndex;
+
+  /// 終点より先には行かない。
+  bool get canNext => alightIndex + 1 < stops.length;
 }
 
 /// 画面の外でも出す文言。UI 側が言語に合わせて入れる。
@@ -110,6 +129,7 @@ class TripController extends ChangeNotifier {
   static const _consentVersion = 1;
   static const _destinationKey = 'destination';
   static const _ridingKey = 'riding.session';
+  static const _routeOriginKey = 'navigation.routeOrigin';
   static const _iCloudKey = 'sync.iCloudEnabled';
   static const _lastSyncKey = 'sync.lastSyncedAt';
   static const _sortModeKey = 'table.sortMode';
@@ -138,6 +158,12 @@ class TripController extends ChangeNotifier {
 
   CatalogSnapshot _snapshot = CatalogSnapshot.empty;
   GeoPoint? _gps;
+
+  /// ナビ中（目的地があるあいだ）に経路を引く出発地。GPS 更新では動かさない。
+  GeoPoint? _routeOrigin;
+
+  /// ↻ で「次に届いた 1 点を経路用の出発地にする」。
+  bool _adoptNextFix = false;
   Destination? _manualOrigin;
   LocationStatus _locationStatus = LocationStatus.unknown;
   Destination? _destination;
@@ -171,8 +197,16 @@ class TripController extends ChangeNotifier {
   /// 同意がオフなら空。ファイルは消さない。
   CatalogSnapshot get visibleCatalog => consentGranted ? _snapshot : CatalogSnapshot.empty;
 
-  /// 出発地。地図で選んだ地点があればそれ、なければ GPS（Swift の `effectiveOrigin`）。
-  GeoPoint? get origin => _manualOrigin?.point ?? _gps;
+  /// 経路を引く出発地。地図で選んだ地点があればそれ。なければ、ナビ中はナビを始めたときに
+  /// 固定した地点（↻ を押すまで動かない）、ナビ中でなければ GPS（Swift の `effectiveOrigin`）。
+  GeoPoint? get origin => _manualOrigin?.point ?? (_destination != null ? _routeOrigin : _gps);
+
+  /// 地図に出す出発地のピン。手動の出発地か、GPS の丸と離れた固定の出発地。
+  GeoPoint? get originPin {
+    final origin = this.origin;
+    if (origin == null) return null;
+    return _manualOrigin != null || origin != _gps ? origin : null;
+  }
 
   /// GPS の現在地。手動の出発地ではない。地図の現在地の丸と「現在地に移動」に使う。
   GeoPoint? get gps => _gps;
@@ -197,8 +231,9 @@ class TripController extends ChangeNotifier {
   /// 路線図から目的地なしで乗ったときは出さない（終点は行き先ではないため。Swift と同じ）。
   double? get distanceLeftMeters {
     final riding = _riding;
-    if (riding != null && riding.fromRouteMap && _destination == null) return null;
-    final origin = riding != null ? (_gps ?? this.origin) : this.origin;
+    if (riding != null && riding.fromRouteMap && _destination == null && !riding.alightAdjusted) return null;
+    // 未乗車でも、手動の出発地が無ければライブの GPS から測る（固定した経路用の出発地ではない）。
+    final origin = riding != null ? (_gps ?? this.origin) : (_manualOrigin?.point ?? _gps ?? this.origin);
     if (origin == null) return null;
     final target = riding?.alightStop.point ?? _destination?.point;
     return target == null ? null : Geo.distance(origin, target);
@@ -235,8 +270,9 @@ class TripController extends ChangeNotifier {
   Future<void> start() async {
     await _adoptSwiftConsent();
     _destination = _readDestination();
+    _routeOrigin = _destination == null ? null : _readRouteOrigin();
     _restoreRiding();
-    _snapshot = await store.load();
+    _snapshot = _repaired(await store.load());
     _saveSub = store.onSaved.listen(_onCatalogSaved);
     _placesSub = places.localChanges.listen((_) => _scheduleSync());
     await sync.checkAvailability();
@@ -255,6 +291,14 @@ class TripController extends ChangeNotifier {
     _syncTimer?.cancel();
     downloader.dispose();
     super.dispose();
+  }
+
+  /// 読み込んだ路線の停留所順を、線と明らかに逆行しているものだけ端末内で直す。
+  /// 番号表・路線図・降車停の ＋／− はどれもこの順を使う。ファイルには書き戻さない。
+  CatalogSnapshot _repaired(CatalogSnapshot loaded) {
+    final (snapshot, count) = StopOrderRepair.snapshot(loaded);
+    if (count > 0) AppLog.i('catalog', 'reordered stops of $count routes');
+    return snapshot;
   }
 
   /// Swift 版（同じバンドル ID）の同意を引き継ぐ。Swift は接頭辞なしの UserDefaults に書く。
@@ -297,7 +341,10 @@ class TripController extends ChangeNotifier {
 
   // MARK: - 現在地
 
-  Future<void> requestLocation() async {
+  /// 位置の許可を確かめて測位を始める。[refreshOrigin] は現在地行の ↻（次に届いた 1 点を
+  /// ナビ中の経路用の出発地にして、経路を引き直す）。
+  Future<void> requestLocation({bool refreshOrigin = false}) async {
+    if (refreshOrigin) adoptNextFixAsOrigin();
     try {
       if (!await Geolocator.isLocationServiceEnabled()) {
         _setLocationStatus(LocationStatus.serviceDisabled);
@@ -403,21 +450,70 @@ class TripController extends ChangeNotifier {
   }
 
   void _updateOrigin(Position position) {
-    _gps = GeoPoint(position.latitude, position.longitude);
-    AppLog.d('location', 'fix ${AppLog.coord(_gps)} acc=${position.accuracy.round()}m');
+    final point = GeoPoint(position.latitude, position.longitude);
+    AppLog.d('location', 'fix ${AppLog.coord(point)} acc=${position.accuracy.round()}m');
     _locating = false;
-    _checkRiding(_gps!);
-    notifyListeners();
-    unawaited(_replan());
+    _onFix(point);
   }
 
-  /// UI テストで GPS の代わりに出発地を入れる。
+  /// テストで路線データを直接入れる（読み込みと同じく停留所順を直す）。
   @visibleForTesting
-  void debugSetOrigin(GeoPoint origin, {DateTime? now}) {
-    _gps = origin;
-    _checkRiding(origin, now: now);
+  void debugSetCatalog(CatalogSnapshot snapshot) {
+    _snapshot = _repaired(snapshot);
     notifyListeners();
-    unawaited(_replan());
+  }
+
+  /// UI テストで GPS の代わりに位置を入れる。
+  @visibleForTesting
+  void debugSetOrigin(GeoPoint origin, {DateTime? now}) => _onFix(origin, now: now);
+
+  /// GPS の 1 点。現在地の丸・乗車中の距離・アラートはいつも動かす。
+  /// 経路は、ナビ中でなければ毎回、ナビ中は経路用の出発地が変わったときだけ引き直す。
+  void _onFix(GeoPoint point, {DateTime? now}) {
+    _gps = point;
+    final replan = _pinRouteOrigin(point);
+    _checkRiding(point, now: now);
+    notifyListeners();
+    if (replan) unawaited(_replan());
+  }
+
+  /// ナビ中に経路用の出発地をこの点にするか。まだ無いときと ↻ のあとの 1 点だけ採用する。
+  bool _pinRouteOrigin(GeoPoint point) {
+    if (_destination == null) {
+      _adoptNextFix = false;
+      return true;
+    }
+    if (_routeOrigin != null && !_adoptNextFix) return false;
+    _adoptNextFix = false;
+    _setRouteOrigin(point);
+    return true;
+  }
+
+  /// ↻。次に届いた GPS の 1 点を経路用の出発地にする（その後の点では動かさない）。
+  void adoptNextFixAsOrigin() {
+    if (_destination == null) return;
+    AppLog.i('trip', 'adopt next fix as origin');
+    _adoptNextFix = true;
+  }
+
+  void _setRouteOrigin(GeoPoint? point) {
+    _routeOrigin = point;
+    AppLog.i('trip', 'route origin ${AppLog.coord(point)}');
+    if (point == null) {
+      unawaited(prefs.remove(_routeOriginKey));
+    } else {
+      unawaited(prefs.setString(_routeOriginKey, jsonEncode(point.toJson())));
+    }
+  }
+
+  GeoPoint? _readRouteOrigin() {
+    final raw = prefs.getString(_routeOriginKey);
+    if (raw == null) return null;
+    try {
+      return GeoPoint.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (_) {
+      return null;
+    }
   }
 
   // MARK: - 出発地
@@ -428,7 +524,7 @@ class TripController extends ChangeNotifier {
     unawaited(_replan());
   }
 
-  /// 現在地（GPS）に戻す。
+  /// 手動の出発地を消す。ナビ中は固定してある経路用の出発地に、そうでなければ GPS に戻す。
   void clearManualOrigin() {
     if (_manualOrigin == null) return;
     _manualOrigin = null;
@@ -450,6 +546,9 @@ class TripController extends ChangeNotifier {
 
   Future<void> setDestination(Destination destination) async {
     _destination = destination;
+    // ナビを始めた瞬間の GPS を経路用の出発地に固定する。まだ無ければ最初に届いた 1 点。
+    _adoptNextFix = false;
+    _setRouteOrigin(_gps);
     await prefs.setString(_destinationKey, jsonEncode(destination.toJson()));
     AppLog.i('trip', 'destination ${AppLog.coord(destination.point)}');
     await places.addHistory(destination);
@@ -463,6 +562,8 @@ class TripController extends ChangeNotifier {
     AppLog.i('trip', 'cancel navigation');
     endRiding();
     _destination = null;
+    _adoptNextFix = false;
+    _setRouteOrigin(null);
     _input = '';
     _decision = const BoardingIdle();
     await prefs.remove(_destinationKey);
@@ -638,7 +739,86 @@ class TripController extends ChangeNotifier {
   /// 路線図から乗る。降車は終点（Swift の `startFromOSMMap`）。
   void startRidingRoute(RouteRecord route, {DateTime? now}) {
     if (route.stops.isEmpty) return;
-    _startRiding(RidingSession.fromRoute(route, destination: _destination?.point, now: now ?? DateTime.now()));
+    _startRiding(RidingSession.fromRoute(
+      route,
+      destination: _destination?.point,
+      now: now ?? DateTime.now(),
+      position: _gps,
+    ));
+  }
+
+  // MARK: - 降車停の変更
+
+  /// 今乗っている路線と、降車停を選べる範囲。番号表・路線図のどちらから乗っても同じ列を使う。
+  AlightChoice? get alightChoice {
+    final riding = _riding;
+    if (riding == null) return null;
+    final relationId = riding.itinerary?.legs[riding.legIndex].relationId ?? riding.routeId;
+    if (relationId == null) return null;
+    final route = visibleCatalog.routes.where((r) => r.relationId == relationId).firstOrNull;
+    if (route == null || route.stops.length < 2) return null;
+    final stops = route.stops;
+    final leg = riding.itinerary?.legs[riding.legIndex];
+    var board = riding.boardStopId == null ? -1 : stops.indexWhere((s) => s.id == riding.boardStopId);
+    if (board < 0 && leg != null && leg.boardIndex < stops.length) board = leg.boardIndex;
+    if (board < 0) board = 0;
+    if (board >= stops.length - 1) return null;
+    var alight = stops.indexWhere((s) => s.id == riding.alightStop.id, board + 1);
+    if (alight < 0) {
+      // ID が変わっていれば、位置が一番近い停留所。
+      alight = board + 1;
+      for (var i = board + 2; i < stops.length; i++) {
+        if (Geo.distance(stops[i].point, riding.alightStop.point) <
+            Geo.distance(stops[alight].point, riding.alightStop.point)) {
+          alight = i;
+        }
+      }
+    }
+    return AlightChoice(route: route, boardIndex: board, alightIndex: alight);
+  }
+
+  /// 降車停を、今乗っている路線に沿って [delta] 個ずらす（＋1 は先、−1 は手前）。
+  /// 乗換の先のレグは変えない。到着アラートは目標が変わったので鳴った記録を消す。
+  void shiftRidingAlight(int delta) {
+    final riding = _riding;
+    final choice = alightChoice;
+    if (riding == null || choice == null || delta == 0) return;
+    final next = choice.alightIndex + delta;
+    if (next <= choice.boardIndex || next >= choice.stops.length) return;
+    final stop = choice.stops[next];
+    final leg = LocalPlanner.legOf(choice.route, choice.boardIndex, next);
+    AppLog.i('riding', 'alight ${riding.alightStop.name} -> ${stop.name} (${choice.alightIndex} -> $next)');
+    _riding = riding.withAlight(stop, path: leg.path);
+    _alertTracker.reset();
+    _alerts.removeWhere((a) => a is DistanceRidingAlert);
+    _saveRiding();
+    notifyListeners();
+    // 一番近いリングで裏の測位を止めていても、新しい目標のために再開する。
+    unawaited(_setBackgroundTracking(true));
+    final gps = _gps;
+    if (gps != null) _checkRiding(gps);
+  }
+
+  /// 乗っている旅程なら、今のレグの降車停と線を [RidingSession] に合わせた旅程（経路地図用）。
+  LocalItinerary ridingView(LocalItinerary itinerary) {
+    final riding = _riding;
+    final index = ridingLegIndexIn(itinerary);
+    if (riding == null || index == null) return itinerary;
+    final leg = itinerary.legs[index];
+    if (leg.alightStop.id == riding.alightStop.id) return itinerary;
+    final legs = [...itinerary.legs];
+    legs[index] = ItineraryLeg(
+      relationId: leg.relationId,
+      ref: leg.ref,
+      routeName: leg.routeName,
+      boardIndex: leg.boardIndex,
+      alightIndex: alightChoice?.alightIndex ?? leg.alightIndex,
+      boardStop: leg.boardStop,
+      alightStop: riding.alightStop,
+      path: riding.path,
+      rideMeters: Geo.polylineLength(riding.path),
+    );
+    return LocalItinerary(legs: legs, walkMeters: itinerary.walkMeters, bearing: itinerary.bearing);
   }
 
   void _startRiding(RidingSession session) {
@@ -826,7 +1006,7 @@ class TripController extends ChangeNotifier {
   }
 
   Future<void> _onCatalogSaved(CatalogSaveSource source) async {
-    _snapshot = await store.load();
+    _snapshot = _repaired(await store.load());
     notifyListeners();
     unawaited(_replan());
     if (source == CatalogSaveSource.local) _scheduleSync();

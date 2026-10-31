@@ -22,13 +22,15 @@ class TripDistanceBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: controller,
+      // 距離アラートの段を変えたら色の境目も変わる。
+      listenable: Listenable.merge([controller, controller.settings]),
       builder: (context, _) {
         final distance = controller.distanceLeftMeters;
         final riding = controller.riding;
         if (distance == null && riding == null) return const SizedBox.shrink();
         return DistanceBadge(
           meters: distance,
+          alertMeters: [for (final slot in controller.settings.distanceSlots) slot.meters],
           label: AppLocalizations.of(context).distanceLeft,
           onTap: riding == null
               ? null
@@ -90,18 +92,28 @@ Future<void> confirmCancelNavigation(BuildContext context, TripController contro
   if (ok == true) await controller.cancelNavigation();
 }
 
-/// バッジの見た目。色は [DistanceColorBand]。
+/// バッジの見た目。色は [DistanceColorBand]（境目は [alertMeters]）。
 class DistanceBadge extends StatelessWidget {
-  const DistanceBadge({super.key, required this.meters, required this.label, this.onTap, this.onLongPress});
+  const DistanceBadge({
+    super.key,
+    required this.meters,
+    required this.alertMeters,
+    required this.label,
+    this.onTap,
+    this.onLongPress,
+  });
 
   final double? meters;
+
+  /// 距離アラート 1・2・3 のメートル。
+  final List<int> alertMeters;
   final String label;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
-    final colors = meters == null ? null : DistanceColorBand.colors(meters!);
+    final colors = meters == null ? null : DistanceColorBand.colors(meters!, alertMeters);
     final textColor = colors?.$2 ?? AppTheme.secondaryText;
     final value = meters == null ? '—' : DistanceColorBand.format(meters!);
     return Semantics(

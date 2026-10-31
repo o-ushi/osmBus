@@ -8,6 +8,7 @@ import '../models/route_search.dart';
 import '../services/geo.dart';
 import '../services/local_planner.dart';
 import '../state/trip_controller.dart';
+import 'alight_stepper.dart';
 import 'bus_map.dart';
 import 'distance_badge.dart';
 import 'keypad.dart';
@@ -95,7 +96,10 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
         .map((s) => s.point)
         .reduce((a, b) => Geo.distance(p, a) <= Geo.distance(p, b) ? a : b);
     final board = start == null || _riding ? null : leg?.boardStop.point ?? nearest(start);
-    final alight = goal == null ? null : leg?.alightStop.point ?? nearest(goal);
+    final riding = controller.riding;
+    // 乗車中に降車停を選び直していれば、そこから歩く。
+    final chosen = _riding && riding != null && riding.alightAdjusted ? riding.alightStop.point : null;
+    final alight = goal == null ? null : chosen ?? leg?.alightStop.point ?? nearest(goal);
     return [
       if (start != null && board != null && board != start)
         MapLine([start, board], color: walkToFromStopsColor, width: 4, dashed: true),
@@ -198,7 +202,8 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
       builder: (context, _) {
         final route = _route;
         final origin = controller.origin;
-        final manualOrigin = controller.manualOrigin?.point;
+        final originPin = controller.originPin;
+        final ridingPath = _riding && controller.riding!.alightAdjusted ? controller.riding!.path : null;
         final goal = controller.destination?.point;
         return Scaffold(
           backgroundColor: AppTheme.sceneLight,
@@ -252,17 +257,21 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
                 lines: [
                   if (route != null)
                     for (final segment in route.polylineSegments)
-                      MapLine(segment, color: _riding ? Colors.orange : AppTheme.accent),
+                      MapLine(segment, color: _riding && ridingPath == null ? Colors.orange : AppTheme.accent),
+                  // 降車停を選び直したら、乗る区間（乗車停留所から降車停まで）を橙で重ねる。
+                  if (ridingPath != null) MapLine(ridingPath, color: Colors.orange, width: 6),
                   if (route != null) ..._walkLines(route, origin, goal),
                 ],
                 pins: [
                   if (route != null) ...[
                     for (final stop in route.stops) MapPin(stop.point, MapPinStyle.stop),
                     MapPin(route.stops.last.point, MapPinStyle.terminal),
+                    if (_riding && controller.riding != null)
+                      MapPin(controller.riding!.alightStop.point, MapPinStyle.alight),
                   ],
                   if (goal != null) MapPin(goal, MapPinStyle.goal),
-                  // GPS は動く現在地の丸。手動の出発地だけ別のピンにする。
-                  if (manualOrigin != null) MapPin(manualOrigin, MapPinStyle.origin),
+                  // GPS は動く現在地の丸。経路を引いた出発地（手動、またはナビ中に固定）は別のピン。
+                  if (originPin != null) MapPin(originPin, MapPinStyle.origin),
                 ],
               ),
               MapDistanceBadge(controller: controller, onRidingMap: _riding),
@@ -294,7 +303,8 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
   /// 地図の下を隠すキーパッド・路線の情報の高さ。
   double _overlayBottom(BuildContext context, RouteRecord? route) {
     if (_keypadVisible) return MediaQuery.sizeOf(context).height * 0.42 + 24;
-    return route != null ? 100 : 0;
+    if (route == null) return 0;
+    return _riding ? 150 : 100;
   }
 
   Widget _emptyState(AppLocalizations l10n, bool noLocation) => Center(
@@ -345,6 +355,7 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
                   _riding ? l10n.ridingLabel : l10n.routeBoardHint,
                   style: TextStyle(fontSize: 12, color: _riding ? Colors.orange : AppTheme.tertiaryText),
                 ),
+                if (_riding) AlightStepper(controller: controller, style: const TextStyle(fontSize: 13)),
               ],
             ),
           ),

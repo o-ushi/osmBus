@@ -4,6 +4,7 @@ import '../l10n/app_localizations.dart';
 import '../models/local_itinerary.dart';
 import '../models/route_catalog.dart';
 import '../state/trip_controller.dart';
+import 'alight_stepper.dart';
 import 'bus_map.dart';
 import 'distance_badge.dart';
 import 'theme.dart';
@@ -43,13 +44,16 @@ class RouteMapScreen extends StatelessWidget {
 
   Widget _build(BuildContext context, int? ridingLeg) {
     final l10n = AppLocalizations.of(context);
-    final legs = itinerary.legs;
+    // 乗車中に降車停を ＋／− でずらしていれば、今のレグの降車停と線をそれに合わせる。
+    final shown = controller?.ridingView(itinerary) ?? itinerary;
+    final legs = shown.legs;
     final board = legs.first.boardStop.point;
     final alight = legs.last.alightStop.point;
     final scheme = Theme.of(context).colorScheme;
     final goal = controller?.destination?.point;
-    final manualOrigin = controller?.manualOrigin?.point;
-    // 出発地（手動の出発地、なければ GPS）。乗ったあとは乗車停留所まで歩く線は要らない。
+    // 出発地のピン（手動の出発地か、ナビ中に固定した出発地）。
+    final originPin = controller?.originPin;
+    // 経路を引いた出発地（ナビ中は固定）。乗ったあとは乗車停留所まで歩く線は要らない。
     final start = ridingLeg == null ? controller?.origin : null;
 
     final lines = <MapLine>[
@@ -80,7 +84,7 @@ class RouteMapScreen extends StatelessWidget {
       for (final leg in legs.skip(1)) MapPin(leg.boardStop.point, MapPinStyle.transfer),
       MapPin(alight, MapPinStyle.alight),
       if (goal != null) MapPin(goal, MapPinStyle.goal),
-      if (manualOrigin != null) MapPin(manualOrigin, MapPinStyle.origin),
+      if (originPin != null) MapPin(originPin, MapPinStyle.origin),
     ];
 
     return Scaffold(
@@ -93,7 +97,7 @@ class RouteMapScreen extends StatelessWidget {
                 Positioned.fill(
                   child: BusMap(
                     initialCenter: board,
-                    initialFit: <GeoPoint>[board, alight, ?goal, ?manualOrigin, ?start, for (final leg in legs) ...leg.path],
+                    initialFit: <GeoPoint>[board, alight, ?goal, ?originPin, ?start, for (final leg in legs) ...leg.path],
                     fitPadding: const EdgeInsets.fromLTRB(48, 56, 48, 110),
                     myLocation: controller?.gps,
                     lines: lines,
@@ -123,7 +127,9 @@ class RouteMapScreen extends StatelessWidget {
                         semanticsLabel: '${leg.ref}. ${l10n.routeBoardHint}',
                       ),
                       title: Text(i == 0 ? l10n.boardAt(leg.boardStop.name) : l10n.transferAt(leg.boardStop.name)),
-                      subtitle: Text(l10n.alightAt(leg.alightStop.name)),
+                      subtitle: i == ridingLeg
+                          ? AlightStepper(controller: controller!, fallbackStopName: leg.alightStop.name)
+                          : Text(l10n.alightAt(leg.alightStop.name)),
                     ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),

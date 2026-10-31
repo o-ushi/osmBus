@@ -411,7 +411,8 @@ class OriginDestinationCard extends StatelessWidget {
                 else
                   IconButton(
                     tooltip: l10n.reload,
-                    onPressed: controller.requestLocation,
+                    // ナビ中は、ここを押したときだけ次の 1 点を出発地にして経路を引き直す。
+                    onPressed: () => controller.requestLocation(refreshOrigin: true),
                     icon: const Icon(CupertinoIcons.arrow_clockwise, size: iconSize, color: AppTheme.accent),
                   ),
                 IconButton(

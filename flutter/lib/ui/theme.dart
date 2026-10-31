@@ -216,14 +216,20 @@ class _PressScaleState extends State<PressScale> {
   }
 }
 
-/// 距離欄の色帯（3km / 1km / 500m / 200m）。
+/// 距離バッジの色帯。境目は距離アラート 3 段のメートル（有効かどうかは見ない）と 3km。
+/// ホームと地図のバッジはどちらもこれを使う。
 abstract final class DistanceColorBand {
-  static (Color background, Color text) colors(double meters) {
-    if (meters >= 3000) return (Colors.blue, Colors.white);
-    if (meters >= 1000) return (Colors.green, Colors.white);
-    if (meters >= 500) return (Colors.yellow, Colors.black);
-    if (meters >= 200) return (Colors.orange, Colors.black);
-    return (Colors.red, Colors.white);
+  static const double farMeters = 3000;
+
+  /// [alertMeters] は距離アラート 1・2・3 のメートル（設定画面の順、`DistanceAlertSlot.index` 順）。
+  /// 先に当てはまった色にする: 3 未満は赤、2 未満は黄、1 未満は橙、3km 未満は緑、それ以上は青。
+  static (Color background, Color text) colors(double meters, List<int> alertMeters) {
+    final slots = [for (var i = 0; i < 3; i++) i < alertMeters.length ? alertMeters[i] : 0];
+    if (meters < slots[2]) return (Colors.red, Colors.white);
+    if (meters < slots[1]) return (Colors.yellow, Colors.black);
+    if (meters < slots[0]) return (Colors.orange, Colors.black);
+    if (meters < farMeters) return (Colors.green, Colors.white);
+    return (Colors.blue, Colors.white);
   }
 
   /// 10 km 以上は小数を落とす。

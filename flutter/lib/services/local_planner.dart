@@ -27,6 +27,10 @@ abstract final class LocalPlanner {
   static const double multiTransferGainSeconds = 300;
   static const double detourAllowanceMeters = 2000;
 
+  /// [record] の [board] から [alight] までのレグ（乗車中に降車停をずらしたときの線）。
+  static ItineraryLeg legOf(RouteRecord record, int board, int alight) =>
+      _Route.geometryOnly(record).leg(board, alight);
+
   static List<LocalItinerary> plan(
     List<RouteRecord> records,
     GeoPoint origin,
@@ -318,6 +322,14 @@ class _Route {
       }
       bestAlightAfter[k] = _alightAround(closest!, after: k);
     }
+  }
+
+  /// 線と停留所だけを使う（出発地・目的地なし）。[leg] を作るためだけに使う。
+  _Route.geometryOnly(this.record)
+      : originDistance = const [],
+        destinationDistance = const [] {
+    boardIndex = null;
+    bestAlightAfter = const [];
   }
 
   /// 最接近の区間 [segment] の前後の停留所のうち、目的地まで歩く距離が短い方（同距離なら手前）。

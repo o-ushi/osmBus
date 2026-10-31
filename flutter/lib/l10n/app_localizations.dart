@@ -286,6 +286,18 @@ abstract class AppLocalizations {
   /// **'{stop} で降車'**
   String alightAt(String stop);
 
+  /// No description provided for @alightNextStop.
+  ///
+  /// In ja, this message translates to:
+  /// **'1つ先の停留所で降りる'**
+  String get alightNextStop;
+
+  /// No description provided for @alightPreviousStop.
+  ///
+  /// In ja, this message translates to:
+  /// **'1つ手前の停留所で降りる'**
+  String get alightPreviousStop;
+
   /// No description provided for @estimatedArrival.
   ///
   /// In ja, this message translates to:
@@ -1531,7 +1543,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpLocationBody.
   ///
   /// In ja, this message translates to:
-  /// **'起動時に位置情報の許可を求めます。現在地バーの ↻ で更新、地図アイコンで出発地を地図から指定できます。指定した出発地は × で現在地に戻せます。乗車中の距離はいつも GPS の現在地から測ります。'**
+  /// **'起動時に位置情報の許可を求めます。現在地バーの ↻ で更新、地図アイコンで出発地を地図から指定できます。指定した出発地は × で現在地に戻せます。ナビ中（行き先があるあいだ）は、↻ を押すまで経路の出発地は動きません（青い現在地の丸は動き続けます）。乗車中の距離はいつも GPS の現在地から測ります。'**
   String get helpLocationBody;
 
   /// No description provided for @helpSavedPlacesTitle.
@@ -1603,7 +1615,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpDistanceBody.
   ///
   /// In ja, this message translates to:
-  /// **'未乗車のときは目的地までの直線距離、乗車中は今乗っているバスの降車バス停までの直線距離です。3km以上は青、1km以上は緑、500m以上は黄、200m以上は橙、200m未満は赤です。乗車中に距離バッジをタップすると、今のルート図が開きます。距離バッジを長押しするとナビ中止（行き先も消えます）。行き先を設定せずに路線図から乗車した場合は「—」と表示され、距離は出ません。'**
+  /// **'未乗車のときは目的地までの直線距離、乗車中は今乗っているバスの降車バス停までの直線距離です。色の境目は到着アラートの距離アラート 1〜3 の距離です（アラートがオフでも同じ）。距離アラート 3 の距離未満は赤、距離アラート 2 の距離未満は黄、距離アラート 1 の距離未満は橙、3km未満は緑、3km以上は青です（初期値では 100m 未満が赤、400m 未満が黄、1km 未満が橙）。乗車中に距離バッジをタップすると、今のルート図が開きます。距離バッジを長押しするとナビ中止（行き先も消えます）。行き先を設定せずに路線図から乗車した場合は「—」と表示され、距離は出ません。'**
   String get helpDistanceBody;
 
   /// No description provided for @helpRidingTitle.
