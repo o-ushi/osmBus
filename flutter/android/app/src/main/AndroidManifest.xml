@@ -36,6 +36,10 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- osmbus:// は app_links で受ける。Flutter 標準の深いリンク（Navigator へ渡す）は使わない。 -->
+            <meta-data
+              android:name="flutter_deeplinking_enabled"
+              android:value="false" />
             <!-- osmbus://destination?name=…&lat=…&lng=… -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

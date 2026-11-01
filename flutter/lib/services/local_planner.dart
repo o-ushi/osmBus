@@ -348,9 +348,7 @@ class _Route {
     final b = record.stops[k + 1].point;
     final near = math.min(destinationDistance[k], destinationDistance[k + 1]);
     if (near > _detailedApproachMeters) return Geo.distanceToPolyline(destination, [a, b]);
-    final span = _span(k);
-    if (span.from == null) return Geo.distanceToPolyline(destination, [a, b]);
-    return Geo.distanceToPolyline(destination, [a, for (var v = span.from!; v <= span.to!; v++) _flat[v], b]);
+    return Geo.distanceToPolyline(destination, [a, ..._span(k).via, b]);
   }
 
   /// これより目的地から遠い区間は、線の形を見ずに停留所どうしの直線で測る。
@@ -366,6 +364,17 @@ class _Route {
   late final List<int?> bestAlightAfter;
 
   late final List<GeoPoint> _flat = [for (final seg in record.polylineSegments) ...seg];
+
+  /// [_flat] の辺 i → i+1 がセグメントの切れ目を繋いだだけの辺か。停留所はそこに投影しない。
+  late final List<bool> _joins = () {
+    final joins = List<bool>.filled(math.max(0, _flat.length - 1), false);
+    var index = 0;
+    for (final seg in record.polylineSegments) {
+      if (index > 0 && seg.isNotEmpty) joins[index - 1] = true;
+      index += seg.length;
+    }
+    return joins;
+  }();
   late final List<double> _cumulative = () {
     final out = List<double>.filled(_flat.length, 0);
     for (var i = 1; i < _flat.length; i++) {
@@ -373,11 +382,13 @@ class _Route {
     }
     return out;
   }();
-  final Map<int, (int, double)> _vertexForStop = {};
   final Map<int, _Span> _spans = {};
 
   /// 停留所がこれより線から離れていたら、線に乗っていないとみなす。
   static const double _onLineMeters = 120;
+
+  /// 1 停留所あたりに残す線上の候補（線が同じ場所を何度も通るときの通過ごと）。
+  static const int _maxAnchors = 6;
 
   static int? _nearest(List<double> distances, double radius) {
     int? best;
@@ -387,40 +398,134 @@ class _Route {
     return best;
   }
 
-  /// 停留所に一番近い線の頂点と、その距離。探すときは軽い平面近似を使う。
-  (int, double) _vertex(int stop) => _vertexForStop.putIfAbsent(stop, () {
-        final p = record.stops[stop].point;
-        final scale = math.cos(p.latitude * math.pi / 180);
-        var best = 0;
-        var bestScore = double.infinity;
-        for (var i = 0; i < _flat.length; i++) {
-          final dy = _flat[i].latitude - p.latitude;
-          final dx = (_flat[i].longitude - p.longitude) * scale;
-          final score = dx * dx + dy * dy;
-          if (score < bestScore) {
-            bestScore = score;
-            best = i;
+  /// 停留所を線の辺へ投影した候補。線が同じ道を何度も通る（往復・ループ・環状）と候補は複数になる。
+  /// 連続して近い辺の並びごとに一番近い 1 つを残す。
+  List<_Anchor> _anchorsFor(GeoPoint p) {
+    final n = _flat.length;
+    if (n < 2) return const [];
+    final scale = math.cos(p.latitude * math.pi / 180) * 111320;
+    const latScale = 110574.0;
+    final runs = <_Anchor>[];
+    _Anchor? best;
+    for (var i = 0; i + 1 < n; i++) {
+      if (_joins[i]) {
+        if (best != null) runs.add(best);
+        best = null;
+        continue;
+      }
+      final a = _flat[i];
+      final b = _flat[i + 1];
+      final ax = (a.longitude - p.longitude) * scale;
+      final ay = (a.latitude - p.latitude) * latScale;
+      final bx = (b.longitude - p.longitude) * scale;
+      final by = (b.latitude - p.latitude) * latScale;
+      final dx = bx - ax;
+      final dy = by - ay;
+      final len2 = dx * dx + dy * dy;
+      final t = len2 == 0 ? 0.0 : (-(ax * dx + ay * dy) / len2).clamp(0.0, 1.0);
+      final px = ax + dx * t;
+      final py = ay + dy * t;
+      final offset = math.sqrt(px * px + py * py);
+      if (offset > _onLineMeters) {
+        if (best != null) runs.add(best);
+        best = null;
+        continue;
+      }
+      if (best == null || offset < best.offset) {
+        final point = GeoPoint(a.latitude + (b.latitude - a.latitude) * t, a.longitude + (b.longitude - a.longitude) * t);
+        best = _Anchor(i, t, point, _cumulative[i] + (_cumulative[i + 1] - _cumulative[i]) * t, offset);
+      }
+    }
+    if (best != null) runs.add(best);
+    runs.sort((x, y) => x.offset.compareTo(y.offset));
+    return runs.length > _maxAnchors ? runs.sublist(0, _maxAnchors) : runs;
+  }
+
+  /// 停留所ごとに、どの通過で線に乗っているか。隣どうしが線に沿って無理なく繋がる組を、
+  /// 停留所列全体で選ぶ（前の区間で選んだ通過を次の区間でも使うので、ループで近道しない）。
+  late final List<_Anchor?> _anchors = () {
+    final stops = record.stops;
+    final n = stops.length;
+    final candidates = [for (final s in stops) <_Anchor?>[..._anchorsFor(s.point), null]];
+    double emission(_Anchor? a) => a == null ? _offLinePenalty : a.offset * 4;
+    var cost = [for (final a in candidates.first) emission(a)];
+    final back = <List<int>>[];
+    for (var k = 1; k < n; k++) {
+      final straight = Geo.distance(stops[k - 1].point, stops[k].point);
+      final next = <double>[];
+      final from = <int>[];
+      for (final q in candidates[k]) {
+        var best = double.infinity;
+        var arg = 0;
+        for (var j = 0; j < candidates[k - 1].length; j++) {
+          final c = cost[j] + _transition(candidates[k - 1][j], q, straight);
+          if (c < best) {
+            best = c;
+            arg = j;
           }
         }
-        return (best, _flat.isEmpty ? double.infinity : Geo.distance(p, _flat[best]));
+        next.add(best + emission(q));
+        from.add(arg);
+      }
+      cost = next;
+      back.add(from);
+    }
+    var pick = 0;
+    for (var j = 1; j < cost.length; j++) {
+      if (cost[j] < cost[pick]) pick = j;
+    }
+    final out = List<_Anchor?>.filled(n, null);
+    for (var k = n - 1; k >= 0; k--) {
+      out[k] = candidates[k][pick];
+      if (k > 0) pick = back[k - 1][pick];
+    }
+    return out;
+  }();
+
+  static const double _offLinePenalty = 600;
+
+  /// 線に沿った [p] → [q] の道のり。線をたどれない（離れすぎ・遠回りすぎ・同じ点）なら null。
+  static double? _along(_Anchor? p, _Anchor? q, double straight) {
+    if (p == null || q == null) return null;
+    final along = (q.along - p.along).abs();
+    if (along > straight * 3 + 300) return null;
+    if (along < straight * 0.5 - 60) return null;
+    return along;
+  }
+
+  /// 隣の停留所へ移るコスト。線の向きに進むのが一番安く、逆向きは割高、たどれなければ直線扱いで高い。
+  static double _transition(_Anchor? p, _Anchor? q, double straight) {
+    final along = _along(p, q, straight);
+    if (along == null) return straight * 5 + 1000;
+    return q!.along >= p!.along ? along : along * 1.5 + 100;
+  }
+
+  /// 隣り合う停留所 k → k+1 の区間。両端が線に乗っていて、道のりが直線の 3 倍 + 300m 以内なら、
+  /// 線が逆向きでもそれをたどる。途中で数 km 飛んでいる線は道のりが伸びるので、停留所どうしを直接結ぶ。
+  _Span _span(int k) => _spans.putIfAbsent(k, () {
+        final straight = Geo.distance(record.stops[k].point, record.stops[k + 1].point);
+        final p = _anchors[k];
+        final q = _anchors[k + 1];
+        final along = _along(p, q, straight);
+        if (along == null) return _Span(straight, const []);
+        return _Span(along, _trace(p!, q!));
       });
 
-  /// 隣り合う停留所 k → k+1 の区間。線の向きと順番が合い、寄り道が過ぎなければ線をたどる。
-  /// そうでなければ（way の順番や向きが崩れている路線）停留所どうしを直接結ぶ。
-  _Span _span(int k) => _spans.putIfAbsent(k, () {
-        final a = record.stops[k].point;
-        final b = record.stops[k + 1].point;
-        final straight = Geo.distance(a, b);
-        if (_flat.length >= 2) {
-          final (va, da) = _vertex(k);
-          final (vb, db) = _vertex(k + 1);
-          if (da <= _onLineMeters && db <= _onLineMeters && vb > va) {
-            final along = _cumulative[vb] - _cumulative[va];
-            if (along <= straight * 3 + 300) return _Span(along, va, vb);
-          }
-        }
-        return _Span(straight, null, null);
-      });
+  /// 投影点 [p] から [q] まで、線の頂点を進む向きで返す（両端の投影点を含む）。
+  List<GeoPoint> _trace(_Anchor p, _Anchor q) {
+    final out = <GeoPoint>[p.point];
+    if (q.along >= p.along) {
+      for (var v = p.edge + 1; v <= q.edge; v++) {
+        out.add(_flat[v]);
+      }
+    } else {
+      for (var v = p.edge; v > q.edge; v--) {
+        out.add(_flat[v]);
+      }
+    }
+    out.add(q.point);
+    return out;
+  }
 
   double rideMeters(int board, int alight) {
     var total = 0.0;
@@ -438,11 +543,8 @@ class _Route {
     }
 
     for (var k = board; k < alight; k++) {
-      final span = _span(k);
-      if (span.from != null) {
-        for (var v = span.from!; v <= span.to!; v++) {
-          add(_flat[v]);
-        }
+      for (final p in _span(k).via) {
+        add(p);
       }
       add(record.stops[k + 1].point);
     }
@@ -463,10 +565,25 @@ class _Route {
 }
 
 class _Span {
-  const _Span(this.meters, this.from, this.to);
+  const _Span(this.meters, this.via);
   final double meters;
-  final int? from;
-  final int? to;
+
+  /// 停留所どうしのあいだにたどる線の点。空なら直線。
+  final List<GeoPoint> via;
+}
+
+/// 停留所を線の辺 [edge]（[_Route._flat] の edge → edge+1）へ投影した点。
+class _Anchor {
+  const _Anchor(this.edge, this.t, this.point, this.along, this.offset);
+  final int edge;
+  final double t;
+  final GeoPoint point;
+
+  /// 線の始点からの道のり。
+  final double along;
+
+  /// 停留所から線までの距離。
+  final double offset;
 }
 
 /// 出発地と目的地が同じあいだ結果を持つ。計算は別 isolate で行う。

@@ -1,5 +1,10 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../models/bus_matrix.dart';
 
 /// 表示言語（Swift の `AppLanguage`）。null は端末の言語に従う。
 enum AppLanguage {
@@ -49,11 +54,193 @@ class DistanceAlertSlot {
   final int meters;
 }
 
+/// 1 件の設定と、変えた時刻。同じキーは時刻が新しい方を残す。
+class SyncedSetting {
+  const SyncedSetting({required this.key, required this.value, required this.updatedAt});
+
+  final String key;
+  final Object? value;
+  final DateTime updatedAt;
+
+  Map<String, dynamic> toJson() => {
+        'key': key,
+        'value': value,
+        'updatedAt': updatedAt.toUtc().toIso8601String(),
+      };
+
+  static SyncedSetting fromJson(Map<String, dynamic> json) {
+    final key = json['key'];
+    final at = json['updatedAt'];
+    if (key is! String || key.isEmpty || at is! String || !json.containsKey('value')) {
+      throw const FormatException('invalid setting');
+    }
+    final setting = SyncedSetting(key: key, value: json['value'], updatedAt: DateTime.parse(at).toUtc());
+    if (!SettingsSync.valid(setting)) throw FormatException('invalid setting $key');
+    return setting;
+  }
+}
+
+/// 設定のうち、iCloud とバックアップでやり取りするもの。
+/// 値そのものはこれまでどおり各キーに置き、変えた時刻だけを別に覚える。
+class SettingsSync {
+  static const timesKey = 'settings.updatedAt';
+
+  static const keys = <String>{
+    'appLanguage',
+    'keypad.inputMode',
+    'keypad.hapticEnabled',
+    'keypad.hapticStrength',
+    'keypad.soundEnabled',
+    'keypad.soundVolume',
+    'alert.soundId',
+    'alert.followsSystem',
+    'alert.soundVolume',
+    'alert.vibrationStrength',
+    'alert.mode.alarm',
+    'alert.mode.alert',
+    'alert.mode.vibration',
+    'alert.distance.0.enabled',
+    'alert.distance.0.meters',
+    'alert.distance.1.enabled',
+    'alert.distance.1.meters',
+    'alert.distance.2.enabled',
+    'alert.distance.2.meters',
+    'table.sortMode',
+    'table.distanceMetric',
+  };
+
+  static const _bools = <String>{
+    'keypad.hapticEnabled',
+    'keypad.soundEnabled',
+    'alert.followsSystem',
+    'alert.mode.alarm',
+    'alert.mode.alert',
+    'alert.mode.vibration',
+    'alert.distance.0.enabled',
+    'alert.distance.1.enabled',
+    'alert.distance.2.enabled',
+  };
+
+  static const _doubles = <String>{'keypad.soundVolume', 'alert.soundVolume'};
+
+  static const _ints = <String>{
+    'alert.distance.0.meters',
+    'alert.distance.1.meters',
+    'alert.distance.2.meters',
+  };
+
+  /// 知らないキーは将来の版のため通す。知っているキーは型が違えば落とす。
+  static bool valid(SyncedSetting setting) {
+    if (!keys.contains(setting.key)) return true;
+    final value = setting.value;
+    if (setting.key == 'appLanguage') {
+      return value == null || (value is String && AppLanguage.fromCode(value) != null);
+    }
+    if (setting.key == 'alert.soundId') return value is String && value.isNotEmpty;
+    if (_bools.contains(setting.key)) return value is bool;
+    if (_doubles.contains(setting.key)) return value is num;
+    if (_ints.contains(setting.key)) return value is num && value > 0;
+    final name = value is String ? value : null;
+    final names = switch (setting.key) {
+      'keypad.inputMode' => KeypadInputMode.values.map((e) => e.name),
+      'keypad.hapticStrength' || 'alert.vibrationStrength' => FeedbackStrength.values.map((e) => e.name),
+      'table.sortMode' => TableSortMode.values.map((e) => e.name),
+      'table.distanceMetric' => DistanceMetric.values.map((e) => e.name),
+      _ => const <String>[],
+    };
+    return name != null && names.contains(name);
+  }
+
+  static Map<String, DateTime> _readTimes(SharedPreferences prefs) {
+    final raw = prefs.getString(timesKey);
+    if (raw == null) return {};
+    try {
+      final json = jsonDecode(raw) as Map<String, dynamic>;
+      return {for (final e in json.entries) e.key: DateTime.parse(e.value as String).toUtc()};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  static Future<void> _writeTimes(SharedPreferences prefs, Map<String, DateTime> times) async {
+    if (times.isEmpty) {
+      await prefs.remove(timesKey);
+      return;
+    }
+    await prefs.setString(
+      timesKey,
+      jsonEncode({for (final e in times.entries) e.key: e.value.toUtc().toIso8601String()}),
+    );
+  }
+
+  /// ユーザーが変えたときに呼ぶ。同期の予約は呼び出し側。
+  static Future<void> touch(SharedPreferences prefs, String key) async {
+    final times = _readTimes(prefs);
+    times[key] = DateTime.now().toUtc();
+    await _writeTimes(prefs, times);
+  }
+
+  /// 一度でも変えた設定。時刻の無い古い変更には、いまの時刻を付けて残す。
+  static List<SyncedSetting> collect(SharedPreferences prefs, {DateTime? now}) {
+    final times = _readTimes(prefs);
+    final clock = (now ?? DateTime.now()).toUtc();
+    var dirty = false;
+    final out = <SyncedSetting>[];
+    for (final key in keys) {
+      final present = prefs.containsKey(key);
+      var at = times[key];
+      if (!present && at == null) continue;
+      if (at == null) {
+        at = clock;
+        times[key] = at;
+        dirty = true;
+      }
+      out.add(SyncedSetting(key: key, value: present ? prefs.get(key) : null, updatedAt: at));
+    }
+    if (dirty) unawaited(_writeTimes(prefs, times));
+    return out;
+  }
+
+  /// [incoming] のうち、手元より新しいものだけを書く。ユーザー操作としては扱わない。
+  /// [force] なら時刻に関わらず書く（バックアップの置き換え）。
+  static Future<bool> apply(SharedPreferences prefs, List<SyncedSetting> incoming, {bool force = false}) async {
+    final times = _readTimes(prefs);
+    var changed = false;
+    for (final setting in incoming) {
+      if (!keys.contains(setting.key) || !valid(setting)) continue;
+      final mine = times[setting.key];
+      if (!force && mine != null && !setting.updatedAt.isAfter(mine)) continue;
+      await _writeValue(prefs, setting.key, setting.value);
+      times[setting.key] = setting.updatedAt;
+      changed = true;
+    }
+    if (changed) await _writeTimes(prefs, times);
+    return changed;
+  }
+
+  static Future<void> _writeValue(SharedPreferences prefs, String key, Object? value) async {
+    if (value == null) {
+      await prefs.remove(key);
+    } else if (value is bool) {
+      await prefs.setBool(key, value);
+    } else if (value is String) {
+      await prefs.setString(key, value);
+    } else if (_ints.contains(key) && value is num) {
+      await prefs.setInt(key, value.round());
+    } else if (value is num) {
+      await prefs.setDouble(key, value.toDouble());
+    }
+  }
+}
+
 /// アプリ全体の設定。値は SharedPreferences に置く。
 class AppSettings extends ChangeNotifier {
   AppSettings(this.prefs);
 
   final SharedPreferences prefs;
+
+  /// ユーザーが設定を変えたとき。同期の反映では呼ばない。
+  void Function()? onLocalChange;
 
   static const _languageKey = 'appLanguage';
   static const _keypadModeKey = 'keypad.inputMode';
@@ -71,9 +258,11 @@ class AppSettings extends ChangeNotifier {
 
   static const double defaultAlertVolume = 0.8;
 
-  Future<void> _set(Future<bool> write) async {
+  Future<void> _set(String key, Future<bool> write) async {
     await write;
+    await SettingsSync.touch(prefs, key);
     notifyListeners();
+    onLocalChange?.call();
   }
 
   T _enumValue<T extends Enum>(List<T> values, String key, T fallback) =>
@@ -84,6 +273,7 @@ class AppSettings extends ChangeNotifier {
   AppLanguage? get language => AppLanguage.fromCode(prefs.getString(_languageKey));
 
   Future<void> setLanguage(AppLanguage? language) => _set(
+        _languageKey,
         language == null ? prefs.remove(_languageKey) : prefs.setString(_languageKey, language.code),
       );
 
@@ -92,40 +282,43 @@ class AppSettings extends ChangeNotifier {
   KeypadInputMode get keypadInputMode =>
       _enumValue(KeypadInputMode.values, _keypadModeKey, KeypadInputMode.appendToExisting);
 
-  Future<void> setKeypadInputMode(KeypadInputMode mode) => _set(prefs.setString(_keypadModeKey, mode.name));
+  Future<void> setKeypadInputMode(KeypadInputMode mode) => _set(_keypadModeKey, prefs.setString(_keypadModeKey, mode.name));
 
   bool get hapticEnabled => prefs.getBool(_hapticEnabledKey) ?? true;
-  Future<void> setHapticEnabled(bool value) => _set(prefs.setBool(_hapticEnabledKey, value));
+  Future<void> setHapticEnabled(bool value) => _set(_hapticEnabledKey, prefs.setBool(_hapticEnabledKey, value));
 
   FeedbackStrength get hapticStrength =>
       _enumValue(FeedbackStrength.values, _hapticStrengthKey, FeedbackStrength.medium);
-  Future<void> setHapticStrength(FeedbackStrength value) => _set(prefs.setString(_hapticStrengthKey, value.name));
+  Future<void> setHapticStrength(FeedbackStrength value) =>
+      _set(_hapticStrengthKey, prefs.setString(_hapticStrengthKey, value.name));
 
   bool get clickEnabled => prefs.getBool(_clickEnabledKey) ?? false;
-  Future<void> setClickEnabled(bool value) => _set(prefs.setBool(_clickEnabledKey, value));
+  Future<void> setClickEnabled(bool value) => _set(_clickEnabledKey, prefs.setBool(_clickEnabledKey, value));
 
   double get clickVolume => prefs.getDouble(_clickVolumeKey) ?? 0.5;
-  Future<void> setClickVolume(double value) => _set(prefs.setDouble(_clickVolumeKey, value));
+  Future<void> setClickVolume(double value) => _set(_clickVolumeKey, prefs.setDouble(_clickVolumeKey, value));
 
   // MARK: - 到着アラート
 
   bool isAlertEnabled(StopAlertMode mode) => prefs.getBool(_alertModeKey(mode)) ?? mode.defaultEnabled;
-  Future<void> setAlertEnabled(StopAlertMode mode, bool value) => _set(prefs.setBool(_alertModeKey(mode), value));
+  Future<void> setAlertEnabled(StopAlertMode mode, bool value) =>
+      _set(_alertModeKey(mode), prefs.setBool(_alertModeKey(mode), value));
 
   String get alertSoundId => prefs.getString(_alertSoundKey) ?? 'tiptoes';
-  Future<void> setAlertSoundId(String id) => _set(prefs.setString(_alertSoundKey, id));
+  Future<void> setAlertSoundId(String id) => _set(_alertSoundKey, prefs.setString(_alertSoundKey, id));
 
   /// オンなら端末の音量に従い、スライダーの音量は使わない。
   bool get alertFollowsSystemVolume => prefs.getBool(_alertFollowsSystemKey) ?? true;
-  Future<void> setAlertFollowsSystemVolume(bool value) => _set(prefs.setBool(_alertFollowsSystemKey, value));
+  Future<void> setAlertFollowsSystemVolume(bool value) =>
+      _set(_alertFollowsSystemKey, prefs.setBool(_alertFollowsSystemKey, value));
 
   double get alertVolume => prefs.getDouble(_alertVolumeKey) ?? defaultAlertVolume;
-  Future<void> setAlertVolume(double value) => _set(prefs.setDouble(_alertVolumeKey, value));
+  Future<void> setAlertVolume(double value) => _set(_alertVolumeKey, prefs.setDouble(_alertVolumeKey, value));
 
   FeedbackStrength get alertVibrationStrength =>
       _enumValue(FeedbackStrength.values, _alertVibrationStrengthKey, FeedbackStrength.heavy);
   Future<void> setAlertVibrationStrength(FeedbackStrength value) =>
-      _set(prefs.setString(_alertVibrationStrengthKey, value.name));
+      _set(_alertVibrationStrengthKey, prefs.setString(_alertVibrationStrengthKey, value.name));
 
   List<DistanceAlertSlot> get distanceSlots => [
         for (var i = 0; i < DistanceAlertSlot.count; i++)
@@ -136,16 +329,21 @@ class AppSettings extends ChangeNotifier {
           ),
       ];
 
-  Future<void> setSlotEnabled(int index, bool value) => _set(prefs.setBool(_slotEnabledKey(index), value));
-  Future<void> setSlotMeters(int index, int meters) => _set(prefs.setInt(_slotMetersKey(index), meters));
+  Future<void> setSlotEnabled(int index, bool value) =>
+      _set(_slotEnabledKey(index), prefs.setBool(_slotEnabledKey(index), value));
+  Future<void> setSlotMeters(int index, int meters) =>
+      _set(_slotMetersKey(index), prefs.setInt(_slotMetersKey(index), meters));
 
   // MARK: - 開発者
 
   static const _verboseLogKey = 'dev.verboseLog';
 
-  /// 位置の更新など量の多いログも書く。
+  /// 位置の更新など量の多いログも書く。端末ごとのものなので同期しない。
   bool get verboseLog => prefs.getBool(_verboseLogKey) ?? false;
-  Future<void> setVerboseLog(bool value) => _set(prefs.setBool(_verboseLogKey, value));
+  Future<void> setVerboseLog(bool value) async {
+    await prefs.setBool(_verboseLogKey, value);
+    notifyListeners();
+  }
 
   /// 有効な距離（遠い順）。
   List<int> get activeThresholds =>

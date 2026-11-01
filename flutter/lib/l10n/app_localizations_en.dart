@@ -659,7 +659,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyStorageBody =>
-      'Route data, its archive, the destination, destination history, saved places, and settings are stored on this device. Route data, saved places, and destination history are also saved to your own iCloud Drive only when iCloud sync is on. Exported backups contain the same.';
+      'Route data, its archive, the destination, destination history, saved places, corrected stops, and settings are stored on this device. Route data, saved places, destination history, corrected stops, and settings for the number table, arrival alerts, the keypad, and language are also saved to your own iCloud Drive only when iCloud sync is on. Exported backups contain the same.';
 
   @override
   String get privacyTitle => 'Privacy & data';
@@ -834,7 +834,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpTableBody =>
-      'Bus numbers are grouped by direction and number of transfers. Tap to open the route map, long-press to board or alight. The bus you are riding turns orange.';
+      'Bus numbers are grouped by direction and number of transfers. Tap to open the route map, long-press to board or alight. The bus you are riding turns orange. If a number you expected is missing, enter it from “A number missing here”.';
 
   @override
   String get helpBoardTitle => 'Start riding';
@@ -1019,87 +1019,184 @@ class AppLocalizationsEn extends AppLocalizations {
   String get longPressToGetOff => 'Long-press to get off';
 
   @override
-  String get stopOrderUpdate => 'Update stop order';
+  String get routeReviewOpen => 'Check this route';
 
   @override
-  String stopOrderSourceBundled(String date, int count) {
-    return '$date · bundled · $count routes';
+  String get stopOrderUsingCustom => 'Using your corrected stops';
+
+  @override
+  String get routeReviewTitle => 'Check this route';
+
+  @override
+  String get routeReviewOrder => 'Order';
+
+  @override
+  String get routeReviewEnds => 'Start and end';
+
+  @override
+  String routeReviewEndStart(String stop, int meters) {
+    return 'The first stop, $stop, is about $meters m from an end of the line.';
   }
 
   @override
-  String stopOrderSourceFetched(String date, int count) {
-    return '$date · downloaded · $count routes';
+  String routeReviewEndLast(String stop, int meters) {
+    return 'The last stop, $stop, is about $meters m from an end of the line.';
   }
 
   @override
-  String stopOrderUpdated(String date) {
-    return 'Updated to the stop order of $date';
+  String get routeReviewEndsProposal =>
+      'The stops closest to the two ends of the line become the first and last stops.';
+
+  @override
+  String get routeReviewReset => 'Reset this route\'s corrections';
+
+  @override
+  String get routeEditsResetAll => 'Reset all corrected stops';
+
+  @override
+  String get routeEditsResetAllConfirm =>
+      'Clears corrected stops on this device and returns those routes to the OSM order. If iCloud sync is on, the same corrections are reset on your other devices.';
+
+  @override
+  String get routeReviewPlace => 'Location';
+
+  @override
+  String get routeReviewMembership => 'Missing or extra stops';
+
+  @override
+  String get routeReviewNothing => 'Nothing to point out';
+
+  @override
+  String get routeReviewBacktrackIntro =>
+      'In the current order, some stops go back 1 km or more along the line.';
+
+  @override
+  String routeReviewBetween(String stop, String after, String before) {
+    return 'Along the line, $stop is between $after and $before.';
   }
 
   @override
-  String stopOrderNotNewer(String date) {
-    return 'No newer stop order (still $date)';
+  String get routeReviewLineStart => 'the start of the line';
+
+  @override
+  String get routeReviewLineEnd => 'the end of the line';
+
+  @override
+  String get routeReviewPartnerDiffers =>
+      'Even allowing for the line direction, the order differs from the return route';
+
+  @override
+  String get routeReviewProposal =>
+      'Stops within 120 m of the line are put in line order; stops farther away stay where they are.';
+
+  @override
+  String get routeReviewUseThis => 'Use this';
+
+  @override
+  String routeReviewOffLine(String stop, int meters) {
+    return '$stop is about $meters m from this route\'s line.';
   }
 
   @override
-  String get stopOrderUpdateFailed =>
-      'Could not download. The current stop order is kept.';
-
-  @override
-  String get stopOrderInspect => 'Check stop order';
-
-  @override
-  String get stopOrderDiffers => 'Differs from the official stop order';
-
-  @override
-  String get stopOrderUsingOfficial => 'Using the official order';
-
-  @override
-  String get stopOrderApply => 'Use the official order for this route';
-
-  @override
-  String get stopOrderRevert => 'Revert';
-
-  @override
-  String orderHintBefore(String anchor, String current, String official) {
-    return 'Before $anchor: now $current. Officially $official.';
+  String routeReviewReplaceCandidate(String ref, int meters) {
+    return 'A stop with the same name is on $ref, about $meters m from this line.';
   }
 
   @override
-  String orderHintAfter(String anchor, String current, String official) {
-    return 'After $anchor: now $current. Officially $official.';
+  String get routeReviewReplace => 'Replace with this stop';
+
+  @override
+  String get routeReviewFromPartner =>
+      'Stops on the return route that are near this route\'s line but not on this route';
+
+  @override
+  String get routeReviewFromOthers =>
+      'Stops of other routes that are near this line but not on this route';
+
+  @override
+  String get routeReviewOnlyHere => 'Stops only in this direction';
+
+  @override
+  String routeReviewCandidate(String stop, String ref, int meters) {
+    return '$stop ($ref, about $meters m from the line)';
   }
 
   @override
-  String orderHintAppliedBefore(
-    String anchor,
-    String current,
-    String official,
-  ) {
-    return 'Before $anchor: $official in the official order ($current in the original order).';
-  }
+  String get routeReviewNoAuto => 'Nothing is added automatically';
 
   @override
-  String orderHintAppliedAfter(String anchor, String current, String official) {
-    return 'After $anchor: $official in the official order ($current in the original order).';
-  }
+  String get routeReviewEditSelf => 'Edit it yourself';
 
   @override
-  String get orderHintNone => 'none';
+  String get routeReviewRevertOsm => 'Back to the OSM order';
 
   @override
-  String inspectFixable(int count) {
-    return 'Routes that can be fixed: $count';
-  }
+  String get stopOrderUseThis => 'Use this order';
 
   @override
-  String inspectUnsure(int count) {
-    return 'Routes left as they are: $count';
-  }
+  String get stopOrderDragHint =>
+      'Drag to reorder. Your changes are used only on this device.';
 
   @override
-  String get inspectApply => 'Use the official order for fixable routes';
+  String get stopEditAdd => 'Add a stop';
 
   @override
-  String get inspectNoData => 'The stop order file has no routes';
+  String get stopEditPickOnMap => 'Choose a place on the map';
+
+  @override
+  String get stopEditPlace => 'Location';
+
+  @override
+  String get stopEditDelete => 'Delete';
+
+  @override
+  String get stopEditName => 'Stop name';
+
+  @override
+  String get stopEditCoordinates => 'Latitude and longitude';
+
+  @override
+  String get stopEditLatitude => 'Latitude';
+
+  @override
+  String get stopEditLongitude => 'Longitude';
+
+  @override
+  String get stopEditLongPressHint => 'Long-press the map to drop a pin.';
+
+  @override
+  String get stopEditConfirmPlace => 'Use this place';
+
+  @override
+  String get stopEditNoCandidates => 'No nearby stops to add.';
+
+  @override
+  String get stopEditAddedByYou => 'Added by you';
+
+  @override
+  String get missingNumberEntry => 'A number missing here';
+
+  @override
+  String get missingNumberTitle => 'A number missing from this segment';
+
+  @override
+  String get missingNumberHint =>
+      'Enter the number you expected. A route with a stop near both ends of this segment opens for review.';
+
+  @override
+  String get missingNumberField => 'Bus number';
+
+  @override
+  String get missingNumberSearch => 'Find';
+
+  @override
+  String get missingNumberNone =>
+      'That number is not in the routes saved on this device.';
+
+  @override
+  String get missingNumberOnSegment => 'Routes with a stop near both ends';
+
+  @override
+  String get missingNumberOthers =>
+      'The number matches. These routes do not have a stop near both ends of this segment.';
 }

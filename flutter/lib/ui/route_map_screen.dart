@@ -7,7 +7,7 @@ import '../state/trip_controller.dart';
 import 'alight_stepper.dart';
 import 'bus_map.dart';
 import 'distance_badge.dart';
-import 'official_order_hint.dart';
+import 'stop_order_editor.dart';
 import 'theme.dart';
 
 /// 番号表のタップ先。乗るバスすべての区間と、乗車・乗換・降車の停留所（Swift の `TransitRouteMapView`）。
@@ -26,7 +26,7 @@ class RouteMapScreen extends StatelessWidget {
   /// 降りた停留所と次に乗る停留所が違えば、その間を歩く。
   static bool _walksBetween(ItineraryLeg from, ItineraryLeg to) => from.alightStop.id != to.boardStop.id;
 
-  /// 各区間で通る停留所。カタログの今の並び（公式の順を適用していればその順）で、乗車停留所から降車停留所まで。
+  /// 各区間で通る停留所。カタログの今の並び（ユーザーが直した停留所があればそれ）で、乗車停留所から降車停留所まで。
   List<GeoPoint> _legStops(ItineraryLeg leg) {
     final route = controller?.visibleCatalog.routes.where((r) => r.relationId == leg.relationId).firstOrNull;
     if (route == null) return const [];
@@ -141,11 +141,7 @@ class RouteMapScreen extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 AlightStepper(controller: controller!, fallbackStopName: leg.alightStop.name),
-                                OfficialOrderHintRow(
-                                  controller: controller!,
-                                  relationId: leg.relationId,
-                                  anchorStopId: controller!.riding?.alightStop.id,
-                                ),
+                                StopOrderEditRow(controller: controller!, relationId: leg.relationId),
                               ],
                             )
                           : Text(l10n.alightAt(leg.alightStop.name)),
@@ -154,8 +150,8 @@ class RouteMapScreen extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
                     child: Text(
                       controller == null
-                          ? l10n.walkMeters(itinerary.walkMeters.round())
-                          : '${l10n.walkMeters(itinerary.walkMeters.round())}\n${l10n.routeBoardHint}',
+                          ? l10n.walkMeters(shown.walkMeters.round())
+                          : '${l10n.walkMeters(shown.walkMeters.round())}\n${l10n.routeBoardHint}',
                       style: const TextStyle(color: AppTheme.secondaryText),
                     ),
                   ),

@@ -215,7 +215,7 @@ void main() {
     });
   });
 
-  group('ステップ 4: 停留所の並びが線と逆行している路線だけ直す', () {
+  group('ステップ 4: 停留所の並びが線と逆行している路線だけ、提案として並べ替える', () {
     final a = const GeoPoint(21.0, lon);
     final b = GeoPoint(21.0 + kmLat, lon);
     final c = GeoPoint(21.0 + 2 * kmLat, lon);
@@ -263,9 +263,57 @@ void main() {
       expect(points(fixed), [a, b, d]);
     });
 
-    test('線が同じ場所を 2 度通る（往復）なら並べ替えない', () {
-      final loop = record([a, d, b], [[a, b, c, d, c, b, a]]);
+    test('線が同じ場所を 2 度通っても、各停留所を一番近い位置で並べる', () {
+      final loop = StopOrderRepair.repair(record([a, d, b], [[a, b, c, d, c, b, a]]));
+      expect(points(loop), [a, b, d]);
+    });
+
+    test('戻りが 1km 以上ある路線だけ並べ替える条件は、線が 2 度通る路線でも同じ', () {
+      final loop = record([a, b, d], [[a, b, c, d, c, b, a]]);
       expect(identical(StopOrderRepair.repair(loop), loop), isTrue);
+    });
+
+    test('E05 復路（13534192）: Indochina Tower が線に二度落ちても PiCo がそのあいだに入る', () {
+      // 線と停留所の座標を縮めたフィクスチャ。位置は (東へ m, 北へ m)。
+      // 線は Indochina Tower の前で小さく回り、もう一度その前を通る（Indochina Tower は線の近くに
+      // 1000m 離れて二度落ちる）。
+      const origin = GeoPoint(21.0048, 105.7545);
+      GeoPoint m(double eastM, double northM) =>
+          GeoPoint(origin.latitude + northM / 110574, origin.longitude + eastM / 104000);
+      final line = [m(0, 0), m(2900, 0), m(3100, 0), m(3100, 300), m(2900, 300), m(2900, 0), m(8000, 0)];
+      const indochina = 'Tòa nhà Indochina Tower - Đối diện ĐHQG Hà Nội';
+      const pico = 'Siêu thị điện máy PiCo - 173 Xuân Thủy';
+      final members = [
+        ('Điểm đỗ xe buýt Smart City', m(0, -20)),
+        ('Đại lộ Thăng Long', m(1500, 20)),
+        (indochina, m(3000, -20)),
+        ('79 Xuân Thủy', m(3600, -20)),
+        ('Cầu Giấy', m(5000, 20)),
+        // OSM のメンバーでは末尾近くにある。
+        (pico, m(3300, -20)),
+        ('Long Biên', m(8000, 20)),
+      ];
+      final e05 = RouteRecord(
+        relationId: 13534192,
+        ref: 'E05',
+        name: 'E05: Smart City → Long Biên',
+        stops: [
+          for (final (i, (name, p)) in members.indexed)
+            RouteStop(id: i + 1, name: name, latitude: p.latitude, longitude: p.longitude),
+        ],
+        polylineSegments: [line],
+        hasGeometry: true,
+      );
+      final fixed = StopOrderRepair.repair(e05);
+      expect([for (final s in fixed.stops) s.name], [
+        'Điểm đỗ xe buýt Smart City',
+        'Đại lộ Thăng Long',
+        indochina,
+        pico,
+        '79 Xuân Thủy',
+        'Cầu Giấy',
+        'Long Biên',
+      ]);
     });
 
     test('目的地が線から 550m より遠ければ、直しても通さない', () {
@@ -273,11 +321,11 @@ void main() {
       expect(LocalPlanner.plan([fixed], east(b, 50), east(d, 800)), isEmpty);
     });
 
-    test('読み込んだカタログに効き、番号表・路線図・＋／− が同じ順を使う', () async {
+    test('読み込んだカタログには効かせない。線と逆行していても OSM のメンバー順のまま', () async {
       final controller = await makeController();
       addTearDown(controller.dispose);
       controller.debugSetCatalog(CatalogSnapshot(routes: [record([a, d, b], [[a, b, c, d]])]));
-      expect(points(controller.visibleCatalog.routes.single), [a, b, d]);
+      expect(points(controller.visibleCatalog.routes.single), [a, d, b]);
     });
   });
 }

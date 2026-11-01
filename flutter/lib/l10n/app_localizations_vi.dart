@@ -654,7 +654,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get privacyStorageBody =>
-      'Dữ liệu tuyến, kho lưu trữ, điểm đến, lịch sử điểm đến, địa điểm đã lưu và cài đặt được lưu trên thiết bị này. Dữ liệu tuyến, địa điểm đã lưu và lịch sử điểm đến chỉ được lưu vào iCloud Drive của bạn khi bật đồng bộ iCloud. Bản sao lưu xuất ra cũng chứa các dữ liệu này.';
+      'Dữ liệu tuyến, kho lưu trữ, điểm đến, lịch sử điểm đến, địa điểm đã lưu, trạm đã sửa và cài đặt được lưu trên thiết bị này. Dữ liệu tuyến, địa điểm đã lưu, lịch sử điểm đến, trạm đã sửa, cùng cài đặt bảng số, cảnh báo đến nơi, bàn phím và ngôn ngữ chỉ được lưu vào iCloud Drive của bạn khi bật đồng bộ iCloud. Bản sao lưu xuất ra cũng chứa các dữ liệu này.';
 
   @override
   String get privacyTitle => 'Quyền riêng tư & dữ liệu';
@@ -830,7 +830,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get helpTableBody =>
-      'Số xe được nhóm theo hướng và số lần chuyển. Chạm để mở bản đồ tuyến, giữ để lên hoặc xuống xe. Xe đang đi có màu cam.';
+      'Số xe được nhóm theo hướng và số lần chuyển. Chạm để mở bản đồ tuyến, giữ để lên hoặc xuống xe. Xe đang đi có màu cam. Nếu số xe bạn nghĩ phải có không có trong bảng, nhập từ “Số xe thiếu ở đoạn này”.';
 
   @override
   String get helpBoardTitle => 'Bắt đầu đi';
@@ -1015,87 +1015,184 @@ class AppLocalizationsVi extends AppLocalizations {
   String get longPressToGetOff => 'Nhấn giữ để xuống xe';
 
   @override
-  String get stopOrderUpdate => 'Cập nhật thứ tự trạm';
+  String get routeReviewOpen => 'Kiểm tra tuyến này';
 
   @override
-  String stopOrderSourceBundled(String date, int count) {
-    return '$date · có sẵn · $count tuyến';
+  String get stopOrderUsingCustom => 'Đang dùng thứ tự đã sửa';
+
+  @override
+  String get routeReviewTitle => 'Kiểm tra tuyến này';
+
+  @override
+  String get routeReviewOrder => 'Thứ tự';
+
+  @override
+  String get routeReviewEnds => 'Điểm đầu và điểm cuối';
+
+  @override
+  String routeReviewEndStart(String stop, int meters) {
+    return 'Trạm đầu, $stop, cách một đầu tuyến khoảng $meters m.';
   }
 
   @override
-  String stopOrderSourceFetched(String date, int count) {
-    return '$date · đã tải · $count tuyến';
+  String routeReviewEndLast(String stop, int meters) {
+    return 'Trạm cuối, $stop, cách một đầu tuyến khoảng $meters m.';
   }
 
   @override
-  String stopOrderUpdated(String date) {
-    return 'Đã cập nhật thứ tự trạm ngày $date';
+  String get routeReviewEndsProposal =>
+      'Trạm gần hai đầu tuyến nhất sẽ thành trạm đầu và trạm cuối.';
+
+  @override
+  String get routeReviewReset => 'Đặt lại sửa của tuyến này';
+
+  @override
+  String get routeEditsResetAll => 'Đặt lại mọi trạm đã sửa';
+
+  @override
+  String get routeEditsResetAllConfirm =>
+      'Xóa các trạm đã sửa trên thiết bị này và đưa các tuyến đó về thứ tự OSM. Nếu đang bật đồng bộ iCloud, sửa giống vậy trên thiết bị khác cũng được đặt lại.';
+
+  @override
+  String get routeReviewPlace => 'Vị trí';
+
+  @override
+  String get routeReviewMembership => 'Trạm thiếu hoặc thừa';
+
+  @override
+  String get routeReviewNothing => 'Không có điểm nào cần lưu ý';
+
+  @override
+  String get routeReviewBacktrackIntro =>
+      'Theo thứ tự hiện tại, có trạm lùi lại từ 1 km trở lên trên tuyến đường.';
+
+  @override
+  String routeReviewBetween(String stop, String after, String before) {
+    return 'Theo tuyến đường, $stop nằm giữa $after và $before.';
   }
 
   @override
-  String stopOrderNotNewer(String date) {
-    return 'Không có thứ tự trạm mới hơn (vẫn là $date)';
+  String get routeReviewLineStart => 'đầu tuyến';
+
+  @override
+  String get routeReviewLineEnd => 'cuối tuyến';
+
+  @override
+  String get routeReviewPartnerDiffers =>
+      'Kể cả khi tính hướng tuyến, thứ tự vẫn khác với chiều về';
+
+  @override
+  String get routeReviewProposal =>
+      'Chỉ các trạm cách tuyến trong 120 m được xếp theo tuyến; các trạm xa hơn giữ nguyên vị trí.';
+
+  @override
+  String get routeReviewUseThis => 'Dùng cách này';
+
+  @override
+  String routeReviewOffLine(String stop, int meters) {
+    return '$stop cách tuyến đường này khoảng $meters m.';
   }
 
   @override
-  String get stopOrderUpdateFailed =>
-      'Không tải được. Vẫn dùng thứ tự trạm hiện tại.';
-
-  @override
-  String get stopOrderInspect => 'Kiểm tra thứ tự trạm';
-
-  @override
-  String get stopOrderDiffers => 'Khác thứ tự trạm chính thức';
-
-  @override
-  String get stopOrderUsingOfficial => 'Đang dùng thứ tự chính thức';
-
-  @override
-  String get stopOrderApply => 'Dùng thứ tự chính thức cho tuyến này';
-
-  @override
-  String get stopOrderRevert => 'Hoàn tác';
-
-  @override
-  String orderHintBefore(String anchor, String current, String official) {
-    return 'Trước $anchor: hiện là $current. Chính thức là $official.';
+  String routeReviewReplaceCandidate(String ref, int meters) {
+    return 'Có trạm cùng tên trên tuyến $ref, cách tuyến này khoảng $meters m.';
   }
 
   @override
-  String orderHintAfter(String anchor, String current, String official) {
-    return 'Sau $anchor: hiện là $current. Chính thức là $official.';
+  String get routeReviewReplace => 'Thay bằng trạm này';
+
+  @override
+  String get routeReviewFromPartner =>
+      'Trạm của chiều về nằm gần tuyến đường này nhưng không thuộc tuyến này';
+
+  @override
+  String get routeReviewFromOthers =>
+      'Trạm của tuyến khác nằm gần tuyến đường này nhưng không thuộc tuyến này';
+
+  @override
+  String get routeReviewOnlyHere => 'Trạm chỉ có ở chiều này';
+
+  @override
+  String routeReviewCandidate(String stop, String ref, int meters) {
+    return '$stop ($ref, cách tuyến khoảng $meters m)';
   }
 
   @override
-  String orderHintAppliedBefore(
-    String anchor,
-    String current,
-    String official,
-  ) {
-    return 'Trước $anchor: $official theo thứ tự chính thức ($current theo thứ tự gốc).';
-  }
+  String get routeReviewNoAuto => 'Không tự động thêm';
 
   @override
-  String orderHintAppliedAfter(String anchor, String current, String official) {
-    return 'Sau $anchor: $official theo thứ tự chính thức ($current theo thứ tự gốc).';
-  }
+  String get routeReviewEditSelf => 'Tự sửa';
 
   @override
-  String get orderHintNone => 'không có';
+  String get routeReviewRevertOsm => 'Trở về thứ tự OSM';
 
   @override
-  String inspectFixable(int count) {
-    return 'Tuyến có thể sửa: $count';
-  }
+  String get stopOrderUseThis => 'Dùng thứ tự này';
 
   @override
-  String inspectUnsure(int count) {
-    return 'Tuyến giữ nguyên: $count';
-  }
+  String get stopOrderDragHint =>
+      'Kéo để đổi thứ tự. Thay đổi chỉ dùng trên thiết bị này.';
 
   @override
-  String get inspectApply => 'Dùng thứ tự chính thức cho các tuyến có thể sửa';
+  String get stopEditAdd => 'Thêm trạm';
 
   @override
-  String get inspectNoData => 'Tệp thứ tự trạm không có tuyến nào';
+  String get stopEditPickOnMap => 'Chọn vị trí trên bản đồ';
+
+  @override
+  String get stopEditPlace => 'Vị trí';
+
+  @override
+  String get stopEditDelete => 'Xóa';
+
+  @override
+  String get stopEditName => 'Tên trạm';
+
+  @override
+  String get stopEditCoordinates => 'Vĩ độ và kinh độ';
+
+  @override
+  String get stopEditLatitude => 'Vĩ độ';
+
+  @override
+  String get stopEditLongitude => 'Kinh độ';
+
+  @override
+  String get stopEditLongPressHint => 'Nhấn giữ bản đồ để đặt ghim.';
+
+  @override
+  String get stopEditConfirmPlace => 'Dùng vị trí này';
+
+  @override
+  String get stopEditNoCandidates => 'Không có trạm nào gần đó để thêm.';
+
+  @override
+  String get stopEditAddedByYou => 'Do bạn thêm';
+
+  @override
+  String get missingNumberEntry => 'Số xe thiếu ở đoạn này';
+
+  @override
+  String get missingNumberTitle => 'Số xe thiếu ở đoạn này';
+
+  @override
+  String get missingNumberHint =>
+      'Nhập số xe bạn nghĩ phải có. Tuyến có trạm gần cả hai đầu đoạn này sẽ được mở để kiểm tra.';
+
+  @override
+  String get missingNumberField => 'Số xe';
+
+  @override
+  String get missingNumberSearch => 'Tìm';
+
+  @override
+  String get missingNumberNone =>
+      'Không có tuyến mang số này trong dữ liệu đã lưu.';
+
+  @override
+  String get missingNumberOnSegment => 'Tuyến có trạm gần cả hai đầu';
+
+  @override
+  String get missingNumberOthers =>
+      'Số xe khớp. Các tuyến này không có trạm gần cả hai đầu đoạn này.';
 }

@@ -1261,7 +1261,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyStorageBody.
   ///
   /// In ja, this message translates to:
-  /// **'路線データ、その保管庫、目的地、目的地の履歴、登録済みの場所、設定はこの端末に保存します。iCloud 同期をオンにしたときだけ、路線データ、登録済みの場所、目的地の履歴を自分の iCloud Drive にも保存します。バックアップの書き出しにも同じものが入ります。'**
+  /// **'路線データ、その保管庫、目的地、目的地の履歴、登録済みの場所、直した停留所、設定はこの端末に保存します。iCloud 同期をオンにしたときだけ、路線データ、登録済みの場所、目的地の履歴、直した停留所、番号表・到着アラート・テンキー・言語の設定を自分の iCloud Drive にも保存します。バックアップの書き出しにも同じものが入ります。'**
   String get privacyStorageBody;
 
   /// No description provided for @privacyTitle.
@@ -1579,7 +1579,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpTableBody.
   ///
   /// In ja, this message translates to:
-  /// **'方向と乗換回数ごとに、乗れるバス番号が並びます。タップで路線図、長押しで乗車と降車の切り替えです。乗車中の番号はオレンジになります。'**
+  /// **'方向と乗換回数ごとに、乗れるバス番号が並びます。タップで路線図、長押しで乗車と降車の切り替えです。乗車中の番号はオレンジになります。乗るはずの番号が表に無いときは「この区間に無い番号」から入れます。'**
   String get helpTableBody;
 
   /// No description provided for @helpBoardTitle.
@@ -1894,125 +1894,323 @@ abstract class AppLocalizations {
   /// **'長押しで降車'**
   String get longPressToGetOff;
 
-  /// No description provided for @stopOrderUpdate.
+  /// No description provided for @routeReviewOpen.
   ///
   /// In ja, this message translates to:
-  /// **'停留所順を更新'**
-  String get stopOrderUpdate;
+  /// **'この路線を確認'**
+  String get routeReviewOpen;
 
-  /// No description provided for @stopOrderSourceBundled.
+  /// No description provided for @stopOrderUsingCustom.
   ///
   /// In ja, this message translates to:
-  /// **'{date}・同梱・{count} 系統'**
-  String stopOrderSourceBundled(String date, int count);
+  /// **'直した順を使っています'**
+  String get stopOrderUsingCustom;
 
-  /// No description provided for @stopOrderSourceFetched.
+  /// No description provided for @routeReviewTitle.
   ///
   /// In ja, this message translates to:
-  /// **'{date}・取得・{count} 系統'**
-  String stopOrderSourceFetched(String date, int count);
+  /// **'この路線の確認'**
+  String get routeReviewTitle;
 
-  /// No description provided for @stopOrderUpdated.
+  /// No description provided for @routeReviewOrder.
   ///
   /// In ja, this message translates to:
-  /// **'{date} の停留所順に更新しました'**
-  String stopOrderUpdated(String date);
+  /// **'順番'**
+  String get routeReviewOrder;
 
-  /// No description provided for @stopOrderNotNewer.
+  /// No description provided for @routeReviewEnds.
   ///
   /// In ja, this message translates to:
-  /// **'新しい停留所順はありません（{date} のまま）'**
-  String stopOrderNotNewer(String date);
+  /// **'始点と終点'**
+  String get routeReviewEnds;
 
-  /// No description provided for @stopOrderUpdateFailed.
+  /// No description provided for @routeReviewEndStart.
   ///
   /// In ja, this message translates to:
-  /// **'取得できませんでした。今の停留所順をそのまま使います'**
-  String get stopOrderUpdateFailed;
+  /// **'始点の {stop} は、線の端から約 {meters} m です。'**
+  String routeReviewEndStart(String stop, int meters);
 
-  /// No description provided for @stopOrderInspect.
+  /// No description provided for @routeReviewEndLast.
   ///
   /// In ja, this message translates to:
-  /// **'停留所順を点検'**
-  String get stopOrderInspect;
+  /// **'終点の {stop} は、線の端から約 {meters} m です。'**
+  String routeReviewEndLast(String stop, int meters);
 
-  /// No description provided for @stopOrderDiffers.
+  /// No description provided for @routeReviewEndsProposal.
   ///
   /// In ja, this message translates to:
-  /// **'公式の停留所順と違います'**
-  String get stopOrderDiffers;
+  /// **'線の両端に一番近い停留所を、始点と終点にします。'**
+  String get routeReviewEndsProposal;
 
-  /// No description provided for @stopOrderUsingOfficial.
+  /// No description provided for @routeReviewReset.
   ///
   /// In ja, this message translates to:
-  /// **'公式の順を使っています'**
-  String get stopOrderUsingOfficial;
+  /// **'この路線の修正をリセット'**
+  String get routeReviewReset;
 
-  /// No description provided for @stopOrderApply.
+  /// No description provided for @routeEditsResetAll.
   ///
   /// In ja, this message translates to:
-  /// **'この路線を公式の順にする'**
-  String get stopOrderApply;
+  /// **'直した停留所をすべてリセット'**
+  String get routeEditsResetAll;
 
-  /// No description provided for @stopOrderRevert.
+  /// No description provided for @routeEditsResetAllConfirm.
   ///
   /// In ja, this message translates to:
-  /// **'元に戻す'**
-  String get stopOrderRevert;
+  /// **'この端末の直した停留所を消し、OSM の並びに戻します。iCloud 同期がオンなら、他の端末の同じ修正も戻します。'**
+  String get routeEditsResetAllConfirm;
 
-  /// No description provided for @orderHintBefore.
+  /// No description provided for @routeReviewPlace.
   ///
   /// In ja, this message translates to:
-  /// **'{anchor} の手前は、今は {current}。公式では {official}。'**
-  String orderHintBefore(String anchor, String current, String official);
+  /// **'場所'**
+  String get routeReviewPlace;
 
-  /// No description provided for @orderHintAfter.
+  /// No description provided for @routeReviewMembership.
   ///
   /// In ja, this message translates to:
-  /// **'{anchor} の次は、今は {current}。公式では {official}。'**
-  String orderHintAfter(String anchor, String current, String official);
+  /// **'停留所の過不足'**
+  String get routeReviewMembership;
 
-  /// No description provided for @orderHintAppliedBefore.
+  /// No description provided for @routeReviewNothing.
   ///
   /// In ja, this message translates to:
-  /// **'{anchor} の手前は、公式の順では {official}（元の順では {current}）。'**
-  String orderHintAppliedBefore(String anchor, String current, String official);
+  /// **'気になる点はありません'**
+  String get routeReviewNothing;
 
-  /// No description provided for @orderHintAppliedAfter.
+  /// No description provided for @routeReviewBacktrackIntro.
   ///
   /// In ja, this message translates to:
-  /// **'{anchor} の次は、公式の順では {official}（元の順では {current}）。'**
-  String orderHintAppliedAfter(String anchor, String current, String official);
+  /// **'今の順では、線の上で 1km 以上戻る停留所があります。'**
+  String get routeReviewBacktrackIntro;
 
-  /// No description provided for @orderHintNone.
+  /// No description provided for @routeReviewBetween.
   ///
   /// In ja, this message translates to:
-  /// **'なし'**
-  String get orderHintNone;
+  /// **'{stop} は、線に沿うと {after} と {before} のあいだです。'**
+  String routeReviewBetween(String stop, String after, String before);
 
-  /// No description provided for @inspectFixable.
+  /// No description provided for @routeReviewLineStart.
   ///
   /// In ja, this message translates to:
-  /// **'直せる路線: {count}'**
-  String inspectFixable(int count);
+  /// **'線の始まり'**
+  String get routeReviewLineStart;
 
-  /// No description provided for @inspectUnsure.
+  /// No description provided for @routeReviewLineEnd.
   ///
   /// In ja, this message translates to:
-  /// **'そのままにする路線: {count}'**
-  String inspectUnsure(int count);
+  /// **'線の終わり'**
+  String get routeReviewLineEnd;
 
-  /// No description provided for @inspectApply.
+  /// No description provided for @routeReviewPartnerDiffers.
   ///
   /// In ja, this message translates to:
-  /// **'直せる路線を公式の順にする'**
-  String get inspectApply;
+  /// **'復路と、線の向きを考慮しても前後が違います'**
+  String get routeReviewPartnerDiffers;
 
-  /// No description provided for @inspectNoData.
+  /// No description provided for @routeReviewProposal.
   ///
   /// In ja, this message translates to:
-  /// **'停留所順のファイルに系統がありません'**
-  String get inspectNoData;
+  /// **'線から 120m 以内の停留所だけを線に沿った順にし、離れた停留所は今の位置に残します。'**
+  String get routeReviewProposal;
+
+  /// No description provided for @routeReviewUseThis.
+  ///
+  /// In ja, this message translates to:
+  /// **'これを使う'**
+  String get routeReviewUseThis;
+
+  /// No description provided for @routeReviewOffLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'{stop} は、この路線の線から約 {meters} m 離れています。'**
+  String routeReviewOffLine(String stop, int meters);
+
+  /// No description provided for @routeReviewReplaceCandidate.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じ名前の停留所が {ref} にあり、この線から約 {meters} m です。'**
+  String routeReviewReplaceCandidate(String ref, int meters);
+
+  /// No description provided for @routeReviewReplace.
+  ///
+  /// In ja, this message translates to:
+  /// **'この停留所に差し替える'**
+  String get routeReviewReplace;
+
+  /// No description provided for @routeReviewFromPartner.
+  ///
+  /// In ja, this message translates to:
+  /// **'復路にあって、この路線の線の近くにあるが、この路線に入っていない停留所'**
+  String get routeReviewFromPartner;
+
+  /// No description provided for @routeReviewFromOthers.
+  ///
+  /// In ja, this message translates to:
+  /// **'他の路線の停留所で、この線の近くにあるが、この路線に入っていないもの'**
+  String get routeReviewFromOthers;
+
+  /// No description provided for @routeReviewOnlyHere.
+  ///
+  /// In ja, this message translates to:
+  /// **'この方向にだけある停留所'**
+  String get routeReviewOnlyHere;
+
+  /// No description provided for @routeReviewCandidate.
+  ///
+  /// In ja, this message translates to:
+  /// **'{stop}（{ref}・線から約 {meters} m）'**
+  String routeReviewCandidate(String stop, String ref, int meters);
+
+  /// No description provided for @routeReviewNoAuto.
+  ///
+  /// In ja, this message translates to:
+  /// **'自動では足しません'**
+  String get routeReviewNoAuto;
+
+  /// No description provided for @routeReviewEditSelf.
+  ///
+  /// In ja, this message translates to:
+  /// **'自分で直す'**
+  String get routeReviewEditSelf;
+
+  /// No description provided for @routeReviewRevertOsm.
+  ///
+  /// In ja, this message translates to:
+  /// **'OSM の並びに戻す'**
+  String get routeReviewRevertOsm;
+
+  /// No description provided for @stopOrderUseThis.
+  ///
+  /// In ja, this message translates to:
+  /// **'この順で使う'**
+  String get stopOrderUseThis;
+
+  /// No description provided for @stopOrderDragHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'ドラッグで順番を入れ替えます。直した内容はこの端末の中だけで使います。'**
+  String get stopOrderDragHint;
+
+  /// No description provided for @stopEditAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'停留所を足す'**
+  String get stopEditAdd;
+
+  /// No description provided for @stopEditPickOnMap.
+  ///
+  /// In ja, this message translates to:
+  /// **'地図で場所を指定'**
+  String get stopEditPickOnMap;
+
+  /// No description provided for @stopEditPlace.
+  ///
+  /// In ja, this message translates to:
+  /// **'場所'**
+  String get stopEditPlace;
+
+  /// No description provided for @stopEditDelete.
+  ///
+  /// In ja, this message translates to:
+  /// **'削除'**
+  String get stopEditDelete;
+
+  /// No description provided for @stopEditName.
+  ///
+  /// In ja, this message translates to:
+  /// **'停留所の名前'**
+  String get stopEditName;
+
+  /// No description provided for @stopEditCoordinates.
+  ///
+  /// In ja, this message translates to:
+  /// **'緯度・経度'**
+  String get stopEditCoordinates;
+
+  /// No description provided for @stopEditLatitude.
+  ///
+  /// In ja, this message translates to:
+  /// **'緯度'**
+  String get stopEditLatitude;
+
+  /// No description provided for @stopEditLongitude.
+  ///
+  /// In ja, this message translates to:
+  /// **'経度'**
+  String get stopEditLongitude;
+
+  /// No description provided for @stopEditLongPressHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'地図を長押ししてピンを置きます。'**
+  String get stopEditLongPressHint;
+
+  /// No description provided for @stopEditConfirmPlace.
+  ///
+  /// In ja, this message translates to:
+  /// **'この場所にする'**
+  String get stopEditConfirmPlace;
+
+  /// No description provided for @stopEditNoCandidates.
+  ///
+  /// In ja, this message translates to:
+  /// **'近くに足せる候補はありません。'**
+  String get stopEditNoCandidates;
+
+  /// No description provided for @stopEditAddedByYou.
+  ///
+  /// In ja, this message translates to:
+  /// **'自分で足した停留所'**
+  String get stopEditAddedByYou;
+
+  /// No description provided for @missingNumberEntry.
+  ///
+  /// In ja, this message translates to:
+  /// **'この区間に無い番号'**
+  String get missingNumberEntry;
+
+  /// No description provided for @missingNumberTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'この区間に無い番号'**
+  String get missingNumberTitle;
+
+  /// No description provided for @missingNumberHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'乗るはずの番号を入れると、この区間の両端に停留所がある路線を開きます。'**
+  String get missingNumberHint;
+
+  /// No description provided for @missingNumberField.
+  ///
+  /// In ja, this message translates to:
+  /// **'バス番号'**
+  String get missingNumberField;
+
+  /// No description provided for @missingNumberSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'探す'**
+  String get missingNumberSearch;
+
+  /// No description provided for @missingNumberNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'その番号の路線は端末にありません。'**
+  String get missingNumberNone;
+
+  /// No description provided for @missingNumberOnSegment.
+  ///
+  /// In ja, this message translates to:
+  /// **'この区間の両端に停留所がある路線'**
+  String get missingNumberOnSegment;
+
+  /// No description provided for @missingNumberOthers.
+  ///
+  /// In ja, this message translates to:
+  /// **'番号は一致します。この区間の両端に停留所はありません。'**
+  String get missingNumberOthers;
 }
 
 class _AppLocalizationsDelegate

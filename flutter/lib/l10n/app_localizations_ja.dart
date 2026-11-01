@@ -642,7 +642,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get privacyStorageBody =>
-      '路線データ、その保管庫、目的地、目的地の履歴、登録済みの場所、設定はこの端末に保存します。iCloud 同期をオンにしたときだけ、路線データ、登録済みの場所、目的地の履歴を自分の iCloud Drive にも保存します。バックアップの書き出しにも同じものが入ります。';
+      '路線データ、その保管庫、目的地、目的地の履歴、登録済みの場所、直した停留所、設定はこの端末に保存します。iCloud 同期をオンにしたときだけ、路線データ、登録済みの場所、目的地の履歴、直した停留所、番号表・到着アラート・テンキー・言語の設定を自分の iCloud Drive にも保存します。バックアップの書き出しにも同じものが入ります。';
 
   @override
   String get privacyTitle => 'プライバシーとデータ';
@@ -812,7 +812,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get helpTableBody =>
-      '方向と乗換回数ごとに、乗れるバス番号が並びます。タップで路線図、長押しで乗車と降車の切り替えです。乗車中の番号はオレンジになります。';
+      '方向と乗換回数ごとに、乗れるバス番号が並びます。タップで路線図、長押しで乗車と降車の切り替えです。乗車中の番号はオレンジになります。乗るはずの番号が表に無いときは「この区間に無い番号」から入れます。';
 
   @override
   String get helpBoardTitle => '乗車開始';
@@ -995,86 +995,175 @@ class AppLocalizationsJa extends AppLocalizations {
   String get longPressToGetOff => '長押しで降車';
 
   @override
-  String get stopOrderUpdate => '停留所順を更新';
+  String get routeReviewOpen => 'この路線を確認';
 
   @override
-  String stopOrderSourceBundled(String date, int count) {
-    return '$date・同梱・$count 系統';
+  String get stopOrderUsingCustom => '直した順を使っています';
+
+  @override
+  String get routeReviewTitle => 'この路線の確認';
+
+  @override
+  String get routeReviewOrder => '順番';
+
+  @override
+  String get routeReviewEnds => '始点と終点';
+
+  @override
+  String routeReviewEndStart(String stop, int meters) {
+    return '始点の $stop は、線の端から約 $meters m です。';
   }
 
   @override
-  String stopOrderSourceFetched(String date, int count) {
-    return '$date・取得・$count 系統';
+  String routeReviewEndLast(String stop, int meters) {
+    return '終点の $stop は、線の端から約 $meters m です。';
   }
 
   @override
-  String stopOrderUpdated(String date) {
-    return '$date の停留所順に更新しました';
+  String get routeReviewEndsProposal => '線の両端に一番近い停留所を、始点と終点にします。';
+
+  @override
+  String get routeReviewReset => 'この路線の修正をリセット';
+
+  @override
+  String get routeEditsResetAll => '直した停留所をすべてリセット';
+
+  @override
+  String get routeEditsResetAllConfirm =>
+      'この端末の直した停留所を消し、OSM の並びに戻します。iCloud 同期がオンなら、他の端末の同じ修正も戻します。';
+
+  @override
+  String get routeReviewPlace => '場所';
+
+  @override
+  String get routeReviewMembership => '停留所の過不足';
+
+  @override
+  String get routeReviewNothing => '気になる点はありません';
+
+  @override
+  String get routeReviewBacktrackIntro => '今の順では、線の上で 1km 以上戻る停留所があります。';
+
+  @override
+  String routeReviewBetween(String stop, String after, String before) {
+    return '$stop は、線に沿うと $after と $before のあいだです。';
   }
 
   @override
-  String stopOrderNotNewer(String date) {
-    return '新しい停留所順はありません（$date のまま）';
+  String get routeReviewLineStart => '線の始まり';
+
+  @override
+  String get routeReviewLineEnd => '線の終わり';
+
+  @override
+  String get routeReviewPartnerDiffers => '復路と、線の向きを考慮しても前後が違います';
+
+  @override
+  String get routeReviewProposal =>
+      '線から 120m 以内の停留所だけを線に沿った順にし、離れた停留所は今の位置に残します。';
+
+  @override
+  String get routeReviewUseThis => 'これを使う';
+
+  @override
+  String routeReviewOffLine(String stop, int meters) {
+    return '$stop は、この路線の線から約 $meters m 離れています。';
   }
 
   @override
-  String get stopOrderUpdateFailed => '取得できませんでした。今の停留所順をそのまま使います';
-
-  @override
-  String get stopOrderInspect => '停留所順を点検';
-
-  @override
-  String get stopOrderDiffers => '公式の停留所順と違います';
-
-  @override
-  String get stopOrderUsingOfficial => '公式の順を使っています';
-
-  @override
-  String get stopOrderApply => 'この路線を公式の順にする';
-
-  @override
-  String get stopOrderRevert => '元に戻す';
-
-  @override
-  String orderHintBefore(String anchor, String current, String official) {
-    return '$anchor の手前は、今は $current。公式では $official。';
+  String routeReviewReplaceCandidate(String ref, int meters) {
+    return '同じ名前の停留所が $ref にあり、この線から約 $meters m です。';
   }
 
   @override
-  String orderHintAfter(String anchor, String current, String official) {
-    return '$anchor の次は、今は $current。公式では $official。';
+  String get routeReviewReplace => 'この停留所に差し替える';
+
+  @override
+  String get routeReviewFromPartner => '復路にあって、この路線の線の近くにあるが、この路線に入っていない停留所';
+
+  @override
+  String get routeReviewFromOthers => '他の路線の停留所で、この線の近くにあるが、この路線に入っていないもの';
+
+  @override
+  String get routeReviewOnlyHere => 'この方向にだけある停留所';
+
+  @override
+  String routeReviewCandidate(String stop, String ref, int meters) {
+    return '$stop（$ref・線から約 $meters m）';
   }
 
   @override
-  String orderHintAppliedBefore(
-    String anchor,
-    String current,
-    String official,
-  ) {
-    return '$anchor の手前は、公式の順では $official（元の順では $current）。';
-  }
+  String get routeReviewNoAuto => '自動では足しません';
 
   @override
-  String orderHintAppliedAfter(String anchor, String current, String official) {
-    return '$anchor の次は、公式の順では $official（元の順では $current）。';
-  }
+  String get routeReviewEditSelf => '自分で直す';
 
   @override
-  String get orderHintNone => 'なし';
+  String get routeReviewRevertOsm => 'OSM の並びに戻す';
 
   @override
-  String inspectFixable(int count) {
-    return '直せる路線: $count';
-  }
+  String get stopOrderUseThis => 'この順で使う';
 
   @override
-  String inspectUnsure(int count) {
-    return 'そのままにする路線: $count';
-  }
+  String get stopOrderDragHint => 'ドラッグで順番を入れ替えます。直した内容はこの端末の中だけで使います。';
 
   @override
-  String get inspectApply => '直せる路線を公式の順にする';
+  String get stopEditAdd => '停留所を足す';
 
   @override
-  String get inspectNoData => '停留所順のファイルに系統がありません';
+  String get stopEditPickOnMap => '地図で場所を指定';
+
+  @override
+  String get stopEditPlace => '場所';
+
+  @override
+  String get stopEditDelete => '削除';
+
+  @override
+  String get stopEditName => '停留所の名前';
+
+  @override
+  String get stopEditCoordinates => '緯度・経度';
+
+  @override
+  String get stopEditLatitude => '緯度';
+
+  @override
+  String get stopEditLongitude => '経度';
+
+  @override
+  String get stopEditLongPressHint => '地図を長押ししてピンを置きます。';
+
+  @override
+  String get stopEditConfirmPlace => 'この場所にする';
+
+  @override
+  String get stopEditNoCandidates => '近くに足せる候補はありません。';
+
+  @override
+  String get stopEditAddedByYou => '自分で足した停留所';
+
+  @override
+  String get missingNumberEntry => 'この区間に無い番号';
+
+  @override
+  String get missingNumberTitle => 'この区間に無い番号';
+
+  @override
+  String get missingNumberHint => '乗るはずの番号を入れると、この区間の両端に停留所がある路線を開きます。';
+
+  @override
+  String get missingNumberField => 'バス番号';
+
+  @override
+  String get missingNumberSearch => '探す';
+
+  @override
+  String get missingNumberNone => 'その番号の路線は端末にありません。';
+
+  @override
+  String get missingNumberOnSegment => 'この区間の両端に停留所がある路線';
+
+  @override
+  String get missingNumberOthers => '番号は一致します。この区間の両端に停留所はありません。';
 }

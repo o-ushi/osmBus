@@ -10,13 +10,11 @@ import '../services/catalog_sync.dart';
 import '../services/google_maps_config.dart';
 import '../services/route_catalog_downloader.dart';
 import '../services/sound_player.dart';
-import '../services/stop_order_source.dart';
 import '../state/app_settings.dart';
 import '../state/trip_controller.dart';
 import 'alert_settings_screen.dart';
 import 'developer_screen.dart';
 import 'grouped_list.dart';
-import 'official_order_hint.dart';
 import 'privacy_screen.dart';
 import 'sheet_page.dart';
 import 'theme.dart';
@@ -57,6 +55,25 @@ class SettingsScreen extends StatelessWidget {
         LocationStatus.deniedForever => l10n.locationDeniedForever,
         LocationStatus.serviceDisabled => l10n.locationServiceDisabled,
       };
+
+  Future<void> _resetRouteEdits(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        content: Text(l10n.routeEditsResetAllConfirm),
+        actions: [
+          CupertinoDialogAction(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.routeEditsResetAll),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) controller.forgetAllCustomStops();
+  }
 
   Future<void> _withdraw(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
@@ -128,22 +145,6 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-
-  /// 今使っている停留所順のファイルの日付と、同梱か取得か。
-  String _stopOrderSourceText(AppLocalizations l10n) {
-    final file = controller.stopOrder.current;
-    final date = file.updated.isEmpty ? '—' : file.updated;
-    return controller.stopOrder.isBundled
-        ? l10n.stopOrderSourceBundled(date, file.routes.length)
-        : l10n.stopOrderSourceFetched(date, file.routes.length);
-  }
-
-  String? _stopOrderResultText(AppLocalizations l10n) => switch (controller.stopOrderUpdateResult) {
-        null => null,
-        StopOrderUpdated(:final updated) => l10n.stopOrderUpdated(updated),
-        StopOrderNotNewer(:final updated) => l10n.stopOrderNotNewer(updated),
-        StopOrderUpdateFailed() => l10n.stopOrderUpdateFailed,
-      };
 
   @override
   Widget build(BuildContext context) {
@@ -277,25 +278,6 @@ class SettingsScreen extends StatelessWidget {
                   onTap: controller.updateCatalog,
                   leading: CupertinoIcons.arrow_2_circlepath,
                 ),
-                // 停留所順の更新は路線データの同意とは独立。押したときだけ取りにいき、位置は送らない。
-                GroupedRow(
-                  title: l10n.stopOrderUpdate,
-                  subtitle: _stopOrderSourceText(l10n),
-                  action: true,
-                  enabled: !controller.stopOrderUpdating,
-                  onTap: controller.updateStopOrder,
-                  leading: CupertinoIcons.list_number,
-                ),
-                if (controller.stopOrderUpdating)
-                  const Padding(padding: EdgeInsets.all(8), child: CupertinoActivityIndicator())
-                else if (_stopOrderResultText(l10n) case final result?)
-                  GroupedRow(title: result, muted: true),
-                GroupedRow(
-                  title: l10n.stopOrderInspect,
-                  action: true,
-                  onTap: () => showStopOrderInspection(context, controller),
-                  leading: CupertinoIcons.checkmark_rectangle,
-                ),
                 if (controller.consentDecided)
                   GroupedRow(
                     title: l10n.withdrawConsent,
@@ -319,6 +301,13 @@ class SettingsScreen extends StatelessWidget {
                     value: controller.iCloudEnabled,
                     onChanged: syncSupported ? controller.setICloudEnabled : null,
                   ),
+                ),
+                GroupedRow(
+                  title: l10n.routeEditsResetAll,
+                  destructive: true,
+                  enabled: controller.hasAnyCustomStops,
+                  onTap: controller.hasAnyCustomStops ? () => _resetRouteEdits(context) : null,
+                  leading: CupertinoIcons.arrow_counterclockwise,
                 ),
                 if (syncSupported)
                   GroupedRow(

@@ -12,7 +12,7 @@ import 'alight_stepper.dart';
 import 'bus_map.dart';
 import 'distance_badge.dart';
 import 'keypad.dart';
-import 'official_order_hint.dart';
+import 'stop_order_editor.dart';
 import 'theme.dart';
 
 /// メニューの「路線図」（Swift の `BusRouteMapView`）。番号で路線を探して地図に出し、
@@ -120,7 +120,7 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
   void _toggleRiding() {
     final opened = _route;
     if (opened == null) return;
-    // 公式の順を適用していれば、その並びで乗る。
+    // ユーザーが直した停留所があれば、その並びで乗る。
     final route =
         controller.visibleCatalog.routes.where((r) => r.relationId == opened.relationId).firstOrNull ?? opened;
     if (_riding) {
@@ -204,7 +204,7 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
-        // 公式の順を適用・元に戻したら、同じ路線の今の並びを使う。
+        // 停留所を直した・OSM の並びに戻したら、同じ路線の今の並びを使う。
         final opened = _route;
         final route = opened == null
             ? null
@@ -312,8 +312,8 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
   double _overlayBottom(BuildContext context, RouteRecord? route) {
     if (_keypadVisible) return MediaQuery.sizeOf(context).height * 0.42 + 24;
     if (route == null) return 0;
-    final hint = controller.officialOrderStatus(route.relationId) == null ? 0 : 28;
-    return (_riding ? 150 : 100) + hint.toDouble();
+    // 「この路線を確認」の行の分も空ける。
+    return _riding ? 178 : 128;
   }
 
   Widget _emptyState(AppLocalizations l10n, bool noLocation) => Center(
@@ -365,11 +365,8 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
                   style: TextStyle(fontSize: 12, color: _riding ? Colors.orange : AppTheme.tertiaryText),
                 ),
                 if (_riding) AlightStepper(controller: controller, style: const TextStyle(fontSize: 13)),
-                OfficialOrderHintRow(
-                  controller: controller,
-                  relationId: route.relationId,
-                  anchorStopId: _riding ? controller.riding?.alightStop.id : null,
-                ),
+                // 乗車中でなくても、開いている路線の停留所順を自分で直せる。
+                StopOrderEditRow(controller: controller, relationId: route.relationId),
               ],
             ),
           ),

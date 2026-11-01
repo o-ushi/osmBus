@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/destination.dart';
 import '../models/route_catalog.dart';
+import 'app_settings.dart';
 
 /// 登録済みの場所（Swift の `SavedPlace`）。[label] は「自宅」など、[placeName] は元の地名。
 class SavedPlace {
@@ -98,14 +99,47 @@ class HistoryEntry {
       );
 }
 
-/// iCloud とバックアップでやり取りする、登録済みの場所と目的地の履歴。
-/// [deletedPlaces] と [historyClearedAt] は、消したものが他の端末から戻ってこないための印。
+/// 1 路線分の、ユーザーが直した停留所。新しい形の配列か、これまでの ID 配列。
+class RouteEdit {
+  const RouteEdit({required this.relationId, required this.updatedAt, required this.stops});
+
+  final int relationId;
+  final DateTime updatedAt;
+  final List<Object?> stops;
+
+  Map<String, dynamic> toJson() => {
+        'relationId': relationId,
+        'updatedAt': updatedAt.toUtc().toIso8601String(),
+        'stops': stops,
+      };
+
+  static RouteEdit fromJson(Map<String, dynamic> json) {
+    final id = json['relationId'];
+    final at = json['updatedAt'];
+    final stops = json['stops'];
+    if (id is! num || at is! String || stops is! List) {
+      throw const FormatException('invalid route edit');
+    }
+    return RouteEdit(
+      relationId: id.toInt(),
+      updatedAt: DateTime.parse(at).toUtc(),
+      stops: List<Object?>.from(stops),
+    );
+  }
+}
+
+/// iCloud とバックアップでやり取りする、登録済みの場所、目的地の履歴、直した停留所、設定。
+/// [deletedPlaces]、[historyClearedAt]、[forgottenRouteEdits] は、消したものが他の端末から戻ってこないための印。
+/// [settings] が null のファイルは、設定を持っていない古いバックアップなので、手元の設定を残す。
 class PersonalData {
   const PersonalData({
     this.places = const [],
     this.history = const [],
     this.deletedPlaces = const {},
     this.historyClearedAt,
+    this.routeEdits = const [],
+    this.forgottenRouteEdits = const {},
+    this.settings,
   });
 
   static const int schemaVersion = 1;
@@ -122,12 +156,26 @@ class PersonalData {
   /// 履歴を消した時刻。これ以前の履歴は戻さない。
   final DateTime? historyClearedAt;
 
+  /// 直した停留所。同じ relationId は [updatedAt] が新しい方を残す。
+  final List<RouteEdit> routeEdits;
+
+  /// 「OSM の並びに戻す」で消した relationId と、消した時刻。
+  final Map<int, DateTime> forgottenRouteEdits;
+
+  /// 変えた設定。同じキーは [SyncedSetting.updatedAt] が新しい方を残す。null は「ファイルに無い」。
+  final List<SyncedSetting>? settings;
+
   Map<String, dynamic> toJson() => {
         'schemaVersion': schemaVersion,
         'places': [for (final p in places) p.toJson()],
         'history': [for (final e in history) e.toJson()],
         'deletedPlaces': {for (final e in deletedPlaces.entries) e.key: e.value.toUtc().toIso8601String()},
         if (historyClearedAt != null) 'historyClearedAt': historyClearedAt!.toUtc().toIso8601String(),
+        'routeEdits': [for (final e in routeEdits) e.toJson()],
+        'forgottenRouteEdits': {
+          for (final e in forgottenRouteEdits.entries) '${e.key}': e.value.toUtc().toIso8601String(),
+        },
+        if (settings != null) 'settings': [for (final s in settings!) s.toJson()],
       };
 
   /// 形が違えば [FormatException]。
@@ -140,6 +188,8 @@ class PersonalData {
     try {
       final deleted = decoded['deletedPlaces'] as Map? ?? const {};
       final cleared = decoded['historyClearedAt'] as String?;
+      final forgotten = decoded['forgottenRouteEdits'] as Map? ?? const {};
+      final hasSettings = decoded.containsKey('settings');
       return PersonalData(
         places: [
           for (final p in decoded['places'] as List? ?? const [])
@@ -153,6 +203,19 @@ class PersonalData {
           for (final e in deleted.entries) e.key as String: DateTime.parse(e.value as String).toUtc(),
         },
         historyClearedAt: cleared == null ? null : DateTime.parse(cleared).toUtc(),
+        routeEdits: [
+          for (final e in decoded['routeEdits'] as List? ?? const [])
+            RouteEdit.fromJson(Map<String, dynamic>.from(e as Map)),
+        ],
+        forgottenRouteEdits: {
+          for (final e in forgotten.entries) int.parse(e.key as String): DateTime.parse(e.value as String).toUtc(),
+        },
+        settings: hasSettings
+            ? [
+                for (final e in decoded['settings'] as List)
+                  SyncedSetting.fromJson(Map<String, dynamic>.from(e as Map)),
+              ]
+            : null,
       );
     } catch (e) {
       throw e is FormatException ? e : FormatException('invalid personal data: $e');
@@ -193,7 +256,54 @@ class PersonalData {
       if (!history.any((kept) => kept.destination.samePlace(e.destination))) history.add(e);
     }
 
-    return PersonalData(places: places, history: history, deletedPlaces: deleted, historyClearedAt: cleared);
+    final forgottenRoutes = <int, DateTime>{...local.forgottenRouteEdits};
+    remote.forgottenRouteEdits.forEach((id, at) {
+      final mine = forgottenRoutes[id];
+      if (mine == null || at.isAfter(mine)) forgottenRoutes[id] = at;
+    });
+    forgottenRoutes.removeWhere((_, at) => now.difference(at) > tombstoneLifetime);
+
+    final byRoute = <int, RouteEdit>{for (final e in local.routeEdits) e.relationId: e};
+    for (final theirs in remote.routeEdits) {
+      final mine = byRoute[theirs.relationId];
+      if (mine == null || theirs.updatedAt.isAfter(mine.updatedAt)) byRoute[theirs.relationId] = theirs;
+    }
+    final routeEdits = [
+      for (final e in byRoute.values)
+        if (forgottenRoutes[e.relationId] == null || e.updatedAt.isAfter(forgottenRoutes[e.relationId]!)) e,
+    ];
+
+    return PersonalData(
+      places: places,
+      history: history,
+      deletedPlaces: deleted,
+      historyClearedAt: cleared,
+      routeEdits: routeEdits,
+      forgottenRouteEdits: forgottenRoutes,
+      settings: mergeSettings(local.settings, remote.settings),
+    );
+  }
+
+  /// 同じキーは新しい方。どちらかが設定を持っていなければ、持っている方を残す。
+  static List<SyncedSetting>? mergeSettings(List<SyncedSetting>? local, List<SyncedSetting>? remote) {
+    if (local == null) return remote;
+    if (remote == null) return local;
+    final byKey = <String, SyncedSetting>{for (final s in local) s.key: s};
+    for (final theirs in remote) {
+      final mine = byKey[theirs.key];
+      if (mine == null || theirs.updatedAt.isAfter(mine.updatedAt)) byKey[theirs.key] = theirs;
+    }
+    return byKey.values.toList();
+  }
+
+  /// バックアップの置き換え。ファイルにあるキーは時刻に関わらずファイルを使い、ファイルに無いキーは手元を残す。
+  static List<SyncedSetting>? overlaySettings(List<SyncedSetting>? local, List<SyncedSetting>? file) {
+    if (file == null) return local;
+    final byKey = <String, SyncedSetting>{for (final s in local ?? const []) s.key: s};
+    for (final theirs in file) {
+      byKey[theirs.key] = theirs;
+    }
+    return byKey.values.toList();
   }
 }
 

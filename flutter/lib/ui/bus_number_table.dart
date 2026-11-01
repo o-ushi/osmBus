@@ -30,6 +30,7 @@ class BusNumberTable extends StatelessWidget {
     required this.onReload,
     required this.onTap,
     required this.onLongPress,
+    this.onMissingNumber,
   });
 
   final TableState state;
@@ -39,6 +40,7 @@ class BusNumberTable extends StatelessWidget {
   /// そのレグのバッジを乗車中（橙）にするか。
   final bool Function(MatrixEntry entry, int legIndex) isRidingLeg;
   final VoidCallback onReload;
+  final VoidCallback? onMissingNumber;
   final ValueChanged<MatrixEntry> onTap;
   /// 長押ししたバッジが何番目のバスか（乗換の行は 2 本目以降もある）。
   final void Function(MatrixEntry entry, int legIndex) onLongPress;
@@ -68,7 +70,28 @@ class BusNumberTable extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          if (onMissingNumber != null && (state == TableState.ready || state == TableState.noRoutes))
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onMissingNumber,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 2, bottom: 8),
+                child: Row(
+                  children: [
+                    const Icon(CupertinoIcons.plus_circle, size: 16, color: AppTheme.accent),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        l10n.missingNumberEntry,
+                        style: const TextStyle(fontSize: 15, color: AppTheme.accent),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            const SizedBox(height: 4),
           Expanded(
             child: SingleChildScrollView(
               child: SizedBox(width: double.infinity, child: _content(context)),

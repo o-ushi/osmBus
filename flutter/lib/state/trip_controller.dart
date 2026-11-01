@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:convert';
 import 'dart:io';
 
@@ -25,9 +26,8 @@ import '../services/location_authorization.dart';
 import '../services/route_catalog_downloader.dart';
 import '../services/route_catalog_store.dart';
 import '../services/sound_player.dart';
-import '../services/official_order_matcher.dart';
-import '../services/stop_order_repair.dart';
-import '../services/stop_order_source.dart';
+import '../services/custom_stops.dart';
+import '../services/route_review.dart';
 import 'app_settings.dart';
 import 'places_store.dart';
 
@@ -87,41 +87,6 @@ class AlightChoice {
   bool get canNext => alightIndex + 1 < stops.length;
 }
 
-/// 路線図に出す、公式の停留所順との関係。
-enum OfficialOrderState {
-  /// 自信を持って対応でき、今の表示順と違う。
-  differs,
-
-  /// この路線へ公式の順を適用している。
-  applied,
-}
-
-class OfficialOrderStatus {
-  const OfficialOrderStatus({required this.state, required this.osmOrder, required this.officialOrder});
-
-  final OfficialOrderState state;
-
-  /// 公式の順を被せる前の並び（OSM の並び。線と逆行していれば端末内で直したもの）。
-  final List<RouteStop> osmOrder;
-
-  /// 公式の順に並べた OSM の停留所。
-  final List<RouteStop> officialOrder;
-}
-
-/// 「停留所順を点検」の結果。適用するまで何も変えない。
-class StopOrderInspection {
-  const StopOrderInspection({required this.fixable, required this.unsure, required this.officialRouteCount});
-
-  /// 自信を持って違いがある路線と、その公式の順。
-  final List<(RouteRecord, OfficialOrderMatch)> fixable;
-
-  /// 公式データに同じ系統があるが、自信を持って対応できなかった路線。
-  final List<RouteRecord> unsure;
-
-  /// 照合に使った停留所順のファイルにある系統・方向の数。
-  final int officialRouteCount;
-}
-
 /// 画面の外でも出す文言。UI 側が言語に合わせて入れる。
 class RidingTexts {
   const RidingTexts({
@@ -153,13 +118,12 @@ class TripController extends ChangeNotifier {
     this.sound,
     this.notifier,
     PlacesStore? places,
-    StopOrderSource? stopOrder,
     this.requestsLocationOnLaunch = true,
   })  : store = store ?? RouteCatalogStore(),
-        stopOrder = stopOrder ?? StopOrderSource(),
         settings = settings ?? AppSettings(prefs),
         places = places ?? PlacesStore(prefs: prefs) {
     this.sync = sync ?? CatalogSync.forPlatform(this.store);
+    this.settings.onLocalChange = _scheduleSync;
     downloader = RouteCatalogDownloader(store: this.store, consentGranted: () => consentGranted)
       ..addListener(notifyListeners);
   }
@@ -168,7 +132,10 @@ class TripController extends ChangeNotifier {
   static const _consentVersion = 1;
   static const _destinationKey = 'destination';
   static const _ridingKey = 'riding.session';
-  static const _officialOrderKey = 'stopOrder.applied';
+  static const _customStopsKey = 'stopOrder.applied';
+  static const _routeEditTimesKey = 'stopOrder.updatedAt';
+  static const _routeEditForgottenKey = 'stopOrder.forgotten';
+  static const _nextLocalStopIdKey = 'stopOrder.nextLocalId';
   static const _routeOriginKey = 'navigation.routeOrigin';
   static const _iCloudKey = 'sync.iCloudEnabled';
   static const _lastSyncKey = 'sync.lastSyncedAt';
@@ -190,23 +157,18 @@ class TripController extends ChangeNotifier {
   final AlertNotifier? notifier;
   final PlacesStore places;
 
-  /// 公式の停留所順のファイル（同梱か、更新で取得したもの）。
-  final StopOrderSource stopOrder;
-
   /// 通知などに使う文言。言語が変わるたびに UI から入れ直す。
   RidingTexts texts = const RidingTexts();
   late final CatalogSync sync;
   late final RouteCatalogDownloader downloader;
   final PlannerCache _planner = PlannerCache();
 
-  /// 読み込んだカタログ（線と逆行する停留所順だけ端末内で直したもの）。
+  /// 読み込んだカタログそのまま（停留所は OSM のメンバー順）。
   CatalogSnapshot _base = CatalogSnapshot.empty;
 
-  /// [_base] に、ユーザーが適用した公式の停留所順を被せたもの。プランナーと地図はこれを見る。
+  /// [_base] に、ユーザーが直した停留所（この端末の記憶）を被せたもの。
+  /// 番号表・プランナー・経路地図・路線図・降車停の − ＋ はこれを見る。
   CatalogSnapshot _snapshot = CatalogSnapshot.empty;
-  final Map<int, (RouteRecord, String, OfficialOrderMatch?)> _matchCache = {};
-  StopOrderUpdateResult? _stopOrderResult;
-  bool _stopOrderUpdating = false;
   GeoPoint? _gps;
 
   /// ナビ中（目的地があるあいだ）に経路を引く出発地。GPS 更新では動かさない。
@@ -322,7 +284,6 @@ class TripController extends ChangeNotifier {
     _destination = _readDestination();
     _routeOrigin = _destination == null ? null : _readRouteOrigin();
     _restoreRiding();
-    await stopOrder.load();
     _setCatalog(await store.load());
     _saveSub = store.onSaved.listen(_onCatalogSaved);
     _placesSub = places.localChanges.listen((_) => _scheduleSync());
@@ -344,169 +305,267 @@ class TripController extends ChangeNotifier {
     super.dispose();
   }
 
+  /// 読み込んだ停留所順は OSM のメンバー順のまま。線と逆行していても、ユーザーが直すまで並べ替えない。
   void _setCatalog(CatalogSnapshot loaded) {
-    _base = _repaired(loaded);
-    _snapshot = _withOfficialOrder(_base);
+    _base = loaded;
+    _snapshot = _withCustomStops(_base);
   }
 
-  // MARK: - 公式の停留所順
+  // MARK: - ユーザーが直した停留所
 
-  /// 適用した公式の順（relationId → 停留所 ID の順）。カタログのファイルは書き換えない。
-  Map<int, List<int>> get _appliedOrders {
-    final raw = prefs.getString(_officialOrderKey);
+  /// relationId → 覚えた停留所（これまでの形の ID 配列か、新しい形の停留所配列）。生の JSON のまま。
+  Map<int, Object?> get _customStops {
+    final raw = prefs.getString(_customStopsKey);
     if (raw == null) return {};
     try {
       final json = jsonDecode(raw) as Map<String, dynamic>;
-      return {
-        for (final MapEntry(:key, :value) in json.entries)
-          int.parse(key): [for (final id in value as List) (id as num).toInt()],
-      };
+      return {for (final MapEntry(:key, :value) in json.entries) int.parse(key): value};
     } catch (_) {
       return {};
     }
   }
 
-  void _saveAppliedOrders(Map<int, List<int>> orders) {
-    if (orders.isEmpty) {
-      unawaited(prefs.remove(_officialOrderKey));
+  void _saveCustomStops(Map<int, Object?> entries) {
+    if (entries.isEmpty) {
+      unawaited(prefs.remove(_customStopsKey));
       return;
     }
-    unawaited(prefs.setString(_officialOrderKey, jsonEncode({for (final e in orders.entries) '${e.key}': e.value})));
+    unawaited(prefs.setString(_customStopsKey, jsonEncode({for (final e in entries.entries) '${e.key}': e.value})));
   }
 
-  /// 適用した路線だけ、覚えた ID の順の停留所にする。ID が路線から無くなっていたら記憶を捨てる。
-  CatalogSnapshot _withOfficialOrder(CatalogSnapshot base) {
-    final orders = _appliedOrders;
-    if (orders.isEmpty) return base;
-    var dropped = false;
-    final routes = <RouteRecord>[];
-    for (final route in base.routes) {
-      final ids = orders[route.relationId];
-      final stops = ids == null ? null : OfficialOrderMatcher.reorder(route, ids);
-      if (ids != null && stops == null) {
-        AppLog.i('stopOrder', 'forget ${route.ref} (${route.relationId}): stops changed');
-        orders.remove(route.relationId);
-        dropped = true;
+  Map<int, DateTime> _readTimes(String key) {
+    final raw = prefs.getString(key);
+    if (raw == null) return {};
+    try {
+      final json = jsonDecode(raw) as Map<String, dynamic>;
+      return {for (final e in json.entries) int.parse(e.key): DateTime.parse(e.value as String).toUtc()};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  void _writeTimes(String key, Map<int, DateTime> times) {
+    if (times.isEmpty) {
+      unawaited(prefs.remove(key));
+      return;
+    }
+    unawaited(prefs.setString(
+      key,
+      jsonEncode({for (final e in times.entries) '${e.key}': e.value.toUtc().toIso8601String()}),
+    ));
+  }
+
+  Map<int, DateTime> get _routeEditTimes => _readTimes(_routeEditTimesKey);
+
+  Map<int, DateTime> get _forgottenRouteEdits => _readTimes(_routeEditForgottenKey);
+
+  /// 時刻の無い古い記憶には、いまの時刻を付けて残す。
+  List<RouteEdit> _routeEditsForSync() {
+    final times = _routeEditTimes;
+    final now = DateTime.now().toUtc();
+    var stamped = false;
+    final edits = <RouteEdit>[];
+    for (final entry in _customStops.entries) {
+      final stops = entry.value;
+      if (stops is! List) continue;
+      var at = times[entry.key];
+      if (at == null) {
+        at = now;
+        times[entry.key] = at;
+        stamped = true;
       }
-      routes.add(stops == null ? route : route.copyWith(stops: stops));
+      edits.add(RouteEdit(relationId: entry.key, updatedAt: at, stops: List<Object?>.from(stops)));
     }
-    if (dropped) _saveAppliedOrders(orders);
-    return base.copyWith(routes: routes);
+    if (stamped) _writeTimes(_routeEditTimesKey, times);
+    return edits;
   }
 
-  bool isOfficialOrderApplied(int relationId) => _appliedOrders.containsKey(relationId);
-
-  /// 公式の順と対応させた結果（[_base] の路線と停留所順のファイルが同じあいだは使い回す）。
-  OfficialOrderMatch? _match(RouteRecord base) {
-    final cached = _matchCache[base.relationId];
-    if (cached != null && identical(cached.$1, base) && cached.$2 == stopOrder.current.updated) return cached.$3;
-    final match = OfficialOrderMatcher.match(base, stopOrder.current.routes);
-    _matchCache[base.relationId] = (base, stopOrder.current.updated, match);
-    return match;
+  /// 場所・履歴に、直した停留所を足したもの。バックアップと iCloud はこれを使う。
+  PersonalData get _personalData {
+    final data = places.data;
+    return PersonalData(
+      places: data.places,
+      history: data.history,
+      deletedPlaces: data.deletedPlaces,
+      historyClearedAt: data.historyClearedAt,
+      routeEdits: _routeEditsForSync(),
+      forgottenRouteEdits: _forgottenRouteEdits,
+      settings: SettingsSync.collect(prefs),
+    );
   }
 
-  static bool _sameOrder(List<RouteStop> stops, List<int> ids) {
-    if (stops.length != ids.length) return false;
-    for (var i = 0; i < ids.length; i++) {
-      if (stops[i].id != ids[i]) return false;
-    }
-    return true;
+  /// 同期やバックアップの設定を書く。同期は予約しない。
+  Future<void> _applySettings(PersonalData data, {required bool force}) async {
+    final incoming = data.settings;
+    if (incoming == null) return;
+    final changed = await SettingsSync.apply(prefs, incoming, force: force);
+    if (!changed) return;
+    settings.notifyListeners();
+    notifyListeners();
   }
 
-  /// 路線図・経路地図のヒント。違いがあるか適用済みのときだけ。一致または自信なしなら null。
-  OfficialOrderStatus? officialOrderStatus(int relationId) {
-    final base = _base.routes.where((r) => r.relationId == relationId).firstOrNull;
-    if (base == null) return null;
-    if (isOfficialOrderApplied(relationId)) {
-      final shown = _snapshot.routes.where((r) => r.relationId == relationId).firstOrNull;
-      if (shown == null) return null;
-      return OfficialOrderStatus(state: OfficialOrderState.applied, osmOrder: base.stops, officialOrder: shown.stops);
-    }
-    final match = _match(base);
-    if (match == null || _sameOrder(base.stops, match.orderedIds)) return null;
-    final official = OfficialOrderMatcher.reorder(base, match.orderedIds);
-    if (official == null) return null;
-    return OfficialOrderStatus(state: OfficialOrderState.differs, osmOrder: base.stops, officialOrder: official);
-  }
-
-  /// この路線を公式の順にする。
-  void applyOfficialOrder(int relationId) {
-    final base = _base.routes.where((r) => r.relationId == relationId).firstOrNull;
-    final match = base == null ? null : _match(base);
-    if (match == null) return;
-    _applyOrders({relationId: match.orderedIds});
-  }
-
-  /// 元に戻す。その路線の記憶を消し、OSM の並びに戻す。
-  void revertOfficialOrder(int relationId) {
-    final orders = _appliedOrders;
-    if (orders.remove(relationId) == null) return;
-    AppLog.i('stopOrder', 'revert $relationId');
-    _saveAppliedOrders(orders);
-    _onOrderChanged();
-  }
-
-  void _applyOrders(Map<int, List<int>> add) {
-    if (add.isEmpty) return;
-    AppLog.i('stopOrder', 'apply ${add.keys.toList()}');
-    _saveAppliedOrders({..._appliedOrders, ...add});
-    _onOrderChanged();
-  }
-
-  void _onOrderChanged() {
-    _snapshot = _withOfficialOrder(_base);
+  /// 同期やバックアップの結果を、直した停留所へ入れる。同期は予約しない。
+  void _applyRouteEdits(PersonalData data) {
+    _saveCustomStops({for (final e in data.routeEdits) e.relationId: e.stops});
+    _writeTimes(_routeEditTimesKey, {for (final e in data.routeEdits) e.relationId: e.updatedAt});
+    _writeTimes(_routeEditForgottenKey, data.forgottenRouteEdits);
+    _snapshot = _withCustomStops(_base);
+    _followAlightStop();
     _planner.invalidate();
     notifyListeners();
     unawaited(_replan());
   }
 
-  /// 全路線を照合する。まだ適用しない。
-  StopOrderInspection inspectStopOrder() {
-    final official = stopOrder.current.routes;
-    final refs = {for (final o in official) OfficialOrderMatcher.normalizeRef(o.ref)};
-    final fixable = <(RouteRecord, OfficialOrderMatch)>[];
-    final unsure = <RouteRecord>[];
-    for (final route in _base.routes) {
-      if (isOfficialOrderApplied(route.relationId)) continue;
-      if (!refs.contains(OfficialOrderMatcher.normalizeRef(route.ref))) continue;
-      final match = _match(route);
-      if (match == null) {
-        unsure.add(route);
-      } else if (!_sameOrder(route.stops, match.orderedIds)) {
-        fixable.add((route, match));
+  /// 記憶がある路線だけ、整えた停留所にする。整えられない記憶は捨てる。
+  CatalogSnapshot _withCustomStops(CatalogSnapshot base) {
+    final entries = _customStops;
+    if (entries.isEmpty) return base;
+    var dropped = false;
+    final catalogStops = {
+      for (final r in base.routes)
+        for (final s in r.stops) s.id: s,
+    };
+    final routes = <RouteRecord>[];
+    for (final route in base.routes) {
+      if (!entries.containsKey(route.relationId)) {
+        routes.add(route);
+        continue;
+      }
+      final stops = CustomStops.resolve(route, entries[route.relationId], elsewhere: catalogStops);
+      if (stops == null) {
+        AppLog.i('stopOrder', 'forget ${route.ref} (${route.relationId}): stops changed');
+        entries.remove(route.relationId);
+        final times = _routeEditTimes..remove(route.relationId);
+        _writeTimes(_routeEditTimesKey, times);
+        dropped = true;
+        routes.add(route);
+      } else {
+        routes.add(route.copyWith(stops: stops));
       }
     }
-    return StopOrderInspection(fixable: fixable, unsure: unsure, officialRouteCount: official.length);
+    if (dropped) _saveCustomStops(entries);
+    return base.copyWith(routes: routes);
   }
 
-  /// 点検で直せた路線だけ公式の順にする。自信がなかった路線は変えない。
-  void applyInspection(StopOrderInspection inspection) =>
-      _applyOrders({for (final (route, match) in inspection.fixable) route.relationId: match.orderedIds});
+  /// この路線に、ユーザーが直した停留所の記憶があるか。
+  bool hasCustomStops(int relationId) =>
+      _customStops.containsKey(relationId) && _base.routes.any((r) => r.relationId == relationId);
 
-  /// 「停留所順を更新」の最後の結果。
-  StopOrderUpdateResult? get stopOrderUpdateResult => _stopOrderResult;
-  bool get stopOrderUpdating => _stopOrderUpdating;
+  /// どれかの路線に、直した停留所の記憶があるか。
+  bool get hasAnyCustomStops => _customStops.isNotEmpty;
 
-  /// 押したときだけ取りにいく。新しい日付のときだけ差し替える。
-  Future<void> updateStopOrder() async {
-    if (_stopOrderUpdating) return;
-    _stopOrderUpdating = true;
-    notifyListeners();
-    try {
-      _stopOrderResult = await stopOrder.update();
-    } finally {
-      _stopOrderUpdating = false;
-      _matchCache.clear();
-      notifyListeners();
+  /// 表示用の停留所を持つ路線（記憶があれば直したもの、無ければ OSM のもの）。同意に関係なく引く。
+  RouteRecord? shownRoute(int relationId) => _snapshot.routes.where((r) => r.relationId == relationId).firstOrNull;
+
+  /// 「この路線を確認」。押したときだけ作る。何も保存しない。
+  /// [stops] を渡すと、その停留所（編集中のもの）で作る。
+  RouteReview? reviewRoute(int relationId, {List<RouteStop>? stops}) {
+    final route = shownRoute(relationId);
+    if (route == null) return null;
+    return RouteReviewer.review(stops == null ? route : route.copyWith(stops: stops), _snapshot.routes);
+  }
+
+  /// この路線の表示用の停留所を [stops] にする（新しい形で保存）。2 件未満なら何もしない。
+  /// カタログのファイルと OSM には書かない。バックアップと iCloud の個人データには載せる。
+  void saveCustomStops(int relationId, List<RouteStop> stops) {
+    if (stops.length < CustomStops.minStops) return;
+    if (!_base.routes.any((r) => r.relationId == relationId)) return;
+    AppLog.i('stopOrder', 'save $relationId (${stops.length} stops)');
+    final forgotten = _forgottenRouteEdits..remove(relationId);
+    _writeTimes(_routeEditForgottenKey, forgotten);
+    _writeTimes(_routeEditTimesKey, {..._routeEditTimes, relationId: DateTime.now().toUtc()});
+    _saveCustomStops({..._customStops, relationId: CustomStops.encode(stops)});
+    _onCustomStopsChanged(sync: true);
+  }
+
+  /// 順番の所見の「これを使う」。提案の並べ替えだけを保存する。
+  void applyOrderFinding(int relationId, OrderFinding finding) => saveCustomStops(relationId, finding.proposal);
+
+  /// 場所の所見の「この停留所に差し替える」。その 1 件だけを候補の ID・名前・座標にする。
+  void applyPlaceFinding(int relationId, PlaceFinding finding) {
+    final replacement = finding.replacement?.stop;
+    final route = shownRoute(relationId);
+    if (replacement == null || route == null) return;
+    final index = route.stops.indexWhere((s) => s.id == finding.stop.id);
+    if (index < 0) return;
+    final stops = [...route.stops];
+    stops[index] = RouteStop(
+      id: replacement.id,
+      name: replacement.name,
+      latitude: replacement.latitude,
+      longitude: replacement.longitude,
+    );
+    saveCustomStops(relationId, stops);
+  }
+
+  /// 「OSM の並びに戻す」。その路線の記憶を消す。表示は OSM のメンバー順に戻る。
+  void forgetCustomStops(int relationId) {
+    final entries = _customStops;
+    if (!entries.containsKey(relationId)) return;
+    entries.remove(relationId);
+    AppLog.i('stopOrder', 'revert $relationId');
+    final times = _routeEditTimes..remove(relationId);
+    _writeTimes(_routeEditTimesKey, times);
+    _writeTimes(_routeEditForgottenKey, {..._forgottenRouteEdits, relationId: DateTime.now().toUtc()});
+    _saveCustomStops(entries);
+    _onCustomStopsChanged(sync: true);
+  }
+
+  /// 直した停留所をすべて消し、OSM の並びに戻す。消した印を残すので、同期先からも戻らない。
+  void forgetAllCustomStops() {
+    final entries = _customStops;
+    if (entries.isEmpty) return;
+    final now = DateTime.now().toUtc();
+    final forgotten = _forgottenRouteEdits;
+    for (final id in entries.keys) {
+      forgotten[id] = now;
     }
+    _writeTimes(_routeEditForgottenKey, forgotten);
+    _writeTimes(_routeEditTimesKey, {});
+    _saveCustomStops({});
+    AppLog.i('stopOrder', 'revert all (${entries.length})');
+    _onCustomStopsChanged(sync: true);
   }
 
-  /// 読み込んだ路線の停留所順を、線と明らかに逆行しているものだけ端末内で直す。
-  /// 番号表・路線図・降車停の ＋／− はどれもこの順を使う。ファイルには書き戻さない。
-  CatalogSnapshot _repaired(CatalogSnapshot loaded) {
-    final (snapshot, count) = StopOrderRepair.snapshot(loaded);
-    if (count > 0) AppLog.i('catalog', 'reordered stops of $count routes');
-    return snapshot;
+  /// 乗車中の降車停の座標・名前を、直した停留所に合わせる。到着距離はこの座標で測る。
+  void _followAlightStop() {
+    final riding = _riding;
+    final choice = alightChoice;
+    if (riding == null || choice == null) return;
+    final stop = choice.alightStop;
+    if (stop.id != riding.alightStop.id) return;
+    if (stop.point == riding.alightStop.point && stop.name == riding.alightStop.name) return;
+    _riding = riding.withAlightStop(stop);
+    _saveRiding();
+  }
+
+  /// ユーザーが足す停留所の ID。負の整数で、この端末で重ならない。
+  int newLocalStopId() {
+    var next = prefs.getInt(_nextLocalStopIdKey) ?? -1;
+    for (final value in _customStops.values) {
+      if (value is! List) continue;
+      for (final e in value) {
+        final id = e is Map ? e['id'] : null;
+        if (id is num && id.toInt() <= next) next = id.toInt() - 1;
+      }
+    }
+    if (next >= 0) next = -1;
+    unawaited(prefs.setInt(_nextLocalStopIdKey, next - 1));
+    return next;
+  }
+
+  void _onCustomStopsChanged({bool sync = false}) {
+    _snapshot = _withCustomStops(_base);
+    _followAlightStop();
+    _planner.invalidate();
+    notifyListeners();
+    unawaited(_replan());
+    if (sync) _scheduleSync();
+  }
+
+  static bool _keptAfterForget(RouteEdit edit, Map<int, DateTime> forgotten) {
+    final at = forgotten[edit.relationId];
+    return at == null || edit.updatedAt.isAfter(at);
   }
 
   /// Swift 版（同じバンドル ID）の同意を引き継ぐ。Swift は接頭辞なしの UserDefaults に書く。
@@ -664,11 +723,11 @@ class TripController extends ChangeNotifier {
     _onFix(point);
   }
 
-  /// テストで同意に関係なく今の並び（公式の順を被せたもの）を見る。
+  /// テストで同意に関係なく今の並び（ユーザーが直した停留所を被せたもの）を見る。
   @visibleForTesting
   CatalogSnapshot get debugCatalog => _snapshot;
 
-  /// テストで路線データを直接入れる（読み込みと同じく停留所順を直す）。
+  /// テストで路線データを直接入れる（読み込みと同じく、停留所は並べ替えない）。
   @visibleForTesting
   void debugSetCatalog(CatalogSnapshot snapshot) {
     _setCatalog(snapshot);
@@ -834,7 +893,15 @@ class TripController extends ChangeNotifier {
   // MARK: - 計画
 
   /// 再読み込み。キャッシュを捨てて再計算する。通信しない。
+  /// 番号表の ↻。出発地が現在地なら、押した時点の GPS をナビ中の経路用の出発地にしてから引き直す
+  /// （乗換地点で新しいバスを探すとき、出発地を更新しなくて済む）。手動の出発地はそのまま。
   Future<void> reload() async {
+    final gps = _gps;
+    if (_manualOrigin == null && _destination != null && gps != null) {
+      _adoptNextFix = false;
+      _setRouteOrigin(gps);
+      notifyListeners();
+    }
     _planner.invalidate();
     await _replan();
   }
@@ -990,7 +1057,7 @@ class TripController extends ChangeNotifier {
   }
 
   /// 降車停を、今乗っている路線に沿って [delta] 個ずらす（＋1 は先、−1 は手前）。
-  /// 乗換の先のレグは変えない。到着アラートは目標が変わったので鳴った記録を消す。
+  /// 乗換があれば、次のレグの乗車停留所も新しい降車停に一番近い停留所へ移す。到着アラートは目標が変わったので鳴った記録を消す。
   void shiftRidingAlight(int delta) {
     final riding = _riding;
     final choice = alightChoice;
@@ -1000,7 +1067,7 @@ class TripController extends ChangeNotifier {
     final stop = choice.stops[next];
     final leg = LocalPlanner.legOf(choice.route, choice.boardIndex, next);
     AppLog.i('riding', 'alight ${riding.alightStop.name} -> ${stop.name} (${choice.alightIndex} -> $next)');
-    _riding = riding.withAlight(stop, path: leg.path);
+    _riding = riding.withAlight(stop, path: leg.path, itinerary: _itineraryWithShiftedAlight(riding, leg));
     _alertTracker.reset();
     _alerts.removeWhere((a) => a is DistanceRidingAlert);
     _saveRiding();
@@ -1011,14 +1078,59 @@ class TripController extends ChangeNotifier {
     if (gps != null) _checkRiding(gps);
   }
 
+  /// 乗っている旅程の今のレグを [leg]（ずらした降車停まで）に替え、次のレグの乗車停留所を
+  /// その降車停に合わせた旅程。次の路線がカタログに無ければ次のレグはそのまま。
+  LocalItinerary? _itineraryWithShiftedAlight(RidingSession riding, ItineraryLeg leg) {
+    final itinerary = riding.itinerary;
+    if (itinerary == null) return null;
+    final index = riding.legIndex;
+    final legs = [...itinerary.legs];
+    final old = legs[index];
+    legs[index] = leg;
+    var walk = itinerary.walkMeters;
+    if (index + 1 < legs.length) {
+      final nextLeg = legs[index + 1];
+      final route = visibleCatalog.routes.where((r) => r.relationId == nextLeg.relationId).firstOrNull;
+      final stops = route?.stops ?? const <RouteStop>[];
+      var alight = stops.indexWhere((s) => s.id == nextLeg.alightStop.id);
+      if (alight < 0 && nextLeg.alightIndex < stops.length) alight = nextLeg.alightIndex;
+      if (route != null && alight >= 1) {
+        // 同じ停留所があればそこ、無ければ一番近い停留所（次のレグの降車停より手前）。
+        var board = stops.indexWhere((s) => s.id == leg.alightStop.id);
+        if (board < 0 || board >= alight) {
+          board = 0;
+          for (var i = 1; i < alight; i++) {
+            if (Geo.distance(stops[i].point, leg.alightStop.point) <
+                Geo.distance(stops[board].point, leg.alightStop.point)) {
+              board = i;
+            }
+          }
+        }
+        final moved = LocalPlanner.legOf(route, board, alight);
+        walk += Geo.distance(leg.alightStop.point, moved.boardStop.point) -
+            Geo.distance(old.alightStop.point, nextLeg.boardStop.point);
+        legs[index + 1] = moved;
+        AppLog.i('riding', 'transfer board ${nextLeg.boardStop.name} -> ${moved.boardStop.name}');
+      }
+    }
+    return LocalItinerary(legs: legs, walkMeters: math.max(0, walk), bearing: itinerary.bearing);
+  }
+
   /// 乗っている旅程なら、今のレグの降車停と線を [RidingSession] に合わせた旅程（経路地図用）。
+  /// 降車停をずらしていれば、乗換の先のレグも乗車中の旅程（乗車停留所を合わせたもの）にする。
   LocalItinerary ridingView(LocalItinerary itinerary) {
     final riding = _riding;
     final index = ridingLegIndexIn(itinerary);
     if (riding == null || index == null) return itinerary;
     final leg = itinerary.legs[index];
-    if (leg.alightStop.id == riding.alightStop.id) return itinerary;
+    final stored = riding.itinerary!;
+    if (leg.alightStop.id == riding.alightStop.id && !riding.alightAdjusted) return itinerary;
     final legs = [...itinerary.legs];
+    if (riding.alightAdjusted) {
+      for (var i = index + 1; i < legs.length; i++) {
+        legs[i] = stored.legs[i];
+      }
+    }
     legs[index] = ItineraryLeg(
       relationId: leg.relationId,
       ref: leg.ref,
@@ -1030,7 +1142,8 @@ class TripController extends ChangeNotifier {
       path: riding.path,
       rideMeters: Geo.polylineLength(riding.path),
     );
-    return LocalItinerary(legs: legs, walkMeters: itinerary.walkMeters, bearing: itinerary.bearing);
+    final walk = riding.alightAdjusted ? stored.walkMeters : itinerary.walkMeters;
+    return LocalItinerary(legs: legs, walkMeters: walk, bearing: itinerary.bearing);
   }
 
   void _startRiding(RidingSession session) {
@@ -1160,12 +1273,16 @@ class TripController extends ChangeNotifier {
 
   Future<void> setSortMode(TableSortMode mode) async {
     await prefs.setString(_sortModeKey, mode.name);
+    await SettingsSync.touch(prefs, _sortModeKey);
     notifyListeners();
+    _scheduleSync();
   }
 
   Future<void> setDistanceMetric(DistanceMetric metric) async {
     await prefs.setString(_metricKey, metric.name);
+    await SettingsSync.touch(prefs, _metricKey);
     notifyListeners();
+    _scheduleSync();
   }
 
   // MARK: - 同意
@@ -1200,6 +1317,9 @@ class TripController extends ChangeNotifier {
     await cancelNavigation();
     clearManualOrigin();
     await places.clearAll();
+    _saveCustomStops({});
+    _writeTimes(_routeEditTimesKey, {});
+    _writeTimes(_routeEditForgottenKey, {});
     await withdrawConsent();
   }
 
@@ -1237,11 +1357,11 @@ class TripController extends ChangeNotifier {
     return 'osmBus-backup-${date.year}${two(date.month)}${two(date.day)}.json';
   }
 
-  /// 路線の正本に、登録済みの場所と目的地の履歴を `personal` として足す。
+  /// 路線の正本に、登録済みの場所、目的地の履歴、直した停留所、変えた設定を `personal` として足す。
   /// 路線だけを読む側（Swift 版など）は `personal` を無視する。
   Future<String> exportBackupText() async {
     final snapshot = await store.load();
-    return jsonEncode({...snapshot.toJson(), 'personal': places.data.toJson()});
+    return jsonEncode({...snapshot.toJson(), 'personal': _personalData.toJson()});
   }
 
   Future<void> exportBackup() async {
@@ -1284,17 +1404,26 @@ class TripController extends ChangeNotifier {
           ImportMode.merge => CatalogOps.merge(local, imported, now: now),
         });
     if (personal != null) {
-      final local = places.data;
-      await places.apply(switch (mode) {
+      final local = _personalData;
+      final applied = switch (mode) {
         // 消した印は手元のまま残す（他の端末で消したものを戻さないため）。
         ImportMode.replace => PersonalData(
             places: personal.places,
             history: personal.history,
             deletedPlaces: local.deletedPlaces,
             historyClearedAt: local.historyClearedAt,
+            routeEdits: [
+              for (final edit in personal.routeEdits)
+                if (_keptAfterForget(edit, local.forgottenRouteEdits)) edit,
+            ],
+            forgottenRouteEdits: local.forgottenRouteEdits,
+            settings: PersonalData.overlaySettings(local.settings, personal.settings),
           ),
         ImportMode.merge => PersonalData.merge(local, personal, now: now),
-      });
+      };
+      await places.apply(applied);
+      _applyRouteEdits(applied);
+      await _applySettings(applied, force: mode == ImportMode.replace);
       _scheduleSync();
     }
     return ImportResult.ok(result.routes.length);
@@ -1336,7 +1465,10 @@ class TripController extends ChangeNotifier {
     notifyListeners();
     try {
       await sync.mergeAndPush();
-      await places.apply(await sync.mergePersonal(places.data));
+      final personal = await sync.mergePersonal(_personalData);
+      await places.apply(personal);
+      _applyRouteEdits(personal);
+      await _applySettings(personal, force: false);
       await prefs.setString(_lastSyncKey, DateTime.now().toUtc().toIso8601String());
     } catch (e) {
       _syncError = '$e';

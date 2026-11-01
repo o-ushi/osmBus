@@ -158,6 +158,27 @@ void main() {
   });
 
   group('路線の形と寄り道', () {
+    test('線が逆向きでも道に沿って描き、数kmの飛びは通らない', () {
+      final a = GeoPoint(21.0, lon);
+      final bend = GeoPoint(21.0 + kmLat / 2, lon - 0.01);
+      final b = GeoPoint(21.0 + kmLat, lon);
+      final origin = GeoPoint(a.latitude - hundredMetersLat, lon);
+      final dest = GeoPoint(b.latitude + hundredMetersLat, lon);
+      final reversed = route(id: 1, ref: '30', stops: [a, b]).copyWith(polylineSegments: [
+        [b, bend, a],
+      ]);
+      final leg = LocalPlanner.plan([reversed], origin, dest).single.firstLeg;
+      expect(leg.path.any((p) => Geo.distance(p, bend) < 20), isTrue);
+      expect(leg.rideMeters, closeTo(Geo.polylineLength([a, bend, b]), 5));
+
+      final far = GeoPoint(21.2, lon + 0.1);
+      final jumped = reversed.copyWith(polylineSegments: [
+        [b, far, a],
+      ]);
+      final chord = LocalPlanner.plan([jumped], origin, dest).single.firstLeg;
+      expect(chord.path.any((p) => Geo.distance(p, far) < 1000), isFalse);
+    });
+
     test('way の順番が崩れた路線でも、端から端の直線にならず停留所に沿う', () {
       // 線を後ろ半分・前半分の順に並べた（Overpass の way 順が崩れたとき）。
       final line = northward(21.0, lon, 4);

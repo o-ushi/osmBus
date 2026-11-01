@@ -70,7 +70,23 @@ class RidingSession {
   }
 
   /// 降車停留所だけを [stop] に変えた乗車。乗車中の線は [path] にする。
-  RidingSession withAlight(RouteStop stop, {required List<GeoPoint> path}) => RidingSession(
+  /// [itinerary] を渡せば旅程も替える（乗換の先のレグの乗車停留所を合わせたもの）。
+  RidingSession withAlight(RouteStop stop, {required List<GeoPoint> path, LocalItinerary? itinerary}) =>
+      RidingSession(
+        ref: ref,
+        alightStop: stop,
+        path: path,
+        startedAt: startedAt,
+        itinerary: itinerary ?? this.itinerary,
+        legIndex: legIndex,
+        routeId: routeId,
+        boardStopId: boardStopId,
+        alightAdjusted: true,
+        boardingDistanceToDestination: boardingDistanceToDestination,
+      );
+
+  /// 同じ降車停の座標や名前だけを入れ替える（ユーザーが停留所の場所を直したとき）。降車停を変えたことにはしない。
+  RidingSession withAlightStop(RouteStop stop) => RidingSession(
         ref: ref,
         alightStop: stop,
         path: path,
@@ -79,7 +95,7 @@ class RidingSession {
         legIndex: legIndex,
         routeId: routeId,
         boardStopId: boardStopId,
-        alightAdjusted: true,
+        alightAdjusted: alightAdjusted,
         boardingDistanceToDestination: boardingDistanceToDestination,
       );
 

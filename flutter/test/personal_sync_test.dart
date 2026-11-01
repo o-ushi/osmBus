@@ -2,12 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:osmbus/models/bus_matrix.dart';
 import 'package:osmbus/models/route_catalog.dart';
 import 'package:osmbus/services/catalog_sync.dart';
 import 'package:osmbus/services/route_catalog_store.dart';
+import 'package:osmbus/state/app_settings.dart';
 import 'package:osmbus/state/places_store.dart';
 import 'package:osmbus/state/trip_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'stop_order_test.dart' show backtracking, ids, straight;
 
 const hanoi = Destination(name: 'Hồ Gươm', point: GeoPoint(21.0285, 105.8542));
 const saigon = Destination(name: 'Bến Thành', point: GeoPoint(10.7726, 106.6980));
@@ -129,13 +133,84 @@ void main() {
         history: [HistoryEntry(destination: saigon, setAt: t1)],
         deletedPlaces: {'z': t1},
         historyClearedAt: t0,
+        routeEdits: [
+          RouteEdit(
+            relationId: 7,
+            updatedAt: t1,
+            stops: [
+              {'id': 1, 'name': 'A', 'latitude': 1.0, 'longitude': 2.0},
+            ],
+          ),
+        ],
+        forgottenRouteEdits: {9: t0},
       );
       final back = PersonalData.fromJson(jsonDecode(jsonEncode(data.toJson())));
       expect(back.places.single.updatedAt, t0);
       expect(back.history.single.destination.name, saigon.name);
       expect(back.deletedPlaces, {'z': t1});
       expect(back.historyClearedAt, t0);
+      expect(back.routeEdits.single.relationId, 7);
+      expect(back.routeEdits.single.stops, [
+        {'id': 1, 'name': 'A', 'latitude': 1.0, 'longitude': 2.0},
+      ]);
+      expect(back.forgottenRouteEdits, {9: t0});
       expect(() => PersonalData.fromJson({'places': 'x'}), throwsFormatException);
+      expect(() => PersonalData.fromJson({'routeEdits': [1]}), throwsFormatException);
+    });
+
+    test('直した停留所は新しい方を残し、戻した印より古いものは戻さない', () {
+      RouteEdit edit(int id, DateTime at) => RouteEdit(
+            relationId: id,
+            updatedAt: at,
+            stops: [
+              {'id': 1, 'name': 'A', 'latitude': 1.0, 'longitude': 2.0},
+              {'id': 2, 'name': 'B', 'latitude': 3.0, 'longitude': 4.0},
+            ],
+          );
+      final merged = PersonalData.merge(
+        PersonalData(routeEdits: [edit(1, t0), edit(2, t2)], forgottenRouteEdits: {3: t0}),
+        PersonalData(routeEdits: [edit(1, t1), edit(3, t0)], forgottenRouteEdits: {2: t1}),
+        now: t2,
+      );
+      expect(merged.routeEdits.map((e) => e.relationId), [1, 2]);
+      expect(merged.routeEdits.first.updatedAt, t1);
+      expect(merged.forgottenRouteEdits.keys, containsAll([2, 3]));
+    });
+
+    test('設定はキーごとに新しい方を残し、設定の無いファイルは手元を残す', () {
+      SyncedSetting setting(String key, Object? value, DateTime at) =>
+          SyncedSetting(key: key, value: value, updatedAt: at);
+      final merged = PersonalData.merge(
+        PersonalData(settings: [
+          setting('table.sortMode', 'direction', t1),
+          setting('keypad.hapticEnabled', true, t0),
+        ]),
+        PersonalData(settings: [
+          setting('table.sortMode', 'distance', t0),
+          setting('keypad.soundEnabled', true, t2),
+        ]),
+        now: t2,
+      );
+      final byKey = {for (final s in merged.settings!) s.key: s.value};
+      expect(byKey['table.sortMode'], 'direction');
+      expect(byKey['keypad.hapticEnabled'], true);
+      expect(byKey['keypad.soundEnabled'], true);
+
+      final kept = PersonalData.merge(
+        PersonalData(settings: [setting('table.sortMode', 'transfers', t1)]),
+        const PersonalData(),
+        now: t2,
+      );
+      expect(kept.settings!.single.value, 'transfers');
+      expect(PersonalData.fromJson({'schemaVersion': 1}).settings, isNull);
+      expect(
+        () => PersonalData.fromJson({
+          'settings': [
+            {'key': 'table.sortMode', 'value': 'sideways', 'updatedAt': t1.toIso8601String()},
+          ],
+        }),
+        throwsFormatException,
+      );
     });
   });
 
@@ -227,6 +302,115 @@ void main() {
       expect(a2.places.places, hasLength(1));
       await a2.syncNow();
       expect(a2.places.places, isEmpty);
+      for (final c in [a, b, a2]) {
+        c.dispose();
+      }
+    });
+
+    test('直した停留所は書き出しと読み込みで戻る', () async {
+      SharedPreferences.setMockInitialValues({});
+      final a = await device('edits-a', FakeCloud());
+      a.debugSetCatalog(CatalogSnapshot(routes: [backtracking, straight]));
+      final proposal = a.reviewRoute(1)!.order!.proposal;
+      a.applyOrderFinding(1, a.reviewRoute(1)!.order!);
+      final exported = await a.exportBackupText();
+      expect((jsonDecode(exported) as Map)['personal']['routeEdits'], isNotEmpty);
+
+      SharedPreferences.setMockInitialValues({});
+      final b = await device('edits-b', FakeCloud());
+      b.debugSetCatalog(CatalogSnapshot(routes: [backtracking, straight]));
+      final result = await b.importBackupText(exported, ImportMode.replace);
+      expect(result.error, isNull);
+      expect(ids(b.shownRoute(1)!.stops), ids(proposal));
+      expect(ids(b.shownRoute(2)!.stops), ids(straight.stops));
+      a.dispose();
+      b.dispose();
+    });
+
+    test('直した停留所の採用と OSM へ戻すが端末間で伝わる', () async {
+      final cloud = FakeCloud();
+      SharedPreferences.setMockInitialValues({'sync.iCloudEnabled': true});
+      final a = await device('route-a', cloud);
+      a.debugSetCatalog(CatalogSnapshot(routes: [backtracking, straight]));
+      final proposal = a.reviewRoute(1)!.order!.proposal;
+      a.applyOrderFinding(1, a.reviewRoute(1)!.order!);
+      await a.syncNow();
+      final applied = (await SharedPreferences.getInstance()).getString('stopOrder.applied');
+      final times = (await SharedPreferences.getInstance()).getString('stopOrder.updatedAt');
+
+      SharedPreferences.setMockInitialValues({'sync.iCloudEnabled': true});
+      final b = await device('route-b', cloud);
+      b.debugSetCatalog(CatalogSnapshot(routes: [backtracking, straight]));
+      await b.syncNow();
+      expect(ids(b.shownRoute(1)!.stops), ids(proposal));
+      b.forgetCustomStops(1);
+      await b.syncNow();
+
+      SharedPreferences.setMockInitialValues({
+        'sync.iCloudEnabled': true,
+        'stopOrder.applied': applied!,
+        'stopOrder.updatedAt': times!,
+      });
+      final a2 = await device('route-a2', cloud);
+      a2.debugSetCatalog(CatalogSnapshot(routes: [backtracking, straight]));
+      expect(a2.hasCustomStops(1), isTrue);
+      await a2.syncNow();
+      expect(a2.hasCustomStops(1), isFalse);
+      expect(ids(a2.shownRoute(1)!.stops), [101, 104, 102, 103]);
+      for (final c in [a, b, a2]) {
+        c.dispose();
+      }
+    });
+
+    test('番号表の並びと到着アラートとテンキーが端末間で伝わる', () async {
+      final cloud = FakeCloud();
+      SharedPreferences.setMockInitialValues({'sync.iCloudEnabled': true});
+      final a = await device('set-a', cloud);
+      await a.setSortMode(TableSortMode.distance);
+      await a.setDistanceMetric(DistanceMetric.total);
+      await a.settings.setSlotMeters(0, 1500);
+      await a.settings.setHapticEnabled(false);
+      await a.settings.setVerboseLog(true);
+      await a.syncNow();
+      expect(a.syncError, isNull);
+      final prefs = await SharedPreferences.getInstance();
+      final saved = <String, Object>{
+        'sync.iCloudEnabled': true,
+        'table.sortMode': prefs.getString('table.sortMode')!,
+        'table.distanceMetric': prefs.getString('table.distanceMetric')!,
+        'alert.distance.0.meters': prefs.getInt('alert.distance.0.meters')!,
+        'keypad.hapticEnabled': prefs.getBool('keypad.hapticEnabled')!,
+        'settings.updatedAt': prefs.getString('settings.updatedAt')!,
+        'dev.verboseLog': true,
+      };
+      final personal = jsonDecode(cloud.personal!) as Map<String, dynamic>;
+      final keys = [
+        for (final s in personal['settings'] as List) (s as Map)['key'],
+      ];
+      expect(keys, containsAll(['table.sortMode', 'table.distanceMetric', 'alert.distance.0.meters', 'keypad.hapticEnabled']));
+      expect(keys, isNot(contains('dev.verboseLog')));
+
+      SharedPreferences.setMockInitialValues({'sync.iCloudEnabled': true});
+      final b = await device('set-b', cloud);
+      await b.syncNow();
+      expect(b.sortMode, TableSortMode.distance);
+      expect(b.distanceMetric, DistanceMetric.total);
+      expect(b.settings.distanceSlots.first.meters, 1500);
+      expect(b.settings.hapticEnabled, isFalse);
+      expect(b.settings.verboseLog, isFalse);
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      await b.settings.setKeypadInputMode(KeypadInputMode.clearBeforeNewInput);
+      await b.syncNow();
+
+      SharedPreferences.setMockInitialValues(saved);
+      final a2 = await device('set-a2', cloud);
+      expect(a2.sortMode, TableSortMode.distance);
+      expect(a2.settings.verboseLog, isTrue);
+      await a2.syncNow();
+      expect(a2.settings.keypadInputMode, KeypadInputMode.clearBeforeNewInput);
+      expect(a2.sortMode, TableSortMode.distance);
+      expect(a2.settings.hapticEnabled, isFalse);
+      expect(a2.settings.verboseLog, isTrue);
       for (final c in [a, b, a2]) {
         c.dispose();
       }

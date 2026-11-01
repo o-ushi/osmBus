@@ -11,6 +11,7 @@ import 'destination_picker_screen.dart';
 import 'distance_badge.dart';
 import 'help_screen.dart';
 import 'keypad.dart';
+import 'missing_number_sheet.dart';
 import 'result_banner.dart';
 import 'route_map_screen.dart';
 import 'settings_screen.dart';
@@ -186,6 +187,9 @@ class _TopScreenState extends State<TopScreen> {
             flatEntries: controller.tableState == TableState.ready ? controller.flatEntries : const [],
             isRidingLeg: (entry, legIndex) => controller.isRidingLeg(entry.itinerary, legIndex),
             onReload: controller.reload,
+            onMissingNumber: controller.tableState == TableState.ready || controller.tableState == TableState.noRoutes
+                ? () => showMissingNumber(context, controller)
+                : null,
             onTap: (entry) => _openMap(entry.itinerary),
             onLongPress: (entry, legIndex) => controller.toggleRiding(entry, legIndex: legIndex),
           ),
