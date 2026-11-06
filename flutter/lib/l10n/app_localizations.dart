@@ -1480,204 +1480,6 @@ abstract class AppLocalizations {
   /// **'逆方向です'**
   String get wrongDirectionTitle;
 
-  /// No description provided for @helpIntro.
-  ///
-  /// In ja, this message translates to:
-  /// **'起動するとマトリクスです。行き先を設定し、バス番号表から乗れるバスを選べます。番号判定のキーパッドは … → 番号入力、または画面左端から右へスワイプで切り替えます。'**
-  String get helpIntro;
-
-  /// No description provided for @helpBasics.
-  ///
-  /// In ja, this message translates to:
-  /// **'基本操作'**
-  String get helpBasics;
-
-  /// No description provided for @helpResults.
-  ///
-  /// In ja, this message translates to:
-  /// **'結果の見方'**
-  String get helpResults;
-
-  /// No description provided for @helpRoutes.
-  ///
-  /// In ja, this message translates to:
-  /// **'路線を見る'**
-  String get helpRoutes;
-
-  /// No description provided for @helpTroubleshooting.
-  ///
-  /// In ja, this message translates to:
-  /// **'トラブルシュート'**
-  String get helpTroubleshooting;
-
-  /// No description provided for @helpTopTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'マトリクス'**
-  String get helpTopTitle;
-
-  /// No description provided for @helpTopBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'起動時の画面です。行き先・現在地・距離・バス番号表が並びます。キーパッドで番号判定したいときは … → 番号入力。画面左端から右へスワイプでも切り替えられます。マトリクスに戻るときは … → マトリクス、またはもう一度左端から右へスワイプします。'**
-  String get helpTopBody;
-
-  /// No description provided for @helpDestinationTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'目的地を設定'**
-  String get helpDestinationTitle;
-
-  /// No description provided for @helpDestinationBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'行き先バーをタップすると地図のシートが開きます。地名検索か地図の長押しで選ぶほか、「履歴から探す」「登録地から探す」からも選べます。シート上部で出発地と目的地を切り替えられます。'**
-  String get helpDestinationBody;
-
-  /// No description provided for @helpLocationTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'現在地と出発地'**
-  String get helpLocationTitle;
-
-  /// No description provided for @helpLocationBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'起動時に位置情報の許可を求めます。現在地バーの ↻ で更新、地図アイコンで出発地を地図から指定できます。指定した出発地は × で現在地に戻せます。ナビ中（行き先があるあいだ）は、↻ を押すまで経路の出発地は動きません（青い現在地の丸は動き続けます）。乗車中の距離はいつも GPS の現在地から測ります。'**
-  String get helpLocationBody;
-
-  /// No description provided for @helpSavedPlacesTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'場所を登録'**
-  String get helpSavedPlacesTitle;
-
-  /// No description provided for @helpSavedPlacesBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'行き先シートの「登録地から探す」から、自宅やよく行く場所を登録できます。タップすると目的地に設定されます。今の目的地は長押しでそのまま登録できます。'**
-  String get helpSavedPlacesBody;
-
-  /// No description provided for @helpBusNumberTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'バス番号を入力'**
-  String get helpBusNumberTitle;
-
-  /// No description provided for @helpBusNumberBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'表に無い番号を判定したいときだけ … → 番号入力（または左端から右スワイプ）でキーパッドを開き、数字だけ入力します（例: 35）。行き先ルートと照合し、乗換地点まで行ける場合は乗車可とします。'**
-  String get helpBusNumberBody;
-
-  /// No description provided for @helpTableTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'バス番号表'**
-  String get helpTableTitle;
-
-  /// No description provided for @helpTableBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'方向と乗換回数ごとに、乗れるバス番号が並びます。タップで路線図、長押しで乗車と降車の切り替えです。乗車中の番号はオレンジになります。乗るはずの番号が表に無いときは「この区間に無い番号」から入れます。'**
-  String get helpTableBody;
-
-  /// No description provided for @helpBoardTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'乗車開始'**
-  String get helpBoardTitle;
-
-  /// No description provided for @helpBoardBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'番号入力でバス番号を入力すると、行き先までのルートと照合します。乗れる系統があれば黄色で「35A だったら乗ってください！」のように表示され、「乗車開始」で乗車中になります。'**
-  String get helpBoardBody;
-
-  /// No description provided for @helpSkipTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'見送ってください！'**
-  String get helpSkipTitle;
-
-  /// No description provided for @helpSkipBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'行き先ルートに、入力した数字の系統が含まれない場合は、赤色で「見送ってください！」と表示されます。'**
-  String get helpSkipBody;
-
-  /// No description provided for @helpDistanceTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'距離の色'**
-  String get helpDistanceTitle;
-
-  /// No description provided for @helpDistanceBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'未乗車のときは目的地までの直線距離、乗車中は今乗っているバスの降車バス停までの直線距離です。色の境目は到着アラートの距離アラート 1〜3 の距離です（アラートがオフでも同じ）。距離アラート 3 の距離未満は赤、距離アラート 2 の距離未満は黄、距離アラート 1 の距離未満は橙、3km未満は緑、3km以上は青です（初期値では 100m 未満が赤、400m 未満が黄、1km 未満が橙）。乗車中に距離バッジをタップすると、今のルート図が開きます。距離バッジを長押しするとナビ中止（行き先も消えます）。行き先を設定せずに路線図から乗車した場合は「—」と表示され、距離は出ません。'**
-  String get helpDistanceBody;
-
-  /// No description provided for @helpRidingTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'乗車中モード'**
-  String get helpRidingTitle;
-
-  /// No description provided for @helpRidingBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'バス番号を長押しすると乗車中になります。同じ番号をもう一度長押しすると降車（乗換用）します。乗車中は降車バス停までの距離で到着アラートが鳴り、画面がオフでも位置の追跡を続けます。逆方向に乗っていそうなときは警告します。'**
-  String get helpRidingBody;
-
-  /// No description provided for @helpLineMapTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'路線図'**
-  String get helpLineMapTitle;
-
-  /// No description provided for @helpLineMapBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'… → 路線図 で、端末に保存した路線データからバス番号で路線を探して地図に出します。一覧ボタンから保存済みの路線も選べます。番号バッジを長押しすると乗車・降車します（降車は終点）。'**
-  String get helpLineMapBody;
-
-  /// No description provided for @helpSettingsTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'設定とアラート'**
-  String get helpSettingsTitle;
-
-  /// No description provided for @helpSettingsBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'… → 設定 から、言語・テンキー入力・キーパッドの音と振動・到着アラート・路線データを変更できます。到着アラートは降車バス停までの距離で最大3段階設定でき、遠い順にアラームが1〜3回鳴ります。アプリが裏にあるときは通知で知らせます。'**
-  String get helpSettingsBody;
-
-  /// No description provided for @helpNoRouteTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'ルートが見つからない'**
-  String get helpNoRouteTitle;
-
-  /// No description provided for @helpNoRouteBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'設定で路線データをダウンロードしたか、現在地と目的地が同じ地域にあるか確認してください。路線データは現在地の周辺を取得します。'**
-  String get helpNoRouteBody;
-
-  /// No description provided for @helpNetworkTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'通信エラー'**
-  String get helpNetworkTitle;
-
-  /// No description provided for @helpNetworkBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'Wi‑Fi またはモバイルデータを確認し、もう一度試してください。バスの判定は端末内の路線データで行うため、オフラインでも使えます。'**
-  String get helpNetworkBody;
-
   /// No description provided for @developerScreen.
   ///
   /// In ja, this message translates to:
@@ -2211,6 +2013,276 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'番号は一致します。この区間の両端に停留所はありません。'**
   String get missingNumberOthers;
+
+  /// No description provided for @settingsGroupAlerts.
+  ///
+  /// In ja, this message translates to:
+  /// **'アラートと表示'**
+  String get settingsGroupAlerts;
+
+  /// No description provided for @settingsGroupRoutes.
+  ///
+  /// In ja, this message translates to:
+  /// **'路線データと位置情報'**
+  String get settingsGroupRoutes;
+
+  /// No description provided for @settingsGroupBackup.
+  ///
+  /// In ja, this message translates to:
+  /// **'同期とバックアップ'**
+  String get settingsGroupBackup;
+
+  /// No description provided for @helpIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'行き先を決めて、乗れるバスを選ぶアプリです。'**
+  String get helpIntro;
+
+  /// No description provided for @helpDestTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'目的地を決める'**
+  String get helpDestTitle;
+
+  /// No description provided for @helpDest1.
+  ///
+  /// In ja, this message translates to:
+  /// **'行き先バーをタップ'**
+  String get helpDest1;
+
+  /// No description provided for @helpDest2.
+  ///
+  /// In ja, this message translates to:
+  /// **'地名を検索するか、地図を長押し'**
+  String get helpDest2;
+
+  /// No description provided for @helpDest3.
+  ///
+  /// In ja, this message translates to:
+  /// **'「登録地から探す」「履歴から探す」からも選べる'**
+  String get helpDest3;
+
+  /// No description provided for @helpOriginTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'出発地を変える'**
+  String get helpOriginTitle;
+
+  /// No description provided for @helpOrigin1.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在地バーの地図アイコンをタップ'**
+  String get helpOrigin1;
+
+  /// No description provided for @helpOrigin2.
+  ///
+  /// In ja, this message translates to:
+  /// **'× で現在地に戻す'**
+  String get helpOrigin2;
+
+  /// No description provided for @helpOrigin3.
+  ///
+  /// In ja, this message translates to:
+  /// **'↻ で現在地を更新'**
+  String get helpOrigin3;
+
+  /// No description provided for @helpPlaceTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'よく行く場所を登録する'**
+  String get helpPlaceTitle;
+
+  /// No description provided for @helpPlace1.
+  ///
+  /// In ja, this message translates to:
+  /// **'行き先シートの「登録地から探す」を開く'**
+  String get helpPlace1;
+
+  /// No description provided for @helpPlace2.
+  ///
+  /// In ja, this message translates to:
+  /// **'今の目的地は長押しで登録'**
+  String get helpPlace2;
+
+  /// No description provided for @helpRideTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'乗車・降車を記録する'**
+  String get helpRideTitle;
+
+  /// No description provided for @helpRide1.
+  ///
+  /// In ja, this message translates to:
+  /// **'バス番号を長押しで乗車'**
+  String get helpRide1;
+
+  /// No description provided for @helpRide2.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じ番号をもう一度長押しで降車'**
+  String get helpRide2;
+
+  /// No description provided for @helpNumberTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'番号で乗れるか調べる'**
+  String get helpNumberTitle;
+
+  /// No description provided for @helpNumber1.
+  ///
+  /// In ja, this message translates to:
+  /// **'…の「番号入力」をタップ（左端から右スワイプでも可）'**
+  String get helpNumber1;
+
+  /// No description provided for @helpNumber2.
+  ///
+  /// In ja, this message translates to:
+  /// **'数字を入れる'**
+  String get helpNumber2;
+
+  /// No description provided for @helpNumber3.
+  ///
+  /// In ja, this message translates to:
+  /// **'乗れるときは「乗車開始」をタップ'**
+  String get helpNumber3;
+
+  /// No description provided for @helpTableTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'乗れるバスを見る'**
+  String get helpTableTitle;
+
+  /// No description provided for @helpTable1.
+  ///
+  /// In ja, this message translates to:
+  /// **'目的地を決めると番号表が出る'**
+  String get helpTable1;
+
+  /// No description provided for @helpTable2.
+  ///
+  /// In ja, this message translates to:
+  /// **'番号をタップで路線図'**
+  String get helpTable2;
+
+  /// No description provided for @helpTable3.
+  ///
+  /// In ja, this message translates to:
+  /// **'乗車中の番号はオレンジ'**
+  String get helpTable3;
+
+  /// No description provided for @helpDistanceTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'距離の色を読む'**
+  String get helpDistanceTitle;
+
+  /// No description provided for @helpDistance1.
+  ///
+  /// In ja, this message translates to:
+  /// **'赤・黄・橙の境目は、到着アラートの距離'**
+  String get helpDistance1;
+
+  /// No description provided for @helpDistance2.
+  ///
+  /// In ja, this message translates to:
+  /// **'3km未満は緑、3km以上は青'**
+  String get helpDistance2;
+
+  /// No description provided for @helpDistance3.
+  ///
+  /// In ja, this message translates to:
+  /// **'乗車中にタップで今のルート図'**
+  String get helpDistance3;
+
+  /// No description provided for @helpLineMapTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'路線図を見る'**
+  String get helpLineMapTitle;
+
+  /// No description provided for @helpLineMap1.
+  ///
+  /// In ja, this message translates to:
+  /// **'…の「路線図」をタップ'**
+  String get helpLineMap1;
+
+  /// No description provided for @helpLineMap2.
+  ///
+  /// In ja, this message translates to:
+  /// **'バス番号で探す'**
+  String get helpLineMap2;
+
+  /// No description provided for @helpLineMap3.
+  ///
+  /// In ja, this message translates to:
+  /// **'番号バッジの長押しで乗車・降車'**
+  String get helpLineMap3;
+
+  /// No description provided for @helpNoRouteTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'ルートが見つからないとき'**
+  String get helpNoRouteTitle;
+
+  /// No description provided for @helpNoRoute1.
+  ///
+  /// In ja, this message translates to:
+  /// **'設定で路線データをダウンロード'**
+  String get helpNoRoute1;
+
+  /// No description provided for @helpNoRoute2.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在地と目的地が同じ地域か確かめる'**
+  String get helpNoRoute2;
+
+  /// No description provided for @helpMissingTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'乗るはずの番号が表に無いとき'**
+  String get helpMissingTitle;
+
+  /// No description provided for @helpMissing1.
+  ///
+  /// In ja, this message translates to:
+  /// **'「この区間に無い番号」をタップ'**
+  String get helpMissing1;
+
+  /// No description provided for @helpMissing2.
+  ///
+  /// In ja, this message translates to:
+  /// **'番号を入れる'**
+  String get helpMissing2;
+
+  /// No description provided for @helpStopTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'ナビをやめたいとき'**
+  String get helpStopTitle;
+
+  /// No description provided for @helpStop1.
+  ///
+  /// In ja, this message translates to:
+  /// **'距離バッジを長押し'**
+  String get helpStop1;
+
+  /// No description provided for @helpNetworkTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'通信エラーのとき'**
+  String get helpNetworkTitle;
+
+  /// No description provided for @helpNetwork1.
+  ///
+  /// In ja, this message translates to:
+  /// **'Wi‑Fi かモバイルデータを確かめる'**
+  String get helpNetwork1;
+
+  /// No description provided for @helpNetwork2.
+  ///
+  /// In ja, this message translates to:
+  /// **'バスの判定は端末内のデータで、オフラインでもできる'**
+  String get helpNetwork2;
 }
 
 class _AppLocalizationsDelegate

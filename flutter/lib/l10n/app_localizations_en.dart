@@ -779,120 +779,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wrongDirectionTitle => 'Reverse direction?';
 
   @override
-  String get helpIntro =>
-      'The app opens on Matrix. Set your destination and pick a bus from the number table. The keypad is under … → Number entry, or swipe right from the left edge.';
-
-  @override
-  String get helpBasics => 'Basic operations';
-
-  @override
-  String get helpResults => 'Reading results';
-
-  @override
-  String get helpRoutes => 'Viewing routes';
-
-  @override
-  String get helpTroubleshooting => 'Troubleshooting';
-
-  @override
-  String get helpTopTitle => 'Matrix';
-
-  @override
-  String get helpTopBody =>
-      'This is the screen that opens at launch. It shows destination, current location, distance, and the bus number table. To check a number on the keypad, open … → Number entry. You can also swipe right from the left edge. Return with … → Matrix, or swipe from the left edge again.';
-
-  @override
-  String get helpDestinationTitle => 'Set destination';
-
-  @override
-  String get helpDestinationBody =>
-      'Tap the destination bar to open the map sheet. Search by name or long-press the map, or pick from History or Saved places. Switch between origin and destination at the top of the sheet.';
-
-  @override
-  String get helpLocationTitle => 'Location and origin';
-
-  @override
-  String get helpLocationBody =>
-      'Location permission is requested at launch. Refresh with ↻ in the location bar, or choose an origin on the map with the map icon. Tap × to go back to your current location. While navigating (a destination is set), the route\'s origin stays put until you tap ↻ (the blue location dot keeps moving). While riding, distance is always measured from GPS.';
-
-  @override
-  String get helpSavedPlacesTitle => 'Saved places';
-
-  @override
-  String get helpSavedPlacesBody =>
-      'Open Saved places in the destination sheet to register home and frequent places. Tap one to set it as your destination. Long-press the current destination to save it as-is.';
-
-  @override
-  String get helpBusNumberTitle => 'Enter bus number';
-
-  @override
-  String get helpBusNumberBody =>
-      'Only when a number is missing from the table, open … → Number entry (or swipe from the left edge) and enter digits (e.g. 35). The app matches your trip and can still say board if that bus reaches a transfer stop.';
-
-  @override
-  String get helpTableTitle => 'Bus number table';
-
-  @override
-  String get helpTableBody =>
-      'Bus numbers are grouped by direction and number of transfers. Tap to open the route map, long-press to board or alight. The bus you are riding turns orange. If a number you expected is missing, enter it from “A number missing here”.';
-
-  @override
-  String get helpBoardTitle => 'Start riding';
-
-  @override
-  String get helpBoardBody =>
-      'On Number entry, the bus you enter is matched against routes to your destination. If a variant works, a yellow message like \"Get on if it\'s 35A!\" appears; tap Start riding to begin.';
-
-  @override
-  String get helpSkipTitle => 'Skip this bus!';
-
-  @override
-  String get helpSkipBody =>
-      'When no matching variant runs toward your destination, you\'ll see red \"Skip this bus!\".';
-
-  @override
-  String get helpDistanceTitle => 'Distance colors';
-
-  @override
-  String get helpDistanceBody =>
-      'When you are not riding, the badge is the straight-line distance to your destination. While riding, it is the distance to the current bus\'s alighting stop. The color changes at the distances of Distance alerts 1–3 in Arrival alerts (even when those alerts are off): red under Distance alert 3, yellow under Distance alert 2, orange under Distance alert 1, green under 3 km, blue from 3 km (by default red under 100 m, yellow under 400 m, orange under 1 km). Tap the badge while riding to open the route map. Long-press the badge to cancel navigation (this also clears the destination). If you start riding from the line map without a destination, the badge shows \"—\".';
-
-  @override
-  String get helpRidingTitle => 'Riding mode';
-
-  @override
-  String get helpRidingBody =>
-      'Long-press a bus number to start riding. Long-press it again to alight for a transfer. While riding, arrival alerts ring by distance to your stop and tracking continues with the screen off. You are warned if the bus seems to be going the wrong way.';
-
-  @override
-  String get helpLineMapTitle => 'Line map';
-
-  @override
-  String get helpLineMapBody =>
-      '… → Line map finds a route by bus number in the route data on your device and draws it on the map. Use the list button to browse saved routes. Long-press the number badge to board or alight (the last stop is the alighting stop).';
-
-  @override
-  String get helpSettingsTitle => 'Settings & alerts';
-
-  @override
-  String get helpSettingsBody =>
-      'From … → Settings you can change language, keypad input, keypad sound and vibration, arrival alerts, and route data. Arrival alerts are distance-based to the alighting stop, with up to 3 thresholds — alarms play 1–3 times from furthest to closest. When the app is in the background, a notification is shown.';
-
-  @override
-  String get helpNoRouteTitle => 'No route found';
-
-  @override
-  String get helpNoRouteBody =>
-      'Make sure you have downloaded route data in Settings and that your location and destination are in the same region. Route data is fetched around your current location.';
-
-  @override
-  String get helpNetworkTitle => 'Connection error';
-
-  @override
-  String get helpNetworkBody =>
-      'Check Wi‑Fi or mobile data, then try again. Bus checks use the route data on your device, so they also work offline.';
-
-  @override
   String get developerScreen => 'Developer';
 
   @override
@@ -1199,4 +1085,143 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get missingNumberOthers =>
       'The number matches. These routes do not have a stop near both ends of this segment.';
+
+  @override
+  String get settingsGroupAlerts => 'Alerts and display';
+
+  @override
+  String get settingsGroupRoutes => 'Route data and location';
+
+  @override
+  String get settingsGroupBackup => 'Sync and backup';
+
+  @override
+  String get helpIntro => 'Set a destination and pick the bus you can take.';
+
+  @override
+  String get helpDestTitle => 'Set a destination';
+
+  @override
+  String get helpDest1 => 'Tap the destination bar';
+
+  @override
+  String get helpDest2 => 'Search for a place or long-press the map';
+
+  @override
+  String get helpDest3 => 'You can also use \"Saved places\" or \"History\"';
+
+  @override
+  String get helpOriginTitle => 'Change the starting point';
+
+  @override
+  String get helpOrigin1 => 'Tap the map icon on the location bar';
+
+  @override
+  String get helpOrigin2 => '× returns to your current location';
+
+  @override
+  String get helpOrigin3 => '↻ refreshes your location';
+
+  @override
+  String get helpPlaceTitle => 'Save a place you often visit';
+
+  @override
+  String get helpPlace1 => 'Open \"Saved places\" on the destination sheet';
+
+  @override
+  String get helpPlace2 => 'Long-press to save the current destination';
+
+  @override
+  String get helpRideTitle => 'Record boarding and getting off';
+
+  @override
+  String get helpRide1 => 'Long-press a bus number to board';
+
+  @override
+  String get helpRide2 => 'Long-press the same number again to get off';
+
+  @override
+  String get helpNumberTitle => 'Check a bus by number';
+
+  @override
+  String get helpNumber1 =>
+      'Tap \"Number entry\" in … (or swipe right from the left edge)';
+
+  @override
+  String get helpNumber2 => 'Enter the digits';
+
+  @override
+  String get helpNumber3 => 'If you can board, tap \"Start riding\"';
+
+  @override
+  String get helpTableTitle => 'See which buses you can take';
+
+  @override
+  String get helpTable1 => 'Set a destination to see the number table';
+
+  @override
+  String get helpTable2 => 'Tap a number for its route map';
+
+  @override
+  String get helpTable3 => 'The number you are riding is orange';
+
+  @override
+  String get helpDistanceTitle => 'Read the distance colors';
+
+  @override
+  String get helpDistance1 =>
+      'Red, yellow and orange follow the arrival alert distances';
+
+  @override
+  String get helpDistance2 => 'Green under 3 km, blue from 3 km';
+
+  @override
+  String get helpDistance3 => 'While riding, tap for the current route map';
+
+  @override
+  String get helpLineMapTitle => 'See a route map';
+
+  @override
+  String get helpLineMap1 => 'Tap \"Line map\" in …';
+
+  @override
+  String get helpLineMap2 => 'Search by bus number';
+
+  @override
+  String get helpLineMap3 => 'Long-press the number badge to board or get off';
+
+  @override
+  String get helpNoRouteTitle => 'When no route is found';
+
+  @override
+  String get helpNoRoute1 => 'Download route data in Settings';
+
+  @override
+  String get helpNoRoute2 => 'Check both points are in the same area';
+
+  @override
+  String get helpMissingTitle => 'When your bus is missing from the table';
+
+  @override
+  String get helpMissing1 =>
+      'Tap the button for a number missing from this section';
+
+  @override
+  String get helpMissing2 => 'Enter the number';
+
+  @override
+  String get helpStopTitle => 'When you want to stop navigation';
+
+  @override
+  String get helpStop1 => 'Long-press the distance badge';
+
+  @override
+  String get helpNetworkTitle => 'When there is a network error';
+
+  @override
+  String get helpNetwork1 => 'Check Wi‑Fi or mobile data';
+
+  @override
+  String get helpNetwork2 =>
+      'Bus checks use data on the device, so they work offline';
 }

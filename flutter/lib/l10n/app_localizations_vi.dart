@@ -775,120 +775,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get wrongDirectionTitle => 'Ngược hướng?';
 
   @override
-  String get helpIntro =>
-      'Ứng dụng mở ở màn hình Ma trận. Đặt điểm đến và chọn xe từ bảng số xe. Bàn phím số ở … → Nhập số, hoặc vuốt sang phải từ mép trái.';
-
-  @override
-  String get helpBasics => 'Thao tác cơ bản';
-
-  @override
-  String get helpResults => 'Cách đọc kết quả';
-
-  @override
-  String get helpRoutes => 'Xem tuyến';
-
-  @override
-  String get helpTroubleshooting => 'Khắc phục sự cố';
-
-  @override
-  String get helpTopTitle => 'Ma trận';
-
-  @override
-  String get helpTopBody =>
-      'Đây là màn hình khi mở ứng dụng: điểm đến, vị trí, khoảng cách và bảng số xe. Để kiểm tra số trên bàn phím, mở … → Nhập số. Cũng có thể vuốt sang phải từ mép trái. Quay lại bằng … → Ma trận, hoặc vuốt từ mép trái lần nữa.';
-
-  @override
-  String get helpDestinationTitle => 'Đặt điểm đến';
-
-  @override
-  String get helpDestinationBody =>
-      'Chạm thanh điểm đến để mở bản đồ. Tìm theo tên hoặc giữ trên bản đồ, hoặc chọn từ Lịch sử hay Địa điểm đã lưu. Chuyển giữa điểm đi và điểm đến ở đầu bảng.';
-
-  @override
-  String get helpLocationTitle => 'Vị trí và điểm đi';
-
-  @override
-  String get helpLocationBody =>
-      'Ứng dụng xin quyền vị trí khi mở. Làm mới bằng ↻ trên thanh vị trí, hoặc chọn điểm đi trên bản đồ bằng biểu tượng bản đồ. Chạm × để quay lại vị trí hiện tại. Khi đang điều hướng (đã đặt điểm đến), điểm đi của lộ trình giữ nguyên cho đến khi bạn chạm ↻ (chấm vị trí màu xanh vẫn di chuyển). Khi đang đi, khoảng cách luôn đo từ GPS.';
-
-  @override
-  String get helpSavedPlacesTitle => 'Địa điểm đã lưu';
-
-  @override
-  String get helpSavedPlacesBody =>
-      'Mở Địa điểm đã lưu trong bảng điểm đến để lưu nhà và nơi thường đến. Chạm để đặt làm điểm đến. Giữ điểm đến hiện tại để lưu ngay.';
-
-  @override
-  String get helpBusNumberTitle => 'Nhập số xe buýt';
-
-  @override
-  String get helpBusNumberBody =>
-      'Chỉ khi số không có trên bảng, mở … → Nhập số (hoặc vuốt từ mép trái) rồi chỉ nhập số (vd: 35). Ứng dụng đối chiếu tuyến; nếu xe tới điểm trung chuyển thì vẫn có thể lên xe.';
-
-  @override
-  String get helpTableTitle => 'Bảng số xe buýt';
-
-  @override
-  String get helpTableBody =>
-      'Số xe được nhóm theo hướng và số lần chuyển. Chạm để mở bản đồ tuyến, giữ để lên hoặc xuống xe. Xe đang đi có màu cam. Nếu số xe bạn nghĩ phải có không có trong bảng, nhập từ “Số xe thiếu ở đoạn này”.';
-
-  @override
-  String get helpBoardTitle => 'Bắt đầu đi';
-
-  @override
-  String get helpBoardBody =>
-      'Trên Nhập số, số xe bạn nhập được đối chiếu với tuyến đến điểm đến. Nếu có biến thể phù hợp, thông báo vàng như \"Nếu là 35A thì lên xe!\" sẽ hiện; chạm Bắt đầu đi.';
-
-  @override
-  String get helpSkipTitle => 'Bỏ qua xe này!';
-
-  @override
-  String get helpSkipBody =>
-      'Khi không có biến thể phù hợp đi tới điểm đến, màn hình hiển thị đỏ \"Bỏ qua xe này!\".';
-
-  @override
-  String get helpDistanceTitle => 'Màu khoảng cách';
-
-  @override
-  String get helpDistanceBody =>
-      'Khi chưa lên xe, huy hiệu là khoảng cách thẳng đến điểm đến. Khi đang đi, là khoảng cách đến trạm xuống của xe hiện tại. Màu đổi theo khoảng cách của Cảnh báo khoảng cách 1–3 trong Cảnh báo đến nơi (kể cả khi cảnh báo tắt): dưới Cảnh báo khoảng cách 3 đỏ, dưới Cảnh báo khoảng cách 2 vàng, dưới Cảnh báo khoảng cách 1 cam, dưới 3 km xanh lá, từ 3 km xanh dương (mặc định dưới 100 m đỏ, dưới 400 m vàng, dưới 1 km cam). Khi đang đi, chạm huy hiệu để mở bản đồ tuyến. Giữ huy hiệu để hủy điều hướng (cũng xóa điểm đến). Nếu lên xe từ sơ đồ tuyến mà chưa đặt điểm đến, huy hiệu hiện \"—\".';
-
-  @override
-  String get helpRidingTitle => 'Chế độ đang đi';
-
-  @override
-  String get helpRidingBody =>
-      'Giữ số xe để bắt đầu đi. Giữ lần nữa để xuống (chuyển tuyến). Khi đang đi, cảnh báo đến nơi reo theo khoảng cách tới trạm xuống và vẫn theo dõi khi tắt màn hình. Ứng dụng cảnh báo nếu xe có vẻ đi ngược hướng.';
-
-  @override
-  String get helpLineMapTitle => 'Sơ đồ tuyến';
-
-  @override
-  String get helpLineMapBody =>
-      '… → Sơ đồ tuyến tìm tuyến theo số xe trong dữ liệu trên thiết bị và vẽ lên bản đồ. Dùng nút danh sách để xem các tuyến đã lưu. Giữ huy hiệu số để lên hoặc xuống (trạm cuối là trạm xuống).';
-
-  @override
-  String get helpSettingsTitle => 'Cài đặt & cảnh báo';
-
-  @override
-  String get helpSettingsBody =>
-      'Từ … → Cài đặt bạn có thể đổi ngôn ngữ, cách nhập bàn phím, âm thanh và rung, cảnh báo đến nơi và dữ liệu tuyến. Cảnh báo đến nơi dựa trên khoảng cách đến trạm xuống, tối đa 3 mức — chuông reo 1–3 lần từ xa đến gần. Khi ứng dụng chạy nền, sẽ hiện thông báo.';
-
-  @override
-  String get helpNoRouteTitle => 'Không tìm thấy tuyến';
-
-  @override
-  String get helpNoRouteBody =>
-      'Hãy chắc rằng bạn đã tải dữ liệu tuyến trong Cài đặt, và vị trí với điểm đến cùng khu vực. Dữ liệu tuyến được tải quanh vị trí hiện tại.';
-
-  @override
-  String get helpNetworkTitle => 'Lỗi kết nối';
-
-  @override
-  String get helpNetworkBody =>
-      'Kiểm tra Wi‑Fi hoặc dữ liệu di động rồi thử lại. Kiểm tra xe dùng dữ liệu tuyến trên thiết bị nên vẫn dùng được khi ngoại tuyến.';
-
-  @override
   String get developerScreen => 'Nhà phát triển';
 
   @override
@@ -1195,4 +1081,142 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get missingNumberOthers =>
       'Số xe khớp. Các tuyến này không có trạm gần cả hai đầu đoạn này.';
+
+  @override
+  String get settingsGroupAlerts => 'Cảnh báo và hiển thị';
+
+  @override
+  String get settingsGroupRoutes => 'Dữ liệu tuyến và vị trí';
+
+  @override
+  String get settingsGroupBackup => 'Đồng bộ và sao lưu';
+
+  @override
+  String get helpIntro => 'Đặt điểm đến và chọn xe có thể đi.';
+
+  @override
+  String get helpDestTitle => 'Đặt điểm đến';
+
+  @override
+  String get helpDest1 => 'Chạm thanh điểm đến';
+
+  @override
+  String get helpDest2 => 'Tìm địa điểm hoặc nhấn giữ bản đồ';
+
+  @override
+  String get helpDest3 =>
+      'Cũng có thể dùng \"Địa điểm đã lưu\" hoặc \"Lịch sử\"';
+
+  @override
+  String get helpOriginTitle => 'Đổi điểm xuất phát';
+
+  @override
+  String get helpOrigin1 => 'Chạm biểu tượng bản đồ ở thanh vị trí';
+
+  @override
+  String get helpOrigin2 => '× để trở về vị trí hiện tại';
+
+  @override
+  String get helpOrigin3 => '↻ để cập nhật vị trí';
+
+  @override
+  String get helpPlaceTitle => 'Lưu nơi hay đến';
+
+  @override
+  String get helpPlace1 => 'Mở \"Địa điểm đã lưu\" ở bảng điểm đến';
+
+  @override
+  String get helpPlace2 => 'Nhấn giữ để lưu điểm đến hiện tại';
+
+  @override
+  String get helpRideTitle => 'Ghi lại lên và xuống xe';
+
+  @override
+  String get helpRide1 => 'Nhấn giữ số xe để lên xe';
+
+  @override
+  String get helpRide2 => 'Nhấn giữ lại số đó để xuống xe';
+
+  @override
+  String get helpNumberTitle => 'Kiểm tra xe theo số';
+
+  @override
+  String get helpNumber1 =>
+      'Chạm \"Nhập số\" trong … (hoặc vuốt phải từ mép trái)';
+
+  @override
+  String get helpNumber2 => 'Nhập các chữ số';
+
+  @override
+  String get helpNumber3 => 'Nếu lên được, chạm \"Bắt đầu đi\"';
+
+  @override
+  String get helpTableTitle => 'Xem các xe có thể đi';
+
+  @override
+  String get helpTable1 => 'Đặt điểm đến để thấy bảng số xe';
+
+  @override
+  String get helpTable2 => 'Chạm số để xem bản đồ tuyến';
+
+  @override
+  String get helpTable3 => 'Số xe đang đi có màu cam';
+
+  @override
+  String get helpDistanceTitle => 'Đọc màu khoảng cách';
+
+  @override
+  String get helpDistance1 => 'Đỏ, vàng, cam theo khoảng cách cảnh báo đến';
+
+  @override
+  String get helpDistance2 => 'Xanh lá dưới 3 km, xanh dương từ 3 km';
+
+  @override
+  String get helpDistance3 => 'Khi đang đi, chạm để xem bản đồ tuyến';
+
+  @override
+  String get helpLineMapTitle => 'Xem bản đồ tuyến';
+
+  @override
+  String get helpLineMap1 => 'Chạm \"Sơ đồ tuyến\" trong …';
+
+  @override
+  String get helpLineMap2 => 'Tìm theo số xe';
+
+  @override
+  String get helpLineMap3 => 'Nhấn giữ huy hiệu số để lên hoặc xuống xe';
+
+  @override
+  String get helpNoRouteTitle => 'Khi không tìm thấy tuyến';
+
+  @override
+  String get helpNoRoute1 => 'Tải dữ liệu tuyến trong Cài đặt';
+
+  @override
+  String get helpNoRoute2 => 'Kiểm tra hai điểm có cùng khu vực không';
+
+  @override
+  String get helpMissingTitle => 'Khi số xe không có trên bảng';
+
+  @override
+  String get helpMissing1 => 'Chạm nút cho số xe không có ở đoạn này';
+
+  @override
+  String get helpMissing2 => 'Nhập số xe';
+
+  @override
+  String get helpStopTitle => 'Khi muốn dừng dẫn đường';
+
+  @override
+  String get helpStop1 => 'Nhấn giữ huy hiệu khoảng cách';
+
+  @override
+  String get helpNetworkTitle => 'Khi có lỗi mạng';
+
+  @override
+  String get helpNetwork1 => 'Kiểm tra Wi‑Fi hoặc dữ liệu di động';
+
+  @override
+  String get helpNetwork2 =>
+      'Kiểm tra xe dùng dữ liệu trên máy nên chạy được khi ngoại tuyến';
 }

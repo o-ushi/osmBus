@@ -134,7 +134,7 @@ class _TopScreenState extends State<TopScreen> {
                 onToggleScreen: _toggleScreen,
                 onSettings: _openSettings,
                 onRouteMap: () => openRouteBrowser(context, controller),
-                onHelp: () => showHelpSheet(context),
+                onHelp: () => showHelpSheet(context, controller),
               ),
               const SizedBox(width: 8),
             ],

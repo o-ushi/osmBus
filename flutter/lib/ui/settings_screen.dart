@@ -15,7 +15,7 @@ import '../state/trip_controller.dart';
 import 'alert_settings_screen.dart';
 import 'developer_screen.dart';
 import 'grouped_list.dart';
-import 'privacy_screen.dart';
+import 'expand_card.dart';
 import 'sheet_page.dart';
 import 'theme.dart';
 
@@ -23,10 +23,42 @@ import 'theme.dart';
 Future<void> showSettingsSheet(BuildContext context, TripController controller) =>
     showSheetNavigator<void>(context, (_) => SettingsScreen(controller: controller));
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key, required this.controller});
 
   final TripController controller;
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  /// 開いているグループ。
+  final Set<String> _open = {};
+
+  TripController get controller => widget.controller;
+
+  Widget _group(String id, String title, IconData icon, Color accent, List<Widget> children) => Padding(
+        key: ValueKey('settings-group-$id'),
+        padding: const EdgeInsets.only(bottom: 10),
+        child: OsmExpandCard(
+          title: title,
+          icon: icon,
+          accent: accent,
+          open: _open.contains(id),
+          onToggle: () => setState(() {
+            if (!_open.remove(id)) _open.add(id);
+          }),
+          // 中の行はこれまでのグループ表示のまま。
+          child: ColoredBox(
+            color: AppTheme.groupedBackground,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children),
+            ),
+          ),
+        ),
+      );
 
   String _time(BuildContext context, DateTime? time) {
     if (time == null) return AppLocalizations.of(context).never;
@@ -181,6 +213,8 @@ class SettingsScreen extends StatelessWidget {
                   ),
               ],
             ),
+            const SizedBox(height: 16),
+            _group('alerts', l10n.settingsGroupAlerts, CupertinoIcons.bell, Colors.orange, [
             GroupedSection(
               title: l10n.arrivalAlerts,
               children: [
@@ -244,6 +278,8 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
             const _MapSection(),
+            ]),
+            _group('routes', l10n.settingsGroupRoutes, CupertinoIcons.map, AppTheme.accent, [
             GroupedSection(
               title: l10n.sectionData,
               children: [
@@ -287,6 +323,34 @@ class SettingsScreen extends StatelessWidget {
                   ),
               ],
             ),
+            GroupedSection(
+              title: l10n.sectionLocation,
+              children: [
+                GroupedRow(
+                  title: _locationText(l10n, controller.locationStatus),
+                  trailing: switch (controller.locationStatus) {
+                    LocationStatus.ok => null,
+                    LocationStatus.deniedForever => CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: Geolocator.openAppSettings,
+                        child: Semantics(label: l10n.openSettings, child: const Icon(CupertinoIcons.gear)),
+                      ),
+                    LocationStatus.serviceDisabled => CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: Geolocator.openLocationSettings,
+                        child: Semantics(label: l10n.openSettings, child: const Icon(CupertinoIcons.gear)),
+                      ),
+                    _ => CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: controller.requestLocation,
+                        child: Semantics(label: l10n.retry, child: const Icon(CupertinoIcons.arrow_clockwise)),
+                      ),
+                  },
+                ),
+              ],
+            ),
+            ]),
+            _group('backup', l10n.settingsGroupBackup, CupertinoIcons.cloud, Colors.teal, [
             GroupedSection(
               title: l10n.sectionSync,
               children: [
@@ -363,42 +427,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            GroupedSection(
-              title: l10n.sectionLocation,
-              children: [
-                GroupedRow(
-                  title: _locationText(l10n, controller.locationStatus),
-                  trailing: switch (controller.locationStatus) {
-                    LocationStatus.ok => null,
-                    LocationStatus.deniedForever => CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: Geolocator.openAppSettings,
-                        child: Semantics(label: l10n.openSettings, child: const Icon(CupertinoIcons.gear)),
-                      ),
-                    LocationStatus.serviceDisabled => CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: Geolocator.openLocationSettings,
-                        child: Semantics(label: l10n.openSettings, child: const Icon(CupertinoIcons.gear)),
-                      ),
-                    _ => CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: controller.requestLocation,
-                        child: Semantics(label: l10n.retry, child: const Icon(CupertinoIcons.arrow_clockwise)),
-                      ),
-                  },
-                ),
-              ],
-            ),
-            GroupedSection(
-              footer: l10n.privacyFooter,
-              children: [
-                GroupedLinkRow(
-                  title: l10n.privacyTitle,
-                  leading: CupertinoIcons.hand_raised_fill,
-                  onTap: () => SheetPage.push<void>(context, (_) => PrivacyScreen(controller: controller)),
-                ),
-              ],
-            ),
+            ]),
             VersionFooter(
               onUnlock: () => SheetPage.push<void>(context, (_) => DeveloperScreen(controller: controller)),
             ),

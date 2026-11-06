@@ -757,120 +757,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get wrongDirectionTitle => '逆方向です';
 
   @override
-  String get helpIntro =>
-      '起動するとマトリクスです。行き先を設定し、バス番号表から乗れるバスを選べます。番号判定のキーパッドは … → 番号入力、または画面左端から右へスワイプで切り替えます。';
-
-  @override
-  String get helpBasics => '基本操作';
-
-  @override
-  String get helpResults => '結果の見方';
-
-  @override
-  String get helpRoutes => '路線を見る';
-
-  @override
-  String get helpTroubleshooting => 'トラブルシュート';
-
-  @override
-  String get helpTopTitle => 'マトリクス';
-
-  @override
-  String get helpTopBody =>
-      '起動時の画面です。行き先・現在地・距離・バス番号表が並びます。キーパッドで番号判定したいときは … → 番号入力。画面左端から右へスワイプでも切り替えられます。マトリクスに戻るときは … → マトリクス、またはもう一度左端から右へスワイプします。';
-
-  @override
-  String get helpDestinationTitle => '目的地を設定';
-
-  @override
-  String get helpDestinationBody =>
-      '行き先バーをタップすると地図のシートが開きます。地名検索か地図の長押しで選ぶほか、「履歴から探す」「登録地から探す」からも選べます。シート上部で出発地と目的地を切り替えられます。';
-
-  @override
-  String get helpLocationTitle => '現在地と出発地';
-
-  @override
-  String get helpLocationBody =>
-      '起動時に位置情報の許可を求めます。現在地バーの ↻ で更新、地図アイコンで出発地を地図から指定できます。指定した出発地は × で現在地に戻せます。ナビ中（行き先があるあいだ）は、↻ を押すまで経路の出発地は動きません（青い現在地の丸は動き続けます）。乗車中の距離はいつも GPS の現在地から測ります。';
-
-  @override
-  String get helpSavedPlacesTitle => '場所を登録';
-
-  @override
-  String get helpSavedPlacesBody =>
-      '行き先シートの「登録地から探す」から、自宅やよく行く場所を登録できます。タップすると目的地に設定されます。今の目的地は長押しでそのまま登録できます。';
-
-  @override
-  String get helpBusNumberTitle => 'バス番号を入力';
-
-  @override
-  String get helpBusNumberBody =>
-      '表に無い番号を判定したいときだけ … → 番号入力（または左端から右スワイプ）でキーパッドを開き、数字だけ入力します（例: 35）。行き先ルートと照合し、乗換地点まで行ける場合は乗車可とします。';
-
-  @override
-  String get helpTableTitle => 'バス番号表';
-
-  @override
-  String get helpTableBody =>
-      '方向と乗換回数ごとに、乗れるバス番号が並びます。タップで路線図、長押しで乗車と降車の切り替えです。乗車中の番号はオレンジになります。乗るはずの番号が表に無いときは「この区間に無い番号」から入れます。';
-
-  @override
-  String get helpBoardTitle => '乗車開始';
-
-  @override
-  String get helpBoardBody =>
-      '番号入力でバス番号を入力すると、行き先までのルートと照合します。乗れる系統があれば黄色で「35A だったら乗ってください！」のように表示され、「乗車開始」で乗車中になります。';
-
-  @override
-  String get helpSkipTitle => '見送ってください！';
-
-  @override
-  String get helpSkipBody =>
-      '行き先ルートに、入力した数字の系統が含まれない場合は、赤色で「見送ってください！」と表示されます。';
-
-  @override
-  String get helpDistanceTitle => '距離の色';
-
-  @override
-  String get helpDistanceBody =>
-      '未乗車のときは目的地までの直線距離、乗車中は今乗っているバスの降車バス停までの直線距離です。色の境目は到着アラートの距離アラート 1〜3 の距離です（アラートがオフでも同じ）。距離アラート 3 の距離未満は赤、距離アラート 2 の距離未満は黄、距離アラート 1 の距離未満は橙、3km未満は緑、3km以上は青です（初期値では 100m 未満が赤、400m 未満が黄、1km 未満が橙）。乗車中に距離バッジをタップすると、今のルート図が開きます。距離バッジを長押しするとナビ中止（行き先も消えます）。行き先を設定せずに路線図から乗車した場合は「—」と表示され、距離は出ません。';
-
-  @override
-  String get helpRidingTitle => '乗車中モード';
-
-  @override
-  String get helpRidingBody =>
-      'バス番号を長押しすると乗車中になります。同じ番号をもう一度長押しすると降車（乗換用）します。乗車中は降車バス停までの距離で到着アラートが鳴り、画面がオフでも位置の追跡を続けます。逆方向に乗っていそうなときは警告します。';
-
-  @override
-  String get helpLineMapTitle => '路線図';
-
-  @override
-  String get helpLineMapBody =>
-      '… → 路線図 で、端末に保存した路線データからバス番号で路線を探して地図に出します。一覧ボタンから保存済みの路線も選べます。番号バッジを長押しすると乗車・降車します（降車は終点）。';
-
-  @override
-  String get helpSettingsTitle => '設定とアラート';
-
-  @override
-  String get helpSettingsBody =>
-      '… → 設定 から、言語・テンキー入力・キーパッドの音と振動・到着アラート・路線データを変更できます。到着アラートは降車バス停までの距離で最大3段階設定でき、遠い順にアラームが1〜3回鳴ります。アプリが裏にあるときは通知で知らせます。';
-
-  @override
-  String get helpNoRouteTitle => 'ルートが見つからない';
-
-  @override
-  String get helpNoRouteBody =>
-      '設定で路線データをダウンロードしたか、現在地と目的地が同じ地域にあるか確認してください。路線データは現在地の周辺を取得します。';
-
-  @override
-  String get helpNetworkTitle => '通信エラー';
-
-  @override
-  String get helpNetworkBody =>
-      'Wi‑Fi またはモバイルデータを確認し、もう一度試してください。バスの判定は端末内の路線データで行うため、オフラインでも使えます。';
-
-  @override
   String get developerScreen => '開発者画面';
 
   @override
@@ -1166,4 +1052,139 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get missingNumberOthers => '番号は一致します。この区間の両端に停留所はありません。';
+
+  @override
+  String get settingsGroupAlerts => 'アラートと表示';
+
+  @override
+  String get settingsGroupRoutes => '路線データと位置情報';
+
+  @override
+  String get settingsGroupBackup => '同期とバックアップ';
+
+  @override
+  String get helpIntro => '行き先を決めて、乗れるバスを選ぶアプリです。';
+
+  @override
+  String get helpDestTitle => '目的地を決める';
+
+  @override
+  String get helpDest1 => '行き先バーをタップ';
+
+  @override
+  String get helpDest2 => '地名を検索するか、地図を長押し';
+
+  @override
+  String get helpDest3 => '「登録地から探す」「履歴から探す」からも選べる';
+
+  @override
+  String get helpOriginTitle => '出発地を変える';
+
+  @override
+  String get helpOrigin1 => '現在地バーの地図アイコンをタップ';
+
+  @override
+  String get helpOrigin2 => '× で現在地に戻す';
+
+  @override
+  String get helpOrigin3 => '↻ で現在地を更新';
+
+  @override
+  String get helpPlaceTitle => 'よく行く場所を登録する';
+
+  @override
+  String get helpPlace1 => '行き先シートの「登録地から探す」を開く';
+
+  @override
+  String get helpPlace2 => '今の目的地は長押しで登録';
+
+  @override
+  String get helpRideTitle => '乗車・降車を記録する';
+
+  @override
+  String get helpRide1 => 'バス番号を長押しで乗車';
+
+  @override
+  String get helpRide2 => '同じ番号をもう一度長押しで降車';
+
+  @override
+  String get helpNumberTitle => '番号で乗れるか調べる';
+
+  @override
+  String get helpNumber1 => '…の「番号入力」をタップ（左端から右スワイプでも可）';
+
+  @override
+  String get helpNumber2 => '数字を入れる';
+
+  @override
+  String get helpNumber3 => '乗れるときは「乗車開始」をタップ';
+
+  @override
+  String get helpTableTitle => '乗れるバスを見る';
+
+  @override
+  String get helpTable1 => '目的地を決めると番号表が出る';
+
+  @override
+  String get helpTable2 => '番号をタップで路線図';
+
+  @override
+  String get helpTable3 => '乗車中の番号はオレンジ';
+
+  @override
+  String get helpDistanceTitle => '距離の色を読む';
+
+  @override
+  String get helpDistance1 => '赤・黄・橙の境目は、到着アラートの距離';
+
+  @override
+  String get helpDistance2 => '3km未満は緑、3km以上は青';
+
+  @override
+  String get helpDistance3 => '乗車中にタップで今のルート図';
+
+  @override
+  String get helpLineMapTitle => '路線図を見る';
+
+  @override
+  String get helpLineMap1 => '…の「路線図」をタップ';
+
+  @override
+  String get helpLineMap2 => 'バス番号で探す';
+
+  @override
+  String get helpLineMap3 => '番号バッジの長押しで乗車・降車';
+
+  @override
+  String get helpNoRouteTitle => 'ルートが見つからないとき';
+
+  @override
+  String get helpNoRoute1 => '設定で路線データをダウンロード';
+
+  @override
+  String get helpNoRoute2 => '現在地と目的地が同じ地域か確かめる';
+
+  @override
+  String get helpMissingTitle => '乗るはずの番号が表に無いとき';
+
+  @override
+  String get helpMissing1 => '「この区間に無い番号」をタップ';
+
+  @override
+  String get helpMissing2 => '番号を入れる';
+
+  @override
+  String get helpStopTitle => 'ナビをやめたいとき';
+
+  @override
+  String get helpStop1 => '距離バッジを長押し';
+
+  @override
+  String get helpNetworkTitle => '通信エラーのとき';
+
+  @override
+  String get helpNetwork1 => 'Wi‑Fi かモバイルデータを確かめる';
+
+  @override
+  String get helpNetwork2 => 'バスの判定は端末内のデータで、オフラインでもできる';
 }
