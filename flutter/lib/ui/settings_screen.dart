@@ -251,6 +251,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
               ],
             ),
+            GroupedSection(
+              footer: l10n.startupSettingNote,
+              children: [
+                GroupedRow(
+                  title: l10n.startupSetting,
+                  trailing: CupertinoSwitch(
+                    value: controller.settings.showStartupScreen,
+                    onChanged: controller.settings.setShowStartupScreen,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
             _group(
               'alerts',
@@ -335,19 +347,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const _MapSection(),
               ],
             ),
-            GroupedSection(
-              footer: l10n.startupSettingNote,
-              children: [
-                GroupedRow(
-                  title: l10n.startupSetting,
-                  trailing: CupertinoSwitch(
-                    value: controller.settings.showStartupScreen,
-                    onChanged: controller.settings.setShowStartupScreen,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
             _group(
               'routes',
               l10n.settingsGroupRoutes,
