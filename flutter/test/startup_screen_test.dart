@@ -69,4 +69,35 @@ void main() {
     expect(find.text('home'), findsOneWidget);
     expect(settings.showStartupScreen, isTrue);
   });
+
+  Future<void> swipeFrom(WidgetTester tester, double x) async {
+    await tester.flingFrom(Offset(x, 300), const Offset(200, 0), 1000);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('ホームで左端から右へスワイプするとスタートアップに戻る', (tester) async {
+    await pump(tester, {});
+    await tester.tap(find.text('はじめる'));
+    await tester.pumpAndSettle();
+    expect(find.text('home'), findsOneWidget);
+
+    await swipeFrom(tester, 4);
+    expect(find.text('はじめる'), findsOneWidget);
+    expect(find.text('home'), findsNothing);
+  });
+
+  testWidgets('左端以外からのスワイプでは戻らない', (tester) async {
+    await pump(tester, {});
+    await tester.tap(find.text('はじめる'));
+    await tester.pumpAndSettle();
+    await swipeFrom(tester, 150);
+    expect(find.text('home'), findsOneWidget);
+  });
+
+  testWidgets('スタートアップ画面がオフならスワイプしても戻らない', (tester) async {
+    await pump(tester, {'showStartupScreen': false});
+    await swipeFrom(tester, 4);
+    expect(find.text('home'), findsOneWidget);
+    expect(find.text('はじめる'), findsNothing);
+  });
 }

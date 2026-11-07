@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
 import '../state/app_settings.dart';
 import 'startup_bottom_bar.dart';
+import 'swipe_to_close_wrapper.dart';
 import 'theme.dart';
 
 /// 起動時（設定で有効なとき）の案内画面。osm日日是好日と同じ構成で、
@@ -169,6 +170,10 @@ class _StartupGateState extends State<StartupGate> {
   late bool _showing =
       widget.settings.showStartupScreen && !widget.openedByLink.value;
 
+  /// 一度ホームを出したら、スタートアップに戻っても作り直さない
+  /// （osm日日是好日の AppRootShell と同じく、表示の切り替えだけで行き来する）。
+  late bool _homeBuilt = !_showing;
+
   @override
   void initState() {
     super.initState();
@@ -183,19 +188,48 @@ class _StartupGateState extends State<StartupGate> {
 
   void _onLink() {
     if (widget.openedByLink.value && _showing) {
-      setState(() => _showing = false);
+      setState(() {
+        _showing = false;
+        _homeBuilt = true;
+      });
     }
+  }
+
+  /// ホームで左端から右へスワイプしたとき。設定がオンのときだけ戻る。
+  void _swipeBackToStartup() {
+    if (!widget.settings.showStartupScreen) return;
+    setState(() => _showing = true);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_showing) return widget.child;
-    return StartupScreen(
-      settings: widget.settings,
-      onContinue: (dontShowAgain) {
-        if (dontShowAgain) widget.settings.setShowStartupScreen(false);
-        setState(() => _showing = false);
-      },
+    return Stack(
+      children: [
+        if (_homeBuilt)
+          Positioned.fill(
+            child: Offstage(
+              offstage: _showing,
+              child: TickerMode(
+                enabled: !_showing,
+                child: SwipeToCloseWrapper(
+                  onClose: _swipeBackToStartup,
+                  child: widget.child,
+                ),
+              ),
+            ),
+          ),
+        if (_showing)
+          StartupScreen(
+            settings: widget.settings,
+            onContinue: (dontShowAgain) {
+              if (dontShowAgain) widget.settings.setShowStartupScreen(false);
+              setState(() {
+                _showing = false;
+                _homeBuilt = true;
+              });
+            },
+          ),
+      ],
     );
   }
 }
