@@ -1224,4 +1224,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get helpNetwork2 =>
       'Bus checks use data on the device, so they work offline';
+
+  @override
+  String get startupStart => 'Get started';
+
+  @override
+  String get startupDontShowAgain => 'Don\'t show again';
+
+  @override
+  String get startupSetting => 'Startup screen';
+
+  @override
+  String get startupSettingNote =>
+      'Show the welcome screen when the app launches';
 }

@@ -1187,4 +1187,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get helpNetwork2 => 'バスの判定は端末内のデータで、オフラインでもできる';
+
+  @override
+  String get startupStart => 'はじめる';
+
+  @override
+  String get startupDontShowAgain => '次回から表示しない';
+
+  @override
+  String get startupSetting => 'スタートアップ画面';
+
+  @override
+  String get startupSettingNote => 'アプリ起動時に案内画面を表示します';
 }

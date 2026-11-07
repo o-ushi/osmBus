@@ -383,5 +383,9 @@
   "helpStop1": "Long-press the distance badge",
   "helpNetworkTitle": "When there is a network error",
   "helpNetwork1": "Check Wi‑Fi or mobile data",
-  "helpNetwork2": "Bus checks use data on the device, so they work offline"
+  "helpNetwork2": "Bus checks use data on the device, so they work offline",
+  "startupStart": "Get started",
+  "startupDontShowAgain": "Don't show again",
+  "startupSetting": "Startup screen",
+  "startupSettingNote": "Show the welcome screen when the app launches"
 }

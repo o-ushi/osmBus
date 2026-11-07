@@ -6,13 +6,18 @@ import '../state/trip_controller.dart';
 import 'bus_route_browser_screen.dart';
 import 'route_map_screen.dart';
 import 'theme.dart';
+import 'osm_page_route.dart';
 
 /// 「あと」距離バッジ。ホームのアプリバーと各地図の左上で同じものを出す。
 /// 未乗車で目的地があれば目的地まで、乗車中は降車停留所まで（GPS から直線）。
 /// 路線図から目的地なしで乗っているときは「—」。距離も乗車も無ければ何も出さない。
 /// タップで乗車中の経路地図を開く（[onRidingMap] なら閉じる）。長押しでナビ中止。
 class TripDistanceBadge extends StatelessWidget {
-  const TripDistanceBadge({super.key, required this.controller, this.onRidingMap = false});
+  const TripDistanceBadge({
+    super.key,
+    required this.controller,
+    this.onRidingMap = false,
+  });
 
   final TripController controller;
 
@@ -30,13 +35,15 @@ class TripDistanceBadge extends StatelessWidget {
         if (distance == null && riding == null) return const SizedBox.shrink();
         return DistanceBadge(
           meters: distance,
-          alertMeters: [for (final slot in controller.settings.distanceSlots) slot.meters],
+          alertMeters: [
+            for (final slot in controller.settings.distanceSlots) slot.meters,
+          ],
           label: AppLocalizations.of(context).distanceLeft,
           onTap: riding == null
               ? null
               : onRidingMap
-                  ? () => Navigator.of(context).maybePop()
-                  : () => openRidingMap(context, controller),
+              ? () => Navigator.of(context).maybePop()
+              : () => openRidingMap(context, controller),
           onLongPress: () => confirmCancelNavigation(context, controller),
         );
       },
@@ -50,7 +57,11 @@ void openRidingMap(BuildContext context, TripController controller) {
   if (controller.riding == null) return;
   if (itinerary != null) {
     Navigator.of(context, rootNavigator: true).push(
-      MaterialPageRoute(builder: (_) => RouteMapScreen(itinerary: itinerary, controller: controller)),
+      osmPageRoute(
+        closeOnSwipeDown: false,
+        builder: (_) =>
+            RouteMapScreen(itinerary: itinerary, controller: controller),
+      ),
     );
     return;
   }
@@ -61,15 +72,25 @@ void openRidingMap(BuildContext context, TripController controller) {
 /// 路線図から乗車中なら、その路線を開いた状態にする。
 void openRouteBrowser(BuildContext context, TripController controller) {
   final routeId = controller.riding?.routeId;
-  final route =
-      routeId == null ? null : controller.visibleCatalog.routes.where((r) => r.relationId == routeId).firstOrNull;
+  final route = routeId == null
+      ? null
+      : controller.visibleCatalog.routes
+            .where((r) => r.relationId == routeId)
+            .firstOrNull;
   Navigator.of(context, rootNavigator: true).push(
-    MaterialPageRoute(builder: (_) => BusRouteBrowserScreen(controller: controller, initialRoute: route)),
+    osmPageRoute(
+      closeOnSwipeDown: false,
+      builder: (_) =>
+          BusRouteBrowserScreen(controller: controller, initialRoute: route),
+    ),
   );
 }
 
 /// 距離バッジの長押し。ナビ中止（目的地も消える）。
-Future<void> confirmCancelNavigation(BuildContext context, TripController controller) async {
+Future<void> confirmCancelNavigation(
+  BuildContext context,
+  TripController controller,
+) async {
   if (controller.destination == null && controller.riding == null) return;
   final l10n = AppLocalizations.of(context);
   final ok = await showCupertinoModalPopup<bool>(
@@ -113,7 +134,9 @@ class DistanceBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = meters == null ? null : DistanceColorBand.colors(meters!, alertMeters);
+    final colors = meters == null
+        ? null
+        : DistanceColorBand.colors(meters!, alertMeters);
     final textColor = colors?.$2 ?? AppTheme.secondaryText;
     final value = meters == null ? '—' : DistanceColorBand.format(meters!);
     return Semantics(
@@ -132,7 +155,14 @@ class DistanceBadge extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textColor)),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                ),
+              ),
               // 桁が多くても 1 行に収める（バッジの高さは固定）。
               FittedBox(
                 fit: BoxFit.scaleDown,
@@ -140,7 +170,12 @@ class DistanceBadge extends StatelessWidget {
                   value,
                   maxLines: 1,
                   softWrap: false,
-                  style: TextStyle(fontSize: 21, fontWeight: FontWeight.w700, color: textColor, height: 1.1),
+                  style: TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.w700,
+                    color: textColor,
+                    height: 1.1,
+                  ),
                 ),
               ),
             ],
@@ -153,7 +188,11 @@ class DistanceBadge extends StatelessWidget {
 
 /// 地図の左上（アプリバーの下、セーフエリアの内側）に置く距離バッジ。
 class MapDistanceBadge extends StatelessWidget {
-  const MapDistanceBadge({super.key, required this.controller, this.onRidingMap = false});
+  const MapDistanceBadge({
+    super.key,
+    required this.controller,
+    this.onRidingMap = false,
+  });
 
   final TripController controller;
   final bool onRidingMap;
@@ -170,7 +209,10 @@ class MapDistanceBadge extends StatelessWidget {
           padding: const EdgeInsets.only(left: 10, top: 8),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 140),
-            child: TripDistanceBadge(controller: controller, onRidingMap: onRidingMap),
+            child: TripDistanceBadge(
+              controller: controller,
+              onRidingMap: onRidingMap,
+            ),
           ),
         ),
       ),

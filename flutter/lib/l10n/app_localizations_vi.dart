@@ -1219,4 +1219,16 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get helpNetwork2 =>
       'Kiểm tra xe dùng dữ liệu trên máy nên chạy được khi ngoại tuyến';
+
+  @override
+  String get startupStart => 'Bắt đầu';
+
+  @override
+  String get startupDontShowAgain => 'Không hiện lại';
+
+  @override
+  String get startupSetting => 'Màn hình khởi động';
+
+  @override
+  String get startupSettingNote => 'Hiện màn hình hướng dẫn khi mở ứng dụng';
 }

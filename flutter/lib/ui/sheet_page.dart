@@ -12,7 +12,9 @@ Future<T?> showSheetNavigator<T>(BuildContext context, WidgetBuilder root) {
     useSafeArea: true,
     showDragHandle: true,
     backgroundColor: AppTheme.groupedBackground,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
     builder: (sheetContext) => FractionallySizedBox(
       heightFactor: 0.94,
       child: Navigator(
@@ -67,7 +69,10 @@ class SheetPage extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 if (canPop)
@@ -75,8 +80,14 @@ class SheetPage extends StatelessWidget {
                     left: 0,
                     child: CupertinoButton(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      onPressed: () => onBack != null ? onBack!() : Navigator.of(context).pop(),
-                      child: const Icon(CupertinoIcons.chevron_back, size: 26),
+                      onPressed: () => onBack != null
+                          ? onBack!()
+                          : Navigator.of(context).pop(),
+                      child: const Icon(
+                        CupertinoIcons.chevron_back,
+                        size: 26,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
                 if (trailing != null)
@@ -86,8 +97,16 @@ class SheetPage extends StatelessWidget {
                     right: 8,
                     child: CupertinoButton(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
-                      child: Semantics(label: l10n.done, child: const Icon(CupertinoIcons.xmark, size: 24)),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true).pop(),
+                      child: Semantics(
+                        label: l10n.done,
+                        child: const Icon(
+                          CupertinoIcons.xmark,
+                          size: 24,
+                          color: Colors.black87,
+                        ),
+                      ),
                     ),
                   ),
               ],

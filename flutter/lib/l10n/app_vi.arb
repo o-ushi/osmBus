@@ -383,5 +383,9 @@
   "helpStop1": "Nhấn giữ huy hiệu khoảng cách",
   "helpNetworkTitle": "Khi có lỗi mạng",
   "helpNetwork1": "Kiểm tra Wi‑Fi hoặc dữ liệu di động",
-  "helpNetwork2": "Kiểm tra xe dùng dữ liệu trên máy nên chạy được khi ngoại tuyến"
+  "helpNetwork2": "Kiểm tra xe dùng dữ liệu trên máy nên chạy được khi ngoại tuyến",
+  "startupStart": "Bắt đầu",
+  "startupDontShowAgain": "Không hiện lại",
+  "startupSetting": "Màn hình khởi động",
+  "startupSettingNote": "Hiện màn hình hướng dẫn khi mở ứng dụng"
 }

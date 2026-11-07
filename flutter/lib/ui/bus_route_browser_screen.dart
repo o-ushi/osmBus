@@ -18,7 +18,11 @@ import 'theme.dart';
 /// メニューの「路線図」（Swift の `BusRouteMapView`）。番号で路線を探して地図に出し、
 /// 番号バッジの長押しで乗車・降車する。路線は端末内の路線データから探す。
 class BusRouteBrowserScreen extends StatefulWidget {
-  const BusRouteBrowserScreen({super.key, required this.controller, this.initialRoute});
+  const BusRouteBrowserScreen({
+    super.key,
+    required this.controller,
+    this.initialRoute,
+  });
 
   final TripController controller;
 
@@ -37,7 +41,8 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
   bool _clearsOnNextInput = false;
   late bool _keypadVisible = widget.initialRoute == null;
 
-  bool get _riding => _route != null && controller.riding?.routeId == _route!.relationId;
+  bool get _riding =>
+      _route != null && controller.riding?.routeId == _route!.relationId;
 
   void _digit(String digit) {
     setState(() {
@@ -63,7 +68,11 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
   Future<void> _search() async {
     final l10n = AppLocalizations.of(context);
     _clearsOnNextInput = true;
-    final found = RouteSearch.find(controller.visibleCatalog.routes, _input, near: controller.origin);
+    final found = RouteSearch.find(
+      controller.visibleCatalog.routes,
+      _input,
+      near: controller.origin,
+    );
     if (found.isEmpty) {
       await _error(l10n.routeSearchNone(_input));
       return;
@@ -72,7 +81,11 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
       _open(found.single);
       return;
     }
-    final picked = await _pickFrom(l10n.routeCandidates, l10n.routeCandidatesHint, found);
+    final picked = await _pickFrom(
+      l10n.routeCandidates,
+      l10n.routeCandidatesHint,
+      found,
+    );
     if (picked != null) _open(picked);
   }
 
@@ -92,25 +105,45 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
   /// 出発地・目的地それぞれに一番近い停留所。乗ったあとは乗る停留所まで歩く線は出さない。
   List<MapLine> _walkLines(RouteRecord route, GeoPoint? start, GeoPoint? goal) {
     if (route.stops.isEmpty || (start == null && goal == null)) return const [];
-    final leg = start == null || goal == null ? null : LocalPlanner.plan([route], start, goal).firstOrNull?.firstLeg;
+    final leg = start == null || goal == null
+        ? null
+        : LocalPlanner.plan([route], start, goal).firstOrNull?.firstLeg;
     GeoPoint nearest(GeoPoint p) => route.stops
         .map((s) => s.point)
         .reduce((a, b) => Geo.distance(p, a) <= Geo.distance(p, b) ? a : b);
-    final board = start == null || _riding ? null : leg?.boardStop.point ?? nearest(start);
+    final board = start == null || _riding
+        ? null
+        : leg?.boardStop.point ?? nearest(start);
     final riding = controller.riding;
     // 乗車中に降車停を選び直していれば、そこから歩く。
-    final chosen = _riding && riding != null && riding.alightAdjusted ? riding.alightStop.point : null;
-    final alight = goal == null ? null : chosen ?? leg?.alightStop.point ?? nearest(goal);
+    final chosen = _riding && riding != null && riding.alightAdjusted
+        ? riding.alightStop.point
+        : null;
+    final alight = goal == null
+        ? null
+        : chosen ?? leg?.alightStop.point ?? nearest(goal);
     return [
       if (start != null && board != null && board != start)
-        MapLine([start, board], color: walkToFromStopsColor, width: 4, dashed: true),
+        MapLine(
+          [start, board],
+          color: walkToFromStopsColor,
+          width: 4,
+          dashed: true,
+        ),
       if (goal != null && alight != null && alight != goal)
-        MapLine([alight, goal], color: walkToFromStopsColor, width: 4, dashed: true),
+        MapLine(
+          [alight, goal],
+          color: walkToFromStopsColor,
+          width: 4,
+          dashed: true,
+        ),
     ];
   }
 
-  static List<GeoPoint> _routePoints(RouteRecord route) =>
-      [for (final s in route.polylineSegments) ...s, ...route.stops.map((s) => s.point)];
+  static List<GeoPoint> _routePoints(RouteRecord route) => [
+    for (final s in route.polylineSegments) ...s,
+    ...route.stops.map((s) => s.point),
+  ];
 
   /// 乗車中に別の操作（別の番号・クリア・一覧）をしたら降車する（Swift と同じ）。
   void _endRidingIfNeeded() {
@@ -122,7 +155,10 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
     if (opened == null) return;
     // ユーザーが直した停留所があれば、その並びで乗る。
     final route =
-        controller.visibleCatalog.routes.where((r) => r.relationId == opened.relationId).firstOrNull ?? opened;
+        controller.visibleCatalog.routes
+            .where((r) => r.relationId == opened.relationId)
+            .firstOrNull ??
+        opened;
     if (_riding) {
       controller.endRiding();
     } else {
@@ -132,20 +168,24 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
   }
 
   Future<void> _error(String message) => showCupertinoDialog<void>(
-        context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: Text(AppLocalizations.of(context).routeMapErrorTitle),
-          content: Text(message),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.pop(context),
-              child: Text(AppLocalizations.of(context).ok),
-            ),
-          ],
+    context: context,
+    builder: (context) => CupertinoAlertDialog(
+      title: Text(AppLocalizations.of(context).routeMapErrorTitle),
+      content: Text(message),
+      actions: [
+        CupertinoDialogAction(
+          onPressed: () => Navigator.pop(context),
+          child: Text(AppLocalizations.of(context).ok),
         ),
-      );
+      ],
+    ),
+  );
 
-  Future<RouteRecord?> _pickFrom(String title, String? hint, List<RouteRecord> routes) {
+  Future<RouteRecord?> _pickFrom(
+    String title,
+    String? hint,
+    List<RouteRecord> routes,
+  ) {
     return showModalBottomSheet<RouteRecord>(
       context: context,
       isScrollControlled: true,
@@ -156,11 +196,20 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
         heightFactor: 0.7,
         child: Column(
           children: [
-            Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+            ),
             if (hint != null)
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Text(hint, style: const TextStyle(fontSize: 13, color: AppTheme.secondaryText)),
+                child: Text(
+                  hint,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.secondaryText,
+                  ),
+                ),
               ),
             Expanded(
               child: ListView.separated(
@@ -173,8 +222,17 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
                   return Material(
                     color: Colors.white,
                     child: ListTile(
-                      title: Text(r.ref, style: const TextStyle(fontWeight: FontWeight.w700)),
-                      subtitle: label == null ? null : Text(label, maxLines: 2, overflow: TextOverflow.ellipsis),
+                      title: Text(
+                        r.ref,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      subtitle: label == null
+                          ? null
+                          : Text(
+                              label,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                       onTap: () => Navigator.pop(context, r),
                     ),
                   );
@@ -208,15 +266,21 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
         final opened = _route;
         final route = opened == null
             ? null
-            : controller.visibleCatalog.routes.where((r) => r.relationId == opened.relationId).firstOrNull ?? opened;
+            : controller.visibleCatalog.routes
+                      .where((r) => r.relationId == opened.relationId)
+                      .firstOrNull ??
+                  opened;
         final origin = controller.origin;
         final originPin = controller.originPin;
-        final ridingPath = _riding && controller.riding!.alightAdjusted ? controller.riding!.path : null;
+        final ridingPath = _riding && controller.riding!.alightAdjusted
+            ? controller.riding!.path
+            : null;
         final goal = controller.destination?.point;
         return Scaffold(
-          backgroundColor: AppTheme.sceneLight,
+          backgroundColor: AppTheme.scene,
           appBar: AppBar(
-            backgroundColor: AppTheme.sceneLight,
+            automaticallyImplyLeading: false,
+            backgroundColor: AppTheme.scene,
             title: Text(l10n.lineMap),
             actions: [
               if (route != null)
@@ -248,8 +312,11 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
                 ),
               IconButton(
                 tooltip: _keypadVisible ? l10n.hideKeypad : l10n.showKeypad,
-                onPressed: () => setState(() => _keypadVisible = !_keypadVisible),
-                icon: Icon(_keypadVisible ? Icons.keyboard_hide : Icons.keyboard),
+                onPressed: () =>
+                    setState(() => _keypadVisible = !_keypadVisible),
+                icon: Icon(
+                  _keypadVisible ? Icons.keyboard_hide : Icons.keyboard,
+                ),
               ),
             ],
           ),
@@ -260,22 +327,34 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
                 initialCenter: origin ?? const GeoPoint(21.0285, 105.8542),
                 initialFit: route == null ? null : _routePoints(route),
                 fitPadding: const EdgeInsets.fromLTRB(40, 40, 40, 120),
-                overlayInsets: EdgeInsets.only(bottom: _overlayBottom(context, route)),
+                overlayInsets: EdgeInsets.only(
+                  bottom: _overlayBottom(context, route),
+                ),
                 myLocation: controller.gps,
                 lines: [
                   if (route != null)
                     for (final segment in route.polylineSegments)
-                      MapLine(segment, color: _riding && ridingPath == null ? Colors.orange : AppTheme.accent),
+                      MapLine(
+                        segment,
+                        color: _riding && ridingPath == null
+                            ? Colors.orange
+                            : AppTheme.accent,
+                      ),
                   // 降車停を選び直したら、乗る区間（乗車停留所から降車停まで）を橙で重ねる。
-                  if (ridingPath != null) MapLine(ridingPath, color: Colors.orange, width: 6),
+                  if (ridingPath != null)
+                    MapLine(ridingPath, color: Colors.orange, width: 6),
                   if (route != null) ..._walkLines(route, origin, goal),
                 ],
                 pins: [
                   if (route != null) ...[
-                    for (final stop in route.stops) MapPin(stop.point, MapPinStyle.stop),
+                    for (final stop in route.stops)
+                      MapPin(stop.point, MapPinStyle.stop),
                     MapPin(route.stops.last.point, MapPinStyle.terminal),
                     if (_riding && controller.riding != null)
-                      MapPin(controller.riding!.alightStop.point, MapPinStyle.alight),
+                      MapPin(
+                        controller.riding!.alightStop.point,
+                        MapPinStyle.alight,
+                      ),
                   ],
                   if (goal != null) MapPin(goal, MapPinStyle.goal),
                   // GPS は動く現在地の丸。経路を引いた出発地（手動、またはナビ中に固定）は別のピン。
@@ -283,9 +362,15 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
                 ],
               ),
               MapDistanceBadge(controller: controller, onRidingMap: _riding),
-              if (route == null && !_keypadVisible) _emptyState(l10n, origin == null),
+              if (route == null && !_keypadVisible)
+                _emptyState(l10n, origin == null),
               if (route != null && !_keypadVisible)
-                Positioned(left: 10, right: 10, bottom: 34, child: _routeInfo(l10n, route)),
+                Positioned(
+                  left: 10,
+                  right: 10,
+                  bottom: 34,
+                  child: _routeInfo(l10n, route),
+                ),
               if (_keypadVisible)
                 Positioned(
                   left: AppTheme.screenPadding,
@@ -317,34 +402,48 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
   }
 
   Widget _emptyState(AppLocalizations l10n, bool noLocation) => Center(
-        child: Container(
-          margin: const EdgeInsets.all(32),
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.92), borderRadius: BorderRadius.circular(16)),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(CupertinoIcons.bus, size: 36, color: AppTheme.secondaryText),
-              const SizedBox(height: 10),
-              Text(l10n.routeMapEmpty, textAlign: TextAlign.center, style: const TextStyle(color: AppTheme.secondaryText)),
-              if (noLocation) ...[
-                const SizedBox(height: 8),
-                Text(
-                  l10n.routeMapNoLocation,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12, color: Colors.orange),
-                ),
-              ],
-            ],
+    child: Container(
+      margin: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            CupertinoIcons.bus,
+            size: 36,
+            color: AppTheme.secondaryText,
           ),
-        ),
-      );
+          const SizedBox(height: 10),
+          Text(
+            l10n.routeMapEmpty,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: AppTheme.secondaryText),
+          ),
+          if (noLocation) ...[
+            const SizedBox(height: 8),
+            Text(
+              l10n.routeMapNoLocation,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, color: Colors.orange),
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
 
   Widget _routeInfo(AppLocalizations l10n, RouteRecord route) {
     final label = route.directionText;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.95), borderRadius: BorderRadius.circular(10)),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.95),
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: Row(
         children: [
           Expanded(
@@ -352,27 +451,46 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(route.ref, style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(
+                  route.ref,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
                 if (label != null)
                   Text(
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12, color: AppTheme.secondaryText),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.secondaryText,
+                    ),
                   ),
                 Text(
                   _riding ? l10n.ridingLabel : l10n.routeBoardHint,
-                  style: TextStyle(fontSize: 12, color: _riding ? Colors.orange : AppTheme.tertiaryText),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: _riding ? Colors.orange : AppTheme.tertiaryText,
+                  ),
                 ),
-                if (_riding) AlightStepper(controller: controller, style: const TextStyle(fontSize: 13)),
+                if (_riding)
+                  AlightStepper(
+                    controller: controller,
+                    style: const TextStyle(fontSize: 13),
+                  ),
                 // 乗車中でなくても、開いている路線の停留所順を自分で直せる。
-                StopOrderEditRow(controller: controller, relationId: route.relationId),
+                StopOrderEditRow(
+                  controller: controller,
+                  relationId: route.relationId,
+                ),
               ],
             ),
           ),
           const Icon(CupertinoIcons.bus, size: 16, color: AppTheme.accent),
           const SizedBox(width: 2),
-          Text('${route.stops.length}', style: const TextStyle(fontSize: 12, color: AppTheme.accent)),
+          Text(
+            '${route.stops.length}',
+            style: const TextStyle(fontSize: 12, color: AppTheme.accent),
+          ),
         ],
       ),
     );
