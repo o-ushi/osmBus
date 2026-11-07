@@ -1,0 +1,662 @@
+{
+  "@@locale": "ja",
+  "appTitle": "osmBus",
+  "settings": "設定",
+  "reload": "再読み込み",
+  "cancel": "キャンセル",
+  "ok": "OK",
+  "never": "なし",
+  "destinationUnset": "目的地を設定",
+  "destinationLabel": "目的地",
+  "destinationPickedPoint": "地図で選んだ地点",
+  "tableConsentRequired": "OSM データの利用に同意すると表示されます",
+  "noLocation": "現在地がありません",
+  "tableCalculating": "経路を読み込み中…",
+  "tableNoRoutes": "この条件ではルートが見つかりませんでした。現在地・目的地・路線データを確認してください。",
+  "noRouteData": "路線データがありません",
+  "headerDirection": "方向",
+  "headerDirect": "直通",
+  "headerTransfer1": "乗換1",
+  "headerTransfer2": "乗換2+",
+  "transferCount": "乗換 {count}",
+  "@transferCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "compassN": "北",
+  "compassNE": "北東",
+  "compassE": "東",
+  "compassSE": "南東",
+  "compassS": "南",
+  "compassSW": "南西",
+  "compassW": "西",
+  "compassNW": "北西",
+  "enterBusNumber": "バス番号を入力",
+  "boardVariant": "{names}だったら乗ってください！",
+  "@boardVariant": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "doNotBoard": "見送ってください！",
+  "alightAt": "{stop} で降車",
+  "@alightAt": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "alightNextStop": "1つ先の停留所で降りる",
+  "alightPreviousStop": "1つ手前の停留所で降りる",
+  "estimatedArrival": "到着目安 {time}（概算 約{minutes}分）",
+  "@estimatedArrival": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "directionAny": "向きはどちらでも可。行き先方面なら大丈夫",
+  "directionToward": "参考：{direction}向き",
+  "@directionToward": {
+    "placeholders": {
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
+  "keypadSubmit": "判定",
+  "sectionData": "路線データ",
+  "consentTitle": "OpenStreetMap データの利用",
+  "consentDescription": "Overpass API から周辺のバス路線を取得し、端末に保存します。",
+  "withdrawConsent": "同意を撤回してデータを削除",
+  "withdrawConfirm": "保存した路線ファイルを削除します。よろしいですか？",
+  "routeCount": "路線 {count} 件",
+  "@routeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "geometryCount": "形状 {count} 件",
+  "@geometryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lastSaved": "最終保存 {time}",
+  "@lastSaved": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadAll": "全件ダウンロード",
+  "updateRoutes": "更新",
+  "progress": "取得中 {done}/{total}",
+  "@progress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadFinished": "形状付き {count} 件を保存しました",
+  "@downloadFinished": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "updateFinished": "更新しました（形状付き {count} 件）",
+  "@updateFinished": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadNoRoutes": "周辺に路線がありません",
+  "downloadConsentRequired": "OSM データの利用への同意が必要です",
+  "downloadFailed": "取得に失敗しました: {detail}",
+  "@downloadFailed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "needsLocation": "ダウンロードには現在地が必要です",
+  "sectionBackup": "バックアップ",
+  "exportBackup": "書き出し",
+  "importBackup": "読み込み",
+  "importChooseMode": "読み込み方法",
+  "importReplace": "置き換え",
+  "importMerge": "統合",
+  "importDone": "{count} 件の路線を保存しました",
+  "@importDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importFailed": "読み込めませんでした: {reason}",
+  "@importFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionSync": "同期",
+  "iCloudSync": "iCloud 同期",
+  "iCloudOnlyIOS": "iCloud は iOS のみ",
+  "iCloudUnavailable": "iCloud を使えません（未サインイン、またはコンテナが未設定）",
+  "syncNow": "今すぐ同期",
+  "syncing": "同期中…",
+  "lastSynced": "最終同期 {time}",
+  "@lastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "syncError": "同期エラー: {detail}",
+  "@syncError": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionTable": "番号表の並び",
+  "sortDirection": "方向",
+  "sortDistance": "距離",
+  "sortTransfers": "乗換回数",
+  "metricLabel": "距離の測り方",
+  "metricWalk": "徒歩優先",
+  "metricTotal": "合計距離",
+  "sectionLocation": "現在地",
+  "locationOk": "取得できます",
+  "locationUnknown": "未確認",
+  "locationDenied": "位置情報が許可されていません",
+  "locationDeniedForever": "位置情報が拒否されています。設定アプリから許可してください",
+  "locationServiceDisabled": "位置情報サービスがオフです",
+  "openSettings": "設定を開く",
+  "retry": "再試行",
+  "pickerTitle": "目的地を選ぶ",
+  "searchHint": "地名を検索",
+  "pickerLongPressHint": "地図を長押しして目的地を決めます",
+  "searchFailed": "検索できませんでした",
+  "routeMapTitle": "{ref} の路線図",
+  "@routeMapTitle": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "boardAt": "乗車: {stop}",
+  "@boardAt": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "walkMeters": "徒歩 {meters}m",
+  "@walkMeters": {
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "busNumberTable": "バス番号表",
+  "currentLocationLabel": "現在地: {status}",
+  "@currentLocationLabel": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "locationAcquired": "取得済み",
+  "locationFetching": "取得中…",
+  "locationNotAcquired": "未取得",
+  "locationNotAllowed": "位置情報の利用が許可されていません。設定から許可してください。",
+  "menuMainScreen": "番号入力",
+  "menuTopScreen": "マトリクス",
+  "more": "その他",
+  "busNumberHint": "数字だけ入力（例: 35）。35A なども自動で判定します。",
+  "ridingLabel": "乗車中",
+  "startRiding": "乗車開始",
+  "getOff": "降車",
+  "distanceLeft": "あと",
+  "moveToCurrentLocation": "現在地に移動",
+  "tableTapHint": "タップで地図、長押しで乗車または降車",
+  "pickOnMap": "地図から選択",
+  "chooseVariant": "系統を選択",
+  "busNumberHeader": "バス番号",
+  "transfersHeader": "乗換回数",
+  "sectionArchive": "保管庫",
+  "archiveCount": "保管庫の路線: {count} 件",
+  "@archiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "archiveRestore": "保管庫から復元",
+  "archiveExport": "保管庫を書き出し",
+  "pickerTitleOrigin": "出発地を選ぶ",
+  "pickerLongPressHintOrigin": "地図を長押しして出発地を決めます",
+  "roleOrigin": "出発地",
+  "roleDestination": "目的地",
+  "manualOriginLabel": "出発地: {name}",
+  "clearManualOrigin": "手動出発地をクリア",
+  "pickOriginOnMap": "出発地を地図から選択",
+  "@manualOriginLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "active": "設定中",
+  "addPlace": "場所を追加",
+  "alertAlarm": "アラーム通知",
+  "alertFollowSystemVolume": "システム音量に従う",
+  "alertNotification": "通知",
+  "alertNotificationFooter": "降車停に近づいたとき、画面にアラートを出します。アプリが裏にあるときは通知で知らせます。",
+  "alertSound": "サウンド",
+  "alertVibration": "バイブレーション",
+  "alertVibrationStrength": "バイブの強さ",
+  "arrivalAlerts": "到着アラート",
+  "cancelNavigation": "ナビを中止",
+  "cancelNavigationConfirm": "行き先をやめますか？乗車中の場合は降車扱いになります。",
+  "cannotBeUndone": "この操作は取り消せません。",
+  "choosePlaceAgain": "場所を選び直す",
+  "chooseSound": "サウンドを選択",
+  "clear": "クリア",
+  "clearHistory": "履歴を消去",
+  "clearHistoryConfirm": "履歴をすべて消去しますか？",
+  "clearHistoryFooter": "目的地の履歴をすべて消去します。",
+  "currentDestination": "現在の目的地",
+  "delete": "削除",
+  "destinationHistory": "目的地の履歴",
+  "distanceAlertBody": "{meters}m でアラート",
+  "@distanceAlertBody": {
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "distanceAlertMeters": "距離（m）",
+  "distanceAlertN": "距離アラート {n}",
+  "@distanceAlertN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "distanceAlertTitle": "距離アラート",
+  "distanceAlerts": "距離アラート",
+  "distanceAlertsFooter": "降車バス停まで設定した距離以内に入ったらアラートします。遠い順にアラームが 1〜3 回鳴ります。",
+  "done": "完了",
+  "edit": "編集",
+  "help": "ヘルプ",
+  "hideKeypad": "テンキーを非表示",
+  "history": "履歴",
+  "historyEmpty": "履歴がありません",
+  "historyEmptyDetail": "目的地を設定すると、ここに履歴として表示されます。",
+  "historyTapFooter": "タップすると、その目的地を設定します。",
+  "keyFeedback": "キーパッドのフィードバック",
+  "keyFeedbackClick": "クリック音",
+  "keyFeedbackFooter": "テンキーを押したときの音と振動を調整します。",
+  "keyFeedbackHaptic": "バイブレーション",
+  "keyFeedbackHapticStrength": "バイブの強さ",
+  "keypadAppend": "結果表示後も数字を継ぎ足す",
+  "keypadClearBeforeNew": "結果表示後はクリアして新規入力",
+  "keypadInput": "テンキー入力",
+  "keypadInputFooter": "判定結果が出たあと（⏎ のあと）、テンキーで数字を押したときの動作を選べます。",
+  "labelHome": "自宅",
+  "labelSchool": "学校",
+  "labelWork": "会社",
+  "language": "言語",
+  "languageFooter": "アプリの表示言語を変更できます。",
+  "languageSystem": "端末の設定に従う",
+  "lineMap": "路線図",
+  "longPressToRegister": "長押しで登録",
+  "longPressToRegisterFooter": "長押しで、現在の目的地をそのまま登録できます。",
+  "place": "場所",
+  "placeFooter": "駅名・住所・施設名で検索するか、地図を長押しして選びます。",
+  "placeName": "名前",
+  "placeNameFooter": "一覧に表示される名前です。自宅・職場など、わかりやすい名前にしてください。",
+  "placeNamePlaceholder": "表示名（例: 自宅）",
+  "preview": "プレビュー",
+  "privacyConsent": "同意の管理",
+  "privacyConsentOff": "同意していません。路線データの取得はしません。",
+  "privacyConsentOn": "同意しています。",
+  "privacyDeleteAll": "すべてのデータを削除",
+  "privacyDeleteAllConfirm": "保存データを削除しますか？",
+  "privacyDeleteAllDetail": "目的地、目的地の履歴、登録済みの場所、外部送信への同意と路線データを削除します。一般設定と路線の保管庫は削除されません。",
+  "privacyFooter": "データの送信・保存・削除について確認できます。",
+  "privacyRecipients": "送信先・項目・目的",
+  "privacyRecipientsBody": "・OpenStreetMap の Overpass API（overpass-api.de、Kumi Systems、Mail.ru）: 現在地の座標と検索半径、路線 ID。路線と停留所の取得のため。同意したときだけ送ります。\n・地図タイル（OpenStreetMap、OSM France）: 表示中の地図の範囲。地図の表示のため。\n・Google マップ（API キーがあり、設定でオンのときだけ）: 表示中の地図の範囲。地図の表示のため。\n・地名検索（Nominatim、Photon）: 入力した地名と、近くを優先するための現在地付近の座標。目的地の検索のため。\n・地名検索（Apple の地図、iOS で検索語句に日本語が含まれるとき）: 入力した地名。日本語の呼び方で場所を探すため。近くを優先するときは現在地付近の座標も送ります。\nバスの判定と番号表は端末の中だけで計算し、Google には何も送りません。",
+  "privacyStorage": "端末での保存",
+  "privacyStorageBody": "路線データ、その保管庫、目的地、目的地の履歴、登録済みの場所、直した停留所、設定はこの端末に保存します。iCloud 同期をオンにしたときだけ、路線データ、登録済みの場所、目的地の履歴、直した停留所、番号表・到着アラート・テンキー・言語の設定を自分の iCloud Drive にも保存します。バックアップの書き出しにも同じものが入ります。",
+  "privacyTitle": "プライバシーとデータ",
+  "routeBoardHint": "番号を長押しで乗車・降車",
+  "routeCandidates": "路線候補",
+  "routeCandidatesHint": "バス番号に一致する路線を選んでください。近い順です。",
+  "routeDataAttribution": "路線データ © OpenStreetMap contributors",
+  "routeList": "路線一覧",
+  "routeListEmpty": "路線データがありません",
+  "routeListEmptyDetail": "設定で路線情報をダウンロードすると、ここに一覧が出ます。",
+  "routeMapEmpty": "バス番号を入力して路線を検索",
+  "routeMapErrorTitle": "路線図エラー",
+  "routeMapNoLocation": "近い路線から並べるには現在地が必要です。",
+  "routeSearchNone": "「{number}」に一致する路線が端末の路線データにありません。",
+  "@routeSearchNone": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "save": "保存",
+  "savedPlaces": "登録済みの場所",
+  "savedPlacesEmpty": "登録済みの場所はありません",
+  "savedPlacesEmptyDetail": "自宅やよく行く場所を登録すると、ワンタップで目的地に設定できます。右上の＋から追加できます。",
+  "savedPlacesFooter": "タップで目的地に設定。左スワイプで削除、鉛筆で編集できます。",
+  "searchFromHistory": "履歴から探す",
+  "searchFromSavedPlaces": "登録地から探す",
+  "showKeypad": "テンキーを表示",
+  "soundBell": "ベル",
+  "soundChime": "チャイム",
+  "soundConfirm": "確認音",
+  "soundDing": "ディン",
+  "soundMessage": "メッセージ",
+  "soundTiptoes": "つま先",
+  "soundTock": "タック",
+  "soundTriTone": "三連音",
+  "strengthHeavy": "強め",
+  "strengthLight": "弱め",
+  "strengthMedium": "普通",
+  "trackingNotice": "到着アラートのため乗車中の位置を追跡しています。",
+  "volume": "音量",
+  "wrongDirectionBody": "このバスは逆方向に走っている可能性があります。乗車前に路線を確認してください。",
+  "wrongDirectionBodyRouteMap": "このバスは目的地に向かっていない可能性があります。次のバス停で降りてください。",
+  "wrongDirectionTitle": "逆方向です",
+  "developerScreen": "開発者画面",
+  "devAppInfo": "アプリと端末",
+  "devLogs": "ログ",
+  "devLogsFooter": "不具合を知らせるときは「ログを送る」から、メールなどで送ってください。先頭に端末とアプリの情報が付きます。位置は約100mに丸めて記録しています。",
+  "devLogSend": "ログを送る",
+  "devLogSize": "ファイル {kb}KB・画面 {count}件",
+  "@devLogSize": {
+    "placeholders": {
+      "kb": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "devLogCopy": "ログをコピー",
+  "devLogCopied": "ログをクリップボードにコピーしました。",
+  "devVerboseLog": "詳細ログ",
+  "devVerboseLogDetail": "位置の更新や降車停までの距離も記録します。乗車中の不具合を調べるときにオンにしてください。",
+  "devLogClear": "ログを消去",
+  "devLogClearConfirm": "ログをすべて消去しますか？",
+  "devTests": "テスト",
+  "devTestAlarm": "到着アラームを鳴らす",
+  "devTestNotification": "5秒後に通知を出す",
+  "devTestNotificationDetail": "押したあと画面を消すと、裏での通知を確かめられます。",
+  "devRecentLogs": "最近のログ（新しい順）",
+  "devNoLogs": "ログはまだありません",
+  "devTapsLeft": "あと {count} 回で開発者画面",
+  "@devTapsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "devLogSubject": "osmBus ログ",
+  "devLogShareText": "osmBus のログを送ります。",
+  "devLogSendFailed": "ログを書き出せませんでした: {reason}",
+  "@devLogSendFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "versionLabel": "バージョン {version} ({build})",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionMap": "地図",
+  "useGoogleMaps": "Google マップを使う",
+  "mapsApiKey": "Google Maps API キー",
+  "mapsKeyUser": "設定済み（…{suffix}）",
+  "@mapsKeyUser": {
+    "placeholders": {
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "mapsKeyBundled": "アプリに組み込んだキーを使用中",
+  "mapsKeyNone": "未設定",
+  "mapsKeyRestart": "変更はアプリの再起動後に反映されます",
+  "mapsFooter": "API キーがあり、オンのときは Google マップで表示します。それ以外は OpenStreetMap の地図です。路線と停留所はどちらも端末内の OSM データです。",
+  "mapsFooterAndroid": "Android ではキーをアプリのビルド時に組み込みます（ここでは変えられません）。",
+  "mapsKeyDialogMessage": "Maps SDK for iOS を有効にしたキーを入力します。空にして保存すると削除します。",
+  "transferAt": "乗換: {stop}",
+  "@transferAt": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "longPressToBoard": "長押しで乗車",
+  "longPressToGetOff": "長押しで降車",
+  "routeReviewOpen": "この路線を確認",
+  "stopOrderUsingCustom": "直した順を使っています",
+  "routeReviewTitle": "この路線の確認",
+  "routeReviewOrder": "順番",
+  "routeReviewEnds": "始点と終点",
+  "routeReviewEndStart": "始点の {stop} は、線の端から約 {meters} m です。",
+  "@routeReviewEndStart": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "routeReviewEndLast": "終点の {stop} は、線の端から約 {meters} m です。",
+  "@routeReviewEndLast": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "routeReviewEndsProposal": "線の両端に一番近い停留所を、始点と終点にします。",
+  "routeReviewReset": "この路線の修正をリセット",
+  "routeEditsResetAll": "直した停留所をすべてリセット",
+  "routeEditsResetAllConfirm": "この端末の直した停留所を消し、OSM の並びに戻します。iCloud 同期がオンなら、他の端末の同じ修正も戻します。",
+  "routeReviewPlace": "場所",
+  "routeReviewMembership": "停留所の過不足",
+  "routeReviewNothing": "気になる点はありません",
+  "routeReviewBacktrackIntro": "今の順では、線の上で 1km 以上戻る停留所があります。",
+  "routeReviewBetween": "{stop} は、線に沿うと {after} と {before} のあいだです。",
+  "@routeReviewBetween": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "after": {
+        "type": "String"
+      },
+      "before": {
+        "type": "String"
+      }
+    }
+  },
+  "routeReviewLineStart": "線の始まり",
+  "routeReviewLineEnd": "線の終わり",
+  "routeReviewPartnerDiffers": "復路と、線の向きを考慮しても前後が違います",
+  "routeReviewProposal": "線から 120m 以内の停留所だけを線に沿った順にし、離れた停留所は今の位置に残します。",
+  "routeReviewUseThis": "これを使う",
+  "routeReviewOffLine": "{stop} は、この路線の線から約 {meters} m 離れています。",
+  "@routeReviewOffLine": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "routeReviewReplaceCandidate": "同じ名前の停留所が {ref} にあり、この線から約 {meters} m です。",
+  "@routeReviewReplaceCandidate": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      },
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "routeReviewReplace": "この停留所に差し替える",
+  "routeReviewFromPartner": "復路にあって、この路線の線の近くにあるが、この路線に入っていない停留所",
+  "routeReviewFromOthers": "他の路線の停留所で、この線の近くにあるが、この路線に入っていないもの",
+  "routeReviewOnlyHere": "この方向にだけある停留所",
+  "routeReviewCandidate": "{stop}（{ref}・線から約 {meters} m）",
+  "@routeReviewCandidate": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "ref": {
+        "type": "String"
+      },
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "routeReviewNoAuto": "自動では足しません",
+  "routeReviewEditSelf": "自分で直す",
+  "routeReviewRevertOsm": "OSM の並びに戻す",
+  "stopOrderUseThis": "この順で使う",
+  "stopOrderDragHint": "ドラッグで順番を入れ替えます。直した内容はこの端末の中だけで使います。",
+  "stopEditAdd": "停留所を足す",
+  "stopEditPickOnMap": "地図で場所を指定",
+  "stopEditPlace": "場所",
+  "stopEditDelete": "削除",
+  "stopEditName": "停留所の名前",
+  "stopEditCoordinates": "緯度・経度",
+  "stopEditLatitude": "緯度",
+  "stopEditLongitude": "経度",
+  "stopEditLongPressHint": "地図を長押ししてピンを置きます。",
+  "stopEditConfirmPlace": "この場所にする",
+  "stopEditNoCandidates": "近くに足せる候補はありません。",
+  "stopEditAddedByYou": "自分で足した停留所",
+  "missingNumberEntry": "この区間に無い番号",
+  "missingNumberTitle": "この区間に無い番号",
+  "missingNumberHint": "乗るはずの番号を入れると、この区間の両端に停留所がある路線を開きます。",
+  "missingNumberField": "バス番号",
+  "missingNumberSearch": "探す",
+  "missingNumberNone": "その番号の路線は端末にありません。",
+  "missingNumberOnSegment": "この区間の両端に停留所がある路線",
+  "missingNumberOthers": "番号は一致します。この区間の両端に停留所はありません。",
+  "settingsGroupAlerts": "アラートと表示",
+  "settingsGroupRoutes": "路線データと位置情報",
+  "settingsGroupBackup": "同期とバックアップ",
+  "helpIntro": "行き先を決めて、乗れるバスを選ぶアプリです。",
+  "helpDestTitle": "目的地を決める",
+  "helpDest1": "行き先バーをタップ",
+  "helpDest2": "地名を検索するか、地図を長押し",
+  "helpDest3": "「登録地から探す」「履歴から探す」からも選べる",
+  "helpOriginTitle": "出発地を変える",
+  "helpOrigin1": "現在地バーの地図アイコンをタップ",
+  "helpOrigin2": "× で現在地に戻す",
+  "helpOrigin3": "↻ で現在地を更新",
+  "helpPlaceTitle": "よく行く場所を登録する",
+  "helpPlace1": "行き先シートの「登録地から探す」を開く",
+  "helpPlace2": "今の目的地は長押しで登録",
+  "helpRideTitle": "乗車・降車を記録する",
+  "helpRide1": "バス番号を長押しで乗車",
+  "helpRide2": "同じ番号をもう一度長押しで降車",
+  "helpNumberTitle": "番号で乗れるか調べる",
+  "helpNumber1": "…の「番号入力」をタップ（左端から右スワイプでも可）",
+  "helpNumber2": "数字を入れる",
+  "helpNumber3": "乗れるときは「乗車開始」をタップ",
+  "helpTableTitle": "乗れるバスを見る",
+  "helpTable1": "目的地を決めると番号表が出る",
+  "helpTable2": "番号をタップで路線図",
+  "helpTable3": "乗車中の番号はオレンジ",
+  "helpDistanceTitle": "距離の色を読む",
+  "helpDistance1": "赤・黄・橙の境目は、到着アラートの距離",
+  "helpDistance2": "3km未満は緑、3km以上は青",
+  "helpDistance3": "乗車中にタップで今のルート図",
+  "helpLineMapTitle": "路線図を見る",
+  "helpLineMap1": "…の「路線図」をタップ",
+  "helpLineMap2": "バス番号で探す",
+  "helpLineMap3": "番号バッジの長押しで乗車・降車",
+  "helpNoRouteTitle": "ルートが見つからないとき",
+  "helpNoRoute1": "設定で路線データをダウンロード",
+  "helpNoRoute2": "現在地と目的地が同じ地域か確かめる",
+  "helpMissingTitle": "乗るはずの番号が表に無いとき",
+  "helpMissing1": "「この区間に無い番号」をタップ",
+  "helpMissing2": "番号を入れる",
+  "helpStopTitle": "ナビをやめたいとき",
+  "helpStop1": "距離バッジを長押し",
+  "helpNetworkTitle": "通信エラーのとき",
+  "helpNetwork1": "Wi‑Fi かモバイルデータを確かめる",
+  "helpNetwork2": "バスの判定は端末内のデータで、オフラインでもできる"
+}
