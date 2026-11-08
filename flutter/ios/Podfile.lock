@@ -93,7 +93,7 @@ SPEC CHECKSUMS:
   integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   share_plus: eccd7beb7cea61271aeed1800e8ccb2b952c0c7f
-  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
+  shared_preferences_foundation: a7c3904f2dedb3701dd1903cb152ef5e7df92422
 
 PODFILE CHECKSUM: 38ac7f7a4655323eef3ff07741eda1e6979cb102
 
