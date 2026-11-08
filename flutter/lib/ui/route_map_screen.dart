@@ -150,67 +150,68 @@ class RouteMapScreen extends StatelessWidget {
                   ),
                 ),
                 if (controller != null)
-                  MapDistanceBadge(
-                    controller: controller!,
-                    onRidingMap: ridingLeg != null,
-                  ),
+                  MapDistanceBadge(controller: controller!),
               ],
             ),
           ),
-          SafeArea(
-            top: false,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.sizeOf(context).height * 0.35,
-              ),
-              child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                children: [
-                  for (final (i, leg) in legs.indexed)
-                    ListTile(
-                      dense: true,
-                      // 番号表と同じく、長押しで乗車・乗換・降車。
-                      leading: BusBadge(
-                        text: leg.ref,
-                        riding: i == ridingLeg,
-                        onLongPress: controller == null
-                            ? null
-                            : () => controller!.toggleRidingLeg(itinerary, i),
-                        semanticsLabel: '${leg.ref}. ${l10n.routeBoardHint}',
+          // 下の区間リストは白地にする（青い地のままだと灰色の文字が溶けて読めない）。
+          ColoredBox(
+            color: Colors.white,
+            child: SafeArea(
+              top: false,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.sizeOf(context).height * 0.35,
+                ),
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  children: [
+                    for (final (i, leg) in legs.indexed)
+                      ListTile(
+                        dense: true,
+                        // 番号表と同じく、長押しで乗車・乗換・降車。
+                        leading: BusBadge(
+                          text: leg.ref,
+                          riding: i == ridingLeg,
+                          onLongPress: controller == null
+                              ? null
+                              : () => controller!.toggleRidingLeg(itinerary, i),
+                          semanticsLabel: '${leg.ref}. ${l10n.routeBoardHint}',
+                        ),
+                        title: Text(
+                          i == 0
+                              ? l10n.boardAt(leg.boardStop.name)
+                              : l10n.transferAt(leg.boardStop.name),
+                        ),
+                        subtitle: i == ridingLeg
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  AlightStepper(
+                                    controller: controller!,
+                                    fallbackStopName: leg.alightStop.name,
+                                  ),
+                                  StopOrderEditRow(
+                                    controller: controller!,
+                                    relationId: leg.relationId,
+                                  ),
+                                ],
+                              )
+                            : Text(l10n.alightAt(leg.alightStop.name)),
                       ),
-                      title: Text(
-                        i == 0
-                            ? l10n.boardAt(leg.boardStop.name)
-                            : l10n.transferAt(leg.boardStop.name),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
+                      child: Text(
+                        controller == null
+                            ? l10n.walkMeters(shown.walkMeters.round())
+                            : '${l10n.walkMeters(shown.walkMeters.round())}\n${l10n.routeBoardHint}',
+                        style: const TextStyle(color: AppTheme.secondaryText),
                       ),
-                      subtitle: i == ridingLeg
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                AlightStepper(
-                                  controller: controller!,
-                                  fallbackStopName: leg.alightStop.name,
-                                ),
-                                StopOrderEditRow(
-                                  controller: controller!,
-                                  relationId: leg.relationId,
-                                ),
-                              ],
-                            )
-                          : Text(l10n.alightAt(leg.alightStop.name)),
                     ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
-                    child: Text(
-                      controller == null
-                          ? l10n.walkMeters(shown.walkMeters.round())
-                          : '${l10n.walkMeters(shown.walkMeters.round())}\n${l10n.routeBoardHint}',
-                      style: const TextStyle(color: AppTheme.secondaryText),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

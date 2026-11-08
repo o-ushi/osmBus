@@ -11,18 +11,19 @@ import 'osm_page_route.dart';
 /// 「あと」距離バッジ。ホームのアプリバーと各地図の左上で同じものを出す。
 /// 未乗車で目的地があれば目的地まで、乗車中は降車停留所まで（GPS から直線）。
 /// 路線図から目的地なしで乗っているときは「—」。距離も乗車も無ければ何も出さない。
-/// タップで乗車中の経路地図を開く（[onRidingMap] なら閉じる）。長押しでナビ中止。
+/// ホームでタップすると乗車中の経路地図を開く。地図の上（[onMap]）でタップするとホームへ戻る
+/// （乗車中でない路線図から乗車中の地図へ飛び、行き来して抜け出せなくなるのを防ぐ）。長押しでナビ中止。
 class TripDistanceBadge extends StatelessWidget {
   const TripDistanceBadge({
     super.key,
     required this.controller,
-    this.onRidingMap = false,
+    this.onMap = false,
   });
 
   final TripController controller;
 
-  /// いま乗車中の経路地図（またはその路線を開いた路線図）を見ているか。
-  final bool onRidingMap;
+  /// 経路地図・路線図の上に出しているか。
+  final bool onMap;
 
   @override
   Widget build(BuildContext context) {
@@ -39,16 +40,21 @@ class TripDistanceBadge extends StatelessWidget {
             for (final slot in controller.settings.distanceSlots) slot.meters,
           ],
           label: AppLocalizations.of(context).distanceLeft,
-          onTap: riding == null
+          onTap: onMap
+              ? () => popToHome(context)
+              : riding == null
               ? null
-              : onRidingMap
-              ? () => Navigator.of(context).maybePop()
               : () => openRidingMap(context, controller),
           onLongPress: () => confirmCancelNavigation(context, controller),
         );
       },
     );
   }
+}
+
+/// 地図やシートを全部閉じてホーム（最初の画面）に戻る。
+void popToHome(BuildContext context) {
+  Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
 }
 
 /// 乗車中の経路地図を開く。番号表から乗っていれば経路地図、路線図から乗っていればその路線の路線図。
@@ -188,14 +194,9 @@ class DistanceBadge extends StatelessWidget {
 
 /// 地図の左上（アプリバーの下、セーフエリアの内側）に置く距離バッジ。
 class MapDistanceBadge extends StatelessWidget {
-  const MapDistanceBadge({
-    super.key,
-    required this.controller,
-    this.onRidingMap = false,
-  });
+  const MapDistanceBadge({super.key, required this.controller});
 
   final TripController controller;
-  final bool onRidingMap;
 
   @override
   Widget build(BuildContext context) {
@@ -209,10 +210,7 @@ class MapDistanceBadge extends StatelessWidget {
           padding: const EdgeInsets.only(left: 10, top: 8),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 140),
-            child: TripDistanceBadge(
-              controller: controller,
-              onRidingMap: onRidingMap,
-            ),
+            child: TripDistanceBadge(controller: controller, onMap: true),
           ),
         ),
       ),

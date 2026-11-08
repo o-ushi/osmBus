@@ -361,7 +361,7 @@ class _BusRouteBrowserScreenState extends State<BusRouteBrowserScreen> {
                   if (originPin != null) MapPin(originPin, MapPinStyle.origin),
                 ],
               ),
-              MapDistanceBadge(controller: controller, onRidingMap: _riding),
+              MapDistanceBadge(controller: controller),
               if (route == null && !_keypadVisible)
                 _emptyState(l10n, origin == null),
               if (route != null && !_keypadVisible)
