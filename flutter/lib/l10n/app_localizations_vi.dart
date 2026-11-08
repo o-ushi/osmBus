@@ -1172,7 +1172,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get helpDistance2 => 'Xanh lá dưới 3 km, xanh dương từ 3 km';
 
   @override
-  String get helpDistance3 => 'Khi đang đi, chạm để xem bản đồ tuyến';
+  String get helpDistance3 =>
+      'Chạm: ở màn hình chính để xem bản đồ tuyến, trên bản đồ để về màn hình chính';
 
   @override
   String get helpLineMapTitle => 'Xem bản đồ tuyến';

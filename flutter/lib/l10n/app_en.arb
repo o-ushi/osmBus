@@ -368,7 +368,7 @@
   "helpDistanceTitle": "Read the distance colors",
   "helpDistance1": "Red, yellow and orange follow the arrival alert distances",
   "helpDistance2": "Green under 3 km, blue from 3 km",
-  "helpDistance3": "While riding, tap for the current route map",
+  "helpDistance3": "Tap it: on home for the current route map, on a map to go back home",
   "helpLineMapTitle": "See a route map",
   "helpLineMap1": "Tap \"Line map\" in …",
   "helpLineMap2": "Search by bus number",

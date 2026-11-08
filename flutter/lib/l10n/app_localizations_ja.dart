@@ -1141,7 +1141,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get helpDistance2 => '3km未満は緑、3km以上は青';
 
   @override
-  String get helpDistance3 => '乗車中にタップで今のルート図';
+  String get helpDistance3 => 'タップすると、ホームでは今のルート図、地図ではホーム画面に戻る';
 
   @override
   String get helpLineMapTitle => '路線図を見る';

@@ -643,7 +643,7 @@
   "helpDistanceTitle": "距離の色を読む",
   "helpDistance1": "赤・黄・橙の境目は、到着アラートの距離",
   "helpDistance2": "3km未満は緑、3km以上は青",
-  "helpDistance3": "乗車中にタップで今のルート図",
+  "helpDistance3": "タップすると、ホームでは今のルート図、地図ではホーム画面に戻る",
   "helpLineMapTitle": "路線図を見る",
   "helpLineMap1": "…の「路線図」をタップ",
   "helpLineMap2": "バス番号で探す",

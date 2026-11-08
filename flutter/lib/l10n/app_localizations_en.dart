@@ -1176,7 +1176,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpDistance2 => 'Green under 3 km, blue from 3 km';
 
   @override
-  String get helpDistance3 => 'While riding, tap for the current route map';
+  String get helpDistance3 =>
+      'Tap it: on home for the current route map, on a map to go back home';
 
   @override
   String get helpLineMapTitle => 'See a route map';

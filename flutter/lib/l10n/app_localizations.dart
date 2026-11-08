@@ -2191,7 +2191,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpDistance3.
   ///
   /// In ja, this message translates to:
-  /// **'乗車中にタップで今のルート図'**
+  /// **'タップすると、ホームでは今のルート図、地図ではホーム画面に戻る'**
   String get helpDistance3;
 
   /// No description provided for @helpLineMapTitle.

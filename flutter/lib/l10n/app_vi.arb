@@ -368,7 +368,7 @@
   "helpDistanceTitle": "Đọc màu khoảng cách",
   "helpDistance1": "Đỏ, vàng, cam theo khoảng cách cảnh báo đến",
   "helpDistance2": "Xanh lá dưới 3 km, xanh dương từ 3 km",
-  "helpDistance3": "Khi đang đi, chạm để xem bản đồ tuyến",
+  "helpDistance3": "Chạm: ở màn hình chính để xem bản đồ tuyến, trên bản đồ để về màn hình chính",
   "helpLineMapTitle": "Xem bản đồ tuyến",
   "helpLineMap1": "Chạm \"Sơ đồ tuyến\" trong …",
   "helpLineMap2": "Tìm theo số xe",
