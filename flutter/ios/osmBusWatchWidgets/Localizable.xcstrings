@@ -1,0 +1,20 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "osmBus を開く" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open osmBus" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "osmBus を開く" } },
+        "vi" : { "stringUnit" : { "state" : "translated", "value" : "Mở osmBus" } }
+      }
+    },
+    "文字盤から osmBus を開きます。" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Opens osmBus from the watch face." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "文字盤から osmBus を開きます。" } },
+        "vi" : { "stringUnit" : { "state" : "translated", "value" : "Mở osmBus từ mặt đồng hồ." } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

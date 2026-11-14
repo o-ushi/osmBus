@@ -1172,7 +1172,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get helpDistance2 => 'Xanh lá dưới 3 km, xanh dương từ 3 km';
 
   @override
-  String get helpDistance3 => 'Khi đang đi, chạm để xem bản đồ tuyến';
+  String get helpDistance3 =>
+      'Chạm: ở màn hình chính để xem bản đồ tuyến, trên bản đồ để về màn hình chính';
 
   @override
   String get helpLineMapTitle => 'Xem bản đồ tuyến';
@@ -1219,4 +1220,16 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get helpNetwork2 =>
       'Kiểm tra xe dùng dữ liệu trên máy nên chạy được khi ngoại tuyến';
+
+  @override
+  String get startupStart => 'Bắt đầu';
+
+  @override
+  String get startupDontShowAgain => 'Không hiện lại';
+
+  @override
+  String get startupSetting => 'Màn hình khởi động';
+
+  @override
+  String get startupSettingNote => 'Hiện màn hình hướng dẫn khi mở ứng dụng';
 }

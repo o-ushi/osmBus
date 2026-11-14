@@ -4,10 +4,9 @@ import 'package:flutter/services.dart';
 /// Swift 版 `AppTheme` / `BusCardBackground` / `SceneBackgroundLayer` と同じ見た目。
 abstract final class AppTheme {
   static const brandBlue = Color.fromRGBO(61, 89, 147, 1);
-  static const sceneLight = Color.fromRGBO(253, 252, 240, 1);
 
-  /// Swift の `sceneColorDark`（RGB 0.10, 0.10, 0.12）。
-  static const sceneDark = Color.fromRGBO(26, 26, 31, 1);
+  /// メイン画面の背景。osmファミリー共通で、端末の明暗に依存しない。
+  static const scene = brandBlue;
   static const accent = Color(0xFF007AFF);
   static const cardFill = Color.fromRGBO(255, 250, 242, 1);
   static const cardBorder = Color.fromRGBO(245, 199, 153, 1);
@@ -27,30 +26,54 @@ abstract final class AppTheme {
   static const double locationRowHeight = 56;
 
   static ThemeData light() {
-    final scheme = ColorScheme.fromSeed(seedColor: accent).copyWith(primary: accent);
+    final scheme = ColorScheme.fromSeed(seedColor: accent)
+        .copyWith(primary: accent);
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: sceneLight,
+      scaffoldBackgroundColor: scene,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        // 閉じるのは自前のスワイプに任せる（iOS 標準の端スワイプと同時に動かさない）。
+        builders: {
+          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.fuchsia: FadeUpwardsPageTransitionsBuilder(),
+        },
+      ),
       splashFactory: NoSplash.splashFactory,
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        foregroundColor: accent,
+        foregroundColor: Colors.white,
         centerTitle: true,
-        titleTextStyle: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black),
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        titleTextStyle: TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
+        systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
-      dividerTheme: const DividerThemeData(color: Color(0x333C3C43), thickness: 0.5, space: 0.5),
+      dividerTheme: const DividerThemeData(
+        color: Color(0x333C3C43),
+        thickness: 0.5,
+        space: 0.5,
+      ),
     );
   }
 }
 
 /// オレンジ枠と左のアクセント帯のカード。
 class BusCard extends StatelessWidget {
-  const BusCard({super.key, required this.child, this.padding = EdgeInsets.zero});
+  const BusCard({
+    super.key,
+    required this.child,
+    this.padding = EdgeInsets.zero,
+  });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -91,44 +114,7 @@ class SceneBackground extends StatelessWidget {
   const SceneBackground({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final dark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
-    return ColoredBox(
-      color: dark ? AppTheme.sceneDark : AppTheme.sceneLight,
-      child: CustomPaint(painter: _PaperGridPainter(dark: dark), size: Size.infinite),
-    );
-  }
-}
-
-class _PaperGridPainter extends CustomPainter {
-  const _PaperGridPainter({required this.dark});
-
-  final bool dark;
-
-  static const double step = 28;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Swift の `PaperGridDotCanvas`。ダークは線 0.18・点 0.12、ライトは 0.12・0.09。
-    final line = Paint()
-      ..color = Color.fromRGBO(140, 115, 71, dark ? 0.18 : 0.12)
-      ..strokeWidth = 0.45;
-    for (var x = 0.0; x <= size.width + step; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), line);
-    }
-    for (var y = 0.0; y <= size.height + step; y += step) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), line);
-    }
-    final dot = Paint()..color = Color.fromRGBO(51, 140, 89, dark ? 0.12 : 0.09);
-    for (var y = 0.0; y <= size.height + step; y += step) {
-      for (var x = 0.0; x <= size.width + step; x += step) {
-        canvas.drawCircle(Offset(x, y), 0.6, dot);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _PaperGridPainter oldDelegate) => oldDelegate.dark != dark;
+  Widget build(BuildContext context) => const ColoredBox(color: AppTheme.scene);
 }
 
 /// バス番号のバッジ。乗車中の番号はオレンジ。
@@ -166,7 +152,11 @@ class BusBadge extends StatelessWidget {
           child: Text(
             text,
             maxLines: 1,
-            style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ),
@@ -176,7 +166,12 @@ class BusBadge extends StatelessWidget {
 
 /// 押すと少し縮むボタン（Swift の `KeypadButtonStyle`）。
 class PressScale extends StatefulWidget {
-  const PressScale({super.key, required this.child, this.onTap, this.onLongPress});
+  const PressScale({
+    super.key,
+    required this.child,
+    this.onTap,
+    this.onLongPress,
+  });
 
   final Widget child;
   final VoidCallback? onTap;
@@ -223,8 +218,13 @@ abstract final class DistanceColorBand {
 
   /// [alertMeters] は距離アラート 1・2・3 のメートル（設定画面の順、`DistanceAlertSlot.index` 順）。
   /// 先に当てはまった色にする: 3 未満は赤、2 未満は黄、1 未満は橙、3km 未満は緑、それ以上は青。
-  static (Color background, Color text) colors(double meters, List<int> alertMeters) {
-    final slots = [for (var i = 0; i < 3; i++) i < alertMeters.length ? alertMeters[i] : 0];
+  static (Color background, Color text) colors(
+    double meters,
+    List<int> alertMeters,
+  ) {
+    final slots = [
+      for (var i = 0; i < 3; i++) i < alertMeters.length ? alertMeters[i] : 0,
+    ];
     if (meters < slots[2]) return (Colors.red, Colors.white);
     if (meters < slots[1]) return (Colors.yellow, Colors.black);
     if (meters < slots[0]) return (Colors.orange, Colors.black);

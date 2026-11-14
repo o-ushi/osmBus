@@ -186,6 +186,14 @@ class TripController extends ChangeNotifier {
   final DistanceAlertTracker _alertTracker = DistanceAlertTracker();
   final List<RidingAlert> _alerts = [];
   bool _wrongDirectionShown = false;
+
+  /// 乗換で降りた旅程と、次に乗るレグ。降りたあと乗換先の番号を長押しで乗れるよう覚えておく。
+  /// 次の乗車・目的地の変更・ナビ中止で忘れる。
+  LocalItinerary? _transferItinerary;
+  int _transferLegIndex = 0;
+
+  /// 距離アラートで手首を震わせる回数（チャイムの順位）。バイブ設定がオンのときだけ流す。
+  final StreamController<int> _vibrationAlerts = StreamController<int>.broadcast();
   bool _foreground = true;
   bool _backgroundTracking = false;
   bool _clearOnNextDigit = false;
@@ -237,6 +245,28 @@ class TripController extends ChangeNotifier {
 
   /// 現在地の取得を始めてから最初の位置が届くまで true。
   bool get locating => _locating;
+
+  /// 距離アラートのバイブ。値は遠いリングから 1, 2, 3 回。Apple Watch へ送る。
+  Stream<int> get vibrationAlerts => _vibrationAlerts.stream;
+
+  /// 乗車中のみ。今のレグの直後のバスの番号。直通・最終区間・路線図から乗ったときは null。
+  String? get nextTransferRef {
+    final riding = _riding;
+    final legs = riding?.itinerary?.legs;
+    if (riding == null || legs == null) return null;
+    final next = riding.legIndex + 1;
+    return next < legs.length ? legs[next].ref : null;
+  }
+
+  /// 未乗車のみ。バス番号の長押しで乗る番号。直前に降りた乗換の次のバス、
+  /// 無ければ判定で乗れると決まった 1 系統。候補が複数なら選べないので null。
+  String? get boardableRef {
+    if (_riding != null) return null;
+    final transfer = _transferItinerary;
+    if (transfer != null) return transfer.legs[_transferLegIndex].ref;
+    final decision = _decision;
+    return decision is BoardIfVariant && decision.names.length == 1 ? decision.names.single : null;
+  }
 
   /// 「あと」バッジの距離。乗車中は降車停留所まで、そうでなければ目的地まで（直線）。
   /// 乗車中は手動の出発地ではなく GPS で測る（バスが動いても距離が固まらないように）。
@@ -301,6 +331,7 @@ class TripController extends ChangeNotifier {
     _placesSub?.cancel();
     _inputTimer?.cancel();
     _syncTimer?.cancel();
+    _vibrationAlerts.close();
     downloader.dispose();
     super.dispose();
   }
@@ -824,6 +855,7 @@ class TripController extends ChangeNotifier {
     AppLog.i('trip', 'destination ${AppLog.coord(destination.point)}');
     await places.addHistory(destination);
     _wrongDirectionShown = false;
+    _transferItinerary = null;
     notifyListeners();
     await _replan();
   }
@@ -832,6 +864,7 @@ class TripController extends ChangeNotifier {
   Future<void> cancelNavigation() async {
     AppLog.i('trip', 'cancel navigation');
     endRiding();
+    _transferItinerary = null;
     _destination = null;
     _adoptNextFix = false;
     _setRouteOrigin(null);
@@ -974,30 +1007,55 @@ class TripController extends ChangeNotifier {
   /// 番号表・ルート図の長押し。[itinerary] の [legIndex] 番目のバスについて [toggleRiding] と同じ。
   void toggleRidingLeg(LocalItinerary itinerary, int legIndex) {
     final ref = itinerary.legs[legIndex].ref;
-    final riding = _riding;
-    if (riding?.ref == ref) {
+    if (_riding?.ref == ref) {
       endRiding();
       return;
     }
-    final current = riding?.itinerary;
-    if (riding != null && current != null) {
-      final next = current.legs.indexWhere((leg) => leg.ref == ref, riding.legIndex + 1);
-      if (next >= 0) {
-        _startRiding(RidingSession.fromItinerary(
-          current,
-          legIndex: next,
-          destination: _destination?.point,
-          now: DateTime.now(),
-        ));
-        return;
-      }
-    }
+    if (_transferToLaterLeg(ref, afterAlight: false)) return;
     _startRiding(RidingSession.fromItinerary(
       itinerary,
       legIndex: legIndex,
       destination: _destination?.point,
       now: DateTime.now(),
     ));
+  }
+
+  /// 乗っている旅程の先のレグに [ref] があれば、そのレグに乗る。
+  /// [afterAlight] なら、乗換地点で降りた直後の旅程も見る（番号表は押した行の旅程を使うので見ない）。
+  /// 同じ番号が 2 回出ることがあるので、今のレグより後ろで最初のものにする。
+  bool _transferToLaterLeg(String ref, {required bool afterAlight}) {
+    final riding = _riding;
+    final current = riding?.itinerary ?? (riding == null && afterAlight ? _transferItinerary : null);
+    if (current == null) return false;
+    final from = riding != null ? riding.legIndex + 1 : _transferLegIndex;
+    final next = current.legs.indexWhere((leg) => _sameRef(leg.ref, ref), from);
+    if (next < 0) return false;
+    _startRiding(RidingSession.fromItinerary(
+      current,
+      legIndex: next,
+      destination: _destination?.point,
+      now: DateTime.now(),
+    ));
+    return true;
+  }
+
+  static bool _sameRef(String a, String b) => a.toUpperCase() == b.toUpperCase();
+
+  /// バス番号の長押し（Apple Watch から）。番号表・判定の長押しと同じ意味にする。
+  /// 乗っている番号なら降車、乗換先の番号なら乗換、未乗車で乗れる 1 系統ならその番号で乗車。
+  /// 何もしなかったら false（候補が複数で選べない、乗れない番号など）。
+  bool longPressBusNumber(String number) {
+    final riding = _riding;
+    if (riding != null && _sameRef(riding.ref, number)) {
+      endRiding();
+      return true;
+    }
+    if (_transferToLaterLeg(number, afterAlight: true)) return true;
+    if (riding != null) return false;
+    final boardable = boardableRef;
+    if (boardable == null || !_sameRef(boardable, number)) return false;
+    startRiding(boardable);
+    return _riding != null;
   }
 
   /// 判定の「乗車開始」。その系統の旅程のうち直通を優先し、徒歩が短いもの。
@@ -1154,6 +1212,7 @@ class TripController extends ChangeNotifier {
           'vibration=${settings.isAlertEnabled(StopAlertMode.vibration)} alert=${settings.isAlertEnabled(StopAlertMode.alert)}',
     );
     _riding = session;
+    _transferItinerary = null;
     _alertTracker.reset();
     _wrongDirectionShown = false;
     _saveRiding();
@@ -1172,7 +1231,16 @@ class TripController extends ChangeNotifier {
 
   void endRiding() {
     if (_riding == null) return;
-    AppLog.i('riding', 'end ${_riding!.ref}');
+    final ended = _riding!;
+    AppLog.i('riding', 'end ${ended.ref}');
+    // 乗換地点で降りたら、次のバスを長押しで乗れるよう旅程を残す。
+    final itinerary = ended.itinerary;
+    if (itinerary != null && ended.legIndex + 1 < itinerary.legs.length) {
+      _transferItinerary = itinerary;
+      _transferLegIndex = ended.legIndex + 1;
+    } else {
+      _transferItinerary = null;
+    }
     _riding = null;
     _alertTracker.reset();
     _alerts.clear();
@@ -1252,7 +1320,10 @@ class TripController extends ChangeNotifier {
     final alarm = settings.isAlertEnabled(StopAlertMode.alarm);
     final vibration = settings.isAlertEnabled(StopAlertMode.vibration);
     if (alarm) unawaited(sound?.playAlarm(fire.repeatCount));
-    if (vibration) sound?.vibrateAlert();
+    if (vibration) {
+      sound?.vibrateAlert();
+      _vibrationAlerts.add(fire.repeatCount);
+    }
     if (alarm || vibration || settings.isAlertEnabled(StopAlertMode.alert)) {
       _raise(DistanceRidingAlert(fire.meters), texts.distanceTitle, texts.distanceBody(fire.meters));
     }

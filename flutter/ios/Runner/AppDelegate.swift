@@ -12,6 +12,7 @@ import UIKit
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GoogleMapsKey.provideAtLaunch()
+    WatchBridge.shared.activate()
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
@@ -22,8 +23,9 @@ import UIKit
   ) -> UISceneConfiguration {
     // 一度 SwiftUI.AppSceneDelegate で保存されたシーンは、Info.plist の
     // SceneDelegate を読まずに復元される。畳んだ外側画面はプロセスが生きたまま黒くなる。
+    // 設定名は毎回逆引き DNS にする。残った "flutter" を状態保存の種別に使うと落ちる。
     let configuration = UISceneConfiguration(
-      name: connectingSceneSession.configuration.name ?? "flutter",
+      name: SceneConfiguration.name,
       sessionRole: connectingSceneSession.role
     )
     configuration.delegateClass = SceneDelegate.self
@@ -41,6 +43,9 @@ import UIKit
     }
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "LocationAuthorization") {
       LocationAuthorization.register(messenger: registrar.messenger())
+    }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "WatchBridge") {
+      WatchBridge.shared.register(messenger: registrar.messenger())
     }
   }
 }

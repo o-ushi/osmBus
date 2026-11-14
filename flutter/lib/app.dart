@@ -9,15 +9,24 @@ import 'models/deep_link.dart';
 import 'services/app_log.dart';
 import 'state/trip_controller.dart';
 import 'ui/theme.dart';
+import 'ui/startup_screen.dart';
 import 'ui/top_screen.dart';
 
 class OsmBusApp extends StatefulWidget {
-  const OsmBusApp({super.key, required this.controller, this.listensDeepLinks = true});
+  const OsmBusApp({
+    super.key,
+    required this.controller,
+    this.listensDeepLinks = true,
+    this.openedByLink = false,
+  });
 
   final TripController controller;
 
   /// UI テストではプラグインを呼ばない。
   final bool listensDeepLinks;
+
+  /// 目的地付きのリンクで起動したとき true（スタートアップ画面を挟まない）。
+  final bool openedByLink;
 
   @override
   State<OsmBusApp> createState() => _OsmBusAppState();
@@ -25,6 +34,7 @@ class OsmBusApp extends StatefulWidget {
 
 class _OsmBusAppState extends State<OsmBusApp> with WidgetsBindingObserver {
   StreamSubscription<Uri>? _links;
+  late final _openedByLink = ValueNotifier<bool>(widget.openedByLink);
 
   @override
   void initState() {
@@ -41,13 +51,19 @@ class _OsmBusAppState extends State<OsmBusApp> with WidgetsBindingObserver {
 
   void _openLink(Uri uri) {
     final destination = OsmBusDeepLink.parseDestination(uri);
-    AppLog.i('link', 'open ${uri.scheme}://${uri.host} valid=${destination != null}');
-    if (destination != null) unawaited(widget.controller.setDestination(destination));
+    AppLog.i(
+      'link',
+      'open ${uri.scheme}://${uri.host} valid=${destination != null}',
+    );
+    if (destination == null) return;
+    _openedByLink.value = true;
+    unawaited(widget.controller.setDestination(destination));
   }
 
   @override
   void dispose() {
     _links?.cancel();
+    _openedByLink.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -90,7 +106,8 @@ class _OsmBusAppState extends State<OsmBusApp> with WidgetsBindingObserver {
           // 端末の言語が 3 言語のどれでもなければ日本語。
           localeResolutionCallback: (locale, supported) {
             for (final candidate in supported) {
-              if (candidate.languageCode == locale?.languageCode) return candidate;
+              if (candidate.languageCode == locale?.languageCode)
+                return candidate;
             }
             return const Locale('ja');
           },
@@ -106,7 +123,11 @@ class _OsmBusAppState extends State<OsmBusApp> with WidgetsBindingObserver {
             );
             return child!;
           },
-          home: TopScreen(controller: widget.controller),
+          home: StartupGate(
+            settings: widget.controller.settings,
+            openedByLink: _openedByLink,
+            child: TopScreen(controller: widget.controller),
+          ),
         );
       },
     );

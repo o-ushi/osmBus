@@ -17,6 +17,18 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		A5A5A201B26D825C1C30FD16 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6361F1ACC44DE15A51027D36 /* Pods_RunnerTests.framework */; };
+		D2B000000000000000000001 /* WatchRideLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B000000000000000000011 /* WatchRideLink.swift */; };
+		D2B000000000000000000002 /* WatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B000000000000000000012 /* WatchBridge.swift */; };
+		D2B000000000000000000003 /* osmBusWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = D2B000000000000000000018 /* osmBusWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D2B000000000000000000004 /* WatchRideLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B000000000000000000011 /* WatchRideLink.swift */; };
+		D2B000000000000000000005 /* OsmBusWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B000000000000000000013 /* OsmBusWatchApp.swift */; };
+		D2B000000000000000000006 /* WatchRideStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B000000000000000000014 /* WatchRideStore.swift */; };
+		D2B000000000000000000007 /* WatchRideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B000000000000000000015 /* WatchRideView.swift */; };
+		D2B000000000000000000008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D2B000000000000000000016 /* Assets.xcassets */; };
+		D2B000000000000000000009 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = D2B000000000000000000017 /* Localizable.xcstrings */; };
+		D2B000000000000000000051 /* LaunchComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B000000000000000000061 /* LaunchComplication.swift */; };
+		D2B000000000000000000052 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = D2B000000000000000000062 /* Localizable.xcstrings */; };
+		D2B000000000000000000053 /* osmBusWatchWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D2B000000000000000000064 /* osmBusWatchWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,6 +38,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
+		};
+		D2B000000000000000000021 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2B000000000000000000041;
+			remoteInfo = osmBusWatch;
+		};
+		D2B000000000000000000071 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2B000000000000000000081;
+			remoteInfo = osmBusWatchWidgets;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -38,6 +64,28 @@
 			files = (
 			);
 			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D2B000000000000000000023 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				D2B000000000000000000003 /* osmBusWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D2B000000000000000000073 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				D2B000000000000000000053 /* osmBusWatchWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -67,9 +115,29 @@
 		A8334A4BBAD337D47C619E14 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		F2325E4B9D1C35DBA3F005C7 /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		F349AEB108DC385513A3BD4A /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2B000000000000000000011 /* WatchRideLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchRideLink.swift; sourceTree = "<group>"; };
+		D2B000000000000000000012 /* WatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchBridge.swift; sourceTree = "<group>"; };
+		D2B000000000000000000013 /* OsmBusWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsmBusWatchApp.swift; sourceTree = "<group>"; };
+		D2B000000000000000000014 /* WatchRideStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchRideStore.swift; sourceTree = "<group>"; };
+		D2B000000000000000000015 /* WatchRideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchRideView.swift; sourceTree = "<group>"; };
+		D2B000000000000000000016 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D2B000000000000000000017 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		D2B000000000000000000018 /* osmBusWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = osmBusWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2B000000000000000000061 /* LaunchComplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchComplication.swift; sourceTree = "<group>"; };
+		D2B000000000000000000062 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		D2B000000000000000000063 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D2B000000000000000000064 /* osmBusWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = osmBusWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2B000000000000000000065 /* osmBusWatchWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = osmBusWatchWidgets.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		D2B000000000000000000025 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6D6A2A445E9C475CD3D20309 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -83,6 +151,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				0DD52E10380F5716967211FD /* Pods_Runner.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D2B000000000000000000075 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -135,6 +210,9 @@
 			children = (
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
+				D2B000000000000000000031 /* Shared */,
+				D2B000000000000000000032 /* osmBusWatch */,
+				D2B000000000000000000077 /* osmBusWatchWidgets */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				162AD05D5E6FDD7E7DDD9154 /* Pods */,
@@ -147,6 +225,8 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
+				D2B000000000000000000018 /* osmBusWatch.app */,
+				D2B000000000000000000064 /* osmBusWatchWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -162,9 +242,41 @@
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */,
+				D2B000000000000000000012 /* WatchBridge.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
 			path = Runner;
+			sourceTree = "<group>";
+		};
+		D2B000000000000000000031 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				D2B000000000000000000011 /* WatchRideLink.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		D2B000000000000000000032 /* osmBusWatch */ = {
+			isa = PBXGroup;
+			children = (
+				D2B000000000000000000013 /* OsmBusWatchApp.swift */,
+				D2B000000000000000000014 /* WatchRideStore.swift */,
+				D2B000000000000000000015 /* WatchRideView.swift */,
+				D2B000000000000000000016 /* Assets.xcassets */,
+				D2B000000000000000000017 /* Localizable.xcstrings */,
+			);
+			path = osmBusWatch;
+			sourceTree = "<group>";
+		};
+		D2B000000000000000000077 /* osmBusWatchWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				D2B000000000000000000061 /* LaunchComplication.swift */,
+				D2B000000000000000000062 /* Localizable.xcstrings */,
+				D2B000000000000000000063 /* Info.plist */,
+				D2B000000000000000000065 /* osmBusWatchWidgets.entitlements */,
+			);
+			path = osmBusWatchWidgets;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -199,6 +311,7 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				D2B000000000000000000023 /* Embed Watch Content */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				A3CFA8E6DC9A289A3C0A6718 /* [CP] Embed Pods Frameworks */,
 				46C2B664DC2064C4781F33AD /* [CP] Copy Pods Resources */,
@@ -206,11 +319,48 @@
 			buildRules = (
 			);
 			dependencies = (
+				D2B000000000000000000022 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
+		};
+		D2B000000000000000000041 /* osmBusWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D2B000000000000000000042 /* Build configuration list for PBXNativeTarget "osmBusWatch" */;
+			buildPhases = (
+				D2B000000000000000000024 /* Sources */,
+				D2B000000000000000000025 /* Frameworks */,
+				D2B000000000000000000026 /* Resources */,
+				D2B000000000000000000073 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D2B000000000000000000072 /* PBXTargetDependency */,
+			);
+			name = osmBusWatch;
+			productName = osmBusWatch;
+			productReference = D2B000000000000000000018 /* osmBusWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D2B000000000000000000081 /* osmBusWatchWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D2B000000000000000000082 /* Build configuration list for PBXNativeTarget "osmBusWatchWidgets" */;
+			buildPhases = (
+				D2B000000000000000000074 /* Sources */,
+				D2B000000000000000000075 /* Frameworks */,
+				D2B000000000000000000076 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = osmBusWatchWidgets;
+			productName = osmBusWatchWidgets;
+			productReference = D2B000000000000000000064 /* osmBusWatchWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -230,6 +380,12 @@
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1100;
 					};
+					D2B000000000000000000041 = {
+						CreatedOnToolsVersion = 27.2;
+					};
+					D2B000000000000000000081 = {
+						CreatedOnToolsVersion = 27.2;
+					};
 				};
 			};
 			buildConfigurationList = 97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */;
@@ -239,6 +395,8 @@
 			knownRegions = (
 				en,
 				Base,
+				ja,
+				vi,
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
@@ -247,6 +405,8 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
+				D2B000000000000000000041 /* osmBusWatch */,
+				D2B000000000000000000081 /* osmBusWatchWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -267,6 +427,23 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D2B000000000000000000026 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D2B000000000000000000008 /* Assets.xcassets in Resources */,
+				D2B000000000000000000009 /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D2B000000000000000000076 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D2B000000000000000000052 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -400,6 +577,27 @@
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */,
+				D2B000000000000000000001 /* WatchRideLink.swift in Sources */,
+				D2B000000000000000000002 /* WatchBridge.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D2B000000000000000000024 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D2B000000000000000000004 /* WatchRideLink.swift in Sources */,
+				D2B000000000000000000005 /* OsmBusWatchApp.swift in Sources */,
+				D2B000000000000000000006 /* WatchRideStore.swift in Sources */,
+				D2B000000000000000000007 /* WatchRideView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D2B000000000000000000074 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D2B000000000000000000051 /* LaunchComplication.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -410,6 +608,16 @@
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		D2B000000000000000000022 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2B000000000000000000041 /* osmBusWatch */;
+			targetProxy = D2B000000000000000000021 /* PBXContainerItemProxy */;
+		};
+		D2B000000000000000000072 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2B000000000000000000081 /* osmBusWatchWidgets */;
+			targetProxy = D2B000000000000000000071 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -719,6 +927,196 @@
 			};
 			name = Release;
 		};
+		D2B000000000000000000043 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = ELS6C2V4CR;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = osmBus;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.osamushikubo.osmBus;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.osamushikubo.osmBus.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		D2B000000000000000000044 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = ELS6C2V4CR;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = osmBus;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.osamushikubo.osmBus;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.osamushikubo.osmBus.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		D2B000000000000000000045 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = ELS6C2V4CR;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = osmBus;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.osamushikubo.osmBus;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.osamushikubo.osmBus.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Profile;
+		};
+		D2B000000000000000000083 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = ELS6C2V4CR;
+				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = osmBusWatchWidgets/osmBusWatchWidgets.entitlements;
+				INFOPLIST_FILE = osmBusWatchWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = osmBus;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.osamushikubo.osmBus.watchkitapp.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		D2B000000000000000000084 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = ELS6C2V4CR;
+				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = osmBusWatchWidgets/osmBusWatchWidgets.entitlements;
+				INFOPLIST_FILE = osmBusWatchWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = osmBus;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.osamushikubo.osmBus.watchkitapp.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		D2B000000000000000000085 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB31CF90195004384FC /* Generated.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = ELS6C2V4CR;
+				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = osmBusWatchWidgets/osmBusWatchWidgets.entitlements;
+				INFOPLIST_FILE = osmBusWatchWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = osmBus;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.osamushikubo.osmBus.watchkitapp.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Profile;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -748,6 +1146,26 @@
 				97C147061CF9000F007C117D /* Debug */,
 				97C147071CF9000F007C117D /* Release */,
 				249021D4217E4FDB00AE95B9 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D2B000000000000000000042 /* Build configuration list for PBXNativeTarget "osmBusWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D2B000000000000000000043 /* Debug */,
+				D2B000000000000000000044 /* Release */,
+				D2B000000000000000000045 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D2B000000000000000000082 /* Build configuration list for PBXNativeTarget "osmBusWatchWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D2B000000000000000000083 /* Debug */,
+				D2B000000000000000000084 /* Release */,
+				D2B000000000000000000085 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

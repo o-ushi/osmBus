@@ -643,7 +643,7 @@
   "helpDistanceTitle": "距離の色を読む",
   "helpDistance1": "赤・黄・橙の境目は、到着アラートの距離",
   "helpDistance2": "3km未満は緑、3km以上は青",
-  "helpDistance3": "乗車中にタップで今のルート図",
+  "helpDistance3": "タップすると、ホームでは今のルート図、地図ではホーム画面に戻る",
   "helpLineMapTitle": "路線図を見る",
   "helpLineMap1": "…の「路線図」をタップ",
   "helpLineMap2": "バス番号で探す",
@@ -658,5 +658,9 @@
   "helpStop1": "距離バッジを長押し",
   "helpNetworkTitle": "通信エラーのとき",
   "helpNetwork1": "Wi‑Fi かモバイルデータを確かめる",
-  "helpNetwork2": "バスの判定は端末内のデータで、オフラインでもできる"
+  "helpNetwork2": "バスの判定は端末内のデータで、オフラインでもできる",
+  "startupStart": "はじめる",
+  "startupDontShowAgain": "次回から表示しない",
+  "startupSetting": "スタートアップ画面",
+  "startupSettingNote": "アプリ起動時に案内画面を表示します"
 }

@@ -43,11 +43,27 @@ enum StopAlertMode {
 
 /// 距離アラートの 1 段（Swift の `DistanceAlertSlot`）。
 class DistanceAlertSlot {
-  const DistanceAlertSlot({required this.index, required this.enabled, required this.meters});
+  const DistanceAlertSlot({
+    required this.index,
+    required this.enabled,
+    required this.meters,
+  });
 
   static const int count = 3;
   static const List<int> defaultMeters = [1000, 400, 100];
-  static const List<int> presets = [50, 100, 150, 200, 300, 400, 500, 750, 1000, 1500, 2000];
+  static const List<int> presets = [
+    50,
+    100,
+    150,
+    200,
+    300,
+    400,
+    500,
+    750,
+    1000,
+    1500,
+    2000,
+  ];
 
   final int index;
   final bool enabled;
@@ -56,26 +72,38 @@ class DistanceAlertSlot {
 
 /// 1 件の設定と、変えた時刻。同じキーは時刻が新しい方を残す。
 class SyncedSetting {
-  const SyncedSetting({required this.key, required this.value, required this.updatedAt});
+  const SyncedSetting({
+    required this.key,
+    required this.value,
+    required this.updatedAt,
+  });
 
   final String key;
   final Object? value;
   final DateTime updatedAt;
 
   Map<String, dynamic> toJson() => {
-        'key': key,
-        'value': value,
-        'updatedAt': updatedAt.toUtc().toIso8601String(),
-      };
+    'key': key,
+    'value': value,
+    'updatedAt': updatedAt.toUtc().toIso8601String(),
+  };
 
   static SyncedSetting fromJson(Map<String, dynamic> json) {
     final key = json['key'];
     final at = json['updatedAt'];
-    if (key is! String || key.isEmpty || at is! String || !json.containsKey('value')) {
+    if (key is! String ||
+        key.isEmpty ||
+        at is! String ||
+        !json.containsKey('value')) {
       throw const FormatException('invalid setting');
     }
-    final setting = SyncedSetting(key: key, value: json['value'], updatedAt: DateTime.parse(at).toUtc());
-    if (!SettingsSync.valid(setting)) throw FormatException('invalid setting $key');
+    final setting = SyncedSetting(
+      key: key,
+      value: json['value'],
+      updatedAt: DateTime.parse(at).toUtc(),
+    );
+    if (!SettingsSync.valid(setting))
+      throw FormatException('invalid setting $key');
     return setting;
   }
 }
@@ -134,16 +162,19 @@ class SettingsSync {
     if (!keys.contains(setting.key)) return true;
     final value = setting.value;
     if (setting.key == 'appLanguage') {
-      return value == null || (value is String && AppLanguage.fromCode(value) != null);
+      return value == null ||
+          (value is String && AppLanguage.fromCode(value) != null);
     }
-    if (setting.key == 'alert.soundId') return value is String && value.isNotEmpty;
+    if (setting.key == 'alert.soundId')
+      return value is String && value.isNotEmpty;
     if (_bools.contains(setting.key)) return value is bool;
     if (_doubles.contains(setting.key)) return value is num;
     if (_ints.contains(setting.key)) return value is num && value > 0;
     final name = value is String ? value : null;
     final names = switch (setting.key) {
       'keypad.inputMode' => KeypadInputMode.values.map((e) => e.name),
-      'keypad.hapticStrength' || 'alert.vibrationStrength' => FeedbackStrength.values.map((e) => e.name),
+      'keypad.hapticStrength' ||
+      'alert.vibrationStrength' => FeedbackStrength.values.map((e) => e.name),
       'table.sortMode' => TableSortMode.values.map((e) => e.name),
       'table.distanceMetric' => DistanceMetric.values.map((e) => e.name),
       _ => const <String>[],
@@ -156,20 +187,28 @@ class SettingsSync {
     if (raw == null) return {};
     try {
       final json = jsonDecode(raw) as Map<String, dynamic>;
-      return {for (final e in json.entries) e.key: DateTime.parse(e.value as String).toUtc()};
+      return {
+        for (final e in json.entries)
+          e.key: DateTime.parse(e.value as String).toUtc(),
+      };
     } catch (_) {
       return {};
     }
   }
 
-  static Future<void> _writeTimes(SharedPreferences prefs, Map<String, DateTime> times) async {
+  static Future<void> _writeTimes(
+    SharedPreferences prefs,
+    Map<String, DateTime> times,
+  ) async {
     if (times.isEmpty) {
       await prefs.remove(timesKey);
       return;
     }
     await prefs.setString(
       timesKey,
-      jsonEncode({for (final e in times.entries) e.key: e.value.toUtc().toIso8601String()}),
+      jsonEncode({
+        for (final e in times.entries) e.key: e.value.toUtc().toIso8601String(),
+      }),
     );
   }
 
@@ -195,7 +234,13 @@ class SettingsSync {
         times[key] = at;
         dirty = true;
       }
-      out.add(SyncedSetting(key: key, value: present ? prefs.get(key) : null, updatedAt: at));
+      out.add(
+        SyncedSetting(
+          key: key,
+          value: present ? prefs.get(key) : null,
+          updatedAt: at,
+        ),
+      );
     }
     if (dirty) unawaited(_writeTimes(prefs, times));
     return out;
@@ -203,7 +248,11 @@ class SettingsSync {
 
   /// [incoming] のうち、手元より新しいものだけを書く。ユーザー操作としては扱わない。
   /// [force] なら時刻に関わらず書く（バックアップの置き換え）。
-  static Future<bool> apply(SharedPreferences prefs, List<SyncedSetting> incoming, {bool force = false}) async {
+  static Future<bool> apply(
+    SharedPreferences prefs,
+    List<SyncedSetting> incoming, {
+    bool force = false,
+  }) async {
     final times = _readTimes(prefs);
     var changed = false;
     for (final setting in incoming) {
@@ -218,7 +267,11 @@ class SettingsSync {
     return changed;
   }
 
-  static Future<void> _writeValue(SharedPreferences prefs, String key, Object? value) async {
+  static Future<void> _writeValue(
+    SharedPreferences prefs,
+    String key,
+    Object? value,
+  ) async {
     if (value == null) {
       await prefs.remove(key);
     } else if (value is bool) {
@@ -243,6 +296,7 @@ class AppSettings extends ChangeNotifier {
   void Function()? onLocalChange;
 
   static const _languageKey = 'appLanguage';
+  static const _showStartupScreenKey = 'showStartupScreen';
   static const _keypadModeKey = 'keypad.inputMode';
   static const _hapticEnabledKey = 'keypad.hapticEnabled';
   static const _hapticStrengthKey = 'keypad.hapticStrength';
@@ -270,67 +324,101 @@ class AppSettings extends ChangeNotifier {
 
   // MARK: - 言語
 
-  AppLanguage? get language => AppLanguage.fromCode(prefs.getString(_languageKey));
+  AppLanguage? get language =>
+      AppLanguage.fromCode(prefs.getString(_languageKey));
 
   Future<void> setLanguage(AppLanguage? language) => _set(
-        _languageKey,
-        language == null ? prefs.remove(_languageKey) : prefs.setString(_languageKey, language.code),
-      );
+    _languageKey,
+    language == null
+        ? prefs.remove(_languageKey)
+        : prefs.setString(_languageKey, language.code),
+  );
 
   // MARK: - テンキー
 
-  KeypadInputMode get keypadInputMode =>
-      _enumValue(KeypadInputMode.values, _keypadModeKey, KeypadInputMode.appendToExisting);
+  KeypadInputMode get keypadInputMode => _enumValue(
+    KeypadInputMode.values,
+    _keypadModeKey,
+    KeypadInputMode.appendToExisting,
+  );
 
-  Future<void> setKeypadInputMode(KeypadInputMode mode) => _set(_keypadModeKey, prefs.setString(_keypadModeKey, mode.name));
+  Future<void> setKeypadInputMode(KeypadInputMode mode) =>
+      _set(_keypadModeKey, prefs.setString(_keypadModeKey, mode.name));
+
+  /// 起動時にスタートアップ画面を出すか（既定はオン）。
+  bool get showStartupScreen => prefs.getBool(_showStartupScreenKey) ?? true;
+  Future<void> setShowStartupScreen(bool value) =>
+      _set(_showStartupScreenKey, prefs.setBool(_showStartupScreenKey, value));
 
   bool get hapticEnabled => prefs.getBool(_hapticEnabledKey) ?? true;
-  Future<void> setHapticEnabled(bool value) => _set(_hapticEnabledKey, prefs.setBool(_hapticEnabledKey, value));
+  Future<void> setHapticEnabled(bool value) =>
+      _set(_hapticEnabledKey, prefs.setBool(_hapticEnabledKey, value));
 
-  FeedbackStrength get hapticStrength =>
-      _enumValue(FeedbackStrength.values, _hapticStrengthKey, FeedbackStrength.medium);
+  FeedbackStrength get hapticStrength => _enumValue(
+    FeedbackStrength.values,
+    _hapticStrengthKey,
+    FeedbackStrength.medium,
+  );
   Future<void> setHapticStrength(FeedbackStrength value) =>
       _set(_hapticStrengthKey, prefs.setString(_hapticStrengthKey, value.name));
 
   bool get clickEnabled => prefs.getBool(_clickEnabledKey) ?? false;
-  Future<void> setClickEnabled(bool value) => _set(_clickEnabledKey, prefs.setBool(_clickEnabledKey, value));
+  Future<void> setClickEnabled(bool value) =>
+      _set(_clickEnabledKey, prefs.setBool(_clickEnabledKey, value));
 
   double get clickVolume => prefs.getDouble(_clickVolumeKey) ?? 0.5;
-  Future<void> setClickVolume(double value) => _set(_clickVolumeKey, prefs.setDouble(_clickVolumeKey, value));
+  Future<void> setClickVolume(double value) =>
+      _set(_clickVolumeKey, prefs.setDouble(_clickVolumeKey, value));
 
   // MARK: - 到着アラート
 
-  bool isAlertEnabled(StopAlertMode mode) => prefs.getBool(_alertModeKey(mode)) ?? mode.defaultEnabled;
+  bool isAlertEnabled(StopAlertMode mode) =>
+      prefs.getBool(_alertModeKey(mode)) ?? mode.defaultEnabled;
   Future<void> setAlertEnabled(StopAlertMode mode, bool value) =>
       _set(_alertModeKey(mode), prefs.setBool(_alertModeKey(mode), value));
 
   String get alertSoundId => prefs.getString(_alertSoundKey) ?? 'tiptoes';
-  Future<void> setAlertSoundId(String id) => _set(_alertSoundKey, prefs.setString(_alertSoundKey, id));
+  Future<void> setAlertSoundId(String id) =>
+      _set(_alertSoundKey, prefs.setString(_alertSoundKey, id));
 
   /// オンなら端末の音量に従い、スライダーの音量は使わない。
-  bool get alertFollowsSystemVolume => prefs.getBool(_alertFollowsSystemKey) ?? true;
-  Future<void> setAlertFollowsSystemVolume(bool value) =>
-      _set(_alertFollowsSystemKey, prefs.setBool(_alertFollowsSystemKey, value));
+  bool get alertFollowsSystemVolume =>
+      prefs.getBool(_alertFollowsSystemKey) ?? true;
+  Future<void> setAlertFollowsSystemVolume(bool value) => _set(
+    _alertFollowsSystemKey,
+    prefs.setBool(_alertFollowsSystemKey, value),
+  );
 
-  double get alertVolume => prefs.getDouble(_alertVolumeKey) ?? defaultAlertVolume;
-  Future<void> setAlertVolume(double value) => _set(_alertVolumeKey, prefs.setDouble(_alertVolumeKey, value));
+  double get alertVolume =>
+      prefs.getDouble(_alertVolumeKey) ?? defaultAlertVolume;
+  Future<void> setAlertVolume(double value) =>
+      _set(_alertVolumeKey, prefs.setDouble(_alertVolumeKey, value));
 
-  FeedbackStrength get alertVibrationStrength =>
-      _enumValue(FeedbackStrength.values, _alertVibrationStrengthKey, FeedbackStrength.heavy);
-  Future<void> setAlertVibrationStrength(FeedbackStrength value) =>
-      _set(_alertVibrationStrengthKey, prefs.setString(_alertVibrationStrengthKey, value.name));
+  FeedbackStrength get alertVibrationStrength => _enumValue(
+    FeedbackStrength.values,
+    _alertVibrationStrengthKey,
+    FeedbackStrength.heavy,
+  );
+  Future<void> setAlertVibrationStrength(FeedbackStrength value) => _set(
+    _alertVibrationStrengthKey,
+    prefs.setString(_alertVibrationStrengthKey, value.name),
+  );
 
   List<DistanceAlertSlot> get distanceSlots => [
-        for (var i = 0; i < DistanceAlertSlot.count; i++)
-          DistanceAlertSlot(
-            index: i,
-            enabled: prefs.getBool(_slotEnabledKey(i)) ?? true,
-            meters: prefs.getInt(_slotMetersKey(i)) ?? DistanceAlertSlot.defaultMeters[i],
-          ),
-      ];
+    for (var i = 0; i < DistanceAlertSlot.count; i++)
+      DistanceAlertSlot(
+        index: i,
+        enabled: prefs.getBool(_slotEnabledKey(i)) ?? true,
+        meters:
+            prefs.getInt(_slotMetersKey(i)) ??
+            DistanceAlertSlot.defaultMeters[i],
+      ),
+  ];
 
-  Future<void> setSlotEnabled(int index, bool value) =>
-      _set(_slotEnabledKey(index), prefs.setBool(_slotEnabledKey(index), value));
+  Future<void> setSlotEnabled(int index, bool value) => _set(
+    _slotEnabledKey(index),
+    prefs.setBool(_slotEnabledKey(index), value),
+  );
   Future<void> setSlotMeters(int index, int meters) =>
       _set(_slotMetersKey(index), prefs.setInt(_slotMetersKey(index), meters));
 
@@ -346,6 +434,8 @@ class AppSettings extends ChangeNotifier {
   }
 
   /// 有効な距離（遠い順）。
-  List<int> get activeThresholds =>
-      [for (final s in distanceSlots) if (s.enabled) s.meters]..sort((a, b) => b.compareTo(a));
+  List<int> get activeThresholds => [
+    for (final s in distanceSlots)
+      if (s.enabled) s.meters,
+  ]..sort((a, b) => b.compareTo(a));
 }

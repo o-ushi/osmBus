@@ -2191,7 +2191,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpDistance3.
   ///
   /// In ja, this message translates to:
-  /// **'乗車中にタップで今のルート図'**
+  /// **'タップすると、ホームでは今のルート図、地図ではホーム画面に戻る'**
   String get helpDistance3;
 
   /// No description provided for @helpLineMapTitle.
@@ -2283,6 +2283,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'バスの判定は端末内のデータで、オフラインでもできる'**
   String get helpNetwork2;
+
+  /// No description provided for @startupStart.
+  ///
+  /// In ja, this message translates to:
+  /// **'はじめる'**
+  String get startupStart;
+
+  /// No description provided for @startupDontShowAgain.
+  ///
+  /// In ja, this message translates to:
+  /// **'次回から表示しない'**
+  String get startupDontShowAgain;
+
+  /// No description provided for @startupSetting.
+  ///
+  /// In ja, this message translates to:
+  /// **'スタートアップ画面'**
+  String get startupSetting;
+
+  /// No description provided for @startupSettingNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'アプリ起動時に案内画面を表示します'**
+  String get startupSettingNote;
 }
 
 class _AppLocalizationsDelegate

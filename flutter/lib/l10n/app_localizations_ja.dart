@@ -1141,7 +1141,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get helpDistance2 => '3km未満は緑、3km以上は青';
 
   @override
-  String get helpDistance3 => '乗車中にタップで今のルート図';
+  String get helpDistance3 => 'タップすると、ホームでは今のルート図、地図ではホーム画面に戻る';
 
   @override
   String get helpLineMapTitle => '路線図を見る';
@@ -1187,4 +1187,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get helpNetwork2 => 'バスの判定は端末内のデータで、オフラインでもできる';
+
+  @override
+  String get startupStart => 'はじめる';
+
+  @override
+  String get startupDontShowAgain => '次回から表示しない';
+
+  @override
+  String get startupSetting => 'スタートアップ画面';
+
+  @override
+  String get startupSettingNote => 'アプリ起動時に案内画面を表示します';
 }

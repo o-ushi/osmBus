@@ -368,7 +368,7 @@
   "helpDistanceTitle": "Read the distance colors",
   "helpDistance1": "Red, yellow and orange follow the arrival alert distances",
   "helpDistance2": "Green under 3 km, blue from 3 km",
-  "helpDistance3": "While riding, tap for the current route map",
+  "helpDistance3": "Tap it: on home for the current route map, on a map to go back home",
   "helpLineMapTitle": "See a route map",
   "helpLineMap1": "Tap \"Line map\" in …",
   "helpLineMap2": "Search by bus number",
@@ -383,5 +383,9 @@
   "helpStop1": "Long-press the distance badge",
   "helpNetworkTitle": "When there is a network error",
   "helpNetwork1": "Check Wi‑Fi or mobile data",
-  "helpNetwork2": "Bus checks use data on the device, so they work offline"
+  "helpNetwork2": "Bus checks use data on the device, so they work offline",
+  "startupStart": "Get started",
+  "startupDontShowAgain": "Don't show again",
+  "startupSetting": "Startup screen",
+  "startupSettingNote": "Show the welcome screen when the app launches"
 }

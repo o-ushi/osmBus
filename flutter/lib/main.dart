@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,16 +9,31 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'models/deep_link.dart';
 import 'services/alert_notifier.dart';
 import 'services/app_log.dart';
 import 'services/google_maps_config.dart';
 import 'services/sound_player.dart';
+import 'services/watch_link.dart';
 import 'state/app_settings.dart';
 import 'state/trip_controller.dart';
 
 Future<void> main() async {
   // 捕まえ損ねた例外もログに残す（送ってもらって原因を追うため）。
-  runZonedGuarded(_run, (error, stack) => AppLog.e('crash', 'uncaught', error, stack));
+  runZonedGuarded(
+    _run,
+    (error, stack) => AppLog.e('crash', 'uncaught', error, stack),
+  );
+}
+
+/// 目的地付きのリンク（osmStroll など）で起動したか。最初の画面を決める前に調べる。
+Future<bool> _launchedWithDestination() async {
+  try {
+    final uri = await AppLinks().getInitialLink();
+    return uri != null && OsmBusDeepLink.parseDestination(uri) != null;
+  } catch (_) {
+    return false;
+  }
 }
 
 Future<void> _run() async {
@@ -39,7 +55,10 @@ Future<void> _run() async {
   AppLog.instance.verbose = settings.verboseLog;
   try {
     final info = await PackageInfo.fromPlatform();
-    AppLog.i('app', 'start ${info.version} (${info.buildNumber}) ${Platform.operatingSystem} ${Platform.operatingSystemVersion}');
+    AppLog.i(
+      'app',
+      'start ${info.version} (${info.buildNumber}) ${Platform.operatingSystem} ${Platform.operatingSystemVersion}',
+    );
   } catch (_) {
     AppLog.i('app', 'start');
   }
@@ -50,6 +69,12 @@ Future<void> _run() async {
     sound: SoundPlayer(settings: settings),
     notifier: AlertNotifier(),
   );
-  runApp(OsmBusApp(controller: controller));
+  WatchLink(controller).start();
+  runApp(
+    OsmBusApp(
+      controller: controller,
+      openedByLink: await _launchedWithDestination(),
+    ),
+  );
   await controller.start();
 }
