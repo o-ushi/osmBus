@@ -12,6 +12,7 @@ import UIKit
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GoogleMapsKey.provideAtLaunch()
+    WatchBridge.shared.activate()
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
@@ -42,6 +43,9 @@ import UIKit
     }
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "LocationAuthorization") {
       LocationAuthorization.register(messenger: registrar.messenger())
+    }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "WatchBridge") {
+      WatchBridge.shared.register(messenger: registrar.messenger())
     }
   }
 }

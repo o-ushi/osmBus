@@ -14,6 +14,7 @@ import 'services/alert_notifier.dart';
 import 'services/app_log.dart';
 import 'services/google_maps_config.dart';
 import 'services/sound_player.dart';
+import 'services/watch_link.dart';
 import 'state/app_settings.dart';
 import 'state/trip_controller.dart';
 
@@ -68,6 +69,7 @@ Future<void> _run() async {
     sound: SoundPlayer(settings: settings),
     notifier: AlertNotifier(),
   );
+  WatchLink(controller).start();
   runApp(
     OsmBusApp(
       controller: controller,
